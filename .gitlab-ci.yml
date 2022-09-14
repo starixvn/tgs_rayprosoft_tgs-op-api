@@ -37,24 +37,6 @@ unit-test:
     reports:
       junit: ./TestReports/*-TestReport.xml
 
-push-nuget:
-  stage: publish
-  needs:
-    - job: build-code
-      artifacts: true
-    - unit-test
-  only:
-    - main
-  script:
-    - dotnet pack -c $BuildConfiguration "Tgs.Promotion.Client/Tgs.Promotion.Client.csproj" --no-restore
-    - dotnet nuget push "Tgs.Promotion.Client/bin/$BuildConfiguration/*.nupkg" -s "raypro-baget" -k $NugetApiKey --skip-duplicate
-  artifacts:
-    name: Nuget
-    untracked: false
-    expire_in: "30 days"
-    paths:
-      - Tgs.Promotion.Client/bin/$BuildConfiguration/*.nupkg
-
 push-docker-image:
   stage: publish
   needs:
@@ -65,7 +47,7 @@ push-docker-image:
     - main
   script:
     - export Tag="$(date -d $CI_PIPELINE_CREATED_AT +%Y%m%d%H%M).$CI_PIPELINE_IID"
-    - dotnet build "Tgs.Promotion.Service/Tgs.Promotion.Service.csproj" -c $BuildConfiguration -t:ContainerBuild -p:DockerfileTag="$ImageName:$Tag" --no-restore
+    - dotnet build "OperatorApi/OperatorApi.csproj" -c $BuildConfiguration -t:ContainerBuild -p:DockerfileTag="$ImageName:$Tag" --no-restore
     - docker push $ImageName:$Tag
 
 push-k8s-template:
