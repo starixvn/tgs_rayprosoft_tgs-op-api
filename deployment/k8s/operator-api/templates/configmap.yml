@@ -1,0 +1,131 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: configmap-{{ include "operator-api.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    type: backend
+    {{- include "operator-api.labels" . | nindent 4 }}
+data:
+  appsettings.json: |
+    {
+      "Operator": {
+        "FileServiceBaseUrl" : "http://file-service",
+        "ValidateCodeBaseUrl": "http://validatecode-api",
+        "SmsBaseUrl": "http://sms-service",
+        "ValidateCodeTestEnabled": {{ .Values.validateCodeTestEnabled }},
+        "PaymentServiceBaseUrl": "http://payment-api",
+        "BrandCertificateBaseUrl": "http://brand-cert-api",
+        "CashBaseUrl": "http://cashservice-api",
+        "GameProvidersPluggableBaseUrl": "http://game-pluggable-service",
+        "PlayerServiceBaseUrl": "http://player-api"
+      },
+      "EmailSetting": {
+        "FromMail": "verifyme@163.com",
+        "FromName": "TGS",
+        "SmtpServer": "smtp.163.com",
+        "Port": 25,
+        "Password": "IAUSMDLMDZWJECBP"
+      },
+      "ConnectionStrings": {
+        "Tgs": "{{ .Values.connectionStrings.tgs }}",
+        "RedisConfigurationString": "{{ .Values.connectionStrings.redis }}"
+      },
+      "NatsSetting": {
+        "Urls": "{{ .Values.nats.urls }}",
+        "ConnectTimeoutMs": 2000,
+        "PingInterval": 5000,
+        "PingMaxOutStanding": 3,
+        "SubscriptionBatchSize": 128
+      },
+      "Report": {
+        "Url": "http://report-api"
+      },
+      "Promotion": {
+        "Url": "http://promotion-api"
+      },
+      "CorsDomain": {
+        "Urls": []
+      },
+      "Email": {
+        "Url": "{{ .Values.mail.url }}"
+      },
+      "ForwardedHeaders": {
+        "ForwardLimit": 1,
+        "ForwardedForHeaderName": "cf-connecting-ip",
+        "KnownProxies": [],
+        "KnownNetworks": ["10.0.0.0/8"]
+      },
+      "RequestLocalization": {
+        "DefaultRequestCulture": "en-US",
+        "ApplyCurrentCultureToResponseHeaders": true,
+        "SupportedCultures": [
+          "en-US",
+          "zh-CN",
+          "zh-TW",
+          "th-TH",
+          "id-ID",
+          "ja-JP",
+          "ko-KR",
+          "vi-VN"
+        ],
+        "SupportedUICultures": [
+          "en-US",
+          "zh-CN",
+          "zh-TW",
+          "th-TH",
+          "id-ID",
+          "ja-JP",
+          "ko-KR",
+          "vi-VN"
+        ]
+      }
+    }
+  yarp-settings.json: |
+    {
+      "Logging": {
+        "LogLevel": {
+          "Microsoft.AspNetCore.HttpLogging": "Information"
+        }
+      },
+      "HttpLogging": {
+        "LoggingFields": "Request",
+        "RequestHeaders": ["cf-connecting-ip", "X-Forwarded-For", "X-Real-IP"]
+      },
+      "ReverseProxy": {
+        "Routes": {
+          "route1": {
+            "ClusterId": "cluster1",
+            "Match": {
+              "Path": "{**catch-all}"
+            }
+          }
+        },
+        "Clusters": {
+          "cluster1": {
+            "Destinations": {
+              "destination1": {
+                "Address": "http://localhost/"
+              }
+            }
+          }
+        }
+      }
+    }
+  monitor.settings.json: |
+    {
+      "Metrics": {
+        "MetricCount": "1"
+      },
+      "Logging":{
+        "Console": {
+          "FormatterName": "json"
+        },
+        "LogLevel": {
+          "Default": "Warning",
+          "Microsoft": "Warning",
+          "Microsoft.Diagnostics": "Warning",
+          "Microsoft.Hosting.Lifetime": "Information"
+        }
+      }
+    }

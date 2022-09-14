@@ -5,12 +5,9 @@
     <UserSecretsId>e0868ee3-eaa7-4a0e-885a-9ccf907086e0</UserSecretsId>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
-    <DockerfileContext>..\..\..</DockerfileContext>
     <AssemblyName>TGS.Apis.OperatorApi</AssemblyName>
     <RootNamespace>TGS.Apis.OperatorApi</RootNamespace>
-    <GlobalNugetConfig>$(UserProfile)\AppData\Roaming\NuGet\NuGet.Config</GlobalNugetConfig>
-    <GlobalNugetConfig Condition="'$(UserProfile)'==''">$(HOME)/.nuget/NuGet/NuGet.Config</GlobalNugetConfig>
-    <DockerfileBuildArguments>--build-arg "BuildConfiguration=$(Configuration)" --secret id=nuget,src="$(GlobalNugetConfig)"</DockerfileBuildArguments>
+    <DockerfileBuildArguments>--build-arg "BuildConfiguration=$(Configuration)"</DockerfileBuildArguments>
     <DockerfileTag Condition="$(DockerfileTag) == ''">operator-api</DockerfileTag>
   </PropertyGroup>
 
