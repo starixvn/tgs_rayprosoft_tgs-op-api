@@ -1,7 +1,9 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
+    <RootNamespace>TGS.Operator.Repositories</RootNamespace>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>
@@ -9,11 +11,10 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Tgs.CashService.Client" Version="0.1.3" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Services\Bucket\PlayerBucket.Core.csproj" />
+    <ProjectReference Include="..\Operator.Core\Operator.Core.csproj" />
   </ItemGroup>
 
 </Project>

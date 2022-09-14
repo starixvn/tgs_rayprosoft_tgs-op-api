@@ -79,10 +79,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Libraries\IdentityVerifiers\IdentityVerifiers.csproj" />
-    <ProjectReference Include="..\..\Repositories\Operator.Repositories\Operator.Repositories.csproj" />
-    <ProjectReference Include="..\..\Repositories\PlayerBucket.Repositories\PlayerBucket.Repositories.csproj" />
-    <ProjectReference Include="..\..\Services\Operator.Core\Operator.Core.csproj" />
+    <ProjectReference Include="..\IdentityVerifiers\IdentityVerifiers.csproj" />
+    <ProjectReference Include="..\Operator.Core\Operator.Core.csproj" />
+    <ProjectReference Include="..\Operator.Repositories\Operator.Repositories.csproj" />
+    <ProjectReference Include="..\PlayerBucket.Repositories\PlayerBucket.Repositories.csproj" />
   </ItemGroup>
 
   <ItemGroup>
