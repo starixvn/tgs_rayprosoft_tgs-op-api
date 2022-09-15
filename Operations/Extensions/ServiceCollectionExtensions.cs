@@ -56,7 +56,6 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IGameProviderOperations, GameProviderOperations>();
         services.AddScoped<IPlayerOperations, PlayerOperations>();
         services.AddScoped<IBrandGameProviderOperations, BrandGameProviderOperations>();
-        services.AddScoped<IAgentOperations, AgentOperations>();
 
         #endregion Operations
 

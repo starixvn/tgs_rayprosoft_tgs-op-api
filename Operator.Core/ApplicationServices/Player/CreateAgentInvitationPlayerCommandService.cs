@@ -3,17 +3,19 @@ using System.Threading;
 using System.Threading.Tasks;
 using Tgs.BrandCertificate.Clients;
 using Tgs.Core.Infrastructures.Security;
+using TGS.Core.Models.Enums;
 using Tgs.PlayerService.Client;
 using Tgs.ServiceUtility;
 using TGS.Core.Models.Exceptions;
 using TGS.Services.Operations;
 using TGS.Services.Operations.Models.Services;
+using PlayerStatus = Tgs.PlayerService.Client.PlayerStatus;
 
 namespace TGS.Services.Operator.ApplicationServices.Player;
 
 internal class CreateAgentInvitationPlayerCommandService : IGetService<CreatePlayerWithAgentInvitationCodeCommand, CreatePlayerInfo>
 {
-    private readonly IAgentOperations _agentOperations;
+    private readonly IAgentRepository _agentRepository;
     private readonly IBrandOperations _brandOperations;
     private readonly IBrandServiceClient _brandServiceClient;
     private readonly IPasswordHandler _passwordHandler;
@@ -24,14 +26,14 @@ internal class CreateAgentInvitationPlayerCommandService : IGetService<CreatePla
         IPlayerOperations playerOperations,
         IPasswordHandler passwordHandler,
         IBrandOperations brandOperations,
-        IAgentOperations agentOperations,
+        IAgentRepository agentRepository,
         IPlayerServiceClient playerServiceClient,
         IBrandServiceClient brandServiceClient)
     {
         _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
         _passwordHandler = passwordHandler ?? throw new ArgumentNullException(nameof(passwordHandler));
         _brandOperations = brandOperations ?? throw new ArgumentNullException(nameof(brandOperations));
-        _agentOperations = agentOperations ?? throw new ArgumentNullException(nameof(agentOperations));
+        _agentRepository = agentRepository ?? throw new ArgumentNullException(nameof(agentRepository));
         _playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
         _brandServiceClient = brandServiceClient ?? throw new ArgumentNullException(nameof(brandServiceClient));
     }
@@ -41,7 +43,7 @@ internal class CreateAgentInvitationPlayerCommandService : IGetService<CreatePla
         CancellationToken cancellationToken = default)
     {
         var player = await _playerServiceClient
-            .GetPlayerInfoByUserNameAsync(command.BrandId, command.UserName)
+            .GetPlayerInfoByUserNameAsync(command.BrandId, command.UserName, cancellationToken)
             .ConfigureAwait(false);
 
         if (player != null)
@@ -50,7 +52,7 @@ internal class CreateAgentInvitationPlayerCommandService : IGetService<CreatePla
         var (salt, password) = _passwordHandler.GenerateCredential(command.Password);
 
         _ = await _brandServiceClient
-            .GetBrandInfoAsync(command.BrandId)
+            .GetBrandInfoAsync(command.BrandId, cancellationToken)
             .ConfigureAwait(false) ?? throw new BrandNotFoundException();
 
         var betLimitId = await _brandOperations
@@ -76,14 +78,12 @@ internal class CreateAgentInvitationPlayerCommandService : IGetService<CreatePla
         int betLimitId,
         PlayerStatus status)
     {
-        var agent = await _agentOperations
-            .GetAgentByInvitationCodeAsync(command.BrandId, command.AgentInvitationCode)
+        var agent = await _agentRepository
+            .GetAgentInfoByInvitationCodeAsync(command.AgentInvitationCode)
             .ConfigureAwait(false);
 
-        if (agent == null || agent.Status != Core.Models.Enums.AgentStatus.Enabled)
-            throw new InvalidInvitationCodeException(
-                command.AgentInvitationCode,
-                "Can't find the agent info");
+        if (agent is not { Status: AgentStatus.Enabled })
+            throw new InvalidInvitationCodeException(command.AgentInvitationCode, "Can't find the agent info");
 
         var result = await _playerOperations
             .CreatePlayerAsync(
