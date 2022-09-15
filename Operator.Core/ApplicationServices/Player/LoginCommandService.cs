@@ -11,43 +11,38 @@ using Tgs.PlayerService.Client;
 using Tgs.ServiceUtility;
 using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.Tokens;
-using TGS.Services.Operations;
-using TGS.Services.Operations.Queries;
 
 namespace TGS.Services.Operator.ApplicationServices.Player;
 
 internal class LoginCommandService : IGetService<LoginCommand, LoginInfo>
 {
-    private readonly IBrandOperations _brandOperations;
+    private readonly IBrandRepository _brandRepository;
     private readonly IBrandServiceClient _brandServiceClient;
     private readonly IHashProvider _hashProvider;
     private readonly IJwtTokenHandler _jwtTokenHandler;
     private readonly IPlayerLoginRecordRepository _loginRecordRepository;
-    private readonly IPasswordHandler _passwordHandler;
-    private readonly IPlayerQueries _playerQueries;
+    private readonly IGetService<PlayerPasswordValidateCommand, bool> _passwordValidateCommandService;
     private readonly IPlayerServiceClient _playerServiceClient;
     private readonly ITokenProvider _tokenProvider;
 
     public LoginCommandService(
-        IPlayerQueries playerQueries,
-        IPasswordHandler passwordHandler,
         ITokenProvider tokenProvider,
         IHashProvider hashProvider,
         IJwtTokenHandler jwtTokenHandler,
-        IBrandOperations brandOperations,
+        IBrandRepository brandRepository,
         IPlayerLoginRecordRepository loginRecordRepository,
         IPlayerServiceClient playerServiceClient,
-        IBrandServiceClient brandServiceClient)
+        IBrandServiceClient brandServiceClient,
+        IGetService<PlayerPasswordValidateCommand, bool> passwordValidateCommandService)
     {
-        _playerQueries = playerQueries ?? throw new ArgumentNullException(nameof(playerQueries));
-        _passwordHandler = passwordHandler ?? throw new ArgumentNullException(nameof(passwordHandler));
         _tokenProvider = tokenProvider ?? throw new ArgumentNullException(nameof(tokenProvider));
         _hashProvider = hashProvider ?? throw new ArgumentNullException(nameof(hashProvider));
         _jwtTokenHandler = jwtTokenHandler ?? throw new ArgumentNullException(nameof(jwtTokenHandler));
-        _brandOperations = brandOperations ?? throw new ArgumentNullException(nameof(brandOperations));
+        _brandRepository = brandRepository ?? throw new ArgumentNullException(nameof(brandRepository));
         _loginRecordRepository = loginRecordRepository ?? throw new ArgumentNullException(nameof(loginRecordRepository));
         _playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
         _brandServiceClient = brandServiceClient ?? throw new ArgumentNullException(nameof(brandServiceClient));
+        _passwordValidateCommandService = passwordValidateCommandService ?? throw new ArgumentNullException(nameof(passwordValidateCommandService));
     }
 
     public async ValueTask<LoginInfo> GetAsync(LoginCommand command, CancellationToken cancellationToken = default)
@@ -68,9 +63,12 @@ internal class LoginCommandService : IGetService<LoginCommand, LoginInfo>
             throw new PlayerNotFoundException("");
         }
 
-        var (salt, password) = await _playerQueries.GetSaltAndPasswordByPlayerCodeAsync(playerInfo.PlayerCode);
+        var isValid = await _passwordValidateCommandService.GetAsync(
+            new PlayerPasswordValidateCommand(playerInfo.PlayerCode, command.Password),
+            cancellationToken)
+            .ConfigureAwait(false);
 
-        if (!_passwordHandler.Verify(password, salt, command.Password))
+        if (!isValid)
         {
             throw new InvalidCredentialsException("");
         }
@@ -121,7 +119,7 @@ internal class LoginCommandService : IGetService<LoginCommand, LoginInfo>
 
         var payload = _hashProvider.Hash($"{data}:{jti}");
 
-        var secretKey = await _brandOperations.GetBrandSecretKeyAsync(brandId);
+        var secretKey = await _brandRepository.GetSecretKeyAsync(brandId);
         var signature = Encoding.UTF8.GetBytes($"{payload}:{secretKey}");
 
         return _jwtTokenHandler.GenerateToken(

@@ -11,11 +11,10 @@ using NUnit.Framework;
 using Tgs.BrandCertificate.Clients;
 using Tgs.Core.Infrastructures.Security;
 using Tgs.PlayerService.Client;
+using Tgs.ServiceUtility;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.Tokens;
-using TGS.Services.Operations;
-using TGS.Services.Operations.Queries;
 using TGS.Services.Operator;
 using TGS.Services.Operator.ApplicationServices.Player;
 using BrandStatus = Tgs.BrandCertificate.BrandStatus;
@@ -29,15 +28,15 @@ internal class LoginTests
     [Test]
     public async Task Can_Login()
     {
-        var fakeBrandOperations = Substitute.For<IBrandOperations>();
+        var fakeBrandRepository = Substitute.For<IBrandRepository>();
         var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
         var fakeHashProvider = Substitute.For<IHashProvider>();
         var fakeJwtTokenHandler = Substitute.For<IJwtTokenHandler>();
         var fakePlayerLoginRecordRepository = Substitute.For<IPlayerLoginRecordRepository>();
-        var fakePasswordHandler = Substitute.For<IPasswordHandler>();
-        var fakePlayerQueries = Substitute.For<IPlayerQueries>();
         var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
         var fakeTokenProvider = Substitute.For<ITokenProvider>();
+        var fakePasswordValidateCommandService = Substitute
+            .For<IGetService<PlayerPasswordValidateCommand, bool>>();
 
         var playerInfo = new Client.PlayerInfo
         {
@@ -85,14 +84,9 @@ internal class LoginTests
                 Arg.Any<CancellationToken>())
             .Returns(playerInfo);
 
-        _ = fakePlayerQueries.GetSaltAndPasswordByPlayerCodeAsync(
-                Arg.Is(playerInfo.PlayerCode))
-            .Returns((byteSalt, bytePassword));
-
-        _ = fakePasswordHandler.Verify(
-                Arg.Is(bytePassword),
-                Arg.Is(byteSalt),
-                Arg.Is(password))
+        _ = fakePasswordValidateCommandService.GetAsync(
+                Arg.Is(new PlayerPasswordValidateCommand(playerInfo.PlayerCode, command.Password)),
+                Arg.Any<CancellationToken>())
             .Returns(true);
 
         _ = fakePlayerLoginRecordRepository.AddPlayerLoginRecordAsync(
@@ -113,8 +107,9 @@ internal class LoginTests
         _ = fakeHashProvider.Hash(Arg.Any<string>())
             .Returns("payload");
 
-        _ = fakeBrandOperations.GetBrandSecretKeyAsync(
-                Arg.Is(playerInfo.BrandId))
+        _ = fakeBrandRepository.GetSecretKeyAsync(
+                Arg.Is(playerInfo.BrandId),
+                Arg.Any<CancellationToken>())
             .Returns("secret_key");
 
         _ = fakeJwtTokenHandler.GenerateToken(
@@ -125,15 +120,14 @@ internal class LoginTests
             .Returns(expected.PlayerToken);
 
         var sut = new LoginCommandService(
-            fakePlayerQueries,
-            fakePasswordHandler,
             fakeTokenProvider,
             fakeHashProvider,
             fakeJwtTokenHandler,
-            fakeBrandOperations,
+            fakeBrandRepository,
             fakePlayerLoginRecordRepository,
             fakePlayerServiceClient,
-            fakeBrandServiceClient);
+            fakeBrandServiceClient,
+            fakePasswordValidateCommandService);
 
         var actual = await sut.GetAsync(command);
 
@@ -151,15 +145,15 @@ internal class LoginTests
     [Test]
     public void Login_Throw_Exception_When_Brand_Is_Not_Active()
     {
-        var fakeBrandOperations = Substitute.For<IBrandOperations>();
+        var fakeBrandRepository = Substitute.For<IBrandRepository>();
         var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
         var fakeHashProvider = Substitute.For<IHashProvider>();
         var fakeJwtTokenHandler = Substitute.For<IJwtTokenHandler>();
         var fakePlayerLoginRecordRepository = Substitute.For<IPlayerLoginRecordRepository>();
-        var fakePasswordHandler = Substitute.For<IPasswordHandler>();
-        var fakePlayerQueries = Substitute.For<IPlayerQueries>();
         var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
         var fakeTokenProvider = Substitute.For<ITokenProvider>();
+        var fakePasswordValidateCommandService = Substitute
+            .For<IGetService<PlayerPasswordValidateCommand, bool>>();
 
         var command = new LoginCommand(
             Guid.NewGuid(),
@@ -176,15 +170,14 @@ internal class LoginTests
             .Returns(BrandStatus.Inactive);
 
         var sut = new LoginCommandService(
-            fakePlayerQueries,
-            fakePasswordHandler,
             fakeTokenProvider,
             fakeHashProvider,
             fakeJwtTokenHandler,
-            fakeBrandOperations,
+            fakeBrandRepository,
             fakePlayerLoginRecordRepository,
             fakePlayerServiceClient,
-            fakeBrandServiceClient);
+            fakeBrandServiceClient,
+            fakePasswordValidateCommandService);
 
         _ = Assert.ThrowsAsync<InvalidStatusException>(async () => await sut.GetAsync(command));
 
@@ -200,15 +193,15 @@ internal class LoginTests
     [Test]
     public void Login_Throw_Exception_When_Password_Is_Not_Verified()
     {
-        var fakeBrandOperations = Substitute.For<IBrandOperations>();
+        var fakeBrandRepository = Substitute.For<IBrandRepository>();
         var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
         var fakeHashProvider = Substitute.For<IHashProvider>();
         var fakeJwtTokenHandler = Substitute.For<IJwtTokenHandler>();
         var fakePlayerLoginRecordRepository = Substitute.For<IPlayerLoginRecordRepository>();
-        var fakePasswordHandler = Substitute.For<IPasswordHandler>();
-        var fakePlayerQueries = Substitute.For<IPlayerQueries>();
         var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
         var fakeTokenProvider = Substitute.For<ITokenProvider>();
+        var fakePasswordValidateCommandService = Substitute
+            .For<IGetService<PlayerPasswordValidateCommand, bool>>();
 
         var playerInfo = new Client.PlayerInfo
         {
@@ -242,26 +235,20 @@ internal class LoginTests
                 Arg.Any<CancellationToken>())
             .Returns(playerInfo);
 
-        _ = fakePlayerQueries.GetSaltAndPasswordByPlayerCodeAsync(
-                Arg.Is(playerInfo.PlayerCode))
-            .Returns((byteSalt, bytePassword));
-
-        _ = fakePasswordHandler.Verify(
-                Arg.Is(bytePassword),
-                Arg.Is(byteSalt),
-                Arg.Is(password))
+        _ = fakePasswordValidateCommandService.GetAsync(
+                Arg.Is(new PlayerPasswordValidateCommand(playerInfo.PlayerCode, command.Password)),
+                Arg.Any<CancellationToken>())
             .Returns(false);
 
         var sut = new LoginCommandService(
-            fakePlayerQueries,
-            fakePasswordHandler,
             fakeTokenProvider,
             fakeHashProvider,
             fakeJwtTokenHandler,
-            fakeBrandOperations,
+            fakeBrandRepository,
             fakePlayerLoginRecordRepository,
             fakePlayerServiceClient,
-            fakeBrandServiceClient);
+            fakeBrandServiceClient,
+            fakePasswordValidateCommandService);
 
         _ = Assert.ThrowsAsync<InvalidCredentialsException>(async () => await sut.GetAsync(command));
 
@@ -277,15 +264,15 @@ internal class LoginTests
     [Test]
     public void Login_Throw_Exception_When_Player_Does_Not_Exist()
     {
-        var fakeBrandOperations = Substitute.For<IBrandOperations>();
+        var fakeBrandRepository = Substitute.For<IBrandRepository>();
         var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
         var fakeHashProvider = Substitute.For<IHashProvider>();
         var fakeJwtTokenHandler = Substitute.For<IJwtTokenHandler>();
         var fakePlayerLoginRecordRepository = Substitute.For<IPlayerLoginRecordRepository>();
-        var fakePasswordHandler = Substitute.For<IPasswordHandler>();
-        var fakePlayerQueries = Substitute.For<IPlayerQueries>();
         var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
         var fakeTokenProvider = Substitute.For<ITokenProvider>();
+        var fakePasswordValidateCommandService = Substitute
+            .For<IGetService<PlayerPasswordValidateCommand, bool>>();
 
         var command = new LoginCommand(
             Guid.NewGuid(),
@@ -308,15 +295,14 @@ internal class LoginTests
             .Returns((Client.PlayerInfo?)null);
 
         var sut = new LoginCommandService(
-            fakePlayerQueries,
-            fakePasswordHandler,
             fakeTokenProvider,
             fakeHashProvider,
             fakeJwtTokenHandler,
-            fakeBrandOperations,
+            fakeBrandRepository,
             fakePlayerLoginRecordRepository,
             fakePlayerServiceClient,
-            fakeBrandServiceClient);
+            fakeBrandServiceClient,
+            fakePasswordValidateCommandService);
 
         _ = Assert.ThrowsAsync<Services.Operator.PlayerNotFoundException>(async () => await sut.GetAsync(command));
 
