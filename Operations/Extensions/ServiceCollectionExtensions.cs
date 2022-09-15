@@ -34,8 +34,6 @@ public static class ServiceCollectionExtensions
         services.AddFactory<IAgentQueries, AgentQueries>();
         services.AddFactory<IPlayerQueries, PlayerQueries>();
         services.AddFactory<IWalletQueries, WalletQueries>();
-        services.AddFactory<ISettingQueries, SettingQueries>();
-        services.AddFactory<ILocalizationStringQueries, LocalizationStringQueries>();
         services.AddFactory<IGameQueries, GameQueries>();
 
         services.AddFactory<IGameActionQueries, GameActionQueries>();
@@ -58,8 +56,6 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IGameProviderOperations, GameProviderOperations>();
         services.AddScoped<IPlayerOperations, PlayerOperations>();
         services.AddScoped<IBrandGameProviderOperations, BrandGameProviderOperations>();
-        services.AddScoped<ISettingOperations, SettingOperations>();
-        services.AddScoped<ILocalizationOperations, LocalizationOperations>();
         services.AddScoped<IAgentOperations, AgentOperations>();
 
         #endregion Operations
