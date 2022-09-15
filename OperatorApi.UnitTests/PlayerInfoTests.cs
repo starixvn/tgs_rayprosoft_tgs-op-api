@@ -12,7 +12,8 @@ using TGS.Core.DataServices.Tgs.Models;
 using TGS.Services.Operations;
 using TGS.Services.Operator;
 using TGS.Services.Operator.ApplicationServices.Player;
-using CoreEnums = TGS.Core.Models.Enums;
+
+using Client = Tgs.PlayerService.Client;
 
 namespace TGS.Tests.OperatorApi.UnitTests;
 
@@ -20,30 +21,56 @@ namespace TGS.Tests.OperatorApi.UnitTests;
 public class PlayerInfoTests
 {
     [Test]
-    public async Task Check_Player_Status_InBlacklist_Should_Return_True()
+    public async Task Check_Player_Status_InBlacklist_Should_Return_False_When_Player_Not_Exist()
     {
-        var fakePlayerOperations = Substitute.For<IPlayerOperations>();
-        var playerCode = "playerCode";
-        var player = new Player
-        {
-            PlayerCode = playerCode,
-            Status = CoreEnums.PlayerStatus.InBlacklist
-        };
-
-        fakePlayerOperations
-            .GetPlayerCodeByUsernameAsync(Arg.Any<Guid>(), "UserName")
-            .Returns(playerCode);
-
-        fakePlayerOperations
-            .GetPlayerByCodeAsync(Arg.Any<string>())
-            .Returns(player);
-
-        var sut = new CheckPlayerBannedQueryService(fakePlayerOperations);
+        var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
 
         var command = new CheckPlayerBannedQuery(
             Guid.NewGuid(),
             "UserName");
-        Assert.IsTrue(await sut.GetAsync(command));
+
+        _ = fakePlayerServiceClient
+            .GetPlayerInfoByUserNameAsync(
+                Arg.Is(command.BrandId),
+                Arg.Is(command.UserName))
+            .Returns((Client.PlayerInfo?)null);
+
+        var sut = new CheckPlayerBannedQueryService(fakePlayerServiceClient);
+        var actual = await sut.GetAsync(command);
+
+        Assert.IsFalse(actual);
+    }
+
+    [Test]
+    public async Task Check_Player_Status_InBlacklist_Should_Return_True()
+    {
+        var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
+
+        var playerInfo = new Client.PlayerInfo
+        {
+            PlayerCode = "player1",
+            BrandId = Guid.NewGuid(),
+            UserName = "UserName"
+        };
+
+        var command = new CheckPlayerBannedQuery(
+            playerInfo.BrandId,
+            playerInfo.UserName);
+
+        _ = fakePlayerServiceClient
+            .GetPlayerInfoByUserNameAsync(
+                Arg.Is(command.BrandId),
+                Arg.Is(command.UserName))
+            .Returns(playerInfo);
+
+        _ = fakePlayerServiceClient
+            .GetPlayerStatusAsync(Arg.Is(playerInfo.PlayerCode))
+            .Returns(PlayerStatus.InBlacklist);
+
+        var sut = new CheckPlayerBannedQueryService(fakePlayerServiceClient);
+        var actual = await sut.GetAsync(command);
+
+        Assert.IsTrue(actual);
     }
 
     [Test]
@@ -68,7 +95,7 @@ public class PlayerInfoTests
 
         var sut = new GetPlayerInfoByUserNameQueryService(fakePlayerServiceClient);
 
-        var playerInfo = new Tgs.PlayerService.Client.PlayerInfo
+        var playerInfo = new Client.PlayerInfo
         {
             PlayerCode = "playerCode",
             BrandId = Guid.NewGuid()

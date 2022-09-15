@@ -1,29 +1,34 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Tgs.PlayerService.Client;
 using Tgs.ServiceUtility;
-using TGS.Services.Operations;
-using CoreEnums = TGS.Core.Models.Enums;
 
 namespace TGS.Services.Operator.ApplicationServices.Player;
 
 internal class CheckPlayerBannedQueryService : IGetService<CheckPlayerBannedQuery, bool>
 {
-    private readonly IPlayerOperations _playerOperations;
+    private readonly IPlayerServiceClient _playerServiceClient;
 
-    public CheckPlayerBannedQueryService(IPlayerOperations playerOperations)
+    public CheckPlayerBannedQueryService(
+        IPlayerServiceClient playerServiceClient)
     {
-        _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
+        _playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
     }
 
     public async ValueTask<bool> GetAsync(CheckPlayerBannedQuery query, CancellationToken cancellationToken = default)
     {
-        var playerCode = await _playerOperations.GetPlayerCodeByUsernameAsync(query.BrandId, query.UserName);
-        if (string.IsNullOrEmpty(playerCode))
+        var playerInfo = await _playerServiceClient
+            .GetPlayerInfoByUserNameAsync(query.BrandId, query.UserName, cancellationToken)
+            .ConfigureAwait(false);
+
+        if (playerInfo is null)
             return false;
 
-        var player = await _playerOperations.GetPlayerByCodeAsync(playerCode);
+        var playerStatus = await _playerServiceClient
+            .GetPlayerStatusAsync(playerInfo.PlayerCode, cancellationToken)
+            .ConfigureAwait(false);
 
-        return player.Status == CoreEnums.PlayerStatus.InBlacklist;
+        return playerStatus == PlayerStatus.InBlacklist;
     }
 }
