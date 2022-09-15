@@ -1,24 +1,30 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Tgs.ServiceUtility;
 using TGS.Core.Infrastructures.Extensions;
+using Tgs.PlayerService.Client;
 using TGS.Services.Operations;
 
 namespace TGS.Services.Operator.ApplicationServices.Player;
 
 internal class GetUserNameQueryService : IGetService<GetUserNameQuery, bool>
 {
-    private readonly IPlayerOperations _playerOperations;
+    private readonly IPlayerServiceClient _playerServiceClient;
 
-    public GetUserNameQueryService(IPlayerOperations playerOperations)
+    public GetUserNameQueryService(
+        IPlayerOperations playerOperations,
+        IPlayerServiceClient playerServiceClient)
     {
-        _playerOperations = playerOperations ?? throw new System.ArgumentNullException(nameof(playerOperations));
+        _playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
     }
 
     public async ValueTask<bool> GetAsync(GetUserNameQuery query, CancellationToken cancellationToken = default)
     {
-        var playerCode = await _playerOperations.GetPlayerCodeByUsernameAsync(query.BrandId, query.Username);
+        var playerInfo = await _playerServiceClient
+            .GetPlayerInfoByUserNameAsync(query.BrandId, query.Username, cancellationToken)
+            .ConfigureAwait(false);
 
-        return playerCode.IsNotNullOrEmpty();
+        return playerInfo is not null;
     }
 }

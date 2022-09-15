@@ -1,7 +1,12 @@
-﻿using System;
+﻿#nullable enable
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.Models.Enums;
 using TGS.Services.Operator;
@@ -17,6 +22,17 @@ internal class BrandRepository : IBrandRepository
     {
         _tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
         _systemClock = systemClock ?? throw new ArgumentNullException(nameof(systemClock));
+    }
+
+    public async ValueTask<string?> GetSecretKeyAsync(
+        Guid brandId,
+        CancellationToken cancellationToken = default)
+    {
+        return await _tgsRepository.Brands
+            .Where(b => b.Id == brandId)
+            .Select(b => b.SecretKey)
+            .FirstOrDefaultAsync(cancellationToken)
+            .ConfigureAwait(false);
     }
 
     public IAsyncEnumerable<AnnouncementInfo> QueryAnnouncementInfosAsync(Guid brandId, DateTimeOffset searchDate)

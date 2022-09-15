@@ -2,7 +2,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using StackExchange.Redis;
 using Tgs.CashService.Client;
-using Tgs.Payment.Clients;
 using TGS.Core.Infrastructures.Mail;
 using TGS.Core.Infrastructures.Redis;
 using TGS.Services.Operator.GameProviders;
@@ -22,7 +21,7 @@ public class OperatorConfiguration
     public OperatorConfiguration AddAgentRepository<TAgentRepository>()
         where TAgentRepository : class, IAgentRepository
     {
-        Services.AddTransient<IAgentRepository, TAgentRepository>();
+        _ = Services.AddTransient<IAgentRepository, TAgentRepository>();
 
         return this;
     }
@@ -30,7 +29,8 @@ public class OperatorConfiguration
     public OperatorConfiguration AddBrandRepository<TBrandRepository>()
         where TBrandRepository : class, IBrandRepository
     {
-        Services.AddTransient<IBrandRepository, TBrandRepository>();
+        _ = Services.AddTransient<IBrandRepository, TBrandRepository>()
+              .Decorate<IBrandRepository, MemoryCachedBrandRepository>();
 
         return this;
     }
@@ -38,7 +38,7 @@ public class OperatorConfiguration
     public OperatorConfiguration AddGameProviderRepository<TGameProviderRepository>()
         where TGameProviderRepository : class, IGameProviderRepository
     {
-        Services.AddTransient<IGameProviderRepository, TGameProviderRepository>();
+        _ = Services.AddTransient<IGameProviderRepository, TGameProviderRepository>();
 
         return this;
     }
@@ -47,7 +47,7 @@ public class OperatorConfiguration
         Func<IServiceProvider, IDatabase> redisDatabaseResolver)
         where THelp2PayRepository : class, IHelp2PayRepository
     {
-        Services.AddTransient<IHelp2PayRepository>(sp =>
+        _ = Services.AddTransient<IHelp2PayRepository>(sp =>
             ActivatorUtilities.CreateInstance<THelp2PayRepository>(sp, redisDatabaseResolver(sp)));
 
         return this;
@@ -56,15 +56,14 @@ public class OperatorConfiguration
     public OperatorConfiguration AddMaintenanceRedisRepository<TMaintenanceRedisRepository>()
         where TMaintenanceRedisRepository : class, IMaintenanceRedisRepository
     {
-        Services
-            .AddTransient<IMaintenanceRedisRepository, TMaintenanceRedisRepository>();
+        _ = Services.AddTransient<IMaintenanceRedisRepository, TMaintenanceRedisRepository>();
 
         return this;
     }
 
     public OperatorConfiguration AddPaymentServiceClient(Action<IHttpClientBuilder> configureHttpClient)
     {
-        Services.AddPaymentServiceClient(configureHttpClient);
+        _ = Services.AddPaymentServiceClient(configureHttpClient);
 
         return this;
     }
@@ -90,7 +89,7 @@ public class OperatorConfiguration
     public OperatorConfiguration AddStationLetterRepository<TStationLetterRepository>()
         where TStationLetterRepository : class, IStationLetterRepository
     {
-        Services.AddTransient<IStationLetterRepository, TStationLetterRepository>();
+        _ = Services.AddTransient<IStationLetterRepository, TStationLetterRepository>();
 
         return this;
     }
@@ -98,7 +97,7 @@ public class OperatorConfiguration
     public OperatorConfiguration AddSysRepository<TSysRepository>()
         where TSysRepository : class, ISysRepository
     {
-        Services.AddTransient<ISysRepository, TSysRepository>();
+        _ = Services.AddTransient<ISysRepository, TSysRepository>();
 
         return this;
     }
@@ -106,7 +105,7 @@ public class OperatorConfiguration
     public OperatorConfiguration AddVipLevelRepository<TVipLevelRepository>()
         where TVipLevelRepository : class, IVipLevelRepository
     {
-        Services.AddTransient<IVipLevelRepository, TVipLevelRepository>();
+        _ = Services.AddTransient<IVipLevelRepository, TVipLevelRepository>();
 
         return this;
     }
@@ -114,7 +113,7 @@ public class OperatorConfiguration
     public OperatorConfiguration AddWalletRepository<TWalletRepository>()
         where TWalletRepository : class, IPlayerRepository
     {
-        Services
+        _ = Services
             .AddTransient<IPlayerRepository, TWalletRepository>();
 
         return this;
@@ -123,7 +122,7 @@ public class OperatorConfiguration
     public OperatorConfiguration ConfigureEmailConfiguration<TDep>(Action<EmailConfiguration, TDep> configure)
         where TDep : class
     {
-        Services
+        _ = Services
             .AddOptions<EmailConfiguration>()
             .Configure(configure);
 
@@ -133,7 +132,7 @@ public class OperatorConfiguration
     public OperatorConfiguration ConfigureOperatorOptions<TDep>(Action<OperatorOptions, TDep> configure)
         where TDep : class
     {
-        Services
+        _ = Services
             .AddOptions<OperatorOptions>()
             .Configure(configure);
 
@@ -142,7 +141,7 @@ public class OperatorConfiguration
 
     public OperatorConfiguration ConfigureWallet(Action<CashServiceClientOptions, IServiceProvider> configure)
     {
-        Services.AddCashServiceClient(configure);
+        _ = Services.AddCashServiceClient(configure);
 
         return this;
     }

@@ -19,20 +19,17 @@ public sealed class PlayerOperations : IPlayerOperations
     private readonly IRedisCacheManager _cacheManager;
 
     private readonly IPlayerOperations _interface;
-    private readonly IJsonSerializationProvider _json;
     private readonly IPlayerCommands _playerCommands;
     private readonly Func<IPlayerQueries> _playerQueriesFactory;
     private readonly Func<IWalletQueries> _walletQueriesFactory;
 
     public PlayerOperations(
         IRedisCacheManager cacheManager,
-        IJsonSerializationProvider json,
         Func<IWalletQueries> walletQueriesFactory,
         Func<IPlayerQueries> playerQueriesFactory,
         IPlayerCommands playerCommands)
     {
         _cacheManager = cacheManager;
-        _json = json;
         _walletQueriesFactory = walletQueriesFactory;
         _playerQueriesFactory = playerQueriesFactory;
         _playerCommands = playerCommands;
@@ -45,18 +42,8 @@ public sealed class PlayerOperations : IPlayerOperations
         await _cacheManager.ClearCacheAsync(RedisCacheType.Player, data.PlayerCode);
     }
 
-    public async Task<string> CreatePlayerAsync(CreatePlayerData data)
-    {
-        var playerCode = await _playerCommands.CreatePlayerAsync(data);
-
-        await _cacheManager.SafeCacheHashSetAsync(RedisCacheType.UsernameToPlayerCode, data.BrandId,
-            new HashEntry[]
-            {
-                new(data.UserName, playerCode)
-            }, TimeSpan.FromHours(12), true);
-
-        return playerCode;
-    }
+    public Task<string> CreatePlayerAsync(CreatePlayerData data)
+        => _playerCommands.CreatePlayerAsync(data);
 
     public Task<Guid> GetBrandIdByPlayerCodeAsync(string playerCode) =>
         GetCachedPlayerValueAsync(playerCode, CachedPlayerFields.BrandId,
@@ -93,28 +80,6 @@ public sealed class PlayerOperations : IPlayerOperations
 
     public Task<Player> GetPlayerByCodeAsync(string playerCode) =>
         _playerQueriesFactory().GetPlayerByCodeAsync(playerCode);
-
-    public async Task<string> GetPlayerCodeByUsernameAsync(Guid brandId, string username)
-    {
-        const RedisCacheType cacheType = RedisCacheType.UsernameToPlayerCode;
-        var cacheKey = brandId;
-        var field = username;
-
-        var value = await _cacheManager.SafeGetHashSetAsync(cacheType, cacheKey, field);
-        if (value.HasValue)
-        {
-            return value;
-        }
-
-        var playerCode = await _playerQueriesFactory().GetPlayerCodeByUsernameAsync(brandId, username);
-        await _cacheManager.SafeCacheHashSetAsync(cacheType, cacheKey, new HashEntry[]
-            {
-                new(field, playerCode)
-            },
-            TimeSpan.FromHours(12));
-
-        return playerCode;
-    }
 
     public Task<string> GetUsernameByPlayerCodeAsync(string playerCode) =>
         GetCachedPlayerValueAsync(playerCode, CachedPlayerFields.Username,

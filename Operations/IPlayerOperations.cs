@@ -22,8 +22,6 @@ public interface IPlayerOperations
 
     Task<Player> GetPlayerByCodeAsync(string playerCode);
 
-    Task<string> GetPlayerCodeByUsernameAsync(Guid brandId, string username);
-
     Task<string> GetUsernameByPlayerCodeAsync(string playerCode);
 
     Task SetEmailAsync(string playerCode, string email, DateTimeOffset updatedOn);
