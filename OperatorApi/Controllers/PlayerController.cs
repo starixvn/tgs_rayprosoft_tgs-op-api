@@ -52,7 +52,7 @@ public class PlayerController : ControllerBase
         [FromServices] IGetService<ChangePasswordQuery, ChangePasswordInfo> getChangePasswordQueryService,
         [FromBody] ChangePasswordRequest request)
     {
-        var brandId = HttpContext.Items.GetBrandId();
+        var brandId = HttpContext.GetBrandId()!.Value;
         var playerTokenData = HttpContext.Items.GetPlayerTokenData();
 
         var query = new ChangePasswordQuery(
@@ -62,6 +62,7 @@ public class PlayerController : ControllerBase
             request.NewPassword);
 
         ChangePasswordInfo info;
+
         try
         {
             info = await getChangePasswordQueryService
@@ -353,7 +354,7 @@ public class PlayerController : ControllerBase
         [FromServices] IGetService<LoginCommand, LoginInfo> loginService,
         [FromBody] LoginRequest request)
     {
-        var brandId = HttpContext.Items.GetBrandId();
+        var brandId = HttpContext.GetBrandId()!.Value;
 
         try
         {
@@ -408,7 +409,7 @@ public class PlayerController : ControllerBase
     public async Task<LogoutResponse> LogoutAsync(
         [FromServices] IGetService<GetLogoutQuery, LogoutInfo> getLogoutQueryService)
     {
-        var brandId = HttpContext.Items.GetBrandId();
+        var brandId = HttpContext.GetBrandId()!.Value;
         var playerTokenData = HttpContext.Items.GetPlayerTokenData();
 
         var query = new GetLogoutQuery(brandId, playerTokenData.PlayerCode, playerTokenData.LoginRecordId);

@@ -26,5 +26,7 @@ public interface IPlayerRepository
 
     ValueTask UpdatePlayerIdentityAsync(string playerCode, Guid identityAuthenticationFormId);
 
+    ValueTask UpdatePlayerLoginPasswordAsync(string playerCode, byte[] salt, byte[] password);
+
     ValueTask UpdatePlayerStatusAsync(string playerCode, PlayerStatus playerStatus);
 }

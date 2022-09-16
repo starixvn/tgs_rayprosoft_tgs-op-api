@@ -3,7 +3,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Tgs.Core.Infrastructures.Security;
 using Tgs.ServiceUtility;
-using TGS.Services.Operations;
 using TGS.Services.Operator.ValidateCode;
 
 namespace TGS.Services.Operator.ApplicationServices.Player;
@@ -11,15 +10,15 @@ namespace TGS.Services.Operator.ApplicationServices.Player;
 internal class ResetPasswordCommandService : ICommandService<ResetPasswordCommand>
 {
     private readonly IPasswordHandler _passwordHandler;
-    private readonly IPlayerOperations _playerOperations;
+    private readonly IPlayerRepository _playerRepository;
     private readonly IValidateCodeOperator _validateCodeOperator;
 
     public ResetPasswordCommandService(
-        IPlayerOperations playerOperations,
+        IPlayerRepository playerRepository,
         IPasswordHandler passwordHandler,
         IValidateCodeOperator validateCodeOperator)
     {
-        _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
+        _playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
         _passwordHandler = passwordHandler ?? throw new ArgumentNullException(nameof(passwordHandler));
 
         _validateCodeOperator =
@@ -35,22 +34,9 @@ internal class ResetPasswordCommandService : ICommandService<ResetPasswordComman
         if (result == null)
             throw new ValidateCodeNotVerifyException();
 
-        var username = await _playerOperations
-            .GetUsernameByPlayerCodeAsync(result.PlayerCode)
-            .ConfigureAwait(false);
-        var updatedOn = DateTimeOffset.UtcNow;
-
         var (newSalt, newPassword) = _passwordHandler.GenerateCredential(command.NewPassword);
 
-        await _playerOperations
-            .ChangePlayerPasswordAsync(new()
-            {
-                Username = username,
-                PlayerCode = result.PlayerCode,
-                Salt = newSalt,
-                Password = newPassword,
-                UpdatedOn = updatedOn
-            })
+        await _playerRepository.UpdatePlayerLoginPasswordAsync(result.PlayerCode, newSalt, newPassword)
             .ConfigureAwait(false);
     }
 }

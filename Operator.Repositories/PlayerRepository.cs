@@ -225,6 +225,22 @@ internal class PlayerRepository : IPlayerRepository
             .ConfigureAwait(false);
     }
 
+    public async ValueTask UpdatePlayerLoginPasswordAsync(string playerCode, byte[] salt, byte[] password)
+    {
+        var playerData = await _tgsRepository.Players
+            .FindAsync(playerCode)
+            .ConfigureAwait(false);
+
+        if (playerData == null)
+            return;
+
+        playerData.Salt = salt;
+        playerData.Password = password;
+        playerData.UpdatedOn = DateTimeOffset.UtcNow;
+
+        _ = await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
+    }
+
     public async ValueTask UpdatePlayerStatusAsync(string playerCode, PlayerStatus playerStatus)
     {
         var player = await _tgsRepository.Players.FindAsync(playerCode)
