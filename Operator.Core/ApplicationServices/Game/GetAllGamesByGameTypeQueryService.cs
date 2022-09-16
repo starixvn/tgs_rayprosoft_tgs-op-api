@@ -15,17 +15,10 @@ namespace TGS.Services.Operator.ApplicationServices.Game;
 internal class GetAllGamesByGameTypeQueryService : IQueryService<GetAllGamesByGameTypeQuery, GameInfo>
 {
     private readonly IGameProviderRepository _gameProviderRepository;
-    private readonly IValidStatus<GameStatus> _validGameStatus;
-    private readonly IValidStatus<Status> _validStatus;
 
     public GetAllGamesByGameTypeQueryService(
-        IValidStatus<Status> validStatus,
-        IValidStatus<GameStatus> validGameStatus,
         IGameProviderRepository gameProviderRepository)
     {
-        _validStatus = validStatus ?? throw new ArgumentNullException(nameof(validStatus));
-        _validGameStatus = validGameStatus ?? throw new ArgumentNullException(nameof(validGameStatus));
-
         _gameProviderRepository =
             gameProviderRepository ?? throw new ArgumentNullException(nameof(gameProviderRepository));
     }
@@ -35,8 +28,6 @@ internal class GetAllGamesByGameTypeQueryService : IQueryService<GetAllGamesByGa
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         var gamePlatformTypes = query.PlatformType.ToGamePlatformTypes();
-        var statuses = _validStatus.GetStatus(query.PlayerType);
-        var gameStatuses = _validGameStatus.GetStatus(query.PlayerType);
 
         var brandSubGps = await _gameProviderRepository.QueryAllSubGameProvidersAsync(query.BrandId)
             .ToArrayAsync(cancellationToken).ConfigureAwait(false);
@@ -52,8 +43,8 @@ internal class GetAllGamesByGameTypeQueryService : IQueryService<GetAllGamesByGa
                     join sgp in brandSubGps on g.SubGpCode equals sgp.Code
                     where gameTypes.Length == 0
                         || gameTypes.Contains(g.Type)
-                    let isActive = statuses.Contains(sgp.Status)
-                        && gameStatuses.Contains(g.Status)
+                    let isActive = sgp.Status == Status.Active
+                        && g.Status == GameStatus.Active
                     select new
                     {
                         g.Id,

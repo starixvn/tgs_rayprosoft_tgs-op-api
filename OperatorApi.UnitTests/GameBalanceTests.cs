@@ -137,8 +137,6 @@ public class GameBalanceTests
     {
         // arrange
         var fakeGameProviderOperations = Substitute.For<IGameProviderOperations>();
-        var fakePlayerOperations = Substitute.For<IPlayerOperations>();
-        var fakeValidStatus = Substitute.For<IValidStatus<Status>>();
         var fakeBrandOperations = Substitute.For<IBrandOperations>();
         var playerCode = "playerCode";
         var brandId = Guid.NewGuid();
@@ -146,32 +144,28 @@ public class GameBalanceTests
         var gameProviderId = Guid.NewGuid();
         var gameProviderStatus = Status.Active;
 
-        fakeGameProviderOperations
+        _ = fakeGameProviderOperations
             .GetGameProviderIdByCodeAsync(Arg.Any<string>())
             .Returns(gameProviderId);
-        fakeGameProviderOperations
+        _ = fakeGameProviderOperations
             .GetGameProviderStatusAsync(Arg.Any<Guid>())
             .Returns(gameProviderStatus);
-
-        var cachedPlayer = new CachedPlayer() { Type = PlayerType.RealPlayer };
-        fakePlayerOperations
-            .GetCachedPlayerAsync(playerCode)
-            .Returns(cachedPlayer);
 
         var playerTokenData = new PlayerTokenData
         {
             PlayerCode = playerCode
         };
 
-        fakeValidStatus.GetStatus(cachedPlayer.Type).Returns(new Status[] { Status.Active });
         var brandGameProviderStatus = Status.Inactive;
 
-        fakeBrandOperations.GetBrandGameProviderStatusAsync(brandId, gameProviderId).Returns(brandGameProviderStatus);
+        _ = fakeBrandOperations.GetBrandGameProviderStatusAsync(brandId, gameProviderId).Returns(brandGameProviderStatus);
 
-        var sut = new GameProviderStatusValidator(fakeGameProviderOperations, fakePlayerOperations, fakeValidStatus, fakeBrandOperations);
+        var sut = new GameProviderStatusValidator(
+            fakeGameProviderOperations,
+            fakeBrandOperations);
 
         // assert
-        Assert.ThrowsAsync<InvalidStatusException>(async () => await sut.CheckGameProviderStatusAsync(playerTokenData, gameProviderCode, brandId));
+        _ = Assert.ThrowsAsync<InvalidStatusException>(async () => await sut.CheckGameProviderStatusAsync(playerTokenData, gameProviderCode, brandId));
     }
 
     [Test]
@@ -179,8 +173,6 @@ public class GameBalanceTests
     {
         // arrange
         var fakeGameProviderOperations = Substitute.For<IGameProviderOperations>();
-        var fakePlayerOperations = Substitute.For<IPlayerOperations>();
-        var fakeValidStatus = Substitute.For<IValidStatus<Status>>();
         var fakeBrandOperations = Substitute.For<IBrandOperations>();
         var playerCode = "playerCode";
         var brandId = Guid.NewGuid();
@@ -188,32 +180,26 @@ public class GameBalanceTests
         var gameProviderId = Guid.NewGuid();
         var gameProviderStatus = Status.Active;
 
-        fakeGameProviderOperations
+        _ = fakeGameProviderOperations
             .GetGameProviderIdByCodeAsync(Arg.Any<string>())
             .Returns(gameProviderId);
-        fakeGameProviderOperations
+        _ = fakeGameProviderOperations
             .GetGameProviderStatusAsync(Arg.Any<Guid>())
             .Returns(gameProviderStatus);
-
-        var cachedPlayer = new CachedPlayer() { Type = PlayerType.RealPlayer };
-        fakePlayerOperations
-            .GetCachedPlayerAsync(playerCode)
-            .Returns(cachedPlayer);
 
         var playerTokenData = new PlayerTokenData
         {
             PlayerCode = playerCode
         };
 
-        fakeValidStatus.GetStatus(cachedPlayer.Type).Returns(new Status[] { Status.Active });
         var brandGameProviderStatus = Status.Maintenance;
 
-        fakeBrandOperations.GetBrandGameProviderStatusAsync(brandId, gameProviderId).Returns(brandGameProviderStatus);
+        _ = fakeBrandOperations.GetBrandGameProviderStatusAsync(brandId, gameProviderId).Returns(brandGameProviderStatus);
 
-        var sut = new GameProviderStatusValidator(fakeGameProviderOperations, fakePlayerOperations, fakeValidStatus, fakeBrandOperations);
+        var sut = new GameProviderStatusValidator(fakeGameProviderOperations, fakeBrandOperations);
 
         // assert
-        Assert.ThrowsAsync<GameProviderUnderMaintenanceException>(async () => await sut.CheckGameProviderStatusAsync(playerTokenData, gameProviderCode, brandId));
+        _ = Assert.ThrowsAsync<GameProviderUnderMaintenanceException>(async () => await sut.CheckGameProviderStatusAsync(playerTokenData, gameProviderCode, brandId));
     }
 
     [Test]
@@ -221,8 +207,6 @@ public class GameBalanceTests
     {
         // arrange
         var fakeGameProviderOperations = Substitute.For<IGameProviderOperations>();
-        var fakePlayerOperations = Substitute.For<IPlayerOperations>();
-        var fakeValidStatus = Substitute.For<IValidStatus<Status>>();
         var fakeBrandOperations = Substitute.For<IBrandOperations>();
         var playerCode = "playerCode";
         var brandId = Guid.NewGuid();
@@ -230,27 +214,22 @@ public class GameBalanceTests
         var gameProviderId = Guid.NewGuid();
         var gameProviderStatus = Status.Inactive;
 
-        fakeGameProviderOperations
+        _ = fakeGameProviderOperations
             .GetGameProviderIdByCodeAsync(Arg.Any<string>())
             .Returns(gameProviderId);
-        fakeGameProviderOperations
+        _ = fakeGameProviderOperations
             .GetGameProviderStatusAsync(Arg.Any<Guid>())
             .Returns(gameProviderStatus);
-
-        var cachedPlayer = new CachedPlayer() { Type = PlayerType.RealPlayer };
-        fakePlayerOperations
-            .GetCachedPlayerAsync(playerCode)
-            .Returns(cachedPlayer);
 
         var playerTokenData = new PlayerTokenData
         {
             PlayerCode = playerCode
         };
 
-        var sut = new GameProviderStatusValidator(fakeGameProviderOperations, fakePlayerOperations, fakeValidStatus, fakeBrandOperations);
+        var sut = new GameProviderStatusValidator(fakeGameProviderOperations, fakeBrandOperations);
 
         // assert
-        Assert.ThrowsAsync<InvalidStatusException>(async () => await sut.CheckGameProviderStatusAsync(playerTokenData, gameProviderCode, brandId));
+        _ = Assert.ThrowsAsync<InvalidStatusException>(async () => await sut.CheckGameProviderStatusAsync(playerTokenData, gameProviderCode, brandId));
     }
 
     [Test]
@@ -258,8 +237,6 @@ public class GameBalanceTests
     {
         // arrange
         var fakeGameProviderOperations = Substitute.For<IGameProviderOperations>();
-        var fakePlayerOperations = Substitute.For<IPlayerOperations>();
-        var fakeValidStatus = Substitute.For<IValidStatus<Status>>();
         var fakeBrandOperations = Substitute.For<IBrandOperations>();
         var playerCode = "playerCode";
         var brandId = Guid.NewGuid();
@@ -267,26 +244,22 @@ public class GameBalanceTests
         var gameProviderId = Guid.NewGuid();
         var gameProviderStatus = Status.Maintenance;
 
-        fakeGameProviderOperations
+        _ = fakeGameProviderOperations
             .GetGameProviderIdByCodeAsync(Arg.Any<string>())
             .Returns(gameProviderId);
-        fakeGameProviderOperations
+        _ = fakeGameProviderOperations
             .GetGameProviderStatusAsync(Arg.Any<Guid>())
             .Returns(gameProviderStatus);
-
-        var cachedPlayer = new CachedPlayer() { Type = PlayerType.RealPlayer };
-        fakePlayerOperations
-            .GetCachedPlayerAsync(playerCode)
-            .Returns(cachedPlayer);
 
         var playerTokenData = new PlayerTokenData
         {
             PlayerCode = playerCode
         };
 
-        var sut = new GameProviderStatusValidator(fakeGameProviderOperations, fakePlayerOperations, fakeValidStatus, fakeBrandOperations);
+        var sut = new GameProviderStatusValidator(fakeGameProviderOperations, fakeBrandOperations);
 
         // assert
-        Assert.ThrowsAsync<GameProviderUnderMaintenanceException>(async () => await sut.CheckGameProviderStatusAsync(playerTokenData, gameProviderCode, brandId));
+        _ = Assert.ThrowsAsync<GameProviderUnderMaintenanceException>(async ()
+            => await sut.CheckGameProviderStatusAsync(playerTokenData, gameProviderCode, brandId));
     }
 }

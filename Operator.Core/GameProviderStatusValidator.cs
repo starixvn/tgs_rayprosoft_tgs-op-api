@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Linq;
 using System.Threading.Tasks;
-using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.Tokens;
@@ -13,18 +11,12 @@ internal class GameProviderStatusValidator : IGameProviderStatusValidator
 {
     private readonly IBrandOperations _brandOperations;
     private readonly IGameProviderOperations _gameProviderOperations;
-    private readonly IPlayerOperations _playerOperations;
-    private readonly IValidStatus<Status> _validStatus;
 
     public GameProviderStatusValidator(
         IGameProviderOperations gameProviderOperations,
-        IPlayerOperations playerOperations,
-        IValidStatus<Status> validStatus,
         IBrandOperations brandOperations)
     {
         _gameProviderOperations = gameProviderOperations;
-        _playerOperations = playerOperations;
-        _validStatus = validStatus;
         _brandOperations = brandOperations;
     }
 
@@ -38,11 +30,7 @@ internal class GameProviderStatusValidator : IGameProviderStatusValidator
             throw new InvalidStatusException("GameProvider doesn't exist");
         }
 
-        var cachedPlayer = await _playerOperations.GetCachedPlayerAsync(playerTokenData.PlayerCode);
-        var playerType = cachedPlayer.Type;
-        var statuses = _validStatus.GetStatus(playerType);
-
-        ValidateGameProviderAndGameStatus(statuses, gameProviderStatus.Value);
+        ValidateGameProviderStatus(gameProviderStatus.Value);
 
         var brandGameProviderStatus =
             await _brandOperations.GetBrandGameProviderStatusAsync(brandId, gameProviderId);
@@ -52,17 +40,17 @@ internal class GameProviderStatusValidator : IGameProviderStatusValidator
             throw new InvalidStatusException("Brand doesn't have the configuration of GameProvider");
         }
 
-        ValidateGameProviderAndGameStatus(statuses, brandGameProviderStatus.Value);
+        ValidateGameProviderStatus(brandGameProviderStatus.Value);
     }
 
-    private static void ValidateGameProviderAndGameStatus(Status[] statuses, Status gameProviderStatus)
+    private static void ValidateGameProviderStatus(Status gameProviderStatus)
     {
-        if (!statuses.Contains(Status.Maintenance) && gameProviderStatus == Status.Maintenance)
+        if (gameProviderStatus == Status.Maintenance)
         {
             throw new GameProviderUnderMaintenanceException();
         }
 
-        if (!statuses.Contains(gameProviderStatus))
+        if (gameProviderStatus != Status.Active)
         {
             throw new InvalidStatusException("GameProvider doesn't exist or is not active");
         }
