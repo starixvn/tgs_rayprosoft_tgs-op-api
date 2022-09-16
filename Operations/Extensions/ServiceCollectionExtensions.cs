@@ -28,7 +28,6 @@ public static class ServiceCollectionExtensions
 
         services.AddFactory<IBrandQueries, BrandQueries>();
         services.AddFactory<IGameProviderQueries, GameProviderQueries>();
-        services.AddFactory<IAgentQueries, AgentQueries>();
         services.AddFactory<IPlayerQueries, PlayerQueries>();
         services.AddFactory<IWalletQueries, WalletQueries>();
         services.AddFactory<IGameQueries, GameQueries>();
@@ -43,7 +42,6 @@ public static class ServiceCollectionExtensions
         #region Commands
 
         services.AddFactory<IPlayerCommands, PlayerCommands>();
-        services.AddFactory<IAgentCommands, AgentCommands>();
 
         #endregion Commands
 
