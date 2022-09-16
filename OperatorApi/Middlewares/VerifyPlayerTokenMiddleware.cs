@@ -1,21 +1,26 @@
-﻿using System;
+﻿#nullable enable
+
+using System;
 using System.Diagnostics;
-using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Tgs.Core.Infrastructures.Security;
+using Tgs.PlayerService.Client;
 using Tgs.ServiceUtility;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Resources;
+using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.Messages;
 using TGS.Core.Models.Tokens;
-using TGS.Services.Operations;
+using TGS.Services.Operator;
 using TGS.Services.Operator.ApplicationServices.Player;
+using PlayerInfo = Tgs.PlayerService.Client.PlayerInfo;
 
 namespace TGS.Apis.OperatorApi.Middlewares;
 
@@ -26,19 +31,22 @@ public sealed class VerifyPlayerTokenMiddleware
     private readonly ILogger<VerifyPlayerTokenMiddleware> _logger;
     private readonly RequestDelegate _next;
 
-    public VerifyPlayerTokenMiddleware(RequestDelegate next, ILogger<VerifyPlayerTokenMiddleware> logger)
+    public VerifyPlayerTokenMiddleware(
+        RequestDelegate next,
+        ILogger<VerifyPlayerTokenMiddleware> logger)
     {
-        _next = next;
-        _logger = logger;
+        _next = next ?? throw new ArgumentNullException(nameof(next));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
     public async Task InvokeAsync(
         HttpContext context,
         ITokenProvider tokenProvider,
         IHashProvider hashProvider,
-        IPlayerOperations playerOperations,
-        IBrandOperations brandOperations,
+        IPlayerServiceClient playerServiceClient,
+        IBrandRepository brandRepository,
         IJwtTokenHandler handler,
+        IGetService<GetPlayerMainDataQuery, PlayerInfo?> playerDataQueryService,
         ICommandService<ValidatePlayerLoginRecordCommand> loginRecordValidateService)
     {
         using var activity = _VerifyPlayerTokenMiddlewareSource.StartActivity(nameof(VerifyPlayerTokenMiddleware));
@@ -66,38 +74,37 @@ public sealed class VerifyPlayerTokenMiddleware
 
         var jwt = handler.ReadToken(token);
 
-        var sub = jwt.Claims.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Sub)?.Value;
+        var claims = jwt.Claims.ToDictionary(c => c.Type, c => c.Value);
 
-        if (string.IsNullOrEmpty(sub))
+        if (!(claims.TryGetValue("sub", out var playerCode) && !string.IsNullOrEmpty(playerCode))
+            || !(claims.TryGetValue("login_id", out var loginId) && !string.IsNullOrEmpty(loginId))
+            || !(claims.TryGetValue("platform_type", out var platform) && !string.IsNullOrEmpty(platform))
+            || !(claims.TryGetValue("exp", out var expire) && !string.IsNullOrEmpty(expire)))
         {
             throw new MissingTokenException(Player.MissingPlayerToken);
         }
 
-        var data = await tokenProvider.DecryptAsync<PlayerTokenData>(sub);
-        if (data == null)
+        var playerTokenData = new PlayerTokenData
         {
-            throw new MissingTokenException(Player.MissingPlayerToken);
-        }
+            PlayerCode = playerCode,
+            LoginRecordId = Guid.Parse(loginId),
+            PlatformType = Enum.Parse<PlatformType>(platform),
+            ExpiredOn = new DateTimeOffset(EpochTime.DateTime(long.Parse(expire)))
+        };
 
-        context.Items.Add(Core.Models.Consts.ContextItems.PlayerToken, data);
+        context.Items.Add(Core.Models.Consts.ContextItems.PlayerToken, playerTokenData);
 
-        var playerCode = data.PlayerCode;
-
-        await loginRecordValidateService.ExecuteAsync(new ValidatePlayerLoginRecordCommand(data.LoginRecordId, playerCode));
+        await loginRecordValidateService.ExecuteAsync(
+            new ValidatePlayerLoginRecordCommand(playerTokenData.LoginRecordId, playerCode));
 
         if (!attribute.NeedAuthorize)
         {
             await _next(context);
-
             return;
         }
 
-        var licenseeId = await playerOperations.GetBrandIdByPlayerCodeAsync(playerCode);
-        var secretKey = await brandOperations.GetBrandSecretKeyAsync(licenseeId);
-
-        var jti = jwt.Claims.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Jti)?.Value;
-        var payload = hashProvider.Hash($"{sub}:{jti}");
-        var signature = $"{payload}:{secretKey}";
+        var brandId = context.GetBrandId();
+        var secretKey = await brandRepository.GetSecretKeyAsync(brandId!.Value);
 
         var result = handler.ValidateToken(
             token,
@@ -107,7 +114,7 @@ public sealed class VerifyPlayerTokenMiddleware
                 ValidIssuer = Consts.Site,
                 ValidateAudience = false,
                 ValidateIssuerSigningKey = true,
-                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(signature)),
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey!)),
                 ValidateLifetime = true,
                 ClockSkew = TimeSpan.Zero
             },

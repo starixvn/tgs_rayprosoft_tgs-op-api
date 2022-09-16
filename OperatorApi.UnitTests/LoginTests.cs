@@ -30,11 +30,9 @@ internal class LoginTests
     {
         var fakeBrandRepository = Substitute.For<IBrandRepository>();
         var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
-        var fakeHashProvider = Substitute.For<IHashProvider>();
         var fakeJwtTokenHandler = Substitute.For<IJwtTokenHandler>();
         var fakePlayerLoginRecordRepository = Substitute.For<IPlayerLoginRecordRepository>();
         var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
-        var fakeTokenProvider = Substitute.For<ITokenProvider>();
         var fakePasswordValidateCommandService = Substitute
             .For<IGetService<PlayerPasswordValidateCommand, bool>>();
 
@@ -96,17 +94,6 @@ internal class LoginTests
                 Arg.Is(command.IpAddress))
             .Returns(loginRecordInfo);
 
-        _ = fakeTokenProvider.EncryptAsync(
-                Arg.Is<PlayerTokenData>(x =>
-                    x.PlayerCode == playerInfo.PlayerCode &&
-                    x.LoginRecordId == loginRecordInfo.Id &&
-                    x.PlatformType == loginRecordInfo.PlatformType &&
-                    x.ExpiredOn == loginRecordInfo.ExpiredOn))
-            .Returns("encrypt_token");
-
-        _ = fakeHashProvider.Hash(Arg.Any<string>())
-            .Returns("payload");
-
         _ = fakeBrandRepository.GetSecretKeyAsync(
                 Arg.Is(playerInfo.BrandId),
                 Arg.Any<CancellationToken>())
@@ -120,8 +107,6 @@ internal class LoginTests
             .Returns(expected.PlayerToken);
 
         var sut = new LoginCommandService(
-            fakeTokenProvider,
-            fakeHashProvider,
             fakeJwtTokenHandler,
             fakeBrandRepository,
             fakePlayerLoginRecordRepository,
@@ -147,11 +132,9 @@ internal class LoginTests
     {
         var fakeBrandRepository = Substitute.For<IBrandRepository>();
         var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
-        var fakeHashProvider = Substitute.For<IHashProvider>();
         var fakeJwtTokenHandler = Substitute.For<IJwtTokenHandler>();
         var fakePlayerLoginRecordRepository = Substitute.For<IPlayerLoginRecordRepository>();
         var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
-        var fakeTokenProvider = Substitute.For<ITokenProvider>();
         var fakePasswordValidateCommandService = Substitute
             .For<IGetService<PlayerPasswordValidateCommand, bool>>();
 
@@ -170,8 +153,6 @@ internal class LoginTests
             .Returns(BrandStatus.Inactive);
 
         var sut = new LoginCommandService(
-            fakeTokenProvider,
-            fakeHashProvider,
             fakeJwtTokenHandler,
             fakeBrandRepository,
             fakePlayerLoginRecordRepository,
@@ -195,11 +176,9 @@ internal class LoginTests
     {
         var fakeBrandRepository = Substitute.For<IBrandRepository>();
         var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
-        var fakeHashProvider = Substitute.For<IHashProvider>();
         var fakeJwtTokenHandler = Substitute.For<IJwtTokenHandler>();
         var fakePlayerLoginRecordRepository = Substitute.For<IPlayerLoginRecordRepository>();
         var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
-        var fakeTokenProvider = Substitute.For<ITokenProvider>();
         var fakePasswordValidateCommandService = Substitute
             .For<IGetService<PlayerPasswordValidateCommand, bool>>();
 
@@ -241,8 +220,6 @@ internal class LoginTests
             .Returns(false);
 
         var sut = new LoginCommandService(
-            fakeTokenProvider,
-            fakeHashProvider,
             fakeJwtTokenHandler,
             fakeBrandRepository,
             fakePlayerLoginRecordRepository,
@@ -266,11 +243,9 @@ internal class LoginTests
     {
         var fakeBrandRepository = Substitute.For<IBrandRepository>();
         var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
-        var fakeHashProvider = Substitute.For<IHashProvider>();
         var fakeJwtTokenHandler = Substitute.For<IJwtTokenHandler>();
         var fakePlayerLoginRecordRepository = Substitute.For<IPlayerLoginRecordRepository>();
         var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
-        var fakeTokenProvider = Substitute.For<ITokenProvider>();
         var fakePasswordValidateCommandService = Substitute
             .For<IGetService<PlayerPasswordValidateCommand, bool>>();
 
@@ -295,8 +270,6 @@ internal class LoginTests
             .Returns((Client.PlayerInfo?)null);
 
         var sut = new LoginCommandService(
-            fakeTokenProvider,
-            fakeHashProvider,
             fakeJwtTokenHandler,
             fakeBrandRepository,
             fakePlayerLoginRecordRepository,

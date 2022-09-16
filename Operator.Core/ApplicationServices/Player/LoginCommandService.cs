@@ -4,13 +4,14 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Tgs.BrandCertificate;
 using Tgs.BrandCertificate.Clients;
 using Tgs.Core.Infrastructures.Security;
+using TGS.Core.Models.Enums;
 using Tgs.PlayerService.Client;
 using Tgs.ServiceUtility;
 using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.Tokens;
+using BrandStatus = Tgs.BrandCertificate.BrandStatus;
 
 namespace TGS.Services.Operator.ApplicationServices.Player;
 
@@ -18,16 +19,12 @@ internal class LoginCommandService : IGetService<LoginCommand, LoginInfo>
 {
     private readonly IBrandRepository _brandRepository;
     private readonly IBrandServiceClient _brandServiceClient;
-    private readonly IHashProvider _hashProvider;
     private readonly IJwtTokenHandler _jwtTokenHandler;
     private readonly IPlayerLoginRecordRepository _loginRecordRepository;
     private readonly IGetService<PlayerPasswordValidateCommand, bool> _passwordValidateCommandService;
     private readonly IPlayerServiceClient _playerServiceClient;
-    private readonly ITokenProvider _tokenProvider;
 
     public LoginCommandService(
-        ITokenProvider tokenProvider,
-        IHashProvider hashProvider,
         IJwtTokenHandler jwtTokenHandler,
         IBrandRepository brandRepository,
         IPlayerLoginRecordRepository loginRecordRepository,
@@ -35,8 +32,6 @@ internal class LoginCommandService : IGetService<LoginCommand, LoginInfo>
         IBrandServiceClient brandServiceClient,
         IGetService<PlayerPasswordValidateCommand, bool> passwordValidateCommandService)
     {
-        _tokenProvider = tokenProvider ?? throw new ArgumentNullException(nameof(tokenProvider));
-        _hashProvider = hashProvider ?? throw new ArgumentNullException(nameof(hashProvider));
         _jwtTokenHandler = jwtTokenHandler ?? throw new ArgumentNullException(nameof(jwtTokenHandler));
         _brandRepository = brandRepository ?? throw new ArgumentNullException(nameof(brandRepository));
         _loginRecordRepository = loginRecordRepository ?? throw new ArgumentNullException(nameof(loginRecordRepository));
@@ -106,21 +101,16 @@ internal class LoginCommandService : IGetService<LoginCommand, LoginInfo>
     private async Task<string> GeneratePlayerJwtTokenAsync(
         Guid brandId, PlayerTokenData playerTokenData, string site)
     {
-        var data = await _tokenProvider.EncryptAsync(playerTokenData);
-
-        var jti = Guid.NewGuid().ToString();
-
         var identity = new ClaimsIdentity(
             new[]
             {
-                new Claim(JwtRegisteredClaimNames.Sub, data),
-                new Claim(JwtRegisteredClaimNames.Jti, jti)
+                new Claim(JwtRegisteredClaimNames.Sub, playerTokenData.PlayerCode),
+                new Claim("login_id", playerTokenData.LoginRecordId.ToString()),
+                new Claim("platform_type", PlatformType.Desktop.ToString())
             });
 
-        var payload = _hashProvider.Hash($"{data}:{jti}");
-
         var secretKey = await _brandRepository.GetSecretKeyAsync(brandId);
-        var signature = Encoding.UTF8.GetBytes($"{payload}:{secretKey}");
+        var signature = Encoding.UTF8.GetBytes(secretKey!);
 
         return _jwtTokenHandler.GenerateToken(
             identity,

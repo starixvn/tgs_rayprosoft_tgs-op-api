@@ -19,5 +19,5 @@ internal class GetPlayerMainDataQueryService : IGetService<GetPlayerMainDataQuer
     public ValueTask<Tgs.PlayerService.Client.PlayerInfo?> GetAsync(
         GetPlayerMainDataQuery query,
         CancellationToken cancellationToken = default)
-        => _playerServiceClient.GetPlayerInfoAsync(query.PlayerCode);
+        => _playerServiceClient.GetPlayerInfoAsync(query.PlayerCode, cancellationToken);
 }
