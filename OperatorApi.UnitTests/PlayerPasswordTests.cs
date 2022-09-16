@@ -6,21 +6,19 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using NSubstitute;
 using NUnit.Framework;
+using Tgs.BrandCertificate.Clients;
+using Tgs.Core.Infrastructures.Security;
+using Tgs.PlayerService.Client;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
-using Tgs.Core.Infrastructures.Security;
-using TGS.Core.Models.Enums;
 using TGS.Core.Models.Tokens;
 using TGS.Services.Operations;
 using TGS.Services.Operations.Models.Services;
 using TGS.Services.Operations.Queries;
-using TGS.Services.Operations.Validators;
 using TGS.Services.Operator;
+using TGS.Services.Operator.ApplicationServices.Player;
 using TGS.Services.Operator.ValidateCode;
 using TGS.SmsService.Client;
-using TGS.Services.Operator.ApplicationServices.Player;
-using Tgs.BrandCertificate.Clients;
-using Tgs.PlayerService.Client;
 
 namespace TGS.Tests.OperatorApi.UnitTests;
 
@@ -38,7 +36,6 @@ public class PlayerPasswordTests
                 PlayerCode = playerCode
             });
 
-        var fakeStatusValidator = Substitute.For<IStatusValidator>();
         var fakePlayerQueries = Substitute.For<IPlayerQueries>();
 
         fakePlayerQueries
@@ -61,7 +58,7 @@ public class PlayerPasswordTests
 
         var fakePlayerOperations = Substitute.For<IPlayerOperations>();
 
-        var sut = new ChangePasswordQueryService(fakeStatusValidator,
+        var sut = new ChangePasswordQueryService(
             fakePlayerQueries,
             fakePasswordHandler,
             fakePlayerOperations);

@@ -1,11 +1,8 @@
 ﻿using System;
 using Microsoft.Extensions.DependencyInjection;
-using TGS.Core.Models;
-using TGS.Core.Models.Enums;
 using TGS.Services.Operations.CodeMappers;
 using TGS.Services.Operations.Commands;
 using TGS.Services.Operations.Queries;
-using TGS.Services.Operations.Validators;
 
 namespace TGS.Services.Operations.Extensions;
 
@@ -58,13 +55,6 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IBrandGameProviderOperations, BrandGameProviderOperations>();
 
         #endregion Operations
-
-        services.AddSingleton<IValidStatus<Status>, ValidStatus>();
-        services.AddSingleton<IValidStatus<GameStatus>, ValidGameStatus>();
-
-        services.AddSingleton<IAmountValidator, AmountValidator>();
-
-        services.AddScoped<IStatusValidator, StatusValidator>();
 
         return services;
     }
