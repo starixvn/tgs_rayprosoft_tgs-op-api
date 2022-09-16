@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Tgs.Core.Infrastructures.Security;
@@ -99,12 +100,11 @@ public sealed class VerifyPlayerTokenMiddleware
         if (!attribute.NeedAuthorize)
         {
             await _next(context);
-
             return;
         }
 
-        var playerInfo = await playerServiceClient.GetPlayerInfoAsync(playerCode);
-        var secretKey = await brandRepository.GetSecretKeyAsync(playerInfo!.BrandId);
+        var brandId = context.GetBrandId();
+        var secretKey = await brandRepository.GetSecretKeyAsync(brandId!.Value);
 
         var result = handler.ValidateToken(
             token,
