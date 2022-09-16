@@ -1,10 +1,11 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using TGS.Core.Models;
+using Tgs.BrandCertificate;
+using Tgs.BrandCertificate.Clients;
 using TGS.Core.Models.Exceptions;
-using TGS.Services.Operations.Validators;
 
 namespace TGS.Apis.OperatorApi.Middlewares;
 
@@ -14,14 +15,15 @@ public sealed class VerifyCredentialsMiddleware
 
     private readonly RequestDelegate _next;
 
-    public VerifyCredentialsMiddleware(RequestDelegate next)
+    public VerifyCredentialsMiddleware(
+        RequestDelegate next)
     {
-        _next = next;
+        _next = next ?? throw new ArgumentNullException(nameof(next));
     }
 
     public async Task InvokeAsync(
         HttpContext context,
-        IStatusValidator statusValidator)
+        IBrandServiceClient brandServiceClient)
     {
         using var activity = _VerifyCredentialsMiddlewareSource.StartActivity(nameof(VerifyCredentialsMiddleware));
 
@@ -30,7 +32,12 @@ public sealed class VerifyCredentialsMiddleware
         if (brandId is null)
             throw new MissingTokenException("Missing Authorization Header");
 
-        await statusValidator.ThrowIfBrandStatusIsNotOneOfAsync(brandId.Value, ValidStatus.Default);
+        var brandStatus = await brandServiceClient.GetBrandStatusAsync(brandId.Value);
+
+        if (brandStatus is not (BrandStatus.Active or BrandStatus.Maintenance))
+        {
+            throw new InvalidStatusException("Brand is not active");
+        }
 
         context.Items.Add(Core.Models.Consts.ContextItems.BrandId, brandId);
 

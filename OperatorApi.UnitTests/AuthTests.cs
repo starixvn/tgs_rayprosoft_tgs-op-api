@@ -6,7 +6,6 @@ using NSubstitute;
 using NUnit.Framework;
 using Tgs.Core.Infrastructures.Security;
 using TGS.Services.Operations;
-using TGS.Services.Operations.Validators;
 using TGS.Services.Operator.ApplicationServices.Auth;
 
 namespace TGS.Tests.OperatorApi.UnitTests;

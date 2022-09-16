@@ -294,7 +294,8 @@ public class GameTests
             "ThisIsPlayerCode",
             null);
 
-        fakeGameProviderRepository.QueryAllSubGameProvidersAsync(Arg.Is(command.BrandId))
+        _ = fakeGameProviderRepository
+            .QueryAllSubGameProvidersAsync(Arg.Is(command.BrandId))
             .Returns(new[]
             {
                 new BrandSubGameProviderInfo(
@@ -326,7 +327,7 @@ public class GameTests
                     "{}")
             }.ToAsyncEnumerable());
 
-        fakeGetGameBalanceService.GetAsync(Arg.Any<GetGameBalanceQuery>())
+        _ = fakeGetGameBalanceService.GetAsync(Arg.Any<GetGameBalanceQuery>())
             .Returns(100M);
 
         await sut.ExecuteAsync(command);
@@ -339,8 +340,6 @@ public class GameTests
     public async Task Get_Game_List_If_System_Game_Provider_Is_Inactive()
     {
         // arrange
-        var fakeValidStatus = Substitute.For<IValidStatus<Status>>();
-        var fakeValidGameStatus = Substitute.For<IValidStatus<GameStatus>>();
         var fakeGameProviderRepository = Substitute.For<IGameProviderRepository>();
 
         var brandId = Guid.NewGuid();
@@ -456,30 +455,13 @@ public class GameTests
                 0)
         };
 
-        fakeValidStatus.GetStatus(Arg.Any<PlayerType>())
-            .Returns(new[]
-            {
-                Status.Active,
-                Status.Maintenance
-            });
-
-        fakeValidGameStatus.GetStatus(Arg.Any<PlayerType>())
-            .Returns(new[]
-            {
-                GameStatus.Active,
-                GameStatus.Maintenance,
-                GameStatus.Testing
-            });
-
-        fakeGameProviderRepository.QueryAllSubGameProvidersAsync(Arg.Is(brandId))
+        _ = fakeGameProviderRepository.QueryAllSubGameProvidersAsync(Arg.Is(brandId))
             .Returns(subGameProviders.Where(sgp => sgp.Status != Status.Inactive).ToAsyncEnumerable());
 
-        fakeGameProviderRepository.QueryAllGamesAsync(Arg.Is(brandId))
-            .Returns(games.ToAsyncEnumerable());
+        _ = fakeGameProviderRepository.QueryAllGamesAsync(Arg.Is(brandId))
+                .Returns(games.ToAsyncEnumerable());
 
         var sut = new GetAllGamesByGameTypeQueryService(
-            fakeValidStatus,
-            fakeValidGameStatus,
             fakeGameProviderRepository);
 
         var query = new GetAllGamesByGameTypeQuery(
@@ -504,8 +486,6 @@ public class GameTests
     public async Task Get_Game_List_Of_All_GameProviders()
     {
         // arrange
-        var fakeValidStatus = Substitute.For<IValidStatus<Status>>();
-        var fakeValidGameStatus = Substitute.For<IValidStatus<GameStatus>>();
         var fakeGameProviderRepository = Substitute.For<IGameProviderRepository>();
 
         var brandId = Guid.NewGuid();
@@ -621,26 +601,11 @@ public class GameTests
                 0)
         };
 
-        fakeValidStatus.GetStatus(Arg.Any<PlayerType>())
-            .Returns(new[]
-            {
-                Status.Active,
-                Status.Maintenance
-            });
+        _ = fakeGameProviderRepository.QueryAllSubGameProvidersAsync(Arg.Is(brandId))
+              .Returns(subGameProviders.ToAsyncEnumerable());
 
-        fakeValidGameStatus.GetStatus(Arg.Any<PlayerType>())
-            .Returns(new[]
-            {
-                GameStatus.Active,
-                GameStatus.Maintenance,
-                GameStatus.Testing
-            });
-
-        fakeGameProviderRepository.QueryAllSubGameProvidersAsync(Arg.Is(brandId))
-            .Returns(subGameProviders.ToAsyncEnumerable());
-
-        fakeGameProviderRepository.QueryAllGamesAsync(Arg.Is(brandId))
-            .Returns(games.ToAsyncEnumerable());
+        _ = fakeGameProviderRepository.QueryAllGamesAsync(Arg.Is(brandId))
+              .Returns(games.ToAsyncEnumerable());
 
         var query = new GetAllGamesByGameTypeQuery(
             brandId,
@@ -649,8 +614,6 @@ public class GameTests
             Array.Empty<GameType>());
 
         var sut = new GetAllGamesByGameTypeQueryService(
-            fakeValidStatus,
-            fakeValidGameStatus,
             fakeGameProviderRepository);
 
         // act
@@ -705,8 +668,6 @@ public class GameTests
     public async Task Get_Game_List_Of_Specific_GameTypes()
     {
         // arrange
-        var fakeValidStatus = Substitute.For<IValidStatus<Status>>();
-        var fakeValidGameStatus = Substitute.For<IValidStatus<GameStatus>>();
         var fakeGameProviderRepository = Substitute.For<IGameProviderRepository>();
 
         var brandId = Guid.NewGuid();
@@ -822,30 +783,13 @@ public class GameTests
                 0)
         };
 
-        fakeValidStatus.GetStatus(Arg.Any<PlayerType>())
-            .Returns(new[]
-            {
-                Status.Active,
-                Status.Maintenance
-            });
-
-        fakeValidGameStatus.GetStatus(Arg.Any<PlayerType>())
-            .Returns(new[]
-            {
-                GameStatus.Active,
-                GameStatus.Maintenance,
-                GameStatus.Testing
-            });
-
-        fakeGameProviderRepository.QueryAllSubGameProvidersAsync(Arg.Is(brandId))
+        _ = fakeGameProviderRepository.QueryAllSubGameProvidersAsync(Arg.Is(brandId))
             .Returns(subGameProviders.ToAsyncEnumerable());
 
-        fakeGameProviderRepository.QueryAllGamesAsync(Arg.Is(brandId))
+        _ = fakeGameProviderRepository.QueryAllGamesAsync(Arg.Is(brandId))
             .Returns(games.ToAsyncEnumerable());
 
         var sut = new GetAllGamesByGameTypeQueryService(
-            fakeValidStatus,
-            fakeValidGameStatus,
             fakeGameProviderRepository);
 
         var gameTypes = new[]

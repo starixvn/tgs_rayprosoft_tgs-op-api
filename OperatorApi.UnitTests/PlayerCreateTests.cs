@@ -1,3 +1,5 @@
+#nullable enable
+
 using System;
 using System.Threading.Tasks;
 using FluentValidation.TestHelper;
@@ -9,11 +11,11 @@ using Tgs.Core.Infrastructures.Security;
 using Tgs.PlayerService.Client;
 using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Apis.OperatorApi.Validators;
-using TGS.Core.DataServices.Tgs.Models;
+using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
 using TGS.Services.Operations;
 using TGS.Services.Operations.Models.Services;
-using TGS.Services.Operations.Validators;
+using TGS.Services.Operator;
 using TGS.Services.Operator.ApplicationServices.Player;
 using TGS.Services.Operator.PlayerRegisterFlow;
 
@@ -52,6 +54,54 @@ public class PlayerCreateTests
     }
 
     [Test]
+    public void Register_Player_With_Agent_InvitationCode_Not_Found_Should_Throw_Error()
+    {
+        var brandId = Guid.NewGuid();
+        var invitationCode = "6rd4mq";
+
+        var fakePlayerOperations = Substitute.For<IPlayerOperations>();
+        var fakePasswordHandler = Substitute.For<IPasswordHandler>();
+        var fakeAgentRepository = Substitute.For<IAgentRepository>();
+        var fakeBrandOperations = Substitute.For<IBrandOperations>();
+        var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
+        var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
+
+        _ = fakeAgentRepository
+            .GetAgentInfoByInvitationCodeAsync(
+                Arg.Is(invitationCode))
+            .Returns((AgentInfo?)null);
+
+        _ = fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId))
+             .Returns(
+                 new Tgs.BrandCertificate.Clients.BrandInfo
+                 {
+                     Id = brandId,
+                     Code = "code",
+                     Currency = "CNY"
+                 });
+
+        var sut = new CreateAgentInvitationPlayerCommandService(
+            fakePlayerOperations,
+            fakePasswordHandler,
+            fakeBrandOperations,
+            fakeAgentRepository,
+            fakePlayerServiceClient,
+            fakeBrandServiceClient);
+
+        var query = new CreatePlayerWithAgentInvitationCodeCommand(
+            brandId,
+            "username",
+            "password",
+            "CNY",
+            invitationCode,
+            false);
+
+        // act
+        Assert.ThrowsAsync<InvalidInvitationCodeException>(
+            async () => await sut.GetAsync(query));
+    }
+
+    [Test]
     public async Task Register_Player_With_Existent_InvitationCode()
     {
         // arrange
@@ -60,25 +110,27 @@ public class PlayerCreateTests
 
         var fakePlayerOperations = Substitute.For<IPlayerOperations>();
         var fakePasswordHandler = Substitute.For<IPasswordHandler>();
-        var fakeAgentOperations = Substitute.For<IAgentOperations>();
+        var fakeAgentRepository = Substitute.For<IAgentRepository>();
         var fakeBrandOperations = Substitute.For<IBrandOperations>();
         var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
         var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
 
-        fakeAgentOperations
-            .GetAgentByInvitationCodeAsync(
-                Arg.Is(brandId),
-                Arg.Is(invitationCode))
-            .Returns(Task.FromResult(new Agent()));
+        _ = fakeAgentRepository
+              .GetAgentInfoByInvitationCodeAsync(
+                  Arg.Is(invitationCode))
+              .Returns(new AgentInfo(
+                  Guid.NewGuid(),
+                  "AgentUserName",
+                  invitationCode,
+                  AgentStatus.Enabled));
 
-        fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId))
-            .Returns(ValueTask.FromResult(
-                new Tgs.BrandCertificate.Clients.BrandInfo
-                {
-                    Id = brandId,
-                    Code = "code",
-                    Currency = "CNY"
-                }));
+        _ = fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId))
+            .Returns(new Tgs.BrandCertificate.Clients.BrandInfo
+            {
+                Id = brandId,
+                Code = "code",
+                Currency = "CNY"
+            });
 
         fakePlayerOperations.CreatePlayerAsync(Arg.Any<CreatePlayerData>())
             .Returns("TestPlayerCode");
@@ -87,7 +139,7 @@ public class PlayerCreateTests
             fakePlayerOperations,
             fakePasswordHandler,
             fakeBrandOperations,
-            fakeAgentOperations,
+            fakeAgentRepository,
             fakePlayerServiceClient,
             fakeBrandServiceClient);
 
@@ -226,24 +278,23 @@ public class PlayerCreateTests
         var fakePlayerOperations = Substitute.For<IPlayerOperations>();
         var fakeBrandOperations = Substitute.For<IBrandOperations>();
         var fakePasswordHandler = Substitute.For<IPasswordHandler>();
-        var fakeAgentOperations = Substitute.For<IAgentOperations>();
+        var fakeAgentRepository = Substitute.For<IAgentRepository>();
         var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
         var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
 
         fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId))
-            .Returns(ValueTask.FromResult(
-                new Tgs.BrandCertificate.Clients.BrandInfo
-                {
-                    Id = brandId,
-                    Code = "code",
-                    Currency = "CNY"
-                }));
+            .Returns(new Tgs.BrandCertificate.Clients.BrandInfo
+            {
+                Id = brandId,
+                Code = "code",
+                Currency = "CNY"
+            });
 
         var sut = new CreateAgentInvitationPlayerCommandService(
             fakePlayerOperations,
             fakePasswordHandler,
             fakeBrandOperations,
-            fakeAgentOperations,
+            fakeAgentRepository,
             fakePlayerServiceClient,
             fakeBrandServiceClient);
 
@@ -273,14 +324,13 @@ public class PlayerCreateTests
         var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
         var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
 
-        fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId))
-            .Returns(ValueTask.FromResult(
-                new Tgs.BrandCertificate.Clients.BrandInfo
-                {
-                    Id = brandId,
-                    Code = "code",
-                    Currency = "CNY"
-                }));
+        _ = fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId))
+              .Returns(new Tgs.BrandCertificate.Clients.BrandInfo
+              {
+                  Id = brandId,
+                  Code = "code",
+                  Currency = "CNY"
+              });
 
         var sut = new CreatePlayerInvitationPlayerCommandService(
             fakePlayerOperations,
@@ -298,56 +348,6 @@ public class PlayerCreateTests
             false);
 
         Assert.ThrowsAsync<InvalidInvitationCodeException>(async () => await sut.GetAsync(command));
-    }
-
-    [Test]
-    public void Register_Player_With_Other_Brand_InvitationCode_Should_Throw_Error()
-    {
-        var brandId = Guid.NewGuid();
-        var invitationCode = "6rd4mq";
-
-        var fakeStatusValidator = Substitute.For<IStatusValidator>();
-        var fakePlayerOperations = Substitute.For<IPlayerOperations>();
-        var fakePasswordHandler = Substitute.For<IPasswordHandler>();
-        var fakeAgentOperations = Substitute.For<IAgentOperations>();
-        var fakeBrandOperations = Substitute.For<IBrandOperations>();
-        var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
-        var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
-
-        fakeAgentOperations
-            .GetAgentByInvitationCodeAsync(
-                Arg.Is(brandId),
-                Arg.Is(invitationCode))
-            .Returns(Task.FromResult(default(Agent)));
-
-        fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId))
-            .Returns(ValueTask.FromResult(
-                new Tgs.BrandCertificate.Clients.BrandInfo
-                {
-                    Id = brandId,
-                    Code = "code",
-                    Currency = "CNY"
-                }));
-
-        var sut = new CreateAgentInvitationPlayerCommandService(
-            fakePlayerOperations,
-            fakePasswordHandler,
-            fakeBrandOperations,
-            fakeAgentOperations,
-            fakePlayerServiceClient,
-            fakeBrandServiceClient);
-
-        var query = new CreatePlayerWithAgentInvitationCodeCommand(
-            brandId,
-            "username",
-            "password",
-            "CNY",
-            invitationCode,
-            false);
-
-        // act
-        Assert.ThrowsAsync<InvalidInvitationCodeException>(
-            async () => await sut.GetAsync(query));
     }
 
     [Test]

@@ -1,8 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Tgs;
 using TGS.Services.Operator;
 
@@ -16,12 +16,13 @@ internal class AgentRepository : IAgentRepository
     {
         _tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
     }
-    public ValueTask<AgentInfo?> GetAgentInfoByInvitationCodeAsync(string invitationCode)
-    {
-        return _tgsRepository.Agents.AsQueryable()
+
+    public async ValueTask<AgentInfo?> GetAgentInfoByInvitationCodeAsync(
+        string invitationCode,
+        CancellationToken cancellationToken = default)
+        => await _tgsRepository.Agents.AsQueryable()
             .Where(agent => agent.InvitationCode == invitationCode)
-            .Select(agent => new AgentInfo(agent.Id, agent.Username, agent.InvitationCode))
-            .ToAsyncEnumerable()
-            .FirstOrDefaultAsync();
-    }
+            .Select(agent => new AgentInfo(agent.Id, agent.Username, agent.InvitationCode, agent.Status))
+            .FirstOrDefaultAsync(cancellationToken)
+            .ConfigureAwait(false);
 }
