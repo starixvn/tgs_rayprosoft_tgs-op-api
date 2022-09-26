@@ -27,6 +27,8 @@ public sealed class MaintenanceMiddleware
 
         if (!string.IsNullOrEmpty(await maintenanceRedisService.GetBrandMaintenanceAsync(brandId).ConfigureAwait(false)))
         {
+            context.Response.StatusCode = StatusCodes.Status503ServiceUnavailable;
+
             await context.Response.WriteAsJsonAsync(new TgsResponse
             {
                 Error = 403,
@@ -34,10 +36,9 @@ public sealed class MaintenanceMiddleware
                 ErrorMessageKey = "UnderMaintenance"
             }).ConfigureAwait(false);
 
-            context.Response.StatusCode = StatusCodes.Status503ServiceUnavailable;
-
             return;
         }
+
         await _next(context);
     }
 }
