@@ -23,9 +23,7 @@ internal class MakeBrandAuthTokenCommandService : IGetService<MakeBrandAuthToken
     public async ValueTask<AuthInfo> GetAsync(
         MakeBrandAuthTokenCommand query, CancellationToken cancellationToken = default)
     {
-        var secretKey = await _brandOperations
-            .GetBrandSecretKeyAsync(query.BrandId)
-            .ConfigureAwait(false);
+        var secretKey = "abcd";
 
         var currency = query.Identity.FindFirst("curr")!.Value;
         var signature = $"{query.BrandId}:{currency}:{secretKey}";
