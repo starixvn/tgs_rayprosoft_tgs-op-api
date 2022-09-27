@@ -55,7 +55,7 @@ spec:
                 secretKeyRef:
                   name: tgs-connections
                   key: tgs
-            - name: ConnectionStrings__Redis
+            - name: ConnectionStrings__RedisConfigurationString
               valueFrom:
                 secretKeyRef:
                   name: tgs-connections

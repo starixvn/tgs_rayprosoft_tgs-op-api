@@ -29,7 +29,8 @@ internal class MakeBrandAuthTokenCommandService : IGetService<MakeBrandAuthToken
         var signature = $"{query.BrandId}:{currency}:{secretKey}";
         var expires = DateTime.Now.AddSeconds(Consts.TokenExpireSeconds.Jwt);
 
-        var token = _jwtTokenHandler.GenerateToken(query.Identity,
+        var token = _jwtTokenHandler.GenerateToken(
+            query.Identity,
             Encoding.UTF8.GetBytes(signature),
             query.Site,
             expires);
