@@ -20,13 +20,6 @@ data:
         "GameProvidersPluggableBaseUrl": "http://game-pluggable-service",
         "PlayerServiceBaseUrl": "http://player-api"
       },
-      "EmailSetting": {
-        "FromMail": "verifyme@163.com",
-        "FromName": "TGS",
-        "SmtpServer": "smtp.163.com",
-        "Port": 25,
-        "Password": "IAUSMDLMDZWJECBP"
-      },
       "ConnectionStrings": {
         "Tgs": "{{ .Values.connectionStrings.tgs }}",
         "RedisConfigurationString": "{{ .Values.connectionStrings.redis }}"

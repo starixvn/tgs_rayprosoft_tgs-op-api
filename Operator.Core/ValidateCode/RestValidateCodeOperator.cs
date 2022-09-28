@@ -11,18 +11,18 @@ namespace TGS.Services.Operator.ValidateCode;
 
 internal class RestValidateCodeOperator : IValidateCodeOperator
 {
-    private readonly IEmailClient _emaiClient;
+    private readonly IEmailClient _emailClient;
     private readonly ISmsServiceClient _smsServiceClient;
     private readonly IValidateCodeServiceClient _validateCodeServiceClient;
 
     public RestValidateCodeOperator(
         IValidateCodeServiceClient validateCodeServiceClient,
         ISmsServiceClient smsServiceClient,
-        IEmailClient emaiClient)
+        IEmailClient emailClient)
     {
         _validateCodeServiceClient = validateCodeServiceClient ?? throw new ArgumentNullException(nameof(validateCodeServiceClient));
         _smsServiceClient = smsServiceClient ?? throw new ArgumentNullException(nameof(smsServiceClient));
-        _emaiClient = emaiClient ?? throw new ArgumentNullException(nameof(emaiClient));
+        _emailClient = emailClient ?? throw new ArgumentNullException(nameof(emailClient));
     }
 
     public async ValueTask<TData?> GetValidateCodeDataAsync<TData>(string validateCode, string token)
@@ -55,7 +55,7 @@ internal class RestValidateCodeOperator : IValidateCodeOperator
             mailSubject,
             mailBody);
 
-        await _emaiClient.SendAsync(mailMessage).ConfigureAwait(false);
+        await _emailClient.SendAsync(mailMessage).ConfigureAwait(false);
     }
 
     public ValueTask SendMessageAsync(string phone, string shortMessage, string currency, Guid brandId)
