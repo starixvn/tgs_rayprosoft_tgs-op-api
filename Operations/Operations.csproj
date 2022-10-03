@@ -22,7 +22,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="StackExchange.Redis" Version="2.6.66" />
-    <PackageReference Include="Tgs.Core" Version="1.0.1" />
+    <PackageReference Include="Tgs.Core" Version="1.0.10" />
     <PackageReference Include="TGS.Core.Infrastructures.Json" Version="0.0.1" />
     <PackageReference Include="Tgs.Logging" Version="0.0.19" />
   </ItemGroup>

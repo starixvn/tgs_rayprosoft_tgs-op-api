@@ -176,8 +176,8 @@ public class PlayerCreateTests
         var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
         var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
 
-        fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId))
-            .Returns(ValueTask.FromResult(
+        _ = fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId))
+            .Returns(ValueTask.FromResult<Tgs.BrandCertificate.Clients.BrandInfo?>(
                 new Tgs.BrandCertificate.Clients.BrandInfo
                 {
                     Id = brandId,
@@ -232,8 +232,8 @@ public class PlayerCreateTests
         var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
         var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
 
-        fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId))
-            .Returns(ValueTask.FromResult(
+        _ = fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId))
+            .Returns(ValueTask.FromResult<Tgs.BrandCertificate.Clients.BrandInfo?>(
                 new Tgs.BrandCertificate.Clients.BrandInfo
                 {
                     Id = brandId,
@@ -362,8 +362,8 @@ public class PlayerCreateTests
         var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
         var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
 
-        fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId))
-            .Returns(ValueTask.FromResult(
+        _ = fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId))
+            .Returns(ValueTask.FromResult<Tgs.BrandCertificate.Clients.BrandInfo?>(
                 new Tgs.BrandCertificate.Clients.BrandInfo
                 {
                     Id = brandId,
