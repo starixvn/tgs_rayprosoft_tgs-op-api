@@ -106,7 +106,7 @@ internal class LoginCommandService : IGetService<LoginCommand, LoginInfo>
             {
                 new Claim(JwtRegisteredClaimNames.Sub, playerTokenData.PlayerCode),
                 new Claim("login_id", playerTokenData.LoginRecordId.ToString()),
-                new Claim("platform_type", PlatformType.Desktop.ToString())
+                new Claim("platform_type", playerTokenData.PlatformType.ToString())
             });
 
         var secretKey = await _brandRepository.GetSecretKeyAsync(brandId);

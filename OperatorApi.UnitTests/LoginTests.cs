@@ -1,6 +1,7 @@
 ﻿#nullable enable
 
 using System;
+using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading;
@@ -14,7 +15,6 @@ using Tgs.PlayerService.Client;
 using Tgs.ServiceUtility;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
-using TGS.Core.Models.Tokens;
 using TGS.Services.Operator;
 using TGS.Services.Operator.ApplicationServices.Player;
 using BrandStatus = Tgs.BrandCertificate.BrandStatus;
@@ -125,6 +125,93 @@ internal class LoginTests
                 Arg.Is(command.IpAddress),
                 Arg.Is(command.HostName),
                 Arg.Any<CancellationToken>());
+    }
+
+    [Test]
+    public async Task Decrypt_Player_Token_Should_Match_Input_Info()
+    {
+        var fakeBrandRepository = Substitute.For<IBrandRepository>();
+        var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
+        var fakePlayerLoginRecordRepository = Substitute.For<IPlayerLoginRecordRepository>();
+        var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
+        var fakePasswordValidateCommandService = Substitute
+            .For<IGetService<PlayerPasswordValidateCommand, bool>>();
+
+        var tokenHandler = new JwtTokenHandler();
+
+        var playerInfo = new Client.PlayerInfo
+        {
+            BrandId = Guid.NewGuid(),
+            PlayerCode = "player1",
+            UserName = "UserName",
+            RegisteredOn = DateTimeOffset.Now.DateTime
+        };
+
+        var brandSecretKey = "L5SdeH9DuREUjoG3FN9vtkBY4FtKFitI";
+
+        var loginRecordInfo = new LoginRecordInfo(
+            Guid.NewGuid(),
+            playerInfo.PlayerCode,
+            LoginStatus.Enabled,
+            PlatformType.Mobile,
+            DateTimeOffset.Now,
+            DateTimeOffset.Now.AddDays(1));
+
+        var password = "Password";
+
+        var command = new LoginCommand(
+            playerInfo.BrandId,
+            playerInfo.UserName,
+            password,
+            "127.0.0.1",
+            "abc.net",
+            loginRecordInfo.PlatformType,
+            "op-api");
+
+        _ = fakeBrandServiceClient.GetBrandStatusAsync(
+                Arg.Is(playerInfo.BrandId),
+                Arg.Any<CancellationToken>())
+            .Returns(BrandStatus.Active);
+
+        _ = fakePlayerServiceClient.GetPlayerInfoByUserNameAsync(
+                Arg.Is(playerInfo.BrandId),
+                Arg.Is(playerInfo.UserName),
+                Arg.Any<CancellationToken>())
+            .Returns(playerInfo);
+
+        _ = fakePasswordValidateCommandService.GetAsync(
+                Arg.Is(new PlayerPasswordValidateCommand(playerInfo.PlayerCode, command.Password)),
+                Arg.Any<CancellationToken>())
+            .Returns(true);
+
+        _ = fakePlayerLoginRecordRepository.AddPlayerLoginRecordAsync(
+                Arg.Is(command.BrandId),
+                Arg.Is(playerInfo.PlayerCode),
+                Arg.Is(command.PlatformType),
+                Arg.Is(command.IpAddress))
+            .Returns(loginRecordInfo);
+
+        _ = fakeBrandRepository.GetSecretKeyAsync(
+                Arg.Is(playerInfo.BrandId),
+                Arg.Any<CancellationToken>())
+            .Returns(brandSecretKey);
+
+        var sut = new LoginCommandService(
+            tokenHandler,
+            fakeBrandRepository,
+            fakePlayerLoginRecordRepository,
+            fakePlayerServiceClient,
+            fakeBrandServiceClient,
+            fakePasswordValidateCommandService);
+
+        var loginInfo = await sut.GetAsync(command);
+
+        var securityToken = tokenHandler.ReadToken(loginInfo.PlayerToken);
+        var actual = securityToken.Claims.ToDictionary(c => c.Type, c => c.Value);
+
+        Assert.AreEqual(loginRecordInfo.PlayerCode, actual["sub"]);
+        Assert.AreEqual(loginRecordInfo.PlatformType.ToString(), actual["platform_type"]);
+        Assert.AreEqual(loginRecordInfo.Id.ToString(), actual["login_id"]);
     }
 
     [Test]
