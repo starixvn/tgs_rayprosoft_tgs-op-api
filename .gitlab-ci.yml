@@ -18,20 +18,23 @@ build-code:
   only:
     - merge_requests
     - main
-  artifacts:
+  cache:
+    key: Tgs.OpApi.$CI_PIPELINE_ID
     untracked: true
-    expire_in: "1 days"
 
 unit-test:
   stage: test
   script:
     - dotnet test -c $BuildConfiguration -l:"junit;LogFilePath=../TestReports/{assembly}-TestReport.xml" --no-restore --no-build
   needs:
-    - job: build-code
-      artifacts: true
+    - build-code
   only:
     - merge_requests
     - main
+  cache:
+    key: Tgs.OpApi.$CI_PIPELINE_ID
+    untracked: true
+    policy: pull
   artifacts:
     when: always
     reports:
@@ -40,11 +43,14 @@ unit-test:
 push-docker-image:
   stage: publish
   needs:
-    - job: build-code
-      artifacts: true
+    - build-code
     - unit-test
   only:
     - main
+  cache:
+    key: Tgs.OpApi.$CI_PIPELINE_ID
+    untracked: true
+    policy: pull
   script:
     - export Tag="$(date -d $CI_PIPELINE_CREATED_AT +%Y%m%d%H%M).$CI_PIPELINE_IID"
     - dotnet build "OperatorApi/OperatorApi.csproj" -c $BuildConfiguration -t:ContainerBuild -p:DockerfileTag="$ImageName:$Tag" --no-restore
