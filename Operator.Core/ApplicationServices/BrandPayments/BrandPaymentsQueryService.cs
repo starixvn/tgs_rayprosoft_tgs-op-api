@@ -28,7 +28,6 @@ internal class BrandPaymentsQueryService : IQueryService<BrandPaymentsQuery, Bra
     {
         var brandPayments = await _paymentServiceClient
             .GetBrandPaymentsAsync(query.BrandId)
-            .Where(bp => bp.Enabled == true)
             .ToArrayAsync()
             .ConfigureAwait(false)!;
 
