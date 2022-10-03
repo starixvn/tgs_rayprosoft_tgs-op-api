@@ -24,6 +24,8 @@ public class PromotionViewModel
 
     public string Name { get; init; } = default!;
 
+    public int Order { get; init; }
+
     public string PromotionType { get; init; } = default!;
 
     public string? SubSubject { get; init; }

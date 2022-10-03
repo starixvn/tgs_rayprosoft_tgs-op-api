@@ -9,14 +9,14 @@ using System.Threading.Tasks;
 using Google.Protobuf;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using Tgs.MessageQueue;
 using Tgs.Promotion.Clients;
 using Tgs.Promotion.Clients.Models.Promotion;
+using Tgs.Promotion.Clients.Protos;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Core.Models.Enums;
-using Tgs.MessageQueue;
-using Tgs.Promotion.Clients.Protos;
 
 namespace TGS.Apis.OperatorApi.Controllers;
 
@@ -136,7 +136,8 @@ public class PromotionController : ControllerBase
                         ? JsonSerializer.SerializeToDocument(
                             promotion.CampaignDetail.Deserialize<RouletteSettingsViewModel>(jsonOptionsAccessor.Value.JsonSerializerOptions)!,
                             jsonOptionsAccessor.Value.JsonSerializerOptions)
-                        : promotion.CampaignDetail
+                        : promotion.CampaignDetail,
+                    Order = promotion.Order
                 });
     }
 

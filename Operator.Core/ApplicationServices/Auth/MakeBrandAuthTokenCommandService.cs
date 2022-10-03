@@ -20,7 +20,7 @@ internal class MakeBrandAuthTokenCommandService : IGetService<MakeBrandAuthToken
         _brandOperations = brandOperations ?? throw new ArgumentNullException(nameof(brandOperations));
     }
 
-    public async ValueTask<AuthInfo> GetAsync(
+    public ValueTask<AuthInfo> GetAsync(
         MakeBrandAuthTokenCommand query, CancellationToken cancellationToken = default)
     {
         var secretKey = "abcd";
@@ -35,8 +35,8 @@ internal class MakeBrandAuthTokenCommandService : IGetService<MakeBrandAuthToken
             query.Site,
             expires);
 
-        return new AuthInfo(
+        return ValueTask.FromResult(new AuthInfo(
             token,
-            new DateTimeOffset(expires).ToUnixTimeMilliseconds());
+            new DateTimeOffset(expires).ToUnixTimeMilliseconds()));
     }
 }
