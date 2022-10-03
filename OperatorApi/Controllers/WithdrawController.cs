@@ -88,6 +88,7 @@ public class WithdrawController : ControllerBase
         var query = new BrandPaymentsQuery(brandId, playerTokenData.PlayerCode);
 
         var brandPayments = await brandPaymentsQueryService.QueryAsync(query)
+            .Where(bp => bp.Enabled == true)
             .ToArrayAsync()
             .ConfigureAwait(false);
 
