@@ -62,21 +62,21 @@ internal class BrandPaymentsQueryService : IQueryService<BrandPaymentsQuery, Bra
             .ConfigureAwait(false);
 
         var brandPaymentInfos = await _paymentServiceClient
-                .FilterBrandPaymentsAsync(
-                    brandPayments,
-                    new Tgs.Payment.Clients.PlayerInfo(
-                        playerInfo!.BrandId,
-                        depositedAmount,
-                        playerInfo.IdentityAuthentication,
-                        playerInfo.PhoneAuthentication,
-                        playerInfo.PlayerCode,
-                        playerInfo.VipLevelId),
-                    blockList,
-                    whiteList,
-                    brandPaymentVipLevels,
-                    cancellationToken)
-                .ToArrayAsync(cancellationToken: cancellationToken)
-                .ConfigureAwait(false);
+            .FilterBrandPaymentsAsync(
+                brandPayments,
+                new Tgs.Payment.Clients.PlayerInfo(
+                    playerInfo!.BrandId,
+                    depositedAmount,
+                    playerInfo.IdentityAuthentication,
+                    playerInfo.PhoneAuthentication,
+                    playerInfo.PlayerCode,
+                    playerInfo.VipLevelId),
+                blockList,
+                whiteList,
+                brandPaymentVipLevels,
+                cancellationToken)
+            .ToArrayAsync(cancellationToken: cancellationToken)
+            .ConfigureAwait(false);
 
         foreach (var brandPaymentInfo in brandPaymentInfos)
             yield return brandPaymentInfo;
