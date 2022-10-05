@@ -313,8 +313,6 @@ public class PlayerController : ControllerBase
 				  .QueryAsync(new GetPlayerBankInfosQuery(playerCode))
 				  .AnyAsync(info => info.IsDefault).ConfigureAwait(false);
 
-		_ = DateOnly.TryParseExact(birthdateValue, "MM/dd/yyyy", out var birthdate);
-
 		var playerInfo = new PlayerInfoViewModel
 		{
 			PlayerCode = player.PlayerCode,
@@ -324,7 +322,7 @@ public class PlayerController : ControllerBase
 			IsAutoTransferToGame = isAutoTransferToGame,
 			IsSetPayPassword = player.IsSetPayPassword,
 			Username = player.UserName,
-			Birthdate = string.IsNullOrWhiteSpace(birthdateValue) ? null : birthdate,
+			Birthdate = string.IsNullOrWhiteSpace(birthdateValue) ? null : DateOnly.ParseExact(birthdateValue, "MM/dd/yyyy"),
 			VipLevel = vipLevel,
 			RealName = playerProperties.GetValueOrDefault("RealName"),
 			Email = playerProperties.GetValueOrDefault("Email"),
