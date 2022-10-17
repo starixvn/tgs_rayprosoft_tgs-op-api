@@ -26,7 +26,7 @@ internal class SetPromotionJoinRegisterFlowStep : IRegisterFlowStep
 
 	public ValueTask<bool> ConfirmCompletedAsync(string? playerCode, CancellationToken cancellationToken = default)
 	{
-		return ValueTask.FromResult(!string.IsNullOrEmpty(playerCode));
+		return ValueTask.FromResult(false);
 	}
 
 	public async ValueTask<RegisterFlowProcessResult> ProcessInputAsync(
@@ -35,19 +35,20 @@ internal class SetPromotionJoinRegisterFlowStep : IRegisterFlowStep
 		PlayerLocationInfo locationInfo,
 		CancellationToken cancellationToken = default)
 	{
-		_logger.LogInformation("SetPromotionJoinRegisterFlowStep input:{input}", input);
-		_logger.LogInformation("SetPromotionJoinRegisterFlowStep locationInfo:{locationInfo}", locationInfo);
 		if (string.IsNullOrWhiteSpace(locationInfo.PlayerCode))
 			return new RegisterFlowProcessResult(false, null, null);
 
-		_logger.LogInformation("SetPromotionJoinRegisterFlowStep promotionIds:{promotionIds}", _promotionIds);
 		foreach (var promotionId in _promotionIds!)
 		{
 			_ = await _promotionClient
 				.JoinAsync(new JoinPromotionRequest(promotionId, locationInfo.PlayerCode))
 				.ConfigureAwait(false);
 
-			_logger.LogInformation("SetPromotionJoinRegisterFlowStep join promotion, promotion Id:{promotionId}, playerCode:{locationInfo.PlayerCode}", promotionId, locationInfo.PlayerCode);
+			_logger.LogInformation(
+				"SetPromotionJoinRegisterFlowStep join promotion, "
+					+ "promotion Id:{promotionId}, playerCode:{locationInfo.PlayerCode}",
+				promotionId,
+				locationInfo.PlayerCode);
 		}
 
 		return new RegisterFlowProcessResult(true, null, null);
