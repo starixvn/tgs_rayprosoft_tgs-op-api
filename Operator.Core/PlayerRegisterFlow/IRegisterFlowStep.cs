@@ -7,17 +7,19 @@ namespace TGS.Services.Operator.PlayerRegisterFlow;
 
 public interface IRegisterFlowStep
 {
-    string Type { get; }
+	string? CurrentStep => Type;
 
-    void SetupStep(JsonElement jsonElement) { }
+	bool IsAuto => false;
 
-    string? CurrentStep => Type;
+	string Type { get; }
 
-    ValueTask<bool> ConfirmCompletedAsync(string? playerCode, CancellationToken cancellationToken = default);
+	ValueTask<bool> ConfirmCompletedAsync(string? playerCode, CancellationToken cancellationToken = default);
 
-    ValueTask<RegisterFlowProcessResult> ProcessInputAsync(
-        Guid brandId,
-        JsonDocument input,
-        PlayerLocationInfo locationInfo,
-        CancellationToken cancellationToken = default);
+	ValueTask<RegisterFlowProcessResult> ProcessInputAsync(
+		Guid brandId,
+		JsonDocument input,
+		PlayerLocationInfo locationInfo,
+		CancellationToken cancellationToken = default);
+
+	void SetupStep(JsonElement jsonElement) { }
 }

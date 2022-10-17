@@ -10,95 +10,99 @@ namespace TGS.Services.Operator.PlayerRegisterFlow;
 
 internal class RegisterFlow : IRegisterFlowStep
 {
-    private readonly Queue<IRegisterFlowStep> _flowSteps = new Queue<IRegisterFlowStep>();
-    private readonly ILogger<RegisterFlow> _logger;
+	private readonly Queue<IRegisterFlowStep> _flowSteps = new Queue<IRegisterFlowStep>();
+	private readonly ILogger<RegisterFlow> _logger;
 
-    public string? CurrentStep => _flowSteps.Count == 0 ? null : _flowSteps.Peek().Type;
+	public string? CurrentStep => _flowSteps.Count == 0 ? null : _flowSteps.Peek().Type;
 
-    public string Type => "RegisterFlow";
+	public string Type => "RegisterFlow";
 
-    public RegisterFlow(IEnumerable<IRegisterFlowStep> steps, ILogger<RegisterFlow> logger)
-    {
-        foreach (var step in steps)
-            _flowSteps.Enqueue(step);
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-    }
+	public RegisterFlow(IEnumerable<IRegisterFlowStep> steps, ILogger<RegisterFlow> logger)
+	{
+		foreach (var step in steps)
+			_flowSteps.Enqueue(step);
+		_logger = logger ?? throw new ArgumentNullException(nameof(logger));
+	}
 
-    public async ValueTask<bool> ConfirmCompletedAsync(string? playerCode, CancellationToken cancellationToken = default)
-    {
-        if (_flowSteps.Count == 0)
-            return true;
+	public async ValueTask<bool> ConfirmCompletedAsync(string? playerCode, CancellationToken cancellationToken = default)
+	{
+		if (_flowSteps.Count == 0)
+			return true;
 
-        while (_flowSteps.Count > 0)
-        {
-            var isCompleted = await _flowSteps.Peek()
-                .ConfirmCompletedAsync(playerCode, cancellationToken)
-                .ConfigureAwait(false);
+		while (_flowSteps.Count > 0)
+		{
+			var isCompleted = await _flowSteps.Peek()
+				.ConfirmCompletedAsync(playerCode, cancellationToken)
+				.ConfigureAwait(false);
 
-            if (isCompleted)
-                _ = _flowSteps.Dequeue();
-            else
-                return false;
-        }
+			if (isCompleted)
+				_ = _flowSteps.Dequeue();
+			else
+				return false;
+		}
 
-        return true;
-    }
+		return true;
+	}
 
-    public async ValueTask<RegisterFlowProcessResult> ProcessInputAsync(
-        Guid brandId,
-        JsonDocument input,
-        PlayerLocationInfo locationInfo,
-        CancellationToken cancellationToken = default)
-    {
-        var currentStep = _flowSteps.Peek();
+	public async ValueTask<RegisterFlowProcessResult> ProcessInputAsync(
+		Guid brandId,
+		JsonDocument input,
+		PlayerLocationInfo locationInfo,
+		CancellationToken cancellationToken = default)
+	{
+		var currentStep = _flowSteps.Peek();
+		var inputLocationInfo = locationInfo;
 
-        var result = await currentStep
-            .ProcessInputAsync(brandId, input, locationInfo, cancellationToken)
-            .ConfigureAwait(false);
+		var result = await currentStep
+			.ProcessInputAsync(brandId, input, inputLocationInfo, cancellationToken)
+			.ConfigureAwait(false);
 
-        _logger.LogInformation("Process result: {result}", result);
+		_logger.LogInformation("Process result: {result}", result);
 
-        if (result.IsCompleted)
-        {
-            _ = _flowSteps.Dequeue();
+		if (currentStep.Type == "CreatePlayer" && result.StepResponse is not null)
+		{
+			var createPlayerResponse = result.StepResponse.Deserialize<CreatePlayerResponse>()!;
 
-            var isCompleted = await ConfirmCompletedAsync(locationInfo.PlayerCode).ConfigureAwait(false);
+			inputLocationInfo = inputLocationInfo with { PlayerCode = createPlayerResponse.PlayerCode };
+		}
 
-            if (!isCompleted && _flowSteps.Peek().Type == "Final")
-            {
-                _logger.LogInformation("Register Flow Final Step Process Start");
+		while (result.IsCompleted && _flowSteps.Count > 0)
+		{
+			_ = _flowSteps.Dequeue();
 
-                if (currentStep.Type == "CreatePlayer" && result.StepResponse is not null)
-                {
-                    var createPlayerResponse = result.StepResponse.Deserialize<CreatePlayerResponse>()!;
-                    var finalResult = await ProcessInputAsync(
-                        brandId,
-                        input,
-                        locationInfo with { PlayerCode = createPlayerResponse.PlayerCode },
-                        cancellationToken).ConfigureAwait(false);
+			var isCompleted = await ConfirmCompletedAsync(locationInfo.PlayerCode).ConfigureAwait(false);
 
-                    return finalResult with
-                    {
-                        StepResponse = result.StepResponse
-                    };
-                }
+			result = result with
+			{
+				IsCompleted = isCompleted
+			};
 
-                return await ProcessInputAsync(
-                    brandId,
-                    input,
-                    locationInfo,
-                    cancellationToken).ConfigureAwait(false);
-            }
+			if (!isCompleted)
+			{
+				var nextStep = _flowSteps.Peek();
 
-            return new RegisterFlowProcessResult(
-                isCompleted,
-                isCompleted ? null : _flowSteps.Peek().Type,
-                result.StepResponse);
-        }
-        else
-            return new RegisterFlowProcessResult(
-                false,
-                currentStep.Type,
-                result.StepResponse);
-    }
+				if (nextStep.Type == "Final")
+					_logger.LogInformation("Register Flow Final Step Process Start");
+
+				if (nextStep.IsAuto)
+				{
+					var nextResult = await ProcessInputAsync(
+						brandId,
+						input,
+						inputLocationInfo,
+						cancellationToken).ConfigureAwait(false);
+
+					result = nextResult with
+					{
+						StepResponse = result.StepResponse
+					};
+				}
+			}
+		}
+
+		return new RegisterFlowProcessResult(
+			result.IsCompleted,
+			_flowSteps.Count == 0 ? null : _flowSteps.Peek().Type,
+			result.StepResponse);
+	}
 }
