@@ -1,4 +1,3 @@
-﻿namespace PlayerBucket.Repositories
-{
-    public record DepositMessageDataResponse(int? PromotionBonusPlayerId,decimal DepositBonusAmount);
-}
+﻿namespace PlayerBucket.Repositories;
+
+public record DepositMessageDataResponse(int? PromotionBonusPlayerId, decimal DepositBonusAmount);

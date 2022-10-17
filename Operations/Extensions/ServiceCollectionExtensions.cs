@@ -15,12 +15,12 @@ public static class ServiceCollectionExtensions
     /// </summary>
     public static IServiceCollection AddOperations(this IServiceCollection services)
     {
-        #region Code Mappers
+		#region Code Mappers
 
-        services.AddScoped<IGameProviderCurrencyCodeMapper, GameProviderCurrencyCodeMapper>();
-        services.AddScoped<IGameProviderLanguageCodeMapper, GameProviderLanguageCodeMapper>();
-        services.AddScoped<IBrandCurrencyCodeMapper, BrandCurrencyCodeMapper>();
-        services.AddScoped<IBrandLanguageCodeMapper, BrandLanguageCodeMapper>();
+		_ = services.AddScoped<IGameProviderCurrencyCodeMapper, GameProviderCurrencyCodeMapper>();
+		_ = services.AddScoped<IGameProviderLanguageCodeMapper, GameProviderLanguageCodeMapper>();
+		_ = services.AddScoped<IBrandCurrencyCodeMapper, BrandCurrencyCodeMapper>();
+		_ = services.AddScoped<IBrandLanguageCodeMapper, BrandLanguageCodeMapper>();
 
         #endregion Code Mappers
 
@@ -43,14 +43,14 @@ public static class ServiceCollectionExtensions
 
         services.AddFactory<IPlayerCommands, PlayerCommands>();
 
-        #endregion Commands
+		#endregion Commands
 
-        #region Operations
+		#region Operations
 
-        services.AddScoped<IBrandOperations, BrandOperations>();
-        services.AddScoped<IGameProviderOperations, GameProviderOperations>();
-        services.AddScoped<IPlayerOperations, PlayerOperations>();
-        services.AddScoped<IBrandGameProviderOperations, BrandGameProviderOperations>();
+		_ = services.AddScoped<IBrandOperations, BrandOperations>();
+		_ = services.AddScoped<IGameProviderOperations, GameProviderOperations>();
+		_ = services.AddScoped<IPlayerOperations, PlayerOperations>();
+		_ = services.AddScoped<IBrandGameProviderOperations, BrandGameProviderOperations>();
 
         #endregion Operations
 
@@ -61,7 +61,7 @@ public static class ServiceCollectionExtensions
         where TInterface : class
         where TServices : class, TInterface
     {
-        services.AddScoped<TInterface, TServices>();
-        services.AddTransient<Func<TInterface>>(c => c.GetRequiredService<TInterface>);
+		_ = services.AddScoped<TInterface, TServices>();
+		_ = services.AddTransient<Func<TInterface>>(c => c.GetRequiredService<TInterface>);
     }
 }

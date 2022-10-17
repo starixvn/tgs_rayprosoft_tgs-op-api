@@ -24,20 +24,20 @@ public class PaymentTests
 
         var query = new AllPaymentChannelsQuery();
 
-        moqPaymentServiceClient
-            .Setup(fake => fake.GetAllPaymentChannelsAsync(It.IsAny<CancellationToken>()))
-            .Returns(new[] {
-                new PaymentChannelInfo
-                {
-                    Id = Guid.NewGuid(),
-                    Name = "test1"
-                },
-                new PaymentChannelInfo
-                {
-                    Id = Guid.NewGuid(),
-                    Name = "test2"
-                }
-            }.ToAsyncEnumerable());
+		_ = moqPaymentServiceClient
+			.Setup(fake => fake.GetAllPaymentChannelsAsync(It.IsAny<CancellationToken>()))
+			.Returns(new[] {
+				new PaymentChannelInfo
+				{
+					Id = Guid.NewGuid(),
+					Name = "test1"
+				},
+				new PaymentChannelInfo
+				{
+					Id = Guid.NewGuid(),
+					Name = "test2"
+				}
+			}.ToAsyncEnumerable());
 
         _ = await sut.GetAsync(query);
 
@@ -55,22 +55,22 @@ public class PaymentTests
 
         var query = new AllPaymentMethodsQuery();
 
-        moqPaymentServiceClient
-            .Setup(fake => fake.GetAllPaymentMethodsAsync(It.IsAny<CancellationToken>()))
-            .Returns(new[] {
-                new PaymentMethodInfo
-                {
-                    Id = Guid.NewGuid(),
-                    Name = "test1",
-                    BankType = "Bank"
-                },
-                new PaymentMethodInfo
-                {
-                    Id = Guid.NewGuid(),
-                    Name = "test2",
-                    BankType = "Crypto"
-                }
-            }.ToAsyncEnumerable());
+		_ = moqPaymentServiceClient
+			.Setup(fake => fake.GetAllPaymentMethodsAsync(It.IsAny<CancellationToken>()))
+			.Returns(new[] {
+				new PaymentMethodInfo
+				{
+					Id = Guid.NewGuid(),
+					Name = "test1",
+					BankType = "Bank"
+				},
+				new PaymentMethodInfo
+				{
+					Id = Guid.NewGuid(),
+					Name = "test2",
+					BankType = "Crypto"
+				}
+			}.ToAsyncEnumerable());
 
         _ = await sut.GetAsync(query);
 
@@ -112,9 +112,9 @@ public class PaymentTests
 
         var query = new BrandPaymentsQuery(brandId, playerCode);
 
-        fakePaymentServiceClient
-            .GetBrandPaymentAclsAsync(Arg.Any<string>(), Arg.Any<IEnumerable<Guid>>())
-            .Returns(Array.Empty<BrandPaymentAcl>().ToAsyncEnumerable());
+		_ = fakePaymentServiceClient
+			.GetBrandPaymentAclsAsync(Arg.Any<string>(), Arg.Any<IEnumerable<Guid>>())
+			.Returns(Array.Empty<BrandPaymentAcl>().ToAsyncEnumerable());
 
         var playerInfo = new Tgs.PlayerService.Client.PlayerInfo
         {
@@ -125,23 +125,23 @@ public class PaymentTests
             VipLevelId = null
         };
 
-        fakePlayerServiceClient
-            .GetPlayerInfoAsync(query.PlayerCode)
-            .Returns(playerInfo);
+		_ = fakePlayerServiceClient
+			.GetPlayerInfoAsync(query.PlayerCode)
+			.Returns(playerInfo);
 
         _ = await sut.QueryAsync(query).ToArrayAsync();
 
-        fakePaymentServiceClient
-            .Received(1)
-            .GetBrandPaymentAclsAsync(Arg.Any<string>(), Arg.Any<IEnumerable<Guid>>());
+		_ = fakePaymentServiceClient
+			.Received(1)
+			.GetBrandPaymentAclsAsync(Arg.Any<string>(), Arg.Any<IEnumerable<Guid>>());
 
-        fakePaymentServiceClient
-            .Received(1)
-            .FilterBrandPaymentsAsync(
-                Arg.Any<IEnumerable<BrandPaymentInfo>>(),
-                Arg.Any<Tgs.Payment.Clients.PlayerInfo>(),
-                Arg.Any<IEnumerable<Guid>>(),
-                Arg.Any<IEnumerable<Guid>>(),
-                Arg.Any<ILookup<Guid, Guid>>());
+		_ = fakePaymentServiceClient
+			.Received(1)
+			.FilterBrandPaymentsAsync(
+				Arg.Any<IEnumerable<BrandPaymentInfo>>(),
+				Arg.Any<Tgs.Payment.Clients.PlayerInfo>(),
+				Arg.Any<IEnumerable<Guid>>(),
+				Arg.Any<IEnumerable<Guid>>(),
+				Arg.Any<ILookup<Guid, Guid>>());
     }
 }

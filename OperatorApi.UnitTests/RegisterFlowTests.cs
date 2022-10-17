@@ -141,7 +141,7 @@ public class RegisterFlowTests
 
 		var playerCode = "player1";
 
-		fakePlayerServiceClient.GetPlayerInfoAsync(Arg.Is(playerCode))
+		_ = fakePlayerServiceClient.GetPlayerInfoAsync(Arg.Is(playerCode))
 			.Returns(new Tgs.PlayerService.Client.PlayerInfo());
 
 		var actual = await sut.ConfirmCompletedAsync(playerCode);
@@ -181,7 +181,7 @@ public class RegisterFlowTests
 			null,
 			null);
 
-		fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId))
+		_ = fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId))
 			.Returns(new Tgs.BrandCertificate.Clients.BrandInfo
 			{
 				Id = brandId,
@@ -189,7 +189,7 @@ public class RegisterFlowTests
 				Currency = "CNY"
 			});
 
-		fakeCreateAgentInvitationPlayerService.GetAsync(Arg.Is<CreatePlayerWithAgentInvitationCodeCommand>(
+		_ = fakeCreateAgentInvitationPlayerService.GetAsync(Arg.Is<CreatePlayerWithAgentInvitationCodeCommand>(
 			x => x.BrandId == brandId
 				&& x.IsTestPlayer == input.IsTestPlayer
 				&& x.UserName == input.UserName
@@ -239,7 +239,7 @@ public class RegisterFlowTests
 			null,
 			"aabbcc");
 
-		fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId))
+		_ = fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId))
 			.Returns(new Tgs.BrandCertificate.Clients.BrandInfo
 			{
 				Id = brandId,
@@ -247,7 +247,7 @@ public class RegisterFlowTests
 				Currency = "CNY"
 			});
 
-		fakeCreateAgentInvitationPlayerService.GetAsync(Arg.Is<CreatePlayerWithAgentInvitationCodeCommand>(
+		_ = fakeCreateAgentInvitationPlayerService.GetAsync(Arg.Is<CreatePlayerWithAgentInvitationCodeCommand>(
 			x => x.BrandId == brandId
 				&& x.IsTestPlayer == input.IsTestPlayer
 				&& x.UserName == input.UserName
@@ -298,7 +298,7 @@ public class RegisterFlowTests
 			null,
 			null);
 
-		fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId))
+		_ = fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId))
 			.Returns(new Tgs.BrandCertificate.Clients.BrandInfo
 			{
 				Id = brandId,
@@ -306,7 +306,7 @@ public class RegisterFlowTests
 				Currency = "CNY"
 			});
 
-		fakeCreatePlayerInvitationPlayerService.GetAsync(Arg.Is<CreatePlayerWithPlayerInvitationCommand>(
+		_ = fakeCreatePlayerInvitationPlayerService.GetAsync(Arg.Is<CreatePlayerWithPlayerInvitationCommand>(
 			x => x.BrandId == brandId
 				&& x.IsTestPlayer == input.IsTestPlayer
 				&& x.UserName == input.UserName
@@ -356,7 +356,7 @@ public class RegisterFlowTests
 			null,
 			null);
 
-		fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId))
+		_ = fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId))
 			.Returns(new Tgs.BrandCertificate.Clients.BrandInfo
 			{
 				Id = brandId,
@@ -364,7 +364,7 @@ public class RegisterFlowTests
 				Currency = "CNY"
 			});
 
-		fakeCreatePlayerService.GetAsync(Arg.Is<CreatePlayerCommand>(
+		_ = fakeCreatePlayerService.GetAsync(Arg.Is<CreatePlayerCommand>(
 			x => x.BrandId == brandId
 				&& x.IsTestPlayer == input.IsTestPlayer
 				&& x.UserName == input.UserName
@@ -496,7 +496,7 @@ public class RegisterFlowTests
 
 		flowDefinition.AddStep(fakeCreatePlayerStep);
 
-		fakeBrandRegisterFlowDefinitionManager.GetRegisterFlowDefinitionAsync(Arg.Is(command.BrandId))
+		_ = fakeBrandRegisterFlowDefinitionManager.GetRegisterFlowDefinitionAsync(Arg.Is(command.BrandId))
 			.Returns(flowDefinition);
 
 		var actual = await sut.GetAsync(command);
@@ -532,7 +532,7 @@ public class RegisterFlowTests
 		var input = JsonDocument.Parse("{}");
 		var locationInfo = new PlayerLocationInfo("player1", "127.0.0.1", "localhost", null);
 
-		fakePlayerSericeClient.GetPlayerInfoAsync(Arg.Is(locationInfo.PlayerCode))
+		_ = fakePlayerSericeClient.GetPlayerInfoAsync(Arg.Is(locationInfo.PlayerCode))
 			.Returns(new Tgs.PlayerService.Client.PlayerInfo
 			{
 				PlayerCode = locationInfo.PlayerCode
@@ -587,7 +587,7 @@ public class RegisterFlowTests
 		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
 		var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
 
-		fakeServiceProvider.GetService(Arg.Is(flowTypes["SetPhoneDontCareDuplicate"]))
+		_ = fakeServiceProvider.GetService(Arg.Is(flowTypes["SetPhoneDontCareDuplicate"]))
 			.Returns(new SetPhoneDontCareDuplicateRegisterFlowStep(
 				fakePlayerServiceClient));
 
@@ -639,7 +639,7 @@ public class RegisterFlowTests
 					&& dict[PlayerPropertyName.PhoneAuthentication] == true.ToString())))
 			.Do(_ =>
 			{
-				fakePlayerServiceClient.GetPlayerInfoAsync(Arg.Is(locationInfo.PlayerCode))
+				_ = fakePlayerServiceClient.GetPlayerInfoAsync(Arg.Is(locationInfo.PlayerCode))
 					.Returns(new Tgs.PlayerService.Client.PlayerInfo
 					{
 						PlayerCode = locationInfo.PlayerCode,
@@ -680,7 +680,7 @@ public class RegisterFlowTests
 		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
 		var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
 
-		fakeServiceProvider.GetService(Arg.Is(flowTypes["SetPhoneDontCareDuplicate"]))
+		_ = fakeServiceProvider.GetService(Arg.Is(flowTypes["SetPhoneDontCareDuplicate"]))
 			.Returns(new SetPhoneDontCareDuplicateRegisterFlowStep(
 				fakePlayerServiceClient));
 
@@ -769,7 +769,7 @@ public class RegisterFlowTests
 		var fakeStartSetPhoneService = Substitute.For<IGetService<StartSetPlayerPhoneCommand, string>>();
 		var fakeConfirmSetPhoneService = Substitute.For<ICommandService<CommitInitPlayerPhoneCommand>>();
 
-		fakeServiceProvider.GetService(Arg.Is(flowTypes["InitPhone"]))
+		_ = fakeServiceProvider.GetService(Arg.Is(flowTypes["InitPhone"]))
 			.Returns(new SetPhoneRegisterFlowStep(
 				fakeBrandServiceClient,
 				fakeStartSetPhoneService,
@@ -779,7 +779,7 @@ public class RegisterFlowTests
 		var fakeStartSetMailService = Substitute.For<IGetService<StartSetPlayerEmailCommand, string>>();
 		var fakeCommitMailService = Substitute.For<ICommandService<CommitInitPlayerEmailCommand>>();
 
-		fakeServiceProvider.GetService(Arg.Is(flowTypes["InitMail"]))
+		_ = fakeServiceProvider.GetService(Arg.Is(flowTypes["InitMail"]))
 			.Returns(new SetEmailRegisterFlowStep(
 				fakeBrandServiceClient,
 				fakeStartSetMailService,
@@ -789,7 +789,7 @@ public class RegisterFlowTests
 		var fakeQueryPlayerBankInfoService = Substitute.For<IQueryService<GetPlayerBankInfosQuery, PlayerBankInfo>>();
 		var fakeCreateBankInfoService = Substitute.For<ICommandService<CreateInitBankInfoCommand>>();
 
-		fakeServiceProvider.GetService(Arg.Is(flowTypes["SetWithdrawBankInfo"]))
+		_ = fakeServiceProvider.GetService(Arg.Is(flowTypes["SetWithdrawBankInfo"]))
 			.Returns(new SetWithdrawBankInfoRegisterFlowStep(
 				fakeQueryPlayerBankInfoService,
 				fakeCreateBankInfoService));
@@ -812,7 +812,7 @@ public class RegisterFlowTests
 		var playerCode = "player1";
 		var brandId = Guid.NewGuid();
 
-		fakePlayerServiceClient.GetPlayerInfoAsync(Arg.Is(playerCode))
+		_ = fakePlayerServiceClient.GetPlayerInfoAsync(Arg.Is(playerCode))
 			.Returns(new Tgs.PlayerService.Client.PlayerInfo
 			{
 				PlayerCode = playerCode,
@@ -845,7 +845,7 @@ public class RegisterFlowTests
 				Id = brandId
 			});
 
-		await flow.ConfirmCompletedAsync(playerCode);
+		_ = await flow.ConfirmCompletedAsync(playerCode);
 		var actual = await flow.ProcessInputAsync(
 			brandId,
 			JsonSerializer.SerializeToDocument(inputData),
@@ -886,7 +886,7 @@ public class RegisterFlowTests
 		var fakeStartSetPhoneService = Substitute.For<IGetService<StartSetPlayerPhoneCommand, string>>();
 		var fakeConfirmSetPhoneService = Substitute.For<ICommandService<CommitInitPlayerPhoneCommand>>();
 
-		fakeServiceProvider.GetService(Arg.Is(flowTypes["InitPhone"]))
+		_ = fakeServiceProvider.GetService(Arg.Is(flowTypes["InitPhone"]))
 			.Returns(new SetPhoneRegisterFlowStep(
 				fakeBrandServiceClient,
 				fakeStartSetPhoneService,
@@ -896,7 +896,7 @@ public class RegisterFlowTests
 		var fakeStartSetMailService = Substitute.For<IGetService<StartSetPlayerEmailCommand, string>>();
 		var fakeCommitMailService = Substitute.For<ICommandService<CommitInitPlayerEmailCommand>>();
 
-		fakeServiceProvider.GetService(Arg.Is(flowTypes["InitMail"]))
+		_ = fakeServiceProvider.GetService(Arg.Is(flowTypes["InitMail"]))
 			.Returns(new SetEmailRegisterFlowStep(
 				fakeBrandServiceClient,
 				fakeStartSetMailService,
@@ -906,7 +906,7 @@ public class RegisterFlowTests
 		var fakeQueryPlayerBankInfoService = Substitute.For<IQueryService<GetPlayerBankInfosQuery, PlayerBankInfo>>();
 		var fakeCreateBankInfoService = Substitute.For<ICommandService<CreateInitBankInfoCommand>>();
 
-		fakeServiceProvider.GetService(Arg.Is(flowTypes["SetWithdrawBankInfo"]))
+		_ = fakeServiceProvider.GetService(Arg.Is(flowTypes["SetWithdrawBankInfo"]))
 			.Returns(new SetWithdrawBankInfoRegisterFlowStep(
 				fakeQueryPlayerBankInfoService,
 				fakeCreateBankInfoService));
@@ -929,7 +929,7 @@ public class RegisterFlowTests
 		var playerCode = "player1";
 		var brandId = Guid.NewGuid();
 
-		fakePlayerServiceClient.GetPlayerInfoAsync(Arg.Is(playerCode))
+		_ = fakePlayerServiceClient.GetPlayerInfoAsync(Arg.Is(playerCode))
 			.Returns(new Tgs.PlayerService.Client.PlayerInfo
 			{
 				PlayerCode = playerCode,
@@ -952,18 +952,18 @@ public class RegisterFlowTests
 
 		var expected = Guid.NewGuid().ToString();
 
-		fakeStartSetPhoneService
+		_ = fakeStartSetPhoneService
 			.GetAsync(Arg.Is<StartSetPlayerPhoneCommand>(cmd => cmd.Phone == "12345678"
 				&& cmd.AreaCode == "123"))
 			.Returns(expected);
 
-		fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId))
+		_ = fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId))
 			.Returns(new Tgs.BrandCertificate.Clients.BrandInfo
 			{
 				Id = brandId
 			});
 
-		await flow.ConfirmCompletedAsync(playerCode);
+		_ = await flow.ConfirmCompletedAsync(playerCode);
 		var actual = await flow.ProcessInputAsync(
 			brandId,
 			JsonSerializer.SerializeToDocument(inputData),
@@ -1004,7 +1004,7 @@ public class RegisterFlowTests
 		var fakeStartSetPhoneService = Substitute.For<IGetService<StartSetPlayerPhoneCommand, string>>();
 		var fakeConfirmSetPhoneService = Substitute.For<ICommandService<CommitInitPlayerPhoneCommand>>();
 
-		fakeServiceProvider.GetService(Arg.Is(flowTypes["InitPhone"]))
+		_ = fakeServiceProvider.GetService(Arg.Is(flowTypes["InitPhone"]))
 			.Returns(new SetPhoneRegisterFlowStep(
 				fakeBrandServiceClient,
 				fakeStartSetPhoneService,
@@ -1014,7 +1014,7 @@ public class RegisterFlowTests
 		var fakeStartSetMailService = Substitute.For<IGetService<StartSetPlayerEmailCommand, string>>();
 		var fakeCommitMailService = Substitute.For<ICommandService<CommitInitPlayerEmailCommand>>();
 
-		fakeServiceProvider.GetService(Arg.Is(flowTypes["InitMail"]))
+		_ = fakeServiceProvider.GetService(Arg.Is(flowTypes["InitMail"]))
 			.Returns(new SetEmailRegisterFlowStep(
 				fakeBrandServiceClient,
 				fakeStartSetMailService,
@@ -1024,7 +1024,7 @@ public class RegisterFlowTests
 		var fakeQueryPlayerBankInfoService = Substitute.For<IQueryService<GetPlayerBankInfosQuery, PlayerBankInfo>>();
 		var fakeCreateBankInfoService = Substitute.For<ICommandService<CreateInitBankInfoCommand>>();
 
-		fakeServiceProvider.GetService(Arg.Is(flowTypes["SetWithdrawBankInfo"]))
+		_ = fakeServiceProvider.GetService(Arg.Is(flowTypes["SetWithdrawBankInfo"]))
 			.Returns(new SetWithdrawBankInfoRegisterFlowStep(
 				fakeQueryPlayerBankInfoService,
 				fakeCreateBankInfoService));
@@ -1078,7 +1078,7 @@ public class RegisterFlowTests
 
 		var expected = Guid.NewGuid().ToString();
 
-		fakeStartSetPhoneService
+		_ = fakeStartSetPhoneService
 			.GetAsync(Arg.Is<StartSetPlayerPhoneCommand>(cmd => cmd.Phone == "12345678"
 				&& cmd.AreaCode == "123"))
 			.Returns(expected);
@@ -1089,7 +1089,7 @@ public class RegisterFlowTests
 				Id = brandId
 			});
 
-		await flow.ConfirmCompletedAsync(playerCode);
+		_ = await flow.ConfirmCompletedAsync(playerCode);
 		var actual = await flow.ProcessInputAsync(
 			brandId,
 			JsonSerializer.SerializeToDocument(inputData),
@@ -1134,7 +1134,7 @@ public class RegisterFlowTests
 		var fakeStartSetPhoneService = Substitute.For<IGetService<StartSetPlayerPhoneCommand, string>>();
 		var fakeConfirmSetPhoneService = Substitute.For<ICommandService<CommitInitPlayerPhoneCommand>>();
 
-		fakeServiceProvider.GetService(Arg.Is(flowTypes["InitPhone"]))
+		_ = fakeServiceProvider.GetService(Arg.Is(flowTypes["InitPhone"]))
 			.Returns(new SetPhoneRegisterFlowStep(
 				fakeBrandServiceClient,
 				fakeStartSetPhoneService,
@@ -1144,7 +1144,7 @@ public class RegisterFlowTests
 		var fakeStartSetMailService = Substitute.For<IGetService<StartSetPlayerEmailCommand, string>>();
 		var fakeCommitMailService = Substitute.For<ICommandService<CommitInitPlayerEmailCommand>>();
 
-		fakeServiceProvider.GetService(Arg.Is(flowTypes["InitMail"]))
+		_ = fakeServiceProvider.GetService(Arg.Is(flowTypes["InitMail"]))
 			.Returns(new SetEmailRegisterFlowStep(
 				fakeBrandServiceClient,
 				fakeStartSetMailService,
@@ -1154,7 +1154,7 @@ public class RegisterFlowTests
 		var fakeQueryPlayerBankInfoService = Substitute.For<IQueryService<GetPlayerBankInfosQuery, PlayerBankInfo>>();
 		var fakeCreateBankInfoService = Substitute.For<ICommandService<CreateInitBankInfoCommand>>();
 
-		fakeServiceProvider.GetService(Arg.Is(flowTypes["SetWithdrawBankInfo"]))
+		_ = fakeServiceProvider.GetService(Arg.Is(flowTypes["SetWithdrawBankInfo"]))
 			.Returns(new SetWithdrawBankInfoRegisterFlowStep(
 				fakeQueryPlayerBankInfoService,
 				fakeCreateBankInfoService));
@@ -1204,7 +1204,7 @@ public class RegisterFlowTests
 			PlayerCode = "aabbcc"
 		};
 
-		await flow.ConfirmCompletedAsync(null);
+		_ = await flow.ConfirmCompletedAsync(null);
 		var actual = await flow.ProcessInputAsync(
 			brandId,
 			JsonSerializer.SerializeToDocument(inputData),
@@ -1245,7 +1245,7 @@ public class RegisterFlowTests
 		var fakeStartSetPhoneService = Substitute.For<IGetService<StartSetPlayerPhoneCommand, string>>();
 		var fakeConfirmSetPhoneService = Substitute.For<ICommandService<CommitInitPlayerPhoneCommand>>();
 
-		fakeServiceProvider.GetService(Arg.Is(flowTypes["InitPhone"]))
+		_ = fakeServiceProvider.GetService(Arg.Is(flowTypes["InitPhone"]))
 			.Returns(new SetPhoneRegisterFlowStep(
 				fakeBrandServiceClient,
 				fakeStartSetPhoneService,
@@ -1255,7 +1255,7 @@ public class RegisterFlowTests
 		var fakeStartSetMailService = Substitute.For<IGetService<StartSetPlayerEmailCommand, string>>();
 		var fakeCommitMailService = Substitute.For<ICommandService<CommitInitPlayerEmailCommand>>();
 
-		fakeServiceProvider.GetService(Arg.Is(flowTypes["InitMail"]))
+		_ = fakeServiceProvider.GetService(Arg.Is(flowTypes["InitMail"]))
 			.Returns(new SetEmailRegisterFlowStep(
 				fakeBrandServiceClient,
 				fakeStartSetMailService,
@@ -1265,7 +1265,7 @@ public class RegisterFlowTests
 		var fakeQueryPlayerBankInfoService = Substitute.For<IQueryService<GetPlayerBankInfosQuery, PlayerBankInfo>>();
 		var fakeCreateBankInfoService = Substitute.For<ICommandService<CreateInitBankInfoCommand>>();
 
-		fakeServiceProvider.GetService(Arg.Is(flowTypes["SetWithdrawBankInfo"]))
+		_ = fakeServiceProvider.GetService(Arg.Is(flowTypes["SetWithdrawBankInfo"]))
 			.Returns(new SetWithdrawBankInfoRegisterFlowStep(
 				fakeQueryPlayerBankInfoService,
 				fakeCreateBankInfoService));
@@ -1288,7 +1288,7 @@ public class RegisterFlowTests
 		var playerCode = "player1";
 		var brandId = Guid.NewGuid();
 
-		fakePlayerServiceClient.GetPlayerInfoAsync(Arg.Is(playerCode))
+		_ = fakePlayerServiceClient.GetPlayerInfoAsync(Arg.Is(playerCode))
 			.Returns(new Tgs.PlayerService.Client.PlayerInfo
 			{
 				PlayerCode = playerCode,
@@ -1315,7 +1315,7 @@ public class RegisterFlowTests
 
 		var expected = Guid.NewGuid().ToString();
 
-		fakeStartSetPhoneService
+		_ = fakeStartSetPhoneService
 			.GetAsync(Arg.Is<StartSetPlayerPhoneCommand>(cmd => cmd.Phone == "12345678"
 				&& cmd.AreaCode == "123"))
 			.Returns(expected);
@@ -1331,7 +1331,7 @@ public class RegisterFlowTests
 				Arg.Is<CommitInitPlayerEmailCommand>(cmd => cmd.SecurityKey == securityKey)))
 			.Do(_ =>
 			{
-				fakePlayerServiceClient.GetPlayerInfoAsync(Arg.Is(playerCode))
+				_ = fakePlayerServiceClient.GetPlayerInfoAsync(Arg.Is(playerCode))
 					.Returns(new Tgs.PlayerService.Client.PlayerInfo
 					{
 						PlayerCode = playerCode,
@@ -1341,7 +1341,7 @@ public class RegisterFlowTests
 					});
 			});
 
-		await flow.ConfirmCompletedAsync(playerCode);
+		_ = await flow.ConfirmCompletedAsync(playerCode);
 		var actual = await flow.ProcessInputAsync(
 			brandId,
 			JsonSerializer.SerializeToDocument(inputData),
@@ -1381,7 +1381,7 @@ public class RegisterFlowTests
 		var fakeStartSetPhoneService = Substitute.For<IGetService<StartSetPlayerPhoneCommand, string>>();
 		var fakeConfirmSetPhoneService = Substitute.For<ICommandService<CommitInitPlayerPhoneCommand>>();
 
-		fakeServiceProvider.GetService(Arg.Is(flowTypes["InitPhone"]))
+		_ = fakeServiceProvider.GetService(Arg.Is(flowTypes["InitPhone"]))
 			.Returns(new SetPhoneRegisterFlowStep(
 				fakeBrandServiceClient,
 				fakeStartSetPhoneService,
@@ -1391,7 +1391,7 @@ public class RegisterFlowTests
 		var fakeStartSetMailService = Substitute.For<IGetService<StartSetPlayerEmailCommand, string>>();
 		var fakeCommitMailService = Substitute.For<ICommandService<CommitInitPlayerEmailCommand>>();
 
-		fakeServiceProvider.GetService(Arg.Is(flowTypes["InitMail"]))
+		_ = fakeServiceProvider.GetService(Arg.Is(flowTypes["InitMail"]))
 			.Returns(new SetEmailRegisterFlowStep(
 				fakeBrandServiceClient,
 				fakeStartSetMailService,
@@ -1401,7 +1401,7 @@ public class RegisterFlowTests
 		var fakeQueryPlayerBankInfoService = Substitute.For<IQueryService<GetPlayerBankInfosQuery, PlayerBankInfo>>();
 		var fakeCreateBankInfoService = Substitute.For<ICommandService<CreateInitBankInfoCommand>>();
 
-		fakeServiceProvider.GetService(Arg.Is(flowTypes["SetWithdrawBankInfo"]))
+		_ = fakeServiceProvider.GetService(Arg.Is(flowTypes["SetWithdrawBankInfo"]))
 			.Returns(new SetWithdrawBankInfoRegisterFlowStep(
 				fakeQueryPlayerBankInfoService,
 				fakeCreateBankInfoService));
@@ -1424,7 +1424,7 @@ public class RegisterFlowTests
 		var playerCode = "player1";
 		var brandId = Guid.NewGuid();
 
-		fakePlayerServiceClient.GetPlayerInfoAsync(Arg.Is(playerCode))
+		_ = fakePlayerServiceClient.GetPlayerInfoAsync(Arg.Is(playerCode))
 			.Returns(new Tgs.PlayerService.Client.PlayerInfo
 			{
 				PlayerCode = playerCode,
@@ -1450,7 +1450,7 @@ public class RegisterFlowTests
 
 		var expected = Guid.NewGuid().ToString();
 
-		fakeStartSetPhoneService
+		_ = fakeStartSetPhoneService
 			.GetAsync(Arg.Is<StartSetPlayerPhoneCommand>(cmd => cmd.Phone == "12345678"
 				&& cmd.AreaCode == "123"))
 			.Returns(expected);
@@ -1466,7 +1466,7 @@ public class RegisterFlowTests
 				Arg.Is<CommitInitPlayerPhoneCommand>(cmd => cmd.SecurityKey == securityKey)))
 			.Do(_ =>
 			{
-				fakePlayerServiceClient.GetPlayerInfoAsync(Arg.Is(playerCode))
+				_ = fakePlayerServiceClient.GetPlayerInfoAsync(Arg.Is(playerCode))
 					.Returns(new Tgs.PlayerService.Client.PlayerInfo
 					{
 						PlayerCode = playerCode,
@@ -1475,7 +1475,7 @@ public class RegisterFlowTests
 					});
 			});
 
-		await flow.ConfirmCompletedAsync(playerCode);
+		_ = await flow.ConfirmCompletedAsync(playerCode);
 		var actual = await flow.ProcessInputAsync(
 			brandId,
 			JsonSerializer.SerializeToDocument(inputData),
@@ -1638,7 +1638,7 @@ public class RegisterFlowTests
 
 		var locationInfo = new PlayerLocationInfo("player1", "127.0.0.1", null, null);
 
-		fakePlayerServiceClient.GetPlayerInfoAsync(Arg.Is(locationInfo.PlayerCode))
+		_ = fakePlayerServiceClient.GetPlayerInfoAsync(Arg.Is(locationInfo.PlayerCode))
 			.Returns(new Tgs.PlayerService.Client.PlayerInfo
 			{
 				PlayerCode = locationInfo.PlayerCode,
@@ -1753,7 +1753,7 @@ public class RegisterFlowTests
 
 		var playerCode = "player1";
 
-		fakePlayerServiceClient.GetPlayerInfoAsync(Arg.Is(playerCode))
+		_ = fakePlayerServiceClient.GetPlayerInfoAsync(Arg.Is(playerCode))
 			.Returns(new Tgs.PlayerService.Client.PlayerInfo
 			{
 				PlayerCode = "tester",
@@ -1791,13 +1791,13 @@ public class RegisterFlowTests
 		};
 		var locationInfo = new PlayerLocationInfo("player1", "127.0.0.1", null, null);
 
-		fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId))
+		_ = fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId))
 			.Returns(new Tgs.BrandCertificate.Clients.BrandInfo
 			{
 				Id = brandId
 			});
 
-		fakePlayerServiceClient.GetPlayerInfoAsync(Arg.Is(locationInfo.PlayerCode))
+		_ = fakePlayerServiceClient.GetPlayerInfoAsync(Arg.Is(locationInfo.PlayerCode))
 			.Returns(new Tgs.PlayerService.Client.PlayerInfo
 			{
 				PlayerCode = locationInfo.PlayerCode
@@ -1839,7 +1839,7 @@ public class RegisterFlowTests
 		};
 		var locationInfo = new PlayerLocationInfo("player1", "127.0.0.1", null, null);
 
-		fakePlayerServiceClient.GetPlayerInfoAsync(Arg.Is(locationInfo.PlayerCode))
+		_ = fakePlayerServiceClient.GetPlayerInfoAsync(Arg.Is(locationInfo.PlayerCode))
 			.Returns(new Tgs.PlayerService.Client.PlayerInfo
 			{
 				PlayerCode = locationInfo.PlayerCode
@@ -1849,7 +1849,7 @@ public class RegisterFlowTests
 			.When(fake => fake.ExecuteAsync(Arg.Any<CommitInitPlayerEmailCommand>()))
 			.Do(_ =>
 			{
-				fakePlayerServiceClient.GetPlayerInfoAsync(Arg.Is(locationInfo.PlayerCode))
+				_ = fakePlayerServiceClient.GetPlayerInfoAsync(Arg.Is(locationInfo.PlayerCode))
 					.Returns(new Tgs.PlayerService.Client.PlayerInfo
 					{
 						PlayerCode = locationInfo.PlayerCode,
@@ -1922,7 +1922,7 @@ public class RegisterFlowTests
 
 		var playerCode = "player1";
 
-		fakePlayerServiceClient.GetPlayerInfoAsync(Arg.Is(playerCode))
+		_ = fakePlayerServiceClient.GetPlayerInfoAsync(Arg.Is(playerCode))
 			.Returns(new Tgs.PlayerService.Client.PlayerInfo
 			{
 				PlayerCode = "tester",
@@ -1970,7 +1970,7 @@ public class RegisterFlowTests
 				SmsRegisterFlowEnabled = true
 			});
 
-		fakePlayerServiceClient.GetPlayerInfoAsync(Arg.Is(locationInfo.PlayerCode))
+		_ = fakePlayerServiceClient.GetPlayerInfoAsync(Arg.Is(locationInfo.PlayerCode))
 			.Returns(new Tgs.PlayerService.Client.PlayerInfo
 			{
 				PlayerCode = locationInfo.PlayerCode
@@ -2012,7 +2012,7 @@ public class RegisterFlowTests
 		};
 		var locationInfo = new PlayerLocationInfo("player1", "127.0.0.1", null, null);
 
-		fakePlayerServiceClient.GetPlayerInfoAsync(Arg.Is(locationInfo.PlayerCode))
+		_ = fakePlayerServiceClient.GetPlayerInfoAsync(Arg.Is(locationInfo.PlayerCode))
 			.Returns(new Tgs.PlayerService.Client.PlayerInfo
 			{
 				PlayerCode = locationInfo.PlayerCode,
@@ -2081,7 +2081,7 @@ public class RegisterFlowTests
 		var playerCode = "player1";
 		var brandId = Guid.NewGuid();
 
-		fakeQueryPlayerBankInfoService.QueryAsync(Arg.Any<GetPlayerBankInfosQuery>())
+		_ = fakeQueryPlayerBankInfoService.QueryAsync(Arg.Any<GetPlayerBankInfosQuery>())
 			.Returns(new[] {
 				new PlayerBankInfo
 				{

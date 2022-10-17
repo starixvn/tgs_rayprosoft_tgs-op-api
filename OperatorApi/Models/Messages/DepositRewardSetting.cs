@@ -1,5 +1,5 @@
-﻿namespace TGS.Apis.OperatorApi.Models.Messages
-{
+﻿namespace TGS.Apis.OperatorApi.Models.Messages;
+
     public class DepositRewardSetting
     {
         public decimal DepositMinimumLimit {get; set;}
@@ -7,4 +7,3 @@
         public decimal BonusAmount { get; set; }
         public decimal TurnoverMultiple { get; set; }
     }
-}

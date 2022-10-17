@@ -51,7 +51,7 @@ public class PromotionTests
 
         var query = new GetSignInRouletteRecordQuery("player1", Guid.NewGuid());
 
-        await sut.GetAsync(query);
+		_ = await sut.GetAsync(query);
 
         _ = fakeRouletteSignInClient.Received(1)
             .GetRouletteRecordAsync(
@@ -68,7 +68,7 @@ public class PromotionTests
 
         var command = new SignInRouletteCommand("player1", Guid.NewGuid());
 
-        await sut.GetAsync(command);
+		_ = await sut.GetAsync(command);
 
         _ = fakeRouletteSignInClient.Received(1)
             .RouletteAsync(

@@ -8,11 +8,11 @@ public sealed class ChangePasswordRequestValidator : AbstractValidator<ChangePas
 {
     public ChangePasswordRequestValidator()
     {
-        RuleFor(x => x.NewPassword)
-            .NotEmpty()
-            .Length(6, 20)
-            .WithName(x => x
-                .WithPropertyExpression(o => o.NewPassword)
-                .GetJsonPropertyName(nameof(x.NewPassword)));
+		_ = RuleFor(x => x.NewPassword)
+			.NotEmpty()
+			.Length(6, 20)
+			.WithName(x => x
+				.WithPropertyExpression(o => o.NewPassword)
+				.GetJsonPropertyName(nameof(x.NewPassword)));
     }
 }

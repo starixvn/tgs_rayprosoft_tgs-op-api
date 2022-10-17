@@ -75,24 +75,24 @@ public class GameBalanceTests
     public async Task Player_Can_Get_Game_Balance_Infos()
     {
         var dbContextOptionsBuilder = new DbContextOptionsBuilder<TgsRepository>();
-        dbContextOptionsBuilder
-            .UseInMemoryDatabase(Guid.NewGuid().ToString())
-            .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
+		_ = dbContextOptionsBuilder
+			.UseInMemoryDatabase(Guid.NewGuid().ToString())
+			.ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
         ITgsRepository repository = new TgsRepository(dbContextOptionsBuilder.Options);
         var brandId = Guid.NewGuid();
 
-        repository.Brands.Add(new CoreModesl.Brand()
-        {
-            Id = brandId,
-            Name = "brandName",
-            ApiKey = string.Empty,
-            ClientId = string.Empty,
-            Code = "Test",
-            CreatedByUsername = "System",
-            UpdatedByUsername = "System",
-            SecretKey = string.Empty
-        });
-        await repository.SaveChangesAsync();
+		_ = repository.Brands.Add(new CoreModesl.Brand()
+		{
+			Id = brandId,
+			Name = "brandName",
+			ApiKey = string.Empty,
+			ClientId = string.Empty,
+			Code = "Test",
+			CreatedByUsername = "System",
+			UpdatedByUsername = "System",
+			SecretKey = string.Empty
+		});
+		_ = await repository.SaveChangesAsync();
 
         var sut = new GetGameBalanceInfosQueryService(repository);
 
@@ -116,15 +116,15 @@ public class GameBalanceTests
 
         var fakeGameProvidersOperatorPluggableClient = Substitute.For<IGameProvidersOperatorPluggableClient>();
 
-        fakeGameProvidersOperatorPluggableClient
-            .GetBalanceAsync(playerCode, gameProviderCode)
-            .Returns(1000m);
+		_ = fakeGameProvidersOperatorPluggableClient
+			.GetBalanceAsync(playerCode, gameProviderCode)
+			.Returns(1000m);
 
         var sut = new GetGameBalanceQueryService(fakeGameProvidersOperatorPluggableClient);
 
         // act
         var query = new GetGameBalanceQuery(playerCode, gameProviderCode);
-        await sut.GetAsync(query, default);
+		_ = await sut.GetAsync(query, default);
 
         // assert
         _ = fakeGameProvidersOperatorPluggableClient

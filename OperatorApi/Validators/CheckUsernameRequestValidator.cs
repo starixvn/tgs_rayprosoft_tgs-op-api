@@ -8,11 +8,11 @@ public sealed class CheckUsernameRequestValidator : AbstractValidator<CheckUsern
 {
     public CheckUsernameRequestValidator()
     {
-        RuleFor(x => x.Username)
-            .NotEmpty()
-            .Length(6, 32)
-            .WithName(x => x
-                .WithPropertyExpression(o => o.Username)
-                .GetBindPropertyName(nameof(x.Username)));
+		_ = RuleFor(x => x.Username)
+			.NotEmpty()
+			.Length(6, 32)
+			.WithName(x => x
+				.WithPropertyExpression(o => o.Username)
+				.GetBindPropertyName(nameof(x.Username)));
     }
 }

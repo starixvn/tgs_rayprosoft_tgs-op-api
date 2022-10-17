@@ -101,9 +101,9 @@ public class PlayerInfoTests
             BrandId = Guid.NewGuid()
         };
 
-        fakePlayerServiceClient
-            .GetPlayerInfoByUserNameAsync(Arg.Any<Guid>(), Arg.Any<string>())
-            .Returns(playerInfo);
+		_ = fakePlayerServiceClient
+			.GetPlayerInfoByUserNameAsync(Arg.Any<Guid>(), Arg.Any<string>())
+			.Returns(playerInfo);
 
         var brandId = Guid.NewGuid();
         var username = "username";
@@ -286,10 +286,10 @@ public class PlayerInfoTests
 
         var command = new SetQqCommand(player.PlayerCode, "this_is_qq_number");
 
-        moqPlayerOperations
-            .Setup(fake => fake.GetPlayerByCodeAsync(
-                It.Is<string>(x => x == player.PlayerCode)))
-            .Returns(Task.FromResult(player));
+		_ = moqPlayerOperations
+			.Setup(fake => fake.GetPlayerByCodeAsync(
+				It.Is<string>(x => x == player.PlayerCode)))
+			.Returns(Task.FromResult(player));
 
         await sut.ExecuteAsync(command);
 
@@ -375,10 +375,10 @@ public class PlayerInfoTests
 
         var command = new SetWeChatCommand(player.PlayerCode, "this_is_wechat_number");
 
-        moqPlayerOperations
-            .Setup(fake => fake.GetPlayerByCodeAsync(
-                It.Is<string>(x => x == player.PlayerCode)))
-            .Returns(Task.FromResult(player));
+		_ = moqPlayerOperations
+			.Setup(fake => fake.GetPlayerByCodeAsync(
+				It.Is<string>(x => x == player.PlayerCode)))
+			.Returns(Task.FromResult(player));
 
         await sut.ExecuteAsync(command);
 

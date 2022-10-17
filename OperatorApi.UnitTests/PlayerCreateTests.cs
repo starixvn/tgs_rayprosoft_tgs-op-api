@@ -45,8 +45,8 @@ public class PlayerCreateTests
 
         flowDefinition.AddStep(fakeCreatePlayerStep);
 
-        fakeBrandRegisterFlowDefinitionManager.GetRegisterFlowDefinitionAsync(Arg.Is(query.BrandId))
-            .Returns(flowDefinition);
+		_ = fakeBrandRegisterFlowDefinitionManager.GetRegisterFlowDefinitionAsync(Arg.Is(query.BrandId))
+			.Returns(flowDefinition);
 
         var actual = await sut.GetAsync(query);
 
@@ -96,9 +96,9 @@ public class PlayerCreateTests
             invitationCode,
             false);
 
-        // act
-        Assert.ThrowsAsync<InvalidInvitationCodeException>(
-            async () => await sut.GetAsync(query));
+		// act
+		_ = Assert.ThrowsAsync<InvalidInvitationCodeException>(
+			async () => await sut.GetAsync(query));
     }
 
     [Test]
@@ -132,8 +132,8 @@ public class PlayerCreateTests
                 Currency = "CNY"
             });
 
-        fakePlayerOperations.CreatePlayerAsync(Arg.Any<CreatePlayerData>())
-            .Returns("TestPlayerCode");
+		_ = fakePlayerOperations.CreatePlayerAsync(Arg.Any<CreatePlayerData>())
+			.Returns("TestPlayerCode");
 
         var sut = new CreateAgentInvitationPlayerCommandService(
             fakePlayerOperations,
@@ -185,12 +185,12 @@ public class PlayerCreateTests
                     Currency = "CNY"
                 }));
 
-        fakePlayerServiceClient.GetPlayerInfoAsync(Arg.Is(upperPlayerCode))
-            .Returns(new Tgs.PlayerService.Client.PlayerInfo
-            {
-                PlayerCode = upperPlayerCode,
-                BrandId = brandId
-            });
+		_ = fakePlayerServiceClient.GetPlayerInfoAsync(Arg.Is(upperPlayerCode))
+			.Returns(new Tgs.PlayerService.Client.PlayerInfo
+			{
+				PlayerCode = upperPlayerCode,
+				BrandId = brandId
+			});
 
         var sut = new CreatePlayerInvitationPlayerCommandService(
             fakePlayerOperations,
@@ -282,13 +282,13 @@ public class PlayerCreateTests
         var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
         var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
 
-        fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId))
-            .Returns(new Tgs.BrandCertificate.Clients.BrandInfo
-            {
-                Id = brandId,
-                Code = "code",
-                Currency = "CNY"
-            });
+		_ = fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId))
+			.Returns(new Tgs.BrandCertificate.Clients.BrandInfo
+			{
+				Id = brandId,
+				Code = "code",
+				Currency = "CNY"
+			});
 
         var sut = new CreateAgentInvitationPlayerCommandService(
             fakePlayerOperations,
@@ -309,7 +309,7 @@ public class PlayerCreateTests
             invitationCode,
             false);
 
-        Assert.ThrowsAsync<InvalidInvitationCodeException>(async () => await sut.GetAsync(query));
+		_ = Assert.ThrowsAsync<InvalidInvitationCodeException>(async () => await sut.GetAsync(query));
     }
 
     [Test]
@@ -347,7 +347,7 @@ public class PlayerCreateTests
             upperPlayerCode,
             false);
 
-        Assert.ThrowsAsync<InvalidInvitationCodeException>(async () => await sut.GetAsync(command));
+		_ = Assert.ThrowsAsync<InvalidInvitationCodeException>(async () => await sut.GetAsync(command));
     }
 
     [Test]
@@ -371,12 +371,12 @@ public class PlayerCreateTests
                     Currency = "CNY"
                 }));
 
-        fakePlayerServiceClient.GetPlayerInfoAsync(Arg.Is(upperPlayerCode))
-            .Returns(new Tgs.PlayerService.Client.PlayerInfo
-            {
-                PlayerCode = upperPlayerCode,
-                BrandId = Guid.NewGuid()
-            });
+		_ = fakePlayerServiceClient.GetPlayerInfoAsync(Arg.Is(upperPlayerCode))
+			.Returns(new Tgs.PlayerService.Client.PlayerInfo
+			{
+				PlayerCode = upperPlayerCode,
+				BrandId = Guid.NewGuid()
+			});
 
         var sut = new CreatePlayerInvitationPlayerCommandService(
             fakePlayerOperations,
@@ -393,9 +393,9 @@ public class PlayerCreateTests
             upperPlayerCode,
             false);
 
-        // act
-        Assert.ThrowsAsync<InvalidInvitationCodeException>(
-            async () => await sut.GetAsync(query));
+		// act
+		_ = Assert.ThrowsAsync<InvalidInvitationCodeException>(
+			async () => await sut.GetAsync(query));
     }
 
     [Test]
@@ -414,8 +414,8 @@ public class PlayerCreateTests
 
         // act
         var actual = sut.TestValidate(request);
-        // assert
-        actual.ShouldHaveValidationErrorFor(request => request.UserName);
+		// assert
+		_ = actual.ShouldHaveValidationErrorFor(request => request.UserName);
     }
 
     [Test]
@@ -435,8 +435,8 @@ public class PlayerCreateTests
         // act
         var actual = sut.TestValidate(request);
 
-        // assert
-        actual.ShouldHaveValidationErrorFor(request => request.UserName);
+		// assert
+		_ = actual.ShouldHaveValidationErrorFor(request => request.UserName);
     }
 
     [Test]
@@ -455,8 +455,8 @@ public class PlayerCreateTests
 
         // act
         var actual = sut.TestValidate(request);
-        // assert
-        actual.ShouldHaveValidationErrorFor(request => request.UserName);
+		// assert
+		_ = actual.ShouldHaveValidationErrorFor(request => request.UserName);
     }
 
     [Test]
@@ -475,8 +475,8 @@ public class PlayerCreateTests
 
         // act
         var actual = sut.TestValidate(request);
-        // assert
-        actual.ShouldHaveValidationErrorFor(request => request.Password);
+		// assert
+		_ = actual.ShouldHaveValidationErrorFor(request => request.Password);
     }
 
     [Test]
@@ -495,7 +495,7 @@ public class PlayerCreateTests
 
         // act
         var actual = sut.TestValidate(request);
-        // assert
-        actual.ShouldHaveValidationErrorFor(request => request.Password);
+		// assert
+		_ = actual.ShouldHaveValidationErrorFor(request => request.Password);
     }
 }

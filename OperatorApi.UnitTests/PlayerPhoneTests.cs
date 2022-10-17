@@ -54,15 +54,15 @@ public class PlayerPhoneTests
             "localhost",
             brandInfo.Id);
 
-        moqValidateCodeOperator
-            .Setup(
-                fake => fake.GetValidateCodeDataAsync<PhoneValidateData>(
-                    It.Is<string>(x => x == validateCode),
-                    It.Is<string>(x => x == securityKey)))
-            .Returns(ValueTask.FromResult(new PhoneValidateData(
-                areaCode,
-                phone,
-                playerCode)));
+		_ = moqValidateCodeOperator
+			.Setup(
+				fake => fake.GetValidateCodeDataAsync<PhoneValidateData>(
+					It.Is<string>(x => x == validateCode),
+					It.Is<string>(x => x == securityKey)))
+			.Returns(ValueTask.FromResult(new PhoneValidateData(
+				areaCode,
+				phone,
+				playerCode)));
 
         await sut.ExecuteAsync(command);
 
@@ -113,14 +113,14 @@ public class PlayerPhoneTests
             "localhost",
             brandInfo.Id);
 
-        moqValidateCodeOperator
-            .Setup(
-                fake => fake.GetValidateCodeDataAsync<PhoneValidateData>(
-                    It.IsAny<string>(),
-                    It.IsAny<string>()))
-            .Returns(ValueTask.FromResult<PhoneValidateData>(null));
+		_ = moqValidateCodeOperator
+			.Setup(
+				fake => fake.GetValidateCodeDataAsync<PhoneValidateData>(
+					It.IsAny<string>(),
+					It.IsAny<string>()))
+			.Returns(ValueTask.FromResult<PhoneValidateData>(null));
 
-        Assert.ThrowsAsync<ValidateCodeNotVerifyException>(async () => await sut.ExecuteAsync(command));
+		_ = Assert.ThrowsAsync<ValidateCodeNotVerifyException>(async () => await sut.ExecuteAsync(command));
     }
 
     [Test]
@@ -146,15 +146,15 @@ public class PlayerPhoneTests
 
         var command = new CommitSetPlayerPhoneCommand(brandId, playerCode, securityKey, validateCode);
 
-        fakeValidateCodeOperator
-            .GetValidateCodeDataAsync<PhoneValidateData>(validateCode, Arg.Any<string>())
-            .Returns(new PhoneValidateData(areaCode, phone, playerCode));
+		_ = fakeValidateCodeOperator
+			.GetValidateCodeDataAsync<PhoneValidateData>(validateCode, Arg.Any<string>())
+			.Returns(new PhoneValidateData(areaCode, phone, playerCode));
 
-        fakeCheckService
-            .GetAsync(new CheckBrandPhoneCanUseQuery(brandId, playerCode, areaCode, phone))
-            .Returns(false);
+		_ = fakeCheckService
+			.GetAsync(new CheckBrandPhoneCanUseQuery(brandId, playerCode, areaCode, phone))
+			.Returns(false);
 
-        Assert.ThrowsAsync<BrandPhoneDuplicateException>(async () => await sut.ExecuteAsync(command));
+		_ = Assert.ThrowsAsync<BrandPhoneDuplicateException>(async () => await sut.ExecuteAsync(command));
     }
 
     [Test]
@@ -177,14 +177,14 @@ public class PlayerPhoneTests
 
         var command = new CommitSetPlayerPhoneCommand(Guid.NewGuid(), playerCode, securityKey, validateCode);
 
-        moqValidateCodeOperator
-            .Setup(
-                fake => fake.GetValidateCodeDataAsync<PhoneValidateData>(
-                    It.IsAny<string>(),
-                    It.IsAny<string>()))
-            .Returns(ValueTask.FromResult<PhoneValidateData>(null));
+		_ = moqValidateCodeOperator
+			.Setup(
+				fake => fake.GetValidateCodeDataAsync<PhoneValidateData>(
+					It.IsAny<string>(),
+					It.IsAny<string>()))
+			.Returns(ValueTask.FromResult<PhoneValidateData>(null));
 
-        Assert.ThrowsAsync<ValidateCodeNotVerifyException>(async () => await sut.ExecuteAsync(command));
+		_ = Assert.ThrowsAsync<ValidateCodeNotVerifyException>(async () => await sut.ExecuteAsync(command));
     }
 
     [Test]
@@ -209,18 +209,18 @@ public class PlayerPhoneTests
 
         var command = new CommitSetPlayerPhoneCommand(Guid.NewGuid(), playerCode, securityKey, validateCode);
 
-        fakeCheckService.GetAsync(Arg.Any<CheckBrandPhoneCanUseQuery>())
-            .Returns(true);
+		_ = fakeCheckService.GetAsync(Arg.Any<CheckBrandPhoneCanUseQuery>())
+			.Returns(true);
 
-        moqValidateCodeOperator
-            .Setup(
-                fake => fake.GetValidateCodeDataAsync<PhoneValidateData>(
-                    It.Is<string>(x => x == validateCode),
-                    It.Is<string>(x => x == securityKey)))
-            .Returns(ValueTask.FromResult(new PhoneValidateData(
-                areaCode,
-                phone,
-                playerCode)));
+		_ = moqValidateCodeOperator
+			.Setup(
+				fake => fake.GetValidateCodeDataAsync<PhoneValidateData>(
+					It.Is<string>(x => x == validateCode),
+					It.Is<string>(x => x == securityKey)))
+			.Returns(ValueTask.FromResult(new PhoneValidateData(
+				areaCode,
+				phone,
+				playerCode)));
 
         await sut.ExecuteAsync(command);
 
@@ -349,32 +349,32 @@ public class PlayerPhoneTests
         var validateCode = "123456";
         var expectedSecurityKey = "3F8E5681-50C8-4F2F-8379-3AA6EF2C6064";
 
-        fakePlayerServiceClient.GetPlayerInfoAsync(Arg.Is(player.PlayerCode))
-            .Returns(player);
+		_ = fakePlayerServiceClient.GetPlayerInfoAsync(Arg.Is(player.PlayerCode))
+			.Returns(player);
 
-        fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(player.BrandId))
-            .Returns(new Tgs.BrandCertificate.Clients.BrandInfo
-            {
-                Id = player.BrandId,
-                Code = "Test",
-                Currency = "CNY",
-                SmsEnabled = false,
-                SmsRegisterFlowEnabled = true
-            });
+		_ = fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(player.BrandId))
+			.Returns(new Tgs.BrandCertificate.Clients.BrandInfo
+			{
+				Id = player.BrandId,
+				Code = "Test",
+				Currency = "CNY",
+				SmsEnabled = false,
+				SmsRegisterFlowEnabled = true
+			});
 
-        moqValidateCodeGenerator
-            .Setup(fake => fake.GenerateCode())
-            .Returns(validateCode);
-        moqValidateCodeGenerator
-            .Setup(fake => fake.GenerateSecurityKey())
-            .Returns(expectedSecurityKey);
+		_ = moqValidateCodeGenerator
+			.Setup(fake => fake.GenerateCode())
+			.Returns(validateCode);
+		_ = moqValidateCodeGenerator
+			.Setup(fake => fake.GenerateSecurityKey())
+			.Returns(expectedSecurityKey);
 
-        moqValidateCodeOperator
-            .Setup(fake => fake.SaveValidateDataAsync(
-                It.Is<string>(x => x == validateCode),
-                It.Is<string>(x => x == expectedSecurityKey),
-                It.IsAny<PhoneValidateData>()))
-            .Returns(ValueTask.FromResult(true));
+		_ = moqValidateCodeOperator
+			.Setup(fake => fake.SaveValidateDataAsync(
+				It.Is<string>(x => x == validateCode),
+				It.Is<string>(x => x == expectedSecurityKey),
+				It.IsAny<PhoneValidateData>()))
+			.Returns(ValueTask.FromResult(true));
 
         var expectedShortMessage = $"Your ID verification code is : {validateCode}";
 

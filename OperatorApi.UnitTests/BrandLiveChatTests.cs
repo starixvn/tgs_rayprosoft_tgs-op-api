@@ -16,19 +16,19 @@ public class BrandLiveChatTests
     public async Task Get_Brand_Live_Chat_Should_Success()
     {
         var dbContextOptionsBuilder = new DbContextOptionsBuilder<TgsRepository>();
-        dbContextOptionsBuilder
-            .UseInMemoryDatabase(Guid.NewGuid().ToString())
-            .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
+		_ = dbContextOptionsBuilder
+			.UseInMemoryDatabase(Guid.NewGuid().ToString())
+			.ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
         ITgsRepository repository = new TgsRepository(dbContextOptionsBuilder.Options);
         var brandId = Guid.NewGuid();
 
-        repository.BrandLiveChats.Add(new CoreModels.BrandLiveChat()
-        {
-            BrandId = brandId,
-            ChatName = "LiveChat",
-            ChatSetting = "{\"url\":\"https://www.google.com\"}"
-        });
-        await repository.SaveChangesAsync();
+		_ = repository.BrandLiveChats.Add(new CoreModels.BrandLiveChat()
+		{
+			BrandId = brandId,
+			ChatName = "LiveChat",
+			ChatSetting = "{\"url\":\"https://www.google.com\"}"
+		});
+		_ = await repository.SaveChangesAsync();
 
         var sut = new GetBrandLiveChatQueryService(repository);
 

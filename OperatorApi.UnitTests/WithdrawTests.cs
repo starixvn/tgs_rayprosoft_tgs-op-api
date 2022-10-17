@@ -60,17 +60,17 @@ public class WithdrawTests
             1000M,
             "ThisIsPlayerNote");
 
-        fakePaymentServiceClient.GetPlayerBankInfosAsync(Arg.Is(query.PlayerCode))
-            .Returns(new[] {
-                new PlayerBankInfo
-                {
-                    Id = query.BankInfoId,
-                    BrandId = query.BrandId,
-                    BankType = "Bank",
-                    PaymentChannelId = Guid.NewGuid(),
-                    PlayerCode = query.PlayerCode
-                }
-            }.ToAsyncEnumerable());
+		_ = fakePaymentServiceClient.GetPlayerBankInfosAsync(Arg.Is(query.PlayerCode))
+			.Returns(new[] {
+				new PlayerBankInfo
+				{
+					Id = query.BankInfoId,
+					BrandId = query.BrandId,
+					BankType = "Bank",
+					PaymentChannelId = Guid.NewGuid(),
+					PlayerCode = query.PlayerCode
+				}
+			}.ToAsyncEnumerable());
 
         var actual = await sut.GetAsync(query);
 
@@ -93,25 +93,25 @@ public class WithdrawTests
 
         var channelId = Guid.NewGuid();
 
-        fakePaymentServiceClient.GetPlayerBankInfosAsync(Arg.Is(query.PlayerCode))
-            .Returns(new[] {
-                new PlayerBankInfo
-                {
-                    Id = query.BankInfoId,
-                    BrandId = query.BrandId,
-                    BankType = "Bank",
-                    PaymentChannelId = channelId,
-                    PlayerCode = query.PlayerCode
-                }
-            }.ToAsyncEnumerable());
+		_ = fakePaymentServiceClient.GetPlayerBankInfosAsync(Arg.Is(query.PlayerCode))
+			.Returns(new[] {
+				new PlayerBankInfo
+				{
+					Id = query.BankInfoId,
+					BrandId = query.BrandId,
+					BankType = "Bank",
+					PaymentChannelId = channelId,
+					PlayerCode = query.PlayerCode
+				}
+			}.ToAsyncEnumerable());
 
-        fakePaymentServiceClient.GetBrandPaymentsAsync(Arg.Is(query.BrandId))
-            .Returns(new[] {
-                new BrandPaymentInfo{
-                    Id = Guid.NewGuid(),
-                    ChannelId = channelId
-                }
-            }.ToAsyncEnumerable());
+		_ = fakePaymentServiceClient.GetBrandPaymentsAsync(Arg.Is(query.BrandId))
+			.Returns(new[] {
+				new BrandPaymentInfo{
+					Id = Guid.NewGuid(),
+					ChannelId = channelId
+				}
+			}.ToAsyncEnumerable());
 
         var actual = await sut.GetAsync(query);
 
@@ -139,7 +139,7 @@ public class WithdrawTests
             1000M,
             "ThisIsPlayerNote");
 
-        Assert.ThrowsAsync<PlayerNotFoundException>(async () => await sut.ExecuteAsync(command));
+		_ = Assert.ThrowsAsync<PlayerNotFoundException>(async () => await sut.ExecuteAsync(command));
     }
 
     [Test]
@@ -165,33 +165,33 @@ public class WithdrawTests
 
         var walletId = Guid.NewGuid();
 
-        fakePlayerService
-            .GetPlayerInfoAsync(Arg.Is(command.PlayerCode))
-            .Returns(new Tgs.PlayerService.Client.PlayerInfo
-            {
-                PlayerCode = command.PlayerCode,
-                BrandId = command.BrandId,
-                IdentityAuthentication = false,
-                IsSetPayPassword = false,
-                PhoneAuthentication = false,
-                UserName = "Tester",
-                VipLevelId = null
-            });
+		_ = fakePlayerService
+			.GetPlayerInfoAsync(Arg.Is(command.PlayerCode))
+			.Returns(new Tgs.PlayerService.Client.PlayerInfo
+			{
+				PlayerCode = command.PlayerCode,
+				BrandId = command.BrandId,
+				IdentityAuthentication = false,
+				IsSetPayPassword = false,
+				PhoneAuthentication = false,
+				UserName = "Tester",
+				VipLevelId = null
+			});
 
-        fakePlayerService
-            .GetPlayerPropertiesAsync(Arg.Is(command.PlayerCode))
-            .Returns(new Dictionary<string, string>
-            {
-                ["DefaultWalletId"] = walletId.ToString()
-            }.ToImmutableDictionary());
+		_ = fakePlayerService
+			.GetPlayerPropertiesAsync(Arg.Is(command.PlayerCode))
+			.Returns(new Dictionary<string, string>
+			{
+				["DefaultWalletId"] = walletId.ToString()
+			}.ToImmutableDictionary());
 
-        fakeCashServiceClient
-            .GetBalanceAsync(Arg.Any<Guid>())
-            .Returns(800M);
+		_ = fakeCashServiceClient
+			.GetBalanceAsync(Arg.Any<Guid>())
+			.Returns(800M);
 
-        fakePlayerBucketRepository
-            .IsBucketFullAsync(Arg.Any<string>())
-            .Returns(true);
+		_ = fakePlayerBucketRepository
+			.IsBucketFullAsync(Arg.Any<string>())
+			.Returns(true);
 
         var fakeBankInfo = new PlayerBankInfo
         {
@@ -202,7 +202,7 @@ public class WithdrawTests
             Detail = JsonDocument.Parse("{}")
         };
 
-        Assert.ThrowsAsync<InsufficientFundsException>(async () => await sut.ExecuteAsync(command));
+		_ = Assert.ThrowsAsync<InsufficientFundsException>(async () => await sut.ExecuteAsync(command));
     }
 
     [Test]
@@ -226,26 +226,26 @@ public class WithdrawTests
             1000M,
             "ThisIsPlayerNote");
 
-        fakePlayerService
-            .GetPlayerInfoAsync(Arg.Is(command.PlayerCode))
-            .Returns(new Tgs.PlayerService.Client.PlayerInfo
-            {
-                PlayerCode = command.PlayerCode,
-                BrandId = command.BrandId,
-                IdentityAuthentication = false,
-                IsSetPayPassword = false,
-                PhoneAuthentication = false,
-                UserName = "Tester",
-                VipLevelId = null
-            });
+		_ = fakePlayerService
+			.GetPlayerInfoAsync(Arg.Is(command.PlayerCode))
+			.Returns(new Tgs.PlayerService.Client.PlayerInfo
+			{
+				PlayerCode = command.PlayerCode,
+				BrandId = command.BrandId,
+				IdentityAuthentication = false,
+				IsSetPayPassword = false,
+				PhoneAuthentication = false,
+				UserName = "Tester",
+				VipLevelId = null
+			});
 
-        fakeCashServiceClient
-            .GetBalanceAsync(Arg.Any<Guid>())
-            .Returns(800M);
+		_ = fakeCashServiceClient
+			.GetBalanceAsync(Arg.Any<Guid>())
+			.Returns(800M);
 
-        fakePlayerBucketRepository
-            .IsBucketFullAsync(Arg.Any<string>())
-            .Returns(false);
+		_ = fakePlayerBucketRepository
+			.IsBucketFullAsync(Arg.Any<string>())
+			.Returns(false);
 
         var fakeBankInfo = new PlayerBankInfo
         {
@@ -256,7 +256,7 @@ public class WithdrawTests
             Detail = JsonDocument.Parse("{}")
         };
 
-        Assert.ThrowsAsync<InsufficientBucketException>(async () => await sut.ExecuteAsync(command));
+		_ = Assert.ThrowsAsync<InsufficientBucketException>(async () => await sut.ExecuteAsync(command));
     }
 
     [Test]
@@ -282,45 +282,45 @@ public class WithdrawTests
 
         var walletId = Guid.NewGuid();
 
-        fakePlayerService
-            .GetPlayerInfoAsync(Arg.Is(command.PlayerCode))
-            .Returns(new Tgs.PlayerService.Client.PlayerInfo
-            {
-                PlayerCode = command.PlayerCode,
-                BrandId = command.BrandId,
-                IdentityAuthentication = false,
-                IsSetPayPassword = false,
-                PhoneAuthentication = false,
-                UserName = "ThisIsPlayerName",
-                VipLevelId = null
-            });
+		_ = fakePlayerService
+			.GetPlayerInfoAsync(Arg.Is(command.PlayerCode))
+			.Returns(new Tgs.PlayerService.Client.PlayerInfo
+			{
+				PlayerCode = command.PlayerCode,
+				BrandId = command.BrandId,
+				IdentityAuthentication = false,
+				IsSetPayPassword = false,
+				PhoneAuthentication = false,
+				UserName = "ThisIsPlayerName",
+				VipLevelId = null
+			});
 
-        fakePlayerService
-            .GetPlayerPropertiesAsync(Arg.Is(command.PlayerCode))
-            .Returns(new Dictionary<string, string>
-            {
-                ["DefaultWalletId"] = walletId.ToString()
-            }.ToImmutableDictionary());
+		_ = fakePlayerService
+			.GetPlayerPropertiesAsync(Arg.Is(command.PlayerCode))
+			.Returns(new Dictionary<string, string>
+			{
+				["DefaultWalletId"] = walletId.ToString()
+			}.ToImmutableDictionary());
 
-        fakeCashServiceClient
-            .GetBalanceAsync(Arg.Any<Guid>())
-            .Returns(2000M);
+		_ = fakeCashServiceClient
+			.GetBalanceAsync(Arg.Any<Guid>())
+			.Returns(2000M);
 
-        fakeCashServiceClient
-            .LockWithdrawAsync(
-                Arg.Is(walletId),
-                Arg.Is(command.Amount),
-                Arg.Any<string>(),
-                Arg.Any<string>())
-            .Returns(new TransactionResponse
-            {
-                TransactionId = Guid.NewGuid(),
-                Balance = 12345M
-            });
+		_ = fakeCashServiceClient
+			.LockWithdrawAsync(
+				Arg.Is(walletId),
+				Arg.Is(command.Amount),
+				Arg.Any<string>(),
+				Arg.Any<string>())
+			.Returns(new TransactionResponse
+			{
+				TransactionId = Guid.NewGuid(),
+				Balance = 12345M
+			});
 
-        fakePlayerBucketRepository
-            .IsBucketFullAsync(Arg.Any<string>())
-            .Returns(true);
+		_ = fakePlayerBucketRepository
+			.IsBucketFullAsync(Arg.Any<string>())
+			.Returns(true);
 
         var fakeBankInfo = new PlayerBankInfo
         {
@@ -371,9 +371,9 @@ public class WithdrawTests
     {
         var dbContextOptionsBuilder = new DbContextOptionsBuilder<TgsRepository>();
 
-        dbContextOptionsBuilder
-            .UseInMemoryDatabase(Guid.NewGuid().ToString())
-            .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
+		_ = dbContextOptionsBuilder
+			.UseInMemoryDatabase(Guid.NewGuid().ToString())
+			.ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
         ITgsRepository repository = new TgsRepository(dbContextOptionsBuilder.Options);
         var playerCode = "4ucmqplxb029";
 
@@ -391,7 +391,7 @@ public class WithdrawTests
                 CurrentBucketAmount = 100
             });
 
-        await repository.SaveChangesAsync();
+		_ = await repository.SaveChangesAsync();
 
         var sut = new GetRequireAmountQueryService(repository);
         var actual = await sut.GetAsync(new GetRequireAmountQuery(playerCode));
@@ -522,45 +522,45 @@ public class WithdrawTests
 
         var walletId = Guid.NewGuid();
 
-        fakePlayerService
-            .GetPlayerInfoAsync(Arg.Is(command.PlayerCode))
-            .Returns(new Tgs.PlayerService.Client.PlayerInfo
-            {
-                PlayerCode = command.PlayerCode,
-                BrandId = command.BrandId,
-                IdentityAuthentication = false,
-                IsSetPayPassword = false,
-                PhoneAuthentication = false,
-                UserName = "Tester",
-                VipLevelId = null
-            });
+		_ = fakePlayerService
+			.GetPlayerInfoAsync(Arg.Is(command.PlayerCode))
+			.Returns(new Tgs.PlayerService.Client.PlayerInfo
+			{
+				PlayerCode = command.PlayerCode,
+				BrandId = command.BrandId,
+				IdentityAuthentication = false,
+				IsSetPayPassword = false,
+				PhoneAuthentication = false,
+				UserName = "Tester",
+				VipLevelId = null
+			});
 
-        fakePlayerService
-            .GetPlayerPropertiesAsync(Arg.Is(command.PlayerCode))
-            .Returns(new Dictionary<string, string>
-            {
-                ["DefaultWalletId"] = walletId.ToString()
-            }.ToImmutableDictionary());
+		_ = fakePlayerService
+			.GetPlayerPropertiesAsync(Arg.Is(command.PlayerCode))
+			.Returns(new Dictionary<string, string>
+			{
+				["DefaultWalletId"] = walletId.ToString()
+			}.ToImmutableDictionary());
 
-        fakeCashServiceClient
-            .GetBalanceAsync(Arg.Any<Guid>())
-            .Returns(1000M);
+		_ = fakeCashServiceClient
+			.GetBalanceAsync(Arg.Any<Guid>())
+			.Returns(1000M);
 
-        fakeCashServiceClient
-            .LockWithdrawAsync(
-                Arg.Is(walletId),
-                Arg.Any<decimal>(),
-                Arg.Any<string>(),
-                Arg.Any<string>())
-            .Returns(new TransactionResponse
-            {
-                Balance = -200M,
-                TransactionId = Guid.NewGuid()
-            });
+		_ = fakeCashServiceClient
+			.LockWithdrawAsync(
+				Arg.Is(walletId),
+				Arg.Any<decimal>(),
+				Arg.Any<string>(),
+				Arg.Any<string>())
+			.Returns(new TransactionResponse
+			{
+				Balance = -200M,
+				TransactionId = Guid.NewGuid()
+			});
 
-        fakePlayerBucketRepository
-            .IsBucketFullAsync(Arg.Any<string>())
-            .Returns(true);
+		_ = fakePlayerBucketRepository
+			.IsBucketFullAsync(Arg.Any<string>())
+			.Returns(true);
 
         var fakeBankInfo = new PlayerBankInfo
         {
@@ -571,7 +571,7 @@ public class WithdrawTests
             Detail = JsonDocument.Parse("{}")
         };
 
-        Assert.ThrowsAsync<InsufficientFundsException>(async () => await sut.ExecuteAsync(command));
+		_ = Assert.ThrowsAsync<InsufficientFundsException>(async () => await sut.ExecuteAsync(command));
     }
 
     [Test]
@@ -586,9 +586,9 @@ public class WithdrawTests
 
         var command = new CheckWithdrawPayPasswordCommand("ThisIsPlayerCode", "1qaz2wsx");
 
-        fakePasswordHandler
-            .Verify(Arg.Any<byte[]>(), Arg.Any<byte[]>(), Arg.Is(command.PayPassword))
-            .Returns(true);
+		_ = fakePasswordHandler
+			.Verify(Arg.Any<byte[]>(), Arg.Any<byte[]>(), Arg.Is(command.PayPassword))
+			.Returns(true);
 
         await sut.ExecuteAsync(command);
 

@@ -54,13 +54,13 @@ public class PayPasswordTests
             validateCode,
             token);
 
-        fakePlayerOperations.GetPlayerByCodeAsync(Arg.Is(player.PlayerCode)).Returns(player);
+		_ = fakePlayerOperations.GetPlayerByCodeAsync(Arg.Is(player.PlayerCode)).Returns(player);
 
-        fakeValidateCodeOperator
-            .GetValidateCodeDataAsync<ValidateCodeData>(Arg.Is(validateCode), Arg.Is(token))
-            .Returns((ValidateCodeData)null);
+		_ = fakeValidateCodeOperator
+			.GetValidateCodeDataAsync<ValidateCodeData>(Arg.Is(validateCode), Arg.Is(token))
+			.Returns((ValidateCodeData)null);
 
-        Assert.ThrowsAsync<ValidateCodeNotVerifyException>(async () => await sut.ExecuteAsync(command));
+		_ = Assert.ThrowsAsync<ValidateCodeNotVerifyException>(async () => await sut.ExecuteAsync(command));
     }
 
     [Test]
@@ -95,15 +95,15 @@ public class PayPasswordTests
             validateCode,
             token);
 
-        fakePlayerOperations.GetPlayerByCodeAsync(Arg.Is(player.PlayerCode)).Returns(player);
+		_ = fakePlayerOperations.GetPlayerByCodeAsync(Arg.Is(player.PlayerCode)).Returns(player);
 
-        fakeValidateCodeOperator
-            .GetValidateCodeDataAsync<ValidateCodeData>(Arg.Is(validateCode), Arg.Is(token))
-            .Returns(new ValidateCodeData(player.PlayerCode, token));
+		_ = fakeValidateCodeOperator
+			.GetValidateCodeDataAsync<ValidateCodeData>(Arg.Is(validateCode), Arg.Is(token))
+			.Returns(new ValidateCodeData(player.PlayerCode, token));
 
         await sut.ExecuteAsync(command);
 
-        fakePasswordHandler.Received(1).GenerateCredential(Arg.Is(newPassword));
+		_ = fakePasswordHandler.Received(1).GenerateCredential(Arg.Is(newPassword));
 
         _ = fakePlayerOperations
             .Received(1)
@@ -127,21 +127,21 @@ public class PayPasswordTests
         var password = "123456";
         var command = new SetFirstPayPasswordCommand(playerCode, password);
 
-        fakePlayerOperations
-            .GetPlayerByCodeAsync(Arg.Is(playerCode))
-            .Returns(new Player
-            {
-                PlayerCode = playerCode,
-                Username = "Tester",
-                WithdrawPassword = new byte[]
-                {
-                    1,
-                    2,
-                    3
-                }
-            });
+		_ = fakePlayerOperations
+			.GetPlayerByCodeAsync(Arg.Is(playerCode))
+			.Returns(new Player
+			{
+				PlayerCode = playerCode,
+				Username = "Tester",
+				WithdrawPassword = new byte[]
+				{
+					1,
+					2,
+					3
+				}
+			});
 
-        Assert.ThrowsAsync<PayPasswordAlreadySetException>(async () => await sut.ExecuteAsync(command));
+		_ = Assert.ThrowsAsync<PayPasswordAlreadySetException>(async () => await sut.ExecuteAsync(command));
     }
 
     [Test]
@@ -158,18 +158,18 @@ public class PayPasswordTests
         var password = "123456";
         var command = new SetFirstPayPasswordCommand(playerCode, password);
 
-        fakePlayerOperations
-            .GetPlayerByCodeAsync(Arg.Is(playerCode))
-            .Returns(new Player
-            {
-                PlayerCode = playerCode,
-                Username = "Tester",
-                WithdrawPassword = Array.Empty<byte>()
-            });
+		_ = fakePlayerOperations
+			.GetPlayerByCodeAsync(Arg.Is(playerCode))
+			.Returns(new Player
+			{
+				PlayerCode = playerCode,
+				Username = "Tester",
+				WithdrawPassword = Array.Empty<byte>()
+			});
 
         await sut.ExecuteAsync(command);
 
-        fakePasswordHandler.Received(1).GenerateCredential(Arg.Is(password));
+		_ = fakePasswordHandler.Received(1).GenerateCredential(Arg.Is(password));
 
         _ = fakePlayerOperations
             .Received(1)
@@ -215,18 +215,18 @@ public class PayPasswordTests
         var validateCode = "123456";
         var expectedSecurityKey = "3F8E5681-50C8-4F2F-8379-3AA6EF2C6064";
 
-        fakePlayerOperations.GetPlayerByCodeAsync(Arg.Is(player.PlayerCode))
-            .Returns(player);
+		_ = fakePlayerOperations.GetPlayerByCodeAsync(Arg.Is(player.PlayerCode))
+			.Returns(player);
 
-        fakeValidateCodeGenerator.GenerateCode()
-            .Returns(validateCode);
+		_ = fakeValidateCodeGenerator.GenerateCode()
+			.Returns(validateCode);
 
-        fakeValidateCodeGenerator.GenerateSecurityKey()
-            .Returns(expectedSecurityKey);
+		_ = fakeValidateCodeGenerator.GenerateSecurityKey()
+			.Returns(expectedSecurityKey);
 
-        fakeValidateCodeOperator
-            .SaveValidateDataAsync(Arg.Is(validateCode), Arg.Is(expectedSecurityKey), Arg.Any<ValidateCodeData>())
-            .Returns(true);
+		_ = fakeValidateCodeOperator
+			.SaveValidateDataAsync(Arg.Is(validateCode), Arg.Is(expectedSecurityKey), Arg.Any<ValidateCodeData>())
+			.Returns(true);
 
         var expected = new
         {
@@ -240,20 +240,20 @@ public class PayPasswordTests
 
         SendEmailRequest actual = null;
 
-        fakeEmailClient
-            .SendAsync(Arg.Do<SendEmailRequest>(msg =>
-            {
-                actual = msg;
-            }))
-            .Returns(ValueTask.FromResult(new SendEmailResponse()));
+		_ = fakeEmailClient
+			.SendAsync(Arg.Do<SendEmailRequest>(msg =>
+			{
+				actual = msg;
+			}))
+			.Returns(ValueTask.FromResult(new SendEmailResponse()));
 
-        fakeBrandServiceClient.GetBrandInfoAsync(Arg.Any<Guid>())
-            .Returns(new Tgs.BrandCertificate.Clients.BrandInfo
-            {
-                Id = player.BrandId,
-                Code = "brandCode",
-                Currency = "CNY"
-            });
+		_ = fakeBrandServiceClient.GetBrandInfoAsync(Arg.Any<Guid>())
+			.Returns(new Tgs.BrandCertificate.Clients.BrandInfo
+			{
+				Id = player.BrandId,
+				Code = "brandCode",
+				Currency = "CNY"
+			});
 
         var actualSecurityKey = await sut.GetAsync(command);
 
@@ -278,7 +278,7 @@ public class PayPasswordTests
             BrandId = Guid.NewGuid(),
             DefaultWalletCurrencyCode = "CNY"
         };
-        fakePlayerOperations.GetPlayerByCodeAsync(playerCode).Returns(player);
+		_ = fakePlayerOperations.GetPlayerByCodeAsync(playerCode).Returns(player);
         var fakeValidateCodeGenerator = Substitute.For<IValidateCodeGenerator>();
         var fakeValidateCodeOperator = Substitute.For<IValidateCodeOperator>();
         var fakeEmailClient = Substitute.For<IEmailClient>();
@@ -297,7 +297,7 @@ public class PayPasswordTests
             fakeSmsServiceClient,
             fakeBrandServiceClient);
 
-        Assert.ThrowsAsync<EmailNotVerifyException>(async () => await sut.GetAsync(command));
+		_ = Assert.ThrowsAsync<EmailNotVerifyException>(async () => await sut.GetAsync(command));
     }
 
     [Test]
@@ -314,8 +314,8 @@ public class PayPasswordTests
         // act
         var actual = sut.TestValidate(request);
 
-        // assert
-        actual.ShouldHaveValidationErrorFor(request => request.NewPassword);
+		// assert
+		_ = actual.ShouldHaveValidationErrorFor(request => request.NewPassword);
     }
 
     [Test]
@@ -332,8 +332,8 @@ public class PayPasswordTests
         // act
         var actual = sut.TestValidate(request);
 
-        // assert
-        actual.ShouldHaveValidationErrorFor(request => request.NewPassword);
+		// assert
+		_ = actual.ShouldHaveValidationErrorFor(request => request.NewPassword);
     }
 
     [Test]
@@ -350,8 +350,8 @@ public class PayPasswordTests
         // act
         var actual = sut.TestValidate(request);
 
-        // assert
-        actual.ShouldHaveValidationErrorFor(request => request.NewPassword);
+		// assert
+		_ = actual.ShouldHaveValidationErrorFor(request => request.NewPassword);
     }
 
     [Test]
@@ -368,8 +368,8 @@ public class PayPasswordTests
         // act
         var actual = sut.TestValidate(request);
 
-        // assert
-        actual.ShouldHaveValidationErrorFor(request => request.Password);
+		// assert
+		_ = actual.ShouldHaveValidationErrorFor(request => request.Password);
     }
 
     [Test]
@@ -386,8 +386,8 @@ public class PayPasswordTests
         // act
         var actual = sut.TestValidate(request);
 
-        // assert
-        actual.ShouldHaveValidationErrorFor(request => request.Password);
+		// assert
+		_ = actual.ShouldHaveValidationErrorFor(request => request.Password);
     }
 
     [Test]
@@ -404,7 +404,7 @@ public class PayPasswordTests
         // act
         var actual = sut.TestValidate(request);
 
-        // assert
-        actual.ShouldHaveValidationErrorFor(request => request.Password);
+		// assert
+		_ = actual.ShouldHaveValidationErrorFor(request => request.Password);
     }
 }

@@ -13,15 +13,15 @@ public static class OperatorConfigurationExtensions
     public static OperatorConfiguration UseOperatorRepositories(this OperatorConfiguration configuration,
         Func<IServiceProvider, IDatabase> redisDatabaseResolver)
     {
-        configuration.Services
-            .AddSingleton<RedisConnectionFactory>();
+		_ = configuration.Services
+			.AddSingleton<RedisConnectionFactory>();
 
-        configuration.Services
-            .AddSingleton<ISystemClock, DefaultSystemClock>();
+		_ = configuration.Services
+			.AddSingleton<ISystemClock, DefaultSystemClock>();
 
-        configuration.Services
-            .AddTransient<IPlayerOnlineRepository>(sp
-                => ActivatorUtilities.CreateInstance<PlayerOnlineRepository>(sp, redisDatabaseResolver(sp)));
+		_ = configuration.Services
+			.AddTransient<IPlayerOnlineRepository>(sp
+				=> ActivatorUtilities.CreateInstance<PlayerOnlineRepository>(sp, redisDatabaseResolver(sp)));
 
         return configuration
             .AddWalletRepository<PlayerRepository>()

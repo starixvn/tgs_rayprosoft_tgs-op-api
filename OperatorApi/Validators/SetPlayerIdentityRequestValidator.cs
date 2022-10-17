@@ -15,7 +15,7 @@ public class SetPlayerIdentityRequestValidator : AbstractValidator<SetPlayerIden
 		IPlayerOperations playerOperations,
 		IIdentityVerifierSelector<string> identityVerifierSelector)
 	{
-		RuleFor(x => x.RealName)
+		_ = RuleFor(x => x.RealName)
 			.NotNull()
 			.NotEmpty()
 			.WithName(x => x

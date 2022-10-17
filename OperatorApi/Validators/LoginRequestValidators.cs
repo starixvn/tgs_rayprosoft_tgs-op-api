@@ -8,17 +8,17 @@ public sealed class LoginRequestValidators : BaseUserRequestValidator<LoginReque
 {
     public LoginRequestValidators()
     {
-        RuleFor(x => x.Password)
-            .NotEmpty()
-            .WithName(x => x
-                .WithPropertyExpression(o => o.Password)
-                .GetJsonPropertyName(x.Password));
+		_ = RuleFor(x => x.Password)
+			.NotEmpty()
+			.WithName(x => x
+				.WithPropertyExpression(o => o.Password)
+				.GetJsonPropertyName(x.Password));
 
-        RuleFor(x => x.PlatformType)
-            .IsInEnum()
-            .WithMessage(x => string.Format(
-                "{0} does not exist",
-                x.WithPropertyExpression(o => o.PlatformType)
-                    .GetJsonPropertyName(nameof(x.PlatformType))));
+		_ = RuleFor(x => x.PlatformType)
+			.IsInEnum()
+			.WithMessage(x => string.Format(
+				"{0} does not exist",
+				x.WithPropertyExpression(o => o.PlatformType)
+					.GetJsonPropertyName(nameof(x.PlatformType))));
     }
 }

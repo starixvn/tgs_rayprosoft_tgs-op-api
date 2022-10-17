@@ -10,18 +10,18 @@ public static class ServiceCollectionExtensions
         this IServiceCollection service,
         Action<RedisOptions, IServiceProvider> configure)
     {
-        service
-            .AddOptions<RedisOptions>()
-            .Configure(configure)
-            .Services
-            .AddRedisServices()
-            .RegisterRedisConnectionFactory<RedisConnectionFactory>();
+		_ = service
+			.AddOptions<RedisOptions>()
+			.Configure(configure)
+			.Services
+			.AddRedisServices()
+			.RegisterRedisConnectionFactory<RedisConnectionFactory>();
 
-        service.AddSingleton(sp =>
-        {
-            var connectionFactory = sp.GetRequiredService<IRedisConnectionFactory>();
-            return connectionFactory.GetConnection();
-        });
+		_ = service.AddSingleton(sp =>
+		{
+			var connectionFactory = sp.GetRequiredService<IRedisConnectionFactory>();
+			return connectionFactory.GetConnection();
+		});
 
         return service;
     }

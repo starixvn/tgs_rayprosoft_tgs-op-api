@@ -27,7 +27,7 @@ public class PlayerDepositTests
             UpdateOnRange: null,
             new PageableRequest());
 
-        await sut.GetAsync(query, default);
+		_ = await sut.GetAsync(query, default);
 
         _ = fakePaymentServiceClient
             .Received(1)
@@ -51,7 +51,7 @@ public class PlayerDepositTests
             UpdateOnRange: null,
             new PageableRequest());
 
-        await sut.GetAsync(query, default);
+		_ = await sut.GetAsync(query, default);
 
         _ = fakePaymentServiceClient
             .Received(1)

@@ -52,9 +52,9 @@ public class PlayerStatusCheckTests
     public async Task When_Api_Has_AuthorizePlayerTokenAttribute_And_AllowNullOrEmpty_Is_False_And_NeedAuthorize_Is_True_Should_Execute()
     {
         var fakeService = Substitute.For<IGetService<GetPlayerStatusQuery, PlayerStatus>>();
-        fakeService
-            .GetAsync(new GetPlayerStatusQuery("playerCode"))
-            .Returns(PlayerStatus.Disabled);
+		_ = fakeService
+			.GetAsync(new GetPlayerStatusQuery("playerCode"))
+			.Returns(PlayerStatus.Disabled);
         var sut = new CheckPlayerEnabledFilter(fakeService);
         var fakeHttpContext = new DefaultHttpContext();
 
@@ -136,9 +136,9 @@ public class PlayerStatusCheckTests
     public async Task When_Api_Has_AuthorizePlayerTokenAttribute_And_NeedAuthorize_Is_True_And_AllowNullOrEmpty_Is_False_And_Player_Status_Blacklist_Should_Get_StatusCodes_403()
     {
         var fakeService = Substitute.For<IGetService<GetPlayerStatusQuery, PlayerStatus>>();
-        fakeService
-            .GetAsync(new GetPlayerStatusQuery("playerCode"))
-            .Returns(PlayerStatus.InBlacklist);
+		_ = fakeService
+			.GetAsync(new GetPlayerStatusQuery("playerCode"))
+			.Returns(PlayerStatus.InBlacklist);
         var sut = new CheckPlayerEnabledFilter(fakeService);
         var fakeHttpContext = new DefaultHttpContext();
 
@@ -193,9 +193,9 @@ public class PlayerStatusCheckTests
     {
         var fakeService = Substitute.For<IGetService<GetPlayerStatusQuery, PlayerStatus>>();
 
-        fakeService
-            .GetAsync(new GetPlayerStatusQuery("playerCode"))
-            .Returns(PlayerStatus.InBlacklist);
+		_ = fakeService
+			.GetAsync(new GetPlayerStatusQuery("playerCode"))
+			.Returns(PlayerStatus.InBlacklist);
 
         var sut = new CheckPlayerEnabledFilter(fakeService);
 
@@ -234,9 +234,9 @@ public class PlayerStatusCheckTests
     {
         var fakeService = Substitute.For<IGetService<GetPlayerStatusQuery, PlayerStatus>>();
 
-        fakeService
-            .GetAsync(new GetPlayerStatusQuery("playerCode"))
-            .Returns(PlayerStatus.InBlacklist);
+		_ = fakeService
+			.GetAsync(new GetPlayerStatusQuery("playerCode"))
+			.Returns(PlayerStatus.InBlacklist);
         var sut = new CheckPlayerEnabledFilter(fakeService);
 
         var fakeHttpContext = new DefaultHttpContext();
@@ -272,9 +272,9 @@ public class PlayerStatusCheckTests
     public async Task When_Player_Status_Disabled_And_Api_Has_EnabledUserBlockedAttribute_Should_Get_StatusCodes_403()
     {
         var fakeService = Substitute.For<IGetService<GetPlayerStatusQuery, PlayerStatus>>();
-        fakeService
-            .GetAsync(new GetPlayerStatusQuery("playerCode"))
-            .Returns(PlayerStatus.Disabled);
+		_ = fakeService
+			.GetAsync(new GetPlayerStatusQuery("playerCode"))
+			.Returns(PlayerStatus.Disabled);
 
         var sut = new CheckPlayerEnabledFilter(fakeService);
 
@@ -311,9 +311,9 @@ public class PlayerStatusCheckTests
     public async Task When_Player_Status_Disabled_And_Api_Has_No_CheckEnabledAttribute_Should_Execute()
     {
         var fakeService = Substitute.For<IGetService<GetPlayerStatusQuery, PlayerStatus>>();
-        fakeService
-            .GetAsync(new GetPlayerStatusQuery("playerCode"))
-            .Returns(PlayerStatus.Disabled);
+		_ = fakeService
+			.GetAsync(new GetPlayerStatusQuery("playerCode"))
+			.Returns(PlayerStatus.Disabled);
 
         var sut = new CheckPlayerEnabledFilter(fakeService);
 
@@ -343,9 +343,9 @@ public class PlayerStatusCheckTests
     public async Task When_Player_Status_Enabled_Api_Should_Execute()
     {
         var fakeService = Substitute.For<IGetService<GetPlayerStatusQuery, PlayerStatus>>();
-        fakeService
-            .GetAsync(new GetPlayerStatusQuery("playerCode"))
-            .Returns(PlayerStatus.Enabled);
+		_ = fakeService
+			.GetAsync(new GetPlayerStatusQuery("playerCode"))
+			.Returns(PlayerStatus.Enabled);
 
         var sut = new CheckPlayerEnabledFilter(fakeService);
 

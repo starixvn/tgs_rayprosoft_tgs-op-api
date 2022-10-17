@@ -27,27 +27,27 @@ public class WalletTests
 
         var playerCode = "ThisIsPlayerCode";
         var brandId = Guid.NewGuid();
-        moqPlayerOperations.Setup(fake => fake.GetCachedPlayerAsync(It.Is<string>(x => x == playerCode)))
-            .Returns(Task.FromResult(new CachedPlayer
-            {
-                PlayerCode = playerCode,
-                Username = "userName",
-                BetLimitId = 0,
-                BrandId = brandId,
-                BrandCode = "BrandCode",
-                DefaultWalletCurrencyCode = "CNY",
-                DefaultWalletId = Guid.NewGuid(),
-                ExternalCurrencyCode = "CNY",
-                Status = PlayerStatus.Enabled,
-                Type = PlayerType.RealPlayer
-            }));
+		_ = moqPlayerOperations.Setup(fake => fake.GetCachedPlayerAsync(It.Is<string>(x => x == playerCode)))
+			.Returns(Task.FromResult(new CachedPlayer
+			{
+				PlayerCode = playerCode,
+				Username = "userName",
+				BetLimitId = 0,
+				BrandId = brandId,
+				BrandCode = "BrandCode",
+				DefaultWalletCurrencyCode = "CNY",
+				DefaultWalletId = Guid.NewGuid(),
+				ExternalCurrencyCode = "CNY",
+				Status = PlayerStatus.Enabled,
+				Type = PlayerType.RealPlayer
+			}));
         var expected = new BalanceInfo(10000M).ToExpectedObject();
 
-        moqCashServiceClient
-            .Setup(fake => fake.GetBalanceAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
-            .Returns(ValueTask.FromResult(10000M));
+		_ = moqCashServiceClient
+			.Setup(fake => fake.GetBalanceAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+			.Returns(ValueTask.FromResult(10000M));
 
-        moqPlayerOnlineRepository.Setup(fake => fake.SetAsync(brandId, playerCode));
+		_ = moqPlayerOnlineRepository.Setup(fake => fake.SetAsync(brandId, playerCode));
 
         var actual = await sut.GetAsync(new GetBalanceQuery(playerCode));
 

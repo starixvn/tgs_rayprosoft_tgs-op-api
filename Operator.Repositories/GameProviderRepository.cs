@@ -32,11 +32,11 @@ internal class GameProviderRepository : IGameProviderRepository
             SubGameProviderCode = gameInfo.SubGpCode
         };
 
-        await _tgsRepository.PlayerFavoriteGames
-            .AddAsync(fg)
-            .ConfigureAwait(false);
+		_ = await _tgsRepository.PlayerFavoriteGames
+			.AddAsync(fg)
+			.ConfigureAwait(false);
 
-        await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
+		_ = await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
     }
 
     public IAsyncEnumerable<BrandGameInfo> QueryAllGamesAsync(Guid brandId)
@@ -170,9 +170,9 @@ internal class GameProviderRepository : IGameProviderRepository
             .ConfigureAwait(false);
         
         if (fg is not null)
-            _tgsRepository.PlayerFavoriteGames.Remove(fg);
+			_ = _tgsRepository.PlayerFavoriteGames.Remove(fg);
 
-        await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
+		_ = await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
     }
 
     private GameStatus GetGameStatus(GameStatus brandGameStatus, GameStatus gameStatus)

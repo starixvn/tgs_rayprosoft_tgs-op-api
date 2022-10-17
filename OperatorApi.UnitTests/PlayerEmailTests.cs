@@ -98,13 +98,13 @@ public class PlayerEmailTests
             Arg.Is(securityKey))
             .Returns(new EmailValidateData(email, playerCode));
 
-        fakePlayerServiceClient.GetPlayerInfoByEmailAsync(
-            Arg.Is(brandInfo.Id),
-            Arg.Is(email))
-            .Returns(new Tgs.PlayerService.Client.PlayerInfo
-            {
-                PlayerCode = "other"
-            });
+		_ = fakePlayerServiceClient.GetPlayerInfoByEmailAsync(
+			Arg.Is(brandInfo.Id),
+			Arg.Is(email))
+			.Returns(new Tgs.PlayerService.Client.PlayerInfo
+			{
+				PlayerCode = "other"
+			});
 
         var command = new CommitInitPlayerEmailCommand(
             securityKey,
@@ -225,11 +225,11 @@ public class PlayerEmailTests
 
         var command = new CommitSetPlayerEmailCommand(playerCode, token, validateCode, brandId);
 
-        fakeValidateCodeOperator
-            .GetValidateCodeDataAsync<EmailValidateData>(Arg.Any<string>(), Arg.Any<string>())
-            .Returns((EmailValidateData)null);
+		_ = fakeValidateCodeOperator
+			.GetValidateCodeDataAsync<EmailValidateData>(Arg.Any<string>(), Arg.Any<string>())
+			.Returns((EmailValidateData)null);
 
-        Assert.ThrowsAsync<ValidateCodeNotVerifyException>(async () => await sut.ExecuteAsync(command));
+		_ = Assert.ThrowsAsync<ValidateCodeNotVerifyException>(async () => await sut.ExecuteAsync(command));
     }
 
     [Test]
@@ -252,9 +252,9 @@ public class PlayerEmailTests
 
         var command = new CommitSetPlayerEmailCommand(playerCode, securityKey, validateCode, brandId);
 
-        fakeValidateCodeOperator
-            .GetValidateCodeDataAsync<EmailValidateData>(Arg.Is(validateCode), Arg.Is(securityKey))
-            .Returns(new EmailValidateData(email, playerCode));
+		_ = fakeValidateCodeOperator
+			.GetValidateCodeDataAsync<EmailValidateData>(Arg.Is(validateCode), Arg.Is(securityKey))
+			.Returns(new EmailValidateData(email, playerCode));
 
         await sut.ExecuteAsync(command);
 
@@ -330,20 +330,20 @@ public class PlayerEmailTests
             fakeCheckEmailService);
         var brandId = Guid.NewGuid();
 
-        fakeValidateCodeOperator
-            .GetValidateCodeDataAsync<EmailValidateData>(Arg.Any<string>(), Arg.Any<string>())
-            .Returns(new EmailValidateData("test@email.com", "playerCode"));
+		_ = fakeValidateCodeOperator
+			.GetValidateCodeDataAsync<EmailValidateData>(Arg.Any<string>(), Arg.Any<string>())
+			.Returns(new EmailValidateData("test@email.com", "playerCode"));
 
-        fakeCheckEmailService
-            .GetAsync(Arg.Any<CheckBrandEmailQuery>())
-            .Returns(true);
+		_ = fakeCheckEmailService
+			.GetAsync(Arg.Any<CheckBrandEmailQuery>())
+			.Returns(true);
 
-        Assert.ThrowsAsync<BrandEmailDuplicateException>(async ()
-            => await sut.ExecuteAsync(new CommitSetPlayerEmailCommand(
-                "playerCode",
-                "a0e4ec77-d05b-41c4-b7dd-dde8e46c27bc",
-                "909542",
-                brandId)));
+		_ = Assert.ThrowsAsync<BrandEmailDuplicateException>(async ()
+			=> await sut.ExecuteAsync(new CommitSetPlayerEmailCommand(
+				"playerCode",
+				"a0e4ec77-d05b-41c4-b7dd-dde8e46c27bc",
+				"909542",
+				brandId)));
     }
 
     [Test]
@@ -406,12 +406,12 @@ public class PlayerEmailTests
         var validateCode = "123456";
         var expectedSecurityKey = "3F8E5681-50C8-4F2F-8379-3AA6EF2C6064";
 
-        fakeValidateCodeGenerator.GenerateCode().Returns(validateCode);
-        fakeValidateCodeGenerator.GenerateSecurityKey().Returns(expectedSecurityKey);
+		_ = fakeValidateCodeGenerator.GenerateCode().Returns(validateCode);
+		_ = fakeValidateCodeGenerator.GenerateSecurityKey().Returns(expectedSecurityKey);
 
-        fakeValidateCodeOperator
-            .SaveValidateDataAsync(Arg.Is(validateCode), Arg.Is(expectedSecurityKey), Arg.Any<EmailValidateData>())
-            .Returns(true);
+		_ = fakeValidateCodeOperator
+			.SaveValidateDataAsync(Arg.Is(validateCode), Arg.Is(expectedSecurityKey), Arg.Any<EmailValidateData>())
+			.Returns(true);
 
         var expected = new
         {
@@ -421,12 +421,12 @@ public class PlayerEmailTests
         }.ToExpectedObject();
 
         SendEmailRequest actual = null;
-        fakeEmailClient
-            .SendAsync(Arg.Do<SendEmailRequest>(msg =>
-            {
-                actual = msg;
-            }))
-            .Returns(ValueTask.FromResult(new SendEmailResponse()));
+		_ = fakeEmailClient
+			.SendAsync(Arg.Do<SendEmailRequest>(msg =>
+			{
+				actual = msg;
+			}))
+			.Returns(ValueTask.FromResult(new SendEmailResponse()));
         var actualSecurityKey = await sut.GetAsync(command);
 
         _ = fakeEmailClient

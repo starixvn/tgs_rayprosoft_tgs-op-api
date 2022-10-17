@@ -97,7 +97,7 @@ internal class StartChangePayPasswordCommandService : IGetService<StartChangePay
                 mailSubject,
                 mailBody);
 
-            await _emailClient.SendAsync(mailMessage).ConfigureAwait(false);
+			_ = await _emailClient.SendAsync(mailMessage).ConfigureAwait(false);
         }
 
         return saveResult.Token;

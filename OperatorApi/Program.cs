@@ -14,23 +14,23 @@ public class Program
         Host.CreateDefaultBuilder(args)
             .ConfigureAppConfiguration((ctx, builder) =>
             {
-                builder.AddJsonFile("/config/appsettings.json", true).AddEnvironmentVariables();
+				_ = builder.AddJsonFile("/config/appsettings.json", true).AddEnvironmentVariables();
             })
             .ConfigureLogging((ctx, logging) =>
             {
-                logging
-                    .AddOpenTelemetry(options =>
-                    {
-                        options.IncludeFormattedMessage = true;
-                        options.ParseStateValues = true;
-                        _ = options.AddFluentdForwardExporter(fluentOptions =>
-                        {
-                            var nodeIp = ctx.Configuration.GetValue<string>("NODE_IP");
-                            fluentOptions.Host = nodeIp;
-                            fluentOptions.Tag = ctx.Configuration.GetValue<string>("OTEL_SERVICE_NAME");
-                            fluentOptions.UseMessagePack();
-                        });
-                    });
+				_ = logging
+					.AddOpenTelemetry(options =>
+					{
+						options.IncludeFormattedMessage = true;
+						options.ParseStateValues = true;
+						_ = options.AddFluentdForwardExporter(fluentOptions =>
+						{
+							var nodeIp = ctx.Configuration.GetValue<string>("NODE_IP");
+							fluentOptions.Host = nodeIp;
+							fluentOptions.Tag = ctx.Configuration.GetValue<string>("OTEL_SERVICE_NAME");
+							fluentOptions.UseMessagePack();
+						});
+					});
             })
             .ConfigureWebHostDefaults(webBuilder => webBuilder.UseStartup<Startup>());
 
