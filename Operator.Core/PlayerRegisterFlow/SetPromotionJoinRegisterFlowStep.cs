@@ -2,7 +2,6 @@
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using Castle.Core.Logging;
 using Microsoft.Extensions.Logging;
 using Tgs.Promotion.Clients;
 using Tgs.Promotion.Clients.Models.Promotion;
@@ -11,8 +10,8 @@ namespace TGS.Services.Operator.PlayerRegisterFlow;
 
 internal class SetPromotionJoinRegisterFlowStep : IRegisterFlowStep
 {
-	private readonly IPromotionClient _promotionClient;
 	private readonly ILogger<SetPromotionJoinRegisterFlowStep> _logger;
+	private readonly IPromotionClient _promotionClient;
 	private Guid[]? _promotionIds;
 
 	public string Type => "JoinPromotion";
@@ -39,13 +38,14 @@ internal class SetPromotionJoinRegisterFlowStep : IRegisterFlowStep
 		if (string.IsNullOrWhiteSpace(locationInfo.PlayerCode))
 			return new RegisterFlowProcessResult(false, null, null);
 
+		_logger.LogInformation("SetPromotionJoinRegisterFlowStep promotionIds:{promotionIds}", _promotionIds);
 		foreach (var promotionId in _promotionIds!)
 		{
 			_ = await _promotionClient
 				.JoinAsync(new JoinPromotionRequest(promotionId, locationInfo.PlayerCode))
 				.ConfigureAwait(false);
 
-			_logger.LogInformation("join promotion, promotion Id:{promotionId}, playerCode:{locationInfo.PlayerCode}", promotionId, locationInfo.PlayerCode);
+			_logger.LogInformation("SetPromotionJoinRegisterFlowStep join promotion, promotion Id:{promotionId}, playerCode:{locationInfo.PlayerCode}", promotionId, locationInfo.PlayerCode);
 		}
 
 		return new RegisterFlowProcessResult(true, null, null);
