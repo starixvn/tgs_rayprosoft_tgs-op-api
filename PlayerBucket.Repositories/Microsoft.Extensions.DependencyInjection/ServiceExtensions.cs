@@ -7,7 +7,7 @@ public static class ServiceExtensions
 {
     public static IServiceCollection AddPlayerBucketRepositoriesServices(this IServiceCollection services)
     {
-        services.AddTransient<IPlayerBucketRepository, PlayerBucketRepository>();
+		_ = services.AddTransient<IPlayerBucketRepository, PlayerBucketRepository>();
 
         return services;
     }

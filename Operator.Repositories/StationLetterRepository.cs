@@ -57,7 +57,7 @@ internal class StationLetterRepository : IStationLetterRepository
             letter.IsRead = true;
             letter.ReadOn = DateTimeOffset.UtcNow;
 
-            await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
+			_ = await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
         }
     }
 

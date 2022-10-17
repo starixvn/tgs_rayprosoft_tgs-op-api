@@ -20,12 +20,12 @@ public class AnnouncementTests
 
         var query = new GetAnnouncementQuery(Guid.NewGuid());
 
-        await sut.QueryAsync(query).ToArrayAsync();
+		_ = await sut.QueryAsync(query).ToArrayAsync();
 
-        fakeBrandRepository
-            .Received(1)
-            .QueryAnnouncementInfosAsync(
-                Arg.Is(query.BrandId),
-                Arg.Any<DateTimeOffset>());
+		_ = fakeBrandRepository
+			.Received(1)
+			.QueryAnnouncementInfosAsync(
+				Arg.Is(query.BrandId),
+				Arg.Any<DateTimeOffset>());
     }
 }

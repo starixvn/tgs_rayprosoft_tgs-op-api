@@ -2,8 +2,8 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace TGS.Apis.OperatorApi.Models.Messages
-{
+namespace TGS.Apis.OperatorApi.Models.Messages;
+
     public class BrandPaymentViewModel
     {
         [JsonPropertyName("banktype")]
@@ -45,4 +45,3 @@ namespace TGS.Apis.OperatorApi.Models.Messages
         [JsonPropertyName("transferlimit")]
         public ValueRange<decimal> TransferLimit { get; init; }
     }
-}

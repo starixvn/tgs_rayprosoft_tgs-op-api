@@ -129,8 +129,8 @@ public class BankDepositController : ControllerBase
 
             var identityId = Guid.NewGuid();
 
-            await redisRepository.StoreDepositHtmlAsync(identityId, applyInfo.Response.Html)
-                .ConfigureAwait(false);
+			_ = await redisRepository.StoreDepositHtmlAsync(identityId, applyInfo.Response.Html)
+				.ConfigureAwait(false);
 
             return new DepositFormCreatedResponse
             {

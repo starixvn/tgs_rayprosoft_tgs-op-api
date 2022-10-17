@@ -19,8 +19,8 @@ public class PlayerGameSettingsTests
 
         var query = new GetPlayerIsAutoTransferToGameQuery("ThisIsPlayerCode");
 
-        fakePlayerRepository.GetPlayerAutoTransferFlagAsync(Arg.Any<string>())
-            .Returns(true);
+		_ = fakePlayerRepository.GetPlayerAutoTransferFlagAsync(Arg.Any<string>())
+			.Returns(true);
 
         var actual = await sut.GetAsync(query);
 

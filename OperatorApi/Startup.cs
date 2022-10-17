@@ -58,303 +58,303 @@ public sealed class Startup
 
     public void Configure(IApplicationBuilder app, ILogger<Startup> logger)
     {
-        app.UseForwardedHeaders();
-        app.UseRequestLocalization(options =>
-        {
-            var config = app.ApplicationServices.GetRequiredService<IConfiguration>();
+		_ = app.UseForwardedHeaders();
+		_ = app.UseRequestLocalization(options =>
+		{
+			var config = app.ApplicationServices.GetRequiredService<IConfiguration>();
 
-            options.SupportedCultures.Clear();
-            options.SupportedUICultures.Clear();
+			options.SupportedCultures.Clear();
+			options.SupportedUICultures.Clear();
 
-            config.GetSection("RequestLocalization").Bind(options);
+			config.GetSection("RequestLocalization").Bind(options);
 
-            options.SetDefaultCulture(config.GetValue<string>("RequestLocalization:DefaultRequestCulture"));
-        });
+			_ = options.SetDefaultCulture(config.GetValue<string>("RequestLocalization:DefaultRequestCulture"));
+		});
 
-        app.UseBrandCertificate();
-        app.UseRouting();
-        app.UseCors();
-        app.UseVerifyJwtTokenMiddlewares(Consts.DefaultBypassRouting);
+		_ = app.UseBrandCertificate();
+		_ = app.UseRouting();
+		_ = app.UseCors();
+		_ = app.UseVerifyJwtTokenMiddlewares(Consts.DefaultBypassRouting);
 
-        app.UseEndpoints(endpoints =>
-        {
-            endpoints.MapControllers();
+		_ = app.UseEndpoints(endpoints =>
+		{
+			_ = endpoints.MapControllers();
 
-            endpoints.MapHealthChecks("/health");
-            endpoints.MapProfileViewer();
-        });
+			_ = endpoints.MapHealthChecks("/health");
+			endpoints.MapProfileViewer();
+		});
 
-        app.UseSwagger();
-        app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "TGS Operator API"));
+		_ = app.UseSwagger();
+		_ = app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "TGS Operator API"));
     }
 
     public void ConfigureServices(IServiceCollection services)
     {
-        services
-            .AddOptions<ForwardedHeadersOptions>()
-            .Configure<IConfiguration>((options, config) =>
-            {
-                options.ForwardedHeaders = ForwardedHeaders.All;
-                options.ForwardLimit = config.GetValue<int>("ForwardedHeaders:ForwardLimit");
+		_ = services
+			.AddOptions<ForwardedHeadersOptions>()
+			.Configure<IConfiguration>((options, config) =>
+			{
+				options.ForwardedHeaders = ForwardedHeaders.All;
+				options.ForwardLimit = config.GetValue<int>("ForwardedHeaders:ForwardLimit");
 
-                var forwardedForHeaderName = config.GetValue<string>("ForwardedHeaders:ForwardedForHeaderName");
-                if (!string.IsNullOrWhiteSpace(forwardedForHeaderName))
-                    options.ForwardedForHeaderName = forwardedForHeaderName;
+				var forwardedForHeaderName = config.GetValue<string>("ForwardedHeaders:ForwardedForHeaderName");
+				if (!string.IsNullOrWhiteSpace(forwardedForHeaderName))
+					options.ForwardedForHeaderName = forwardedForHeaderName;
 
-                var knownProxies = config.GetSection("ForwardedHeaders:KnownProxies").Get<string[]>() ?? Array.Empty<string>();
+				var knownProxies = config.GetSection("ForwardedHeaders:KnownProxies").Get<string[]>() ?? Array.Empty<string>();
 
-                foreach (var knownProxie in knownProxies)
-                    options.KnownProxies.Add(IPAddress.Parse(knownProxie));
+				foreach (var knownProxie in knownProxies)
+					options.KnownProxies.Add(IPAddress.Parse(knownProxie));
 
-                var knownNetworks = config.GetSection("ForwardedHeaders:KnownNetworks").Get<string[]>() ?? Array.Empty<string>();
+				var knownNetworks = config.GetSection("ForwardedHeaders:KnownNetworks").Get<string[]>() ?? Array.Empty<string>();
 
-                foreach (var cidr in knownNetworks)
-                {
-                    (var ip, var range) = cidr.Split("/");
+				foreach (var cidr in knownNetworks)
+				{
+					(var ip, var range) = cidr.Split("/");
 
-                    options.KnownNetworks.Add(
-                        new IPNetwork(
-                            IPAddress.Parse(ip),
-                            string.IsNullOrEmpty(range)
-                                ? 32
-                                : int.Parse(range)));
-                }
-            });
+					options.KnownNetworks.Add(
+						new IPNetwork(
+							IPAddress.Parse(ip),
+							string.IsNullOrEmpty(range)
+								? 32
+								: int.Parse(range)));
+				}
+			});
 
-        services.AddTgsRepository(_configuration, "Tgs");
+		_ = services.AddTgsRepository(_configuration, "Tgs");
 
-        services.AddMemoryCache();
+		_ = services.AddMemoryCache();
 
-        services
-            .AddWebApiServices()
-            .AddTgsLog()
-            .AddSystemJsonSerializer()
-            .AddSecurity()
-            .AddOperations()
-            .AddApiClient()
-            .AddReportClient((options, sp) =>
-            {
-                var config = sp.GetRequiredService<IConfiguration>();
+		_ = services
+			.AddWebApiServices()
+			.AddTgsLog()
+			.AddSystemJsonSerializer()
+			.AddSecurity()
+			.AddOperations()
+			.AddApiClient()
+			.AddReportClient((options, sp) =>
+			{
+				var config = sp.GetRequiredService<IConfiguration>();
 
-                options.BaseUrl = config.GetValue<Uri>("Report:Url");
-            })
-            .AddPromotionClientServices((options, sp) =>
-            {
-                var config = sp.GetRequiredService<IConfiguration>();
+				options.BaseUrl = config.GetValue<Uri>("Report:Url");
+			})
+			.AddPromotionClientServices((options, sp) =>
+			{
+				var config = sp.GetRequiredService<IConfiguration>();
 
-                config.GetSection("Promotion").Bind(options);
-            })
-            .AddTransactions()
-            .AddBrandCertificateClient((options, sp) =>
-            {
-                var config = sp.GetRequiredService<IConfiguration>();
+				config.GetSection("Promotion").Bind(options);
+			})
+			.AddTransactions()
+			.AddBrandCertificateClient((options, sp) =>
+			{
+				var config = sp.GetRequiredService<IConfiguration>();
 
-                options.BrandCertificateBaseUrl = config.GetValue<Uri>("Operator:BrandCertificateBaseUrl");
-            })
-            .AddBrandServiceClient((options, sp) =>
-            {
-                var config = sp.GetRequiredService<IConfiguration>();
+				options.BrandCertificateBaseUrl = config.GetValue<Uri>("Operator:BrandCertificateBaseUrl");
+			})
+			.AddBrandServiceClient((options, sp) =>
+			{
+				var config = sp.GetRequiredService<IConfiguration>();
 
-                options.BrandCertificateBaseUrl = config.GetValue<Uri>("Operator:BrandCertificateBaseUrl");
-            })
-            .AddGameProvidersPluggableServerClient((options, sp) =>
-            {
-                var config = sp.GetRequiredService<IConfiguration>();
+				options.BrandCertificateBaseUrl = config.GetValue<Uri>("Operator:BrandCertificateBaseUrl");
+			})
+			.AddGameProvidersPluggableServerClient((options, sp) =>
+			{
+				var config = sp.GetRequiredService<IConfiguration>();
 
-                options.BaseUrl = config.GetValue<Uri>("Operator:GameProvidersPluggableBaseUrl");
-            })
-            .AddPlayerServiceClient((options, sp) =>
-            {
-                var config = sp.GetRequiredService<IConfiguration>();
+				options.BaseUrl = config.GetValue<Uri>("Operator:GameProvidersPluggableBaseUrl");
+			})
+			.AddPlayerServiceClient((options, sp) =>
+			{
+				var config = sp.GetRequiredService<IConfiguration>();
 
-                options.BaseUrl = config.GetValue<Uri>("Operator:PlayerServiceBaseUrl");
-            });
+				options.BaseUrl = config.GetValue<Uri>("Operator:PlayerServiceBaseUrl");
+			});
 
-        services
-            .AddRedis((options, sp) =>
-            {
-                var config = sp.GetRequiredService<IConfiguration>();
+		_ = services
+			.AddRedis((options, sp) =>
+			{
+				var config = sp.GetRequiredService<IConfiguration>();
 
-                options.ConnectionString = config.GetConnectionString("RedisConfigurationString");
-            });
+				options.ConnectionString = config.GetConnectionString("RedisConfigurationString");
+			});
 
-        services.AddErrorMapper()
-            .AddErrorMapper<OperatorApiErrorMapper>();
+		_ = services.AddErrorMapper()
+			.AddErrorMapper<OperatorApiErrorMapper>();
 
-        services
-            .AddOperatorApiCore()
-            .ConfigureOperatorOptions<IConfiguration>((options, config) =>
-            {
-                config.GetSection("Operator").Bind(options);
-            })
-            .UseOperatorRepositories(sp
-                => sp.GetRequiredService<IRedisConnectionFactory>().GetConnection().GetDatabase())
-            .ConfigureWallet((options, sp) =>
-            {
-                var operatorOptions = sp.GetRequiredService<IOptions<OperatorOptions>>().Value;
+		_ = services
+			.AddOperatorApiCore()
+			.ConfigureOperatorOptions<IConfiguration>((options, config) =>
+			{
+				config.GetSection("Operator").Bind(options);
+			})
+			.UseOperatorRepositories(sp
+				=> sp.GetRequiredService<IRedisConnectionFactory>().GetConnection().GetDatabase())
+			.ConfigureWallet((options, sp) =>
+			{
+				var operatorOptions = sp.GetRequiredService<IOptions<OperatorOptions>>().Value;
 
-                options.BaseUrl = operatorOptions.CashBaseUrl;
-            })
-            .AddPaymentServiceClient(httpClientBuilder => httpClientBuilder
-                .ConfigureHttpClient((sp, http) =>
-                {
-                    var config = sp.GetRequiredService<IConfiguration>();
+				options.BaseUrl = operatorOptions.CashBaseUrl;
+			})
+			.AddPaymentServiceClient(httpClientBuilder => httpClientBuilder
+				.ConfigureHttpClient((sp, http) =>
+				{
+					var config = sp.GetRequiredService<IConfiguration>();
 
-                    http.BaseAddress = config.GetValue<Uri>("Operator:PaymentServiceBaseUrl");
-                }))
-            .Services
-            .AddSingleton<ManualDepositSerializer>()
-            .AddSingleton<PrimePaySerializer>()
-            .AddSingleton<LeePaySerializer>()
-            .AddSingleton<UmPaySerializer>()
-            .AddSingleton<MaticPaySerializer>()
-            .AddSingleton<Help2PaySerializer>()
-            .AddSingleton<SkyPaySerializer>()
-            .AddSingleton<ZeroNineNinePaySerializer>()
-            .AddSingleton<TuPaySerializer>()
-            .AddSingleton<MalakiPaySerializer>();
+					http.BaseAddress = config.GetValue<Uri>("Operator:PaymentServiceBaseUrl");
+				}))
+			.Services
+			.AddSingleton<ManualDepositSerializer>()
+			.AddSingleton<PrimePaySerializer>()
+			.AddSingleton<LeePaySerializer>()
+			.AddSingleton<UmPaySerializer>()
+			.AddSingleton<MaticPaySerializer>()
+			.AddSingleton<Help2PaySerializer>()
+			.AddSingleton<SkyPaySerializer>()
+			.AddSingleton<ZeroNineNinePaySerializer>()
+			.AddSingleton<TuPaySerializer>()
+			.AddSingleton<MalakiPaySerializer>();
 
-        services
-            .AddMessageQueue()
-            .AddNatsMessageQueue(natsConfig =>
-            {
-                natsConfig
-                    .ConfigQueueOptions((options, sp) =>
-                    {
-                        var config = sp.GetRequiredService<IConfiguration>();
+		_ = services
+			.AddMessageQueue()
+			.AddNatsMessageQueue(natsConfig =>
+			{
+				_ = natsConfig
+					.ConfigQueueOptions((options, sp) =>
+					{
+						var config = sp.GetRequiredService<IConfiguration>();
 
-                        options.Url = config.GetValue<string>("NatsSetting:Urls");
-                    });
-            })
-            .AddNatsGlobPatternExchange("*");
+						options.Url = config.GetValue<string>("NatsSetting:Urls");
+					});
+			})
+			.AddNatsGlobPatternExchange("*");
 
-        services
-            .AddOptions<ConstValidateCodeOptions>()
-            .Configure<IConfiguration>((options, config) =>
-            {
-                config.GetSection("Operator").Bind(options);
-            })
-            .Services
-            .Decorate<IValidateCodeGenerator, ConstValidateCodeGenerator>();
+		_ = services
+			.AddOptions<ConstValidateCodeOptions>()
+			.Configure<IConfiguration>((options, config) =>
+			{
+				config.GetSection("Operator").Bind(options);
+			})
+			.Services
+			.Decorate<IValidateCodeGenerator, ConstValidateCodeGenerator>();
 
-        services
-            .AddIdentityVerifiers()
-            .AddPlayerBucketRepositoriesServices();
+		_ = services
+			.AddIdentityVerifiers()
+			.AddPlayerBucketRepositoriesServices();
 
-        services
-            .AddRouting(options => options.LowercaseUrls = true);
+		_ = services
+			.AddRouting(options => options.LowercaseUrls = true);
 
-        services
-            .AddControllers(options =>
-            {
-                options.AddBrandCertificateFilters();
-                options.Filters.Add<CheckPlayerEnabledFilter>();
-                options.Filters.Add<ValidateModelFilter>();
-                options.AddWebApiToolkitFilters();
-                options.Filters.Add<TgsResponseWrapperAttribute>();
-                options.Filters.Add<ErrorMessageMapperFilter>();
-            })
-            .ConfigureApiBehaviorOptions(options => options.SuppressModelStateInvalidFilter = true)
-            .AddFluentValidation(c =>
-            {
-                c.RegisterValidatorsFromAssemblyContaining<Startup>(lifetime: ServiceLifetime.Scoped);
-                c.DisableDataAnnotationsValidation = true;
-            })
-            .AddJsonOptions(jsonOptions =>
-            {
-                jsonOptions.JsonSerializerOptions.Converters.Add(new DateOnlyConverter());
-            });
+		_ = services
+			.AddControllers(options =>
+			{
+				options.AddBrandCertificateFilters();
+				_ = options.Filters.Add<CheckPlayerEnabledFilter>();
+				_ = options.Filters.Add<ValidateModelFilter>();
+				options.AddWebApiToolkitFilters();
+				_ = options.Filters.Add<TgsResponseWrapperAttribute>();
+				_ = options.Filters.Add<ErrorMessageMapperFilter>();
+			})
+			.ConfigureApiBehaviorOptions(options => options.SuppressModelStateInvalidFilter = true)
+			.AddFluentValidation(c =>
+			{
+				_ = c.RegisterValidatorsFromAssemblyContaining<Startup>(lifetime: ServiceLifetime.Scoped);
+				c.DisableDataAnnotationsValidation = true;
+			})
+			.AddJsonOptions(jsonOptions =>
+			{
+				jsonOptions.JsonSerializerOptions.Converters.Add(new DateOnlyConverter());
+			});
 
-        services.AddHttpClient<IEmailClient, EmailClient>((sp, c) =>
-        {
-            var url = _configuration.GetSection("Email:Url");
-            c.BaseAddress = new Uri(url.Value);
-        });
+		_ = services.AddHttpClient<IEmailClient, EmailClient>((sp, c) =>
+		{
+			var url = _configuration.GetSection("Email:Url");
+			c.BaseAddress = new Uri(url.Value);
+		});
 
-        services.AddHttpContextAccessor();
+		_ = services.AddHttpContextAccessor();
 
-        services.AddHealthChecks();
+		_ = services.AddHealthChecks();
 
-        services
-            .AddOptions<OtlpExporterOptions>()
-            .Configure<IConfiguration>((options, conifg) =>
-            {
-                var nodeIp = conifg.GetValue<string>("NODE_IP");
+		_ = services
+			.AddOptions<OtlpExporterOptions>()
+			.Configure<IConfiguration>((options, conifg) =>
+			{
+				var nodeIp = conifg.GetValue<string>("NODE_IP");
 
-                if (!string.IsNullOrWhiteSpace(nodeIp))
-                    options.Endpoint = new Uri($"http://{nodeIp}:4317");
+				if (!string.IsNullOrWhiteSpace(nodeIp))
+					options.Endpoint = new Uri($"http://{nodeIp}:4317");
 
-                conifg.GetSection("Opentelemetry:Tracing").Bind(options);
-            });
-        services
-            .AddOpenTelemetryTracing(
-                builder => builder
-                    .SetResourceBuilder(ResourceBuilder.CreateDefault()
-                        .AddEnvironmentVariableDetector())
-                    .AddSource("Tgs.*")
-                    .AddSource("TGS.*")
-                    .AddAspNetCoreInstrumentation()
-                    .AddHttpClientInstrumentation()
-                    .AddEntityFrameworkCoreInstrumentation(options =>
-                    {
-                        options.SetDbStatementForText = true;
-                    })
-                    .AddProfileViewExporter()
-                    .AddOtlpExporter())
-            .Configure<AspNetCoreInstrumentationOptions>(options =>
-            {
-                options.Filter = httpContext =>
-                {
-                    return !httpContext.Request.Path.HasValue
-                        || !httpContext.Request.Path.StartsWithSegments("/swagger")
-                        && !httpContext.Request.Path.StartsWithSegments("/health")
-                        && !httpContext.Request.Path.StartsWithSegments("/profiler/")
-                        && !httpContext.Request.Path.StartsWithSegments("/metrics")
-                        && !new[] { "html", "ico", "png", "jpg" }.Any(
-                            ext => httpContext.Request.Path.Value.EndsWith($".{ext}"));
-                };
-            });
+				conifg.GetSection("Opentelemetry:Tracing").Bind(options);
+			});
+		_ = services
+			.AddOpenTelemetryTracing(
+				builder => builder
+					.SetResourceBuilder(ResourceBuilder.CreateDefault()
+						.AddEnvironmentVariableDetector())
+					.AddSource("Tgs.*")
+					.AddSource("TGS.*")
+					.AddAspNetCoreInstrumentation()
+					.AddHttpClientInstrumentation()
+					.AddEntityFrameworkCoreInstrumentation(options =>
+					{
+						options.SetDbStatementForText = true;
+					})
+					.AddProfileViewExporter()
+					.AddOtlpExporter())
+			.Configure<AspNetCoreInstrumentationOptions>(options =>
+			{
+				options.Filter = httpContext =>
+				{
+					return !httpContext.Request.Path.HasValue
+						|| !httpContext.Request.Path.StartsWithSegments("/swagger")
+						&& !httpContext.Request.Path.StartsWithSegments("/health")
+						&& !httpContext.Request.Path.StartsWithSegments("/profiler/")
+						&& !httpContext.Request.Path.StartsWithSegments("/metrics")
+						&& !new[] { "html", "ico", "png", "jpg" }.Any(
+							ext => httpContext.Request.Path.Value.EndsWith($".{ext}"));
+				};
+			});
 
-        services.AddProfileViewer();
+		_ = services.AddProfileViewer();
 
-        services
-            .AddInterceptionService()
-            .AddServiceUtiltiyInterceptors();
+		_ = services
+			.AddInterceptionService()
+			.AddServiceUtiltiyInterceptors();
 
-        services.AddSwaggerGen(c =>
-        {
-            c.SwaggerDoc("v1",
-                new OpenApiInfo
-                {
-                    Title = "TGS Operator API",
-                    Version = "v1"
-                });
+		_ = services.AddSwaggerGen(c =>
+		{
+			c.SwaggerDoc("v1",
+				new OpenApiInfo
+				{
+					Title = "TGS Operator API",
+					Version = "v1"
+				});
 
-            c.AddBrandCertificateSecurityDefinition();
-            c.OperationFilter<SwaggerHeaderFilter>();
-            c.SchemaFilter<SwaggerEnumDescriptionFilter>();
-            c.OperationFilter<SwaggerTgsResponseWrapperFilter>();
+			c.AddBrandCertificateSecurityDefinition();
+			c.OperationFilter<SwaggerHeaderFilter>();
+			c.SchemaFilter<SwaggerEnumDescriptionFilter>();
+			c.OperationFilter<SwaggerTgsResponseWrapperFilter>();
 
-            var xml = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-            var path = Path.Combine(AppContext.BaseDirectory, xml);
+			var xml = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+			var path = Path.Combine(AppContext.BaseDirectory, xml);
 
-            if (File.Exists(path))
-            {
-                c.IncludeXmlComments(path);
-            }
-        });
-        services.AddCors(options =>
-        {
-            var corsDomain = _configuration.GetSection("CorsDomain").Get<CorsDomain>();
+			if (File.Exists(path))
+			{
+				c.IncludeXmlComments(path);
+			}
+		});
+		_ = services.AddCors(options =>
+		{
+			var corsDomain = _configuration.GetSection("CorsDomain").Get<CorsDomain>();
 
-            options.AddDefaultPolicy(
-                builder =>
-                {
-                    builder.WithOrigins(corsDomain.Urls)
-                        .AllowAnyHeader()
-                        .AllowAnyMethod()
-                        .SetIsOriginAllowed(_ => true);
-                });
-        });
+			options.AddDefaultPolicy(
+				builder =>
+				{
+					_ = builder.WithOrigins(corsDomain.Urls)
+						.AllowAnyHeader()
+						.AllowAnyMethod()
+						.SetIsOriginAllowed(_ => true);
+				});
+		});
     }
 }

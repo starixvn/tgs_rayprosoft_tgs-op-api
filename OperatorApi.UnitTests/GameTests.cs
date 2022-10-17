@@ -35,7 +35,7 @@ public class GameTests
             Guid.NewGuid(),
             "ThisIsPlayerCode");
 
-        await sut.GetAsync(query);
+		_ = await sut.GetAsync(query);
 
         _ = fakeGameProviderRepository.Received(1)
             .QueryPlayerFavoriteGamesAsync(
@@ -60,11 +60,11 @@ public class GameTests
             "ThisIsPlayerCode",
             "gp1");
 
-        fakePlayerRepository.GetPlayerAutoTransferFlagAsync(Arg.Is(command.PlayerCode))
-            .Returns(false);
+		_ = fakePlayerRepository.GetPlayerAutoTransferFlagAsync(Arg.Is(command.PlayerCode))
+			.Returns(false);
 
-        fakeGetPlayerBalanceService.GetAsync(Arg.Any<GetBalanceQuery>())
-            .Returns(new BalanceInfo(1000M));
+		_ = fakeGetPlayerBalanceService.GetAsync(Arg.Any<GetBalanceQuery>())
+			.Returns(new BalanceInfo(1000M));
 
         await sut.ExecuteAsync(command);
 
@@ -89,11 +89,11 @@ public class GameTests
             "ThisIsPlayerCode",
             "gp1");
 
-        fakePlayerRepository.GetPlayerAutoTransferFlagAsync(Arg.Is(command.PlayerCode))
-            .Returns(true);
+		_ = fakePlayerRepository.GetPlayerAutoTransferFlagAsync(Arg.Is(command.PlayerCode))
+			.Returns(true);
 
-        fakeGetPlayerBalanceService.GetAsync(Arg.Any<GetBalanceQuery>())
-            .Returns(new BalanceInfo(1000M));
+		_ = fakeGetPlayerBalanceService.GetAsync(Arg.Any<GetBalanceQuery>())
+			.Returns(new BalanceInfo(1000M));
 
         await sut.ExecuteAsync(command);
 
@@ -120,40 +120,40 @@ public class GameTests
             "ThisIsPlayerCode",
             "gp2");
 
-        fakeGameProviderRepository.QueryAllSubGameProvidersAsync(Arg.Is(command.BrandId))
-            .Returns(new[]
-            {
-                new BrandSubGameProviderInfo(
-                    "sub1",
-                    "sub1",
-                    "sub1",
-                    Guid.NewGuid(),
-                    "gp1",
-                    true,
-                    Status.Active,
-                    "{}"),
-                new BrandSubGameProviderInfo(
-                    "sub2",
-                    "sub2",
-                    "sub2",
-                    Guid.NewGuid(),
-                    "gp1",
-                    true,
-                    Status.Active,
-                    "{}"),
-                new BrandSubGameProviderInfo(
-                    "sub3",
-                    "sub3",
-                    "sub3",
-                    Guid.NewGuid(),
-                    "gp2",
-                    true,
-                    Status.Active,
-                    "{}")
-            }.ToAsyncEnumerable());
+		_ = fakeGameProviderRepository.QueryAllSubGameProvidersAsync(Arg.Is(command.BrandId))
+			.Returns(new[]
+			{
+				new BrandSubGameProviderInfo(
+					"sub1",
+					"sub1",
+					"sub1",
+					Guid.NewGuid(),
+					"gp1",
+					true,
+					Status.Active,
+					"{}"),
+				new BrandSubGameProviderInfo(
+					"sub2",
+					"sub2",
+					"sub2",
+					Guid.NewGuid(),
+					"gp1",
+					true,
+					Status.Active,
+					"{}"),
+				new BrandSubGameProviderInfo(
+					"sub3",
+					"sub3",
+					"sub3",
+					Guid.NewGuid(),
+					"gp2",
+					true,
+					Status.Active,
+					"{}")
+			}.ToAsyncEnumerable());
 
-        fakeGetGameBalanceService.GetAsync(Arg.Any<GetGameBalanceQuery>())
-            .Returns(100M);
+		_ = fakeGetGameBalanceService.GetAsync(Arg.Any<GetGameBalanceQuery>())
+			.Returns(100M);
 
         await sut.ExecuteAsync(command);
 
@@ -178,40 +178,40 @@ public class GameTests
             "ThisIsPlayerCode",
             "GpCode");
 
-        fakeGameProviderRepository.QueryAllSubGameProvidersAsync(Arg.Is(command.BrandId))
-            .Returns(new[]
-            {
-                new BrandSubGameProviderInfo(
-                    "sub1",
-                    "sub1",
-                    "sub1",
-                    Guid.NewGuid(),
-                    "gp1",
-                    true,
-                    Status.Active,
-                    "{}"),
-                new BrandSubGameProviderInfo(
-                    "sub2",
-                    "sub2",
-                    "sub2",
-                    Guid.NewGuid(),
-                    "gp1",
-                    true,
-                    Status.Active,
-                    "{}"),
-                new BrandSubGameProviderInfo(
-                    "sub3",
-                    "sub3",
-                    "sub3",
-                    Guid.NewGuid(),
-                    "gp2",
-                    true,
-                    Status.Active,
-                    "{}")
-            }.ToAsyncEnumerable());
+		_ = fakeGameProviderRepository.QueryAllSubGameProvidersAsync(Arg.Is(command.BrandId))
+			.Returns(new[]
+			{
+				new BrandSubGameProviderInfo(
+					"sub1",
+					"sub1",
+					"sub1",
+					Guid.NewGuid(),
+					"gp1",
+					true,
+					Status.Active,
+					"{}"),
+				new BrandSubGameProviderInfo(
+					"sub2",
+					"sub2",
+					"sub2",
+					Guid.NewGuid(),
+					"gp1",
+					true,
+					Status.Active,
+					"{}"),
+				new BrandSubGameProviderInfo(
+					"sub3",
+					"sub3",
+					"sub3",
+					Guid.NewGuid(),
+					"gp2",
+					true,
+					Status.Active,
+					"{}")
+			}.ToAsyncEnumerable());
 
-        fakeGetGameBalanceService.GetAsync(Arg.Any<GetGameBalanceQuery>())
-            .Returns(1m);
+		_ = fakeGetGameBalanceService.GetAsync(Arg.Any<GetGameBalanceQuery>())
+			.Returns(1m);
 
         await sut.ExecuteAsync(command);
 
@@ -236,40 +236,40 @@ public class GameTests
             "ThisIsPlayerCode",
             "GpCode");
 
-        fakeGameProviderRepository.QueryAllSubGameProvidersAsync(Arg.Is(command.BrandId))
-            .Returns(new[]
-            {
-                new BrandSubGameProviderInfo(
-                    "sub1",
-                    "sub1",
-                    "sub1",
-                    Guid.NewGuid(),
-                    "gp1",
-                    true,
-                    Status.Active,
-                    "{}"),
-                new BrandSubGameProviderInfo(
-                    "sub2",
-                    "sub2",
-                    "sub2",
-                    Guid.NewGuid(),
-                    "gp1",
-                    true,
-                    Status.Active,
-                    "{}"),
-                new BrandSubGameProviderInfo(
-                    "sub3",
-                    "sub3",
-                    "sub3",
-                    Guid.NewGuid(),
-                    "gp2",
-                    true,
-                    Status.Active,
-                    "{}")
-            }.ToAsyncEnumerable());
+		_ = fakeGameProviderRepository.QueryAllSubGameProvidersAsync(Arg.Is(command.BrandId))
+			.Returns(new[]
+			{
+				new BrandSubGameProviderInfo(
+					"sub1",
+					"sub1",
+					"sub1",
+					Guid.NewGuid(),
+					"gp1",
+					true,
+					Status.Active,
+					"{}"),
+				new BrandSubGameProviderInfo(
+					"sub2",
+					"sub2",
+					"sub2",
+					Guid.NewGuid(),
+					"gp1",
+					true,
+					Status.Active,
+					"{}"),
+				new BrandSubGameProviderInfo(
+					"sub3",
+					"sub3",
+					"sub3",
+					Guid.NewGuid(),
+					"gp2",
+					true,
+					Status.Active,
+					"{}")
+			}.ToAsyncEnumerable());
 
-        fakeGetGameBalanceService.GetAsync(Arg.Any<GetGameBalanceQuery>())
-            .Returns(0.88m);
+		_ = fakeGetGameBalanceService.GetAsync(Arg.Any<GetGameBalanceQuery>())
+			.Returns(0.88m);
 
         await sut.ExecuteAsync(command);
 
@@ -638,24 +638,24 @@ public class GameTests
             PlatformType.Desktop,
             Array.Empty<GameType>());
 
-        fakeQueryAllService.QueryAsync(Arg.Any<GetAllGamesByGameTypeQuery>())
-            .Returns(new[]
-            {
-                new GameInfo
-                {
-                    Id = 1,
-                    Code = "test",
-                    Name = "test",
-                    GameProviderCode = "Test"
-                },
-                new GameInfo
-                {
-                    Id = 2,
-                    Code = "test",
-                    Name = "test",
-                    GameProviderCode = "ABC"
-                }
-            }.ToAsyncEnumerable());
+		_ = fakeQueryAllService.QueryAsync(Arg.Any<GetAllGamesByGameTypeQuery>())
+			.Returns(new[]
+			{
+				new GameInfo
+				{
+					Id = 1,
+					Code = "test",
+					Name = "test",
+					GameProviderCode = "Test"
+				},
+				new GameInfo
+				{
+					Id = 2,
+					Code = "test",
+					Name = "test",
+					GameProviderCode = "ABC"
+				}
+			}.ToAsyncEnumerable());
 
         // act
         var result = await sut.QueryAsync(query).ToArrayAsync();
@@ -897,19 +897,19 @@ public class GameTests
         var fakePluggableClient = Substitute.For<IGameProvidersOperatorPluggableClient>();
         var fakeGameProviderRepository = Substitute.For<IGameProviderRepository>();
 
-        fakeGameProviderRepository.QueryAllGamesAsync(query.BrandId)
-            .Returns(games.ToAsyncEnumerable());
+		_ = fakeGameProviderRepository.QueryAllGamesAsync(query.BrandId)
+			.Returns(games.ToAsyncEnumerable());
 
-        fakePluggableClient
-            .GetGameUrlAsync(
-                playerToken.PlayerCode,
-                playerToken.LoginRecordId,
-                playerToken.PlatformType == PlatformType.Mobile,
-                query.GameId,
-                query.LanguageCode,
-                query.IpAddress,
-                backUrl)
-            .Returns(ValueTask.FromResult(gameUrl));
+		_ = fakePluggableClient
+			.GetGameUrlAsync(
+				playerToken.PlayerCode,
+				playerToken.LoginRecordId,
+				playerToken.PlatformType == PlatformType.Mobile,
+				query.GameId,
+				query.LanguageCode,
+				query.IpAddress,
+				backUrl)
+			.Returns(ValueTask.FromResult(gameUrl));
 
         var sut = new GetGameUrlQueryService(
             fakePluggableClient,
@@ -1006,13 +1006,13 @@ public class GameTests
                 0)
         };
 
-        fakeGameProviderRepository
-            .QueryAllGamesAsync(query.BrandId)
-            .Returns(games.ToAsyncEnumerable());
+		_ = fakeGameProviderRepository
+			.QueryAllGamesAsync(query.BrandId)
+			.Returns(games.ToAsyncEnumerable());
 
-        fakeGetGameUrlQueryService
-            .GetAsync(Arg.Any<GetGameUrlQuery>())
-            .Returns(gameUrl);
+		_ = fakeGetGameUrlQueryService
+			.GetAsync(Arg.Any<GetGameUrlQuery>())
+			.Returns(gameUrl);
 
         var sut = new GetLobbyGameUrlQueryService(
             fakeGameProviderRepository,
@@ -1037,26 +1037,26 @@ public class GameTests
             "ThisIsPlayerCode",
             1000);
 
-        fakeGameProviderRepository.QueryAllGamesAsync(Arg.Is(command.BrandId))
-            .Returns(new[]
-            {
-                new BrandGameInfo(
-                    command.GameId,
-                    "code1",
-                    "name1",
-                    "test",
-                    "subgp1",
-                    Guid.NewGuid(),
-                    "gp1",
-                    GameStatus.Active,
-                    GameType.Arcade,
-                    GamePlatformType.Desktop,
-                    true,
-                    string.Empty,
-                    "{}",
-                    GameTag.New,
-                    0)
-            }.ToAsyncEnumerable());
+		_ = fakeGameProviderRepository.QueryAllGamesAsync(Arg.Is(command.BrandId))
+			.Returns(new[]
+			{
+				new BrandGameInfo(
+					command.GameId,
+					"code1",
+					"name1",
+					"test",
+					"subgp1",
+					Guid.NewGuid(),
+					"gp1",
+					GameStatus.Active,
+					GameType.Arcade,
+					GamePlatformType.Desktop,
+					true,
+					string.Empty,
+					"{}",
+					GameTag.New,
+					0)
+			}.ToAsyncEnumerable());
 
         await sut.ExecuteAsync(command);
 
@@ -1076,12 +1076,12 @@ public class GameTests
             "ThisIsPlayerCode",
             GameType.Arcade);
 
-        sut.QueryAsync(query);
+		_ = sut.QueryAsync(query);
 
-        fakeGameProviderRepository.Received(1)
-            .QueryPlayerFavoriteGamesAsync(
-                Arg.Is(query.BrandId),
-                Arg.Is(query.PlayerCode));
+		_ = fakeGameProviderRepository.Received(1)
+			.QueryPlayerFavoriteGamesAsync(
+				Arg.Is(query.BrandId),
+				Arg.Is(query.PlayerCode));
     }
 
     [Test]
@@ -1136,26 +1136,26 @@ public class GameTests
             LanguageCode = "zh-cn"
         };
 
-        fakeGetGpCodeService.GetAsync(Arg.Any<GetGpCodeQuery>())
-            .Returns(ValueTask.FromResult(new BrandSubGameProviderInfo(
-                "sub1",
-                "sub1",
-                "sub1",
-                Guid.NewGuid(),
-                "gp1",
-                true,
-                Status.Active,
-                string.Empty)));
+		_ = fakeGetGpCodeService.GetAsync(Arg.Any<GetGpCodeQuery>())
+			.Returns(ValueTask.FromResult(new BrandSubGameProviderInfo(
+				"sub1",
+				"sub1",
+				"sub1",
+				Guid.NewGuid(),
+				"gp1",
+				true,
+				Status.Active,
+				string.Empty)));
 
         _ = fakeGetGameUrlQueryService.GetAsync(Arg.Any<GetGameUrlQuery>())
             .Returns(ValueTask.FromResult(gameUrl));
 
-        await sut.GetGameUrlAsync(
-            fakeGetGpCodeService,
-            fakeGetGameUrlQueryService,
-            fakeFundInAllService,
-            fakeFundService,
-            request);
+		_ = await sut.GetGameUrlAsync(
+			fakeGetGpCodeService,
+			fakeGetGameUrlQueryService,
+			fakeFundInAllService,
+			fakeFundService,
+			request);
 
         _ = fakeFundInAllService.Received(1)
             .ExecuteAsync(Arg.Any<FundInAllGameBalanceCommand>());
@@ -1195,27 +1195,27 @@ public class GameTests
             LanguageCode = "zh-cn"
         };
 
-        fakeGetGpCodeService.GetAsync(Arg.Any<GetGpCodeQuery>())
-            .Returns(ValueTask.FromResult(new BrandSubGameProviderInfo(
-                "sub1",
-                "sub1",
-                "sub1",
-                Guid.NewGuid(),
-                "gp1",
-                true,
-                Status.Active,
-                string.Empty)));
+		_ = fakeGetGpCodeService.GetAsync(Arg.Any<GetGpCodeQuery>())
+			.Returns(ValueTask.FromResult(new BrandSubGameProviderInfo(
+				"sub1",
+				"sub1",
+				"sub1",
+				Guid.NewGuid(),
+				"gp1",
+				true,
+				Status.Active,
+				string.Empty)));
 
         _ = fakeGetLobbyGameUrlQueryService
             .GetAsync(Arg.Any<GetLobbyGameUrlQuery>())
             .Returns(ValueTask.FromResult(new Uri("http://www.google.com")));
 
-        await sut.GetLobbyGameUrlAsync(
-            fakeGetGpCodeService,
-            fakeGetLobbyGameUrlQueryService,
-            fakeFundInAllService,
-            fakeFundService,
-            request);
+		_ = await sut.GetLobbyGameUrlAsync(
+			fakeGetGpCodeService,
+			fakeGetLobbyGameUrlQueryService,
+			fakeFundInAllService,
+			fakeFundService,
+			request);
 
         _ = fakeFundInAllService.Received(1)
             .ExecuteAsync(Arg.Any<FundInAllGameBalanceCommand>());

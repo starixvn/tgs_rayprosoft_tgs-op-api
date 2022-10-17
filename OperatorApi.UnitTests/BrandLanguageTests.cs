@@ -17,32 +17,32 @@ public class BrandLanguageTests
     public async Task Get_Brand_Languages_Should_Success()
     {
         var dbContextOptionsBuilder = new DbContextOptionsBuilder<TgsRepository>();
-        dbContextOptionsBuilder
-            .UseInMemoryDatabase(Guid.NewGuid().ToString())
-            .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
+		_ = dbContextOptionsBuilder
+			.UseInMemoryDatabase(Guid.NewGuid().ToString())
+			.ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
         ITgsRepository repository = new TgsRepository(dbContextOptionsBuilder.Options);
         var brandId = Guid.NewGuid();
 
-        repository.Brands.Add(new CoreModels.Brand()
-        {
-            Id = brandId,
-            ApiKey = string.Empty,
-            ClientId = string.Empty,
-            Code = "Test",
-            CreatedByUsername = "System",
-            UpdatedByUsername = "System",
-            Name = "Test",
-            SecretKey = string.Empty
-        });
+		_ = repository.Brands.Add(new CoreModels.Brand()
+		{
+			Id = brandId,
+			ApiKey = string.Empty,
+			ClientId = string.Empty,
+			Code = "Test",
+			CreatedByUsername = "System",
+			UpdatedByUsername = "System",
+			Name = "Test",
+			SecretKey = string.Empty
+		});
 
-        repository.BrandLanguages.Add(new CoreModels.BrandLanguage()
-        {
-            BrandId = brandId,
-            CultureCode = "zh-TW",
-            BrandCultureCode = "zh-TW"
-        });
+		_ = repository.BrandLanguages.Add(new CoreModels.BrandLanguage()
+		{
+			BrandId = brandId,
+			CultureCode = "zh-TW",
+			BrandCultureCode = "zh-TW"
+		});
 
-        await repository.SaveChangesAsync();
+		_ = await repository.SaveChangesAsync();
 
         var sut = new GetBrandLanguageQueryService(repository);
 

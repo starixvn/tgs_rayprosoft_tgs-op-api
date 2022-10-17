@@ -8,16 +8,16 @@ public sealed class GetGameUrlRequestValidator : AbstractValidator<GetGameUrlReq
 {
     public GetGameUrlRequestValidator()
     {
-        RuleFor(x => x.SubGameProviderCode)
-            .NotEmpty()
-            .WithName(x => x
-                .WithPropertyExpression(o => o.SubGameProviderCode)
-                .GetBindPropertyName(nameof(x.SubGameProviderCode)));
+		_ = RuleFor(x => x.SubGameProviderCode)
+			.NotEmpty()
+			.WithName(x => x
+				.WithPropertyExpression(o => o.SubGameProviderCode)
+				.GetBindPropertyName(nameof(x.SubGameProviderCode)));
 
-        RuleFor(x => x.LanguageCode)
-            .NotEmpty()
-            .WithName(x => x
-                .WithPropertyExpression(o => o.LanguageCode)
-                .GetBindPropertyName(nameof(x.LanguageCode)));
+		_ = RuleFor(x => x.LanguageCode)
+			.NotEmpty()
+			.WithName(x => x
+				.WithPropertyExpression(o => o.LanguageCode)
+				.GetBindPropertyName(nameof(x.LanguageCode)));
     }
 }

@@ -40,9 +40,9 @@ public class StationLetterTests
     public async Task Player_Can_Get_Station_Letters_With_Status_Published()
     {
         var dbContextOptionsBuilder = new DbContextOptionsBuilder<TgsRepository>();
-        dbContextOptionsBuilder
-            .UseInMemoryDatabase(Guid.NewGuid().ToString())
-            .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
+		_ = dbContextOptionsBuilder
+			.UseInMemoryDatabase(Guid.NewGuid().ToString())
+			.ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
         ITgsRepository repository = new TgsRepository(dbContextOptionsBuilder.Options);
 
         var playerCode = "playerCode";
@@ -83,7 +83,7 @@ public class StationLetterTests
         });
 
         await repository.StationLetterPlayers.AddRangeAsync(stationLetterPlayers);
-        await repository.SaveChangesAsync();
+		_ = await repository.SaveChangesAsync();
 
         var sut = new StationLetterRepository(repository);
 
@@ -118,7 +118,7 @@ public class StationLetterTests
         var playerCode = "ThisIsPlayerCode";
         var letterId = Guid.NewGuid();
 
-        sut.ExecuteAsync(new SetHaveReadCommand(playerCode, letterId));
+		_ = sut.ExecuteAsync(new SetHaveReadCommand(playerCode, letterId));
 
         moqStationLetterRepository.Verify(
             fake => fake.SetStationLetterHaveReadAsync(It.Is<string>(x => x == playerCode), It.Is<Guid>(x => x == letterId)),
@@ -131,9 +131,9 @@ public class StationLetterTests
         // arrange
         var playerCode = "playerCode";
         var dbContextOptionsBuilder = new DbContextOptionsBuilder<TgsRepository>();
-        dbContextOptionsBuilder
-            .UseInMemoryDatabase(Guid.NewGuid().ToString())
-            .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
+		_ = dbContextOptionsBuilder
+			.UseInMemoryDatabase(Guid.NewGuid().ToString())
+			.ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
 
         var tgsRepository = new TgsRepository(dbContextOptionsBuilder.Options);
 
@@ -183,7 +183,7 @@ public class StationLetterTests
 
         await tgsRepository.StationLetterPlayers.AddRangeAsync(stationLetterPlayers);
 
-        await tgsRepository.SaveChangesAsync();
+		_ = await tgsRepository.SaveChangesAsync();
 
         var sut = new StationLetterRepository(tgsRepository);
 
@@ -201,9 +201,9 @@ public class StationLetterTests
     public async Task Set_Db_Station_Letter_HaveRead_Should_Commit()
     {
         var dbContextOptionsBuilder = new DbContextOptionsBuilder<TgsRepository>();
-        dbContextOptionsBuilder
-            .UseInMemoryDatabase(Guid.NewGuid().ToString())
-            .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
+		_ = dbContextOptionsBuilder
+			.UseInMemoryDatabase(Guid.NewGuid().ToString())
+			.ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
 
         var tgsRepository = new TgsRepository(dbContextOptionsBuilder.Options);
         var sut = new StationLetterRepository(tgsRepository);
@@ -211,16 +211,16 @@ public class StationLetterTests
         var playerCode = "ThisIsPlayerCode";
         var letterId = Guid.NewGuid();
 
-        tgsRepository.StationLetters.Add(new Core.DataServices.Tgs.Models.StationLetter
-        {
-            Id = letterId,
-            BrandId = Guid.NewGuid(),
-            Subject = "test",
-            Content = "content",
-            Localization = "{}",
-            CreatedByUsername = "System",
-            UpdatedByUsername = "System"
-        });
+		_ = tgsRepository.StationLetters.Add(new Core.DataServices.Tgs.Models.StationLetter
+		{
+			Id = letterId,
+			BrandId = Guid.NewGuid(),
+			Subject = "test",
+			Content = "content",
+			Localization = "{}",
+			CreatedByUsername = "System",
+			UpdatedByUsername = "System"
+		});
 
         var targetPlayerLetter = new StationLetterPlayer
         {
@@ -229,9 +229,9 @@ public class StationLetterTests
             IsRead = false
         };
 
-        tgsRepository.StationLetterPlayers.Add(targetPlayerLetter);
+		_ = tgsRepository.StationLetterPlayers.Add(targetPlayerLetter);
 
-        await tgsRepository.SaveChangesAsync();
+		_ = await tgsRepository.SaveChangesAsync();
 
         await sut.SetStationLetterHaveReadAsync(playerCode, letterId);
 

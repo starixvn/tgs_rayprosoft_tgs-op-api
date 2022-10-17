@@ -18,7 +18,7 @@ public class LocalizationTests
 
         var query = new GetAllLocalizationStringsQuery("en-US");
 
-        await sut.GetAsync(query);
+		_ = await sut.GetAsync(query);
 
         _ = fakeSysRepository.Received(1)
             .QueryAllLocalizationStringsAsync(Arg.Is(query.CultureCode));

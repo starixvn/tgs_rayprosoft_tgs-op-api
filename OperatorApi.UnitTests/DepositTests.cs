@@ -38,27 +38,27 @@ public class DepositTests
             Guid.NewGuid(),
             Guid.NewGuid());
 
-        moqPaymentServiceClient
-            .Setup(fake => fake.GetDepositFormAsync(
-                It.Is<Guid>(x => x == query.BrandId),
-                It.Is<Guid>(x => x == query.FormId),
-                It.IsAny<CancellationToken>()))
-            .Returns(ValueTask.FromResult(new DepositFormInfo
-            {
-                Amount = 1000M,
-                BrandId = Guid.NewGuid(),
-                BrandPaymentId = Guid.NewGuid(),
-                ChannelName = "ChannelName",
-                CreatedOn = DateTimeOffset.Now,
-                Id = query.FormId,
-                PaymentMethodId = Guid.NewGuid(),
-                PlayerCode = "OtherPlayerCode",
-                UserName = "OtherUserName",
-                Status = PaymentFlowState.WaitApprove,
-                UpdatedOn = DateTimeOffset.Now
-            }));
+		_ = moqPaymentServiceClient
+			.Setup(fake => fake.GetDepositFormAsync(
+				It.Is<Guid>(x => x == query.BrandId),
+				It.Is<Guid>(x => x == query.FormId),
+				It.IsAny<CancellationToken>()))
+			.Returns(ValueTask.FromResult(new DepositFormInfo
+			{
+				Amount = 1000M,
+				BrandId = Guid.NewGuid(),
+				BrandPaymentId = Guid.NewGuid(),
+				ChannelName = "ChannelName",
+				CreatedOn = DateTimeOffset.Now,
+				Id = query.FormId,
+				PaymentMethodId = Guid.NewGuid(),
+				PlayerCode = "OtherPlayerCode",
+				UserName = "OtherUserName",
+				Status = PaymentFlowState.WaitApprove,
+				UpdatedOn = DateTimeOffset.Now
+			}));
 
-        Assert.ThrowsAsync<UltraViresException>(async () => await sut.GetAsync(query));
+		_ = Assert.ThrowsAsync<UltraViresException>(async () => await sut.GetAsync(query));
     }
 
     [Test]
@@ -93,33 +93,33 @@ public class DepositTests
                 }));
         var paymentId = Guid.NewGuid();
 
-        moqPaymentClient
-            .Setup(fake => fake.DepositAsync(
-                It.IsAny<string>(),
-                It.Is<decimal>(x => x == command.Amount),
-                It.IsAny<string>(),
-                It.IsAny<CancellationToken>()))
-            .Returns(ValueTask.FromResult(command.CreatePaymentSettings(Guid.NewGuid())));
+		_ = moqPaymentClient
+			.Setup(fake => fake.DepositAsync(
+				It.IsAny<string>(),
+				It.Is<decimal>(x => x == command.Amount),
+				It.IsAny<string>(),
+				It.IsAny<CancellationToken>()))
+			.Returns(ValueTask.FromResult(command.CreatePaymentSettings(Guid.NewGuid())));
 
-        moqPaymentServiceClient
-            .Setup(fake => fake.GetBrandPaymentByIdAsync(
-                It.Is<Guid>(x => x == command.BrandPaymentId),
-                It.IsAny<CancellationToken>()))
-            .Returns(ValueTask.FromResult(new BrandPaymentInfo
-            {
-                Id = command.BrandPaymentId,
-                PaymentId = paymentId
-            }));
+		_ = moqPaymentServiceClient
+			.Setup(fake => fake.GetBrandPaymentByIdAsync(
+				It.Is<Guid>(x => x == command.BrandPaymentId),
+				It.IsAny<CancellationToken>()))
+			.Returns(ValueTask.FromResult(new BrandPaymentInfo
+			{
+				Id = command.BrandPaymentId,
+				PaymentId = paymentId
+			}));
 
-        moqPaymentServiceClient
-            .Setup(fake => fake.GetPaymentByIdAsync(
-                It.Is<Guid>(x => x == paymentId),
-                It.IsAny<CancellationToken>()))
-            .Returns(ValueTask.FromResult(new PaymentInfo
-            {
-                Id = paymentId,
-                Code = "Test"
-            }));
+		_ = moqPaymentServiceClient
+			.Setup(fake => fake.GetPaymentByIdAsync(
+				It.Is<Guid>(x => x == paymentId),
+				It.IsAny<CancellationToken>()))
+			.Returns(ValueTask.FromResult(new PaymentInfo
+			{
+				Id = paymentId,
+				Code = "Test"
+			}));
 
         var expected = new DepositFormCreateInfo
         {
@@ -138,7 +138,7 @@ public class DepositTests
                 })
         }.ToExpectedObject();
 
-        await sut.GetAsync(command);
+		_ = await sut.GetAsync(command);
 
         moqPaymentServiceClient.Verify(
             fake => fake.CreateDepositFormAsync(
@@ -193,33 +193,33 @@ public class DepositTests
                         0.1M))));
         var paymentId = Guid.NewGuid();
 
-        moqPaymentClient
-            .Setup(fake => fake.DepositAsync(
-                It.IsAny<string>(),
-                It.Is<decimal>(x => x == command.Amount),
-                It.IsAny<string>(),
-                It.IsAny<CancellationToken>()))
-            .Returns(ValueTask.FromResult(command.CreatePaymentSettings(Guid.NewGuid())));
+		_ = moqPaymentClient
+			.Setup(fake => fake.DepositAsync(
+				It.IsAny<string>(),
+				It.Is<decimal>(x => x == command.Amount),
+				It.IsAny<string>(),
+				It.IsAny<CancellationToken>()))
+			.Returns(ValueTask.FromResult(command.CreatePaymentSettings(Guid.NewGuid())));
 
-        moqPaymentServiceClient
-            .Setup(fake => fake.GetBrandPaymentByIdAsync(
-                It.Is<Guid>(x => x == command.BrandPaymentId),
-                It.IsAny<CancellationToken>()))
-            .Returns(ValueTask.FromResult(new BrandPaymentInfo
-            {
-                Id = command.BrandPaymentId,
-                PaymentId = paymentId
-            }));
+		_ = moqPaymentServiceClient
+			.Setup(fake => fake.GetBrandPaymentByIdAsync(
+				It.Is<Guid>(x => x == command.BrandPaymentId),
+				It.IsAny<CancellationToken>()))
+			.Returns(ValueTask.FromResult(new BrandPaymentInfo
+			{
+				Id = command.BrandPaymentId,
+				PaymentId = paymentId
+			}));
 
-        moqPaymentServiceClient
-            .Setup(fake => fake.GetPaymentByIdAsync(
-                It.Is<Guid>(x => x == paymentId),
-                It.IsAny<CancellationToken>()))
-            .Returns(ValueTask.FromResult(new PaymentInfo
-            {
-                Id = paymentId,
-                Code = "Test"
-            }));
+		_ = moqPaymentServiceClient
+			.Setup(fake => fake.GetPaymentByIdAsync(
+				It.Is<Guid>(x => x == paymentId),
+				It.IsAny<CancellationToken>()))
+			.Returns(ValueTask.FromResult(new PaymentInfo
+			{
+				Id = paymentId,
+				Code = "Test"
+			}));
 
         var expected = new DepositFormCreateInfo
         {
@@ -250,7 +250,7 @@ public class DepositTests
             PromotionId = command.PromotionId
         }.ToExpectedObject();
 
-        await sut.GetAsync(command);
+		_ = await sut.GetAsync(command);
 
         moqPaymentServiceClient.Verify(
             fake => fake.CreateDepositFormAsync(
@@ -284,27 +284,27 @@ public class DepositTests
             _ => "{}");
         var paymentId = Guid.NewGuid();
 
-        fakePaymentServiceClient.GetBrandPaymentByIdAsync(
-            Arg.Is(command.BrandPaymentId))
-            .Returns(new BrandPaymentInfo
-            {
-                Id = command.BrandPaymentId,
-                PaymentId = paymentId
-            });
+		_ = fakePaymentServiceClient.GetBrandPaymentByIdAsync(
+			Arg.Is(command.BrandPaymentId))
+			.Returns(new BrandPaymentInfo
+			{
+				Id = command.BrandPaymentId,
+				PaymentId = paymentId
+			});
 
-        fakePaymentServiceClient.GetPaymentByIdAsync(
-            Arg.Is(paymentId))
-            .Returns(new PaymentInfo
-            {
-                Id = paymentId,
-                Code = "Test"
-            });
+		_ = fakePaymentServiceClient.GetPaymentByIdAsync(
+			Arg.Is(paymentId))
+			.Returns(new PaymentInfo
+			{
+				Id = paymentId,
+				Code = "Test"
+			});
 
-        fakeBrandServiceClient.GetBrandPaymentSettingsAsync(
-            Arg.Is(command.BrandId))
-            .Returns(new BrandPaymentSettings(true));
+		_ = fakeBrandServiceClient.GetBrandPaymentSettingsAsync(
+			Arg.Is(command.BrandId))
+			.Returns(new BrandPaymentSettings(true));
 
-        Assert.ThrowsAsync<PreviousDepositStillProcessingException>(async () => await sut.GetAsync(command));
+		_ = Assert.ThrowsAsync<PreviousDepositStillProcessingException>(async () => await sut.GetAsync(command));
     }
 
     [Test]
@@ -330,7 +330,7 @@ public class DepositTests
             Guid.NewGuid(),
             _ => "{}");
 
-        Assert.ThrowsAsync<Exception>(async () => await sut.GetAsync(command));
+		_ = Assert.ThrowsAsync<Exception>(async () => await sut.GetAsync(command));
     }
 
     [Test]
@@ -357,27 +357,27 @@ public class DepositTests
             _ => "{}");
         var paymentId = Guid.NewGuid();
 
-        moqPaymentServiceClient
-            .Setup(fake => fake.GetBrandPaymentByIdAsync(
-                It.Is<Guid>(x => x == command.BrandPaymentId),
-                It.IsAny<CancellationToken>()))
-            .Returns(ValueTask.FromResult(new BrandPaymentInfo
-            {
-                Id = command.BrandPaymentId,
-                PaymentId = paymentId
-            }));
+		_ = moqPaymentServiceClient
+			.Setup(fake => fake.GetBrandPaymentByIdAsync(
+				It.Is<Guid>(x => x == command.BrandPaymentId),
+				It.IsAny<CancellationToken>()))
+			.Returns(ValueTask.FromResult(new BrandPaymentInfo
+			{
+				Id = command.BrandPaymentId,
+				PaymentId = paymentId
+			}));
 
-        moqPaymentServiceClient
-            .Setup(fake => fake.GetPaymentByIdAsync(
-                It.Is<Guid>(x => x == paymentId),
-                It.IsAny<CancellationToken>()))
-            .Returns(ValueTask.FromResult(new PaymentInfo
-            {
-                Id = paymentId,
-                Code = "Test"
-            }));
+		_ = moqPaymentServiceClient
+			.Setup(fake => fake.GetPaymentByIdAsync(
+				It.Is<Guid>(x => x == paymentId),
+				It.IsAny<CancellationToken>()))
+			.Returns(ValueTask.FromResult(new PaymentInfo
+			{
+				Id = paymentId,
+				Code = "Test"
+			}));
 
-        Assert.ThrowsAsync<CannotJoinPromotionException>(async () => await sut.GetAsync(command));
+		_ = Assert.ThrowsAsync<CannotJoinPromotionException>(async () => await sut.GetAsync(command));
     }
 
     [Test]
@@ -393,25 +393,25 @@ public class DepositTests
             Guid.NewGuid(),
             Guid.NewGuid());
 
-        moqPaymentServiceClient
-            .Setup(fake => fake.GetDepositFormAsync(
-                It.Is<Guid>(x => x == query.BrandId),
-                It.Is<Guid>(x => x == query.FormId),
-                It.IsAny<CancellationToken>()))
-            .Returns(ValueTask.FromResult(new DepositFormInfo
-            {
-                Amount = 1000M,
-                BrandId = query.BrandId,
-                BrandPaymentId = Guid.NewGuid(),
-                ChannelName = "ChannelName",
-                CreatedOn = DateTimeOffset.Now,
-                Id = query.FormId,
-                PaymentMethodId = Guid.NewGuid(),
-                PlayerCode = query.PlayerCode,
-                Status = PaymentFlowState.WaitApprove,
-                UpdatedOn = DateTimeOffset.Now,
-                UserName = "PlayerName"
-            }));
+		_ = moqPaymentServiceClient
+			.Setup(fake => fake.GetDepositFormAsync(
+				It.Is<Guid>(x => x == query.BrandId),
+				It.Is<Guid>(x => x == query.FormId),
+				It.IsAny<CancellationToken>()))
+			.Returns(ValueTask.FromResult(new DepositFormInfo
+			{
+				Amount = 1000M,
+				BrandId = query.BrandId,
+				BrandPaymentId = Guid.NewGuid(),
+				ChannelName = "ChannelName",
+				CreatedOn = DateTimeOffset.Now,
+				Id = query.FormId,
+				PaymentMethodId = Guid.NewGuid(),
+				PlayerCode = query.PlayerCode,
+				Status = PaymentFlowState.WaitApprove,
+				UpdatedOn = DateTimeOffset.Now,
+				UserName = "PlayerName"
+			}));
 
         var actual = await sut.GetAsync(query);
 
@@ -469,49 +469,49 @@ public class DepositTests
             fileStream,
             id => "{}");
 
-        moqBrandPaymentQueryService
-            .Setup(fake => fake.QueryAsync(
-                It.IsAny<BrandPaymentsQuery>(),
-                It.IsAny<CancellationToken>()))
-            .Returns(new[] {
-                new BrandPaymentInfo
-                {
-                    TransferType = TransferType.Deposit
-                }
-            }.ToAsyncEnumerable());
+		_ = moqBrandPaymentQueryService
+			.Setup(fake => fake.QueryAsync(
+				It.IsAny<BrandPaymentsQuery>(),
+				It.IsAny<CancellationToken>()))
+			.Returns(new[] {
+				new BrandPaymentInfo
+				{
+					TransferType = TransferType.Deposit
+				}
+			}.ToAsyncEnumerable());
 
-        moqGetPaymentService
-            .Setup(fake => fake.GetAsync(
-                It.IsAny<GetPaymentQuery>(),
-                It.IsAny<CancellationToken>()))
-            .Returns(ValueTask.FromResult(
-                new PaymentInfo
-                {
-                    Code = "Manual"
-                }));
+		_ = moqGetPaymentService
+			.Setup(fake => fake.GetAsync(
+				It.IsAny<GetPaymentQuery>(),
+				It.IsAny<CancellationToken>()))
+			.Returns(ValueTask.FromResult(
+				new PaymentInfo
+				{
+					Code = "Manual"
+				}));
 
-        moqPaymentServiceClient
-            .Setup(fake => fake.GetDepositFormAsync(
-                It.Is<Guid>(x => x == command.BrandId),
-                It.Is<Guid>(x => x == command.FormId),
-                It.IsAny<CancellationToken>()))
-            .Returns(ValueTask.FromResult(
-                new DepositFormInfo
-                {
-                    Id = Guid.NewGuid(),
-                    Status = PaymentFlowState.WaitPayment
-                }));
+		_ = moqPaymentServiceClient
+			.Setup(fake => fake.GetDepositFormAsync(
+				It.Is<Guid>(x => x == command.BrandId),
+				It.Is<Guid>(x => x == command.FormId),
+				It.IsAny<CancellationToken>()))
+			.Returns(ValueTask.FromResult(
+				new DepositFormInfo
+				{
+					Id = Guid.NewGuid(),
+					Status = PaymentFlowState.WaitPayment
+				}));
 
-        moqFileServiceClient
-            .Setup(fake => fake.UploadFileAsync(
-                It.IsAny<string>(),
-                It.Is<MediaTypeHeaderValue>(x => x.ToString() == contentType),
-                It.IsAny<Stream>()))
-            .Returns(ValueTask.FromResult(new FileView
-            {
-                Id = "testFileId",
-                ContentType = contentType
-            }));
+		_ = moqFileServiceClient
+			.Setup(fake => fake.UploadFileAsync(
+				It.IsAny<string>(),
+				It.Is<MediaTypeHeaderValue>(x => x.ToString() == contentType),
+				It.IsAny<Stream>()))
+			.Returns(ValueTask.FromResult(new FileView
+			{
+				Id = "testFileId",
+				ContentType = contentType
+			}));
 
         await sut.ExecuteAsync(command);
 
@@ -559,49 +559,49 @@ public class DepositTests
             fileStream,
             id => "{}");
 
-        moqBrandPaymentQueryService
-            .Setup(fake => fake.QueryAsync(
-                It.IsAny<BrandPaymentsQuery>(),
-                It.IsAny<CancellationToken>()))
-            .Returns(new[] {
-                new BrandPaymentInfo
-                {
-                    TransferType = TransferType.Deposit
-                }
-            }.ToAsyncEnumerable());
+		_ = moqBrandPaymentQueryService
+			.Setup(fake => fake.QueryAsync(
+				It.IsAny<BrandPaymentsQuery>(),
+				It.IsAny<CancellationToken>()))
+			.Returns(new[] {
+				new BrandPaymentInfo
+				{
+					TransferType = TransferType.Deposit
+				}
+			}.ToAsyncEnumerable());
 
-        moqGetPaymentService
-            .Setup(fake => fake.GetAsync(
-                It.IsAny<GetPaymentQuery>(),
-                It.IsAny<CancellationToken>()))
-            .Returns(ValueTask.FromResult(
-                new PaymentInfo
-                {
-                    Code = "Manual"
-                }));
+		_ = moqGetPaymentService
+			.Setup(fake => fake.GetAsync(
+				It.IsAny<GetPaymentQuery>(),
+				It.IsAny<CancellationToken>()))
+			.Returns(ValueTask.FromResult(
+				new PaymentInfo
+				{
+					Code = "Manual"
+				}));
 
-        moqPaymentServiceClient
-            .Setup(fake => fake.GetDepositFormAsync(
-                It.Is<Guid>(x => x == command.BrandId),
-                It.Is<Guid>(x => x == command.FormId),
-                It.IsAny<CancellationToken>()))
-            .Returns(ValueTask.FromResult(
-                new DepositFormInfo
-                {
-                    Id = Guid.NewGuid(),
-                    Status = PaymentFlowState.Approved
-                }));
+		_ = moqPaymentServiceClient
+			.Setup(fake => fake.GetDepositFormAsync(
+				It.Is<Guid>(x => x == command.BrandId),
+				It.Is<Guid>(x => x == command.FormId),
+				It.IsAny<CancellationToken>()))
+			.Returns(ValueTask.FromResult(
+				new DepositFormInfo
+				{
+					Id = Guid.NewGuid(),
+					Status = PaymentFlowState.Approved
+				}));
 
-        moqFileServiceClient
-            .Setup(fake => fake.UploadFileAsync(
-                It.IsAny<string>(),
-                It.Is<MediaTypeHeaderValue>(x => x.ToString() == contentType),
-                It.IsAny<Stream>()))
-            .Returns(ValueTask.FromResult(new FileView
-            {
-                Id = "testFileId",
-                ContentType = contentType
-            }));
+		_ = moqFileServiceClient
+			.Setup(fake => fake.UploadFileAsync(
+				It.IsAny<string>(),
+				It.Is<MediaTypeHeaderValue>(x => x.ToString() == contentType),
+				It.IsAny<Stream>()))
+			.Returns(ValueTask.FromResult(new FileView
+			{
+				Id = "testFileId",
+				ContentType = contentType
+			}));
 
         await sut.ExecuteAsync(command);
 
@@ -633,23 +633,23 @@ public class DepositTests
             Guid.NewGuid(),
             Guid.NewGuid());
 
-        fakePaymentServiceClient.GetDepositFormAsync(Arg.Is(query.BrandId), Arg.Is(query.FormId))
-            .Returns(new DepositFormInfo
-            {
-                Amount = 1000M,
-                BrandId = query.BrandId,
-                BrandPaymentId = Guid.NewGuid(),
-                ChannelName = "ChannelName",
-                CreatedOn = DateTimeOffset.Now,
-                Id = query.FormId,
-                PaymentMethodId = Guid.NewGuid(),
-                PlayerCode = query.PlayerCode,
-                Status = PaymentFlowState.WaitApprove,
-                UpdatedOn = DateTimeOffset.Now,
-                UserName = "UserName"
-            });
+		_ = fakePaymentServiceClient.GetDepositFormAsync(Arg.Is(query.BrandId), Arg.Is(query.FormId))
+			.Returns(new DepositFormInfo
+			{
+				Amount = 1000M,
+				BrandId = query.BrandId,
+				BrandPaymentId = Guid.NewGuid(),
+				ChannelName = "ChannelName",
+				CreatedOn = DateTimeOffset.Now,
+				Id = query.FormId,
+				PaymentMethodId = Guid.NewGuid(),
+				PlayerCode = query.PlayerCode,
+				Status = PaymentFlowState.WaitApprove,
+				UpdatedOn = DateTimeOffset.Now,
+				UserName = "UserName"
+			});
 
-        await sut.GetAsync(query);
+		_ = await sut.GetAsync(query);
 
         _ = fakePaymentServiceClient.Received(1)
             .GetDepositFormAsync(Arg.Is(query.BrandId), Arg.Is(query.FormId));

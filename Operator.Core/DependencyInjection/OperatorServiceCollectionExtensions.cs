@@ -60,7 +60,7 @@ public static class OperatorServiceCollectionExtensions
 			.AddRouletteSignInClient()
 			.AddDepositAccumulateRouletteClient();
 
-		services
+		_ = services
 			.AddScoped(sp => new RegisterFlowBuilder(
 				sp,
 				_FlowTypes.ToImmutableDictionary()))
@@ -69,7 +69,7 @@ public static class OperatorServiceCollectionExtensions
 			.AddScoped<FinalRegisterFlowStep>();
 
 		foreach (var v in _FlowTypes.Values)
-			services.AddScoped(v);
+			_ = services.AddScoped(v);
 
 		var opConfiguration = new OperatorConfiguration(services);
 

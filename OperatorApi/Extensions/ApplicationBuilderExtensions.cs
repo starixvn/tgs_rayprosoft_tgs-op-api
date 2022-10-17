@@ -11,11 +11,11 @@ public static class ApplicationBuilderExtensions
     {
         var bypass = bypassRouting.Concat(new[] { "/api/auth" }).Distinct().ToArray();
 
-        app.UseWhen(context => bypass.All(r => !context.Request.Path.StartsWithSegments(r)),
-            builder => builder
-                .UseMiddleware<VerifyCredentialsMiddleware>()
-                .UseMiddleware<MaintenanceMiddleware>()
-                .UseMiddleware<VerifyPlayerTokenMiddleware>());
+		_ = app.UseWhen(context => bypass.All(r => !context.Request.Path.StartsWithSegments(r)),
+			builder => builder
+				.UseMiddleware<VerifyCredentialsMiddleware>()
+				.UseMiddleware<MaintenanceMiddleware>()
+				.UseMiddleware<VerifyPlayerTokenMiddleware>());
 
         return app;
     }

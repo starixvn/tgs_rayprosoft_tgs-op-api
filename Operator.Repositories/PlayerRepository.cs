@@ -23,16 +23,16 @@ internal class PlayerRepository : IPlayerRepository
         var createFormId = Guid.NewGuid();
         var currentDate = DateTimeOffset.UtcNow;
 
-        await _tgsRepository.PlayerAuthenticationForms
-            .AddAsync(new PlayerAuthenticationForm
-            {
-                Id = createFormId,
-                CreatedOn = currentDate,
-                BrandId = brandId,
-                PlayerCode = playerCode,
-                Data = data
-            })
-            .ConfigureAwait(false);
+		_ = await _tgsRepository.PlayerAuthenticationForms
+			.AddAsync(new PlayerAuthenticationForm
+			{
+				Id = createFormId,
+				CreatedOn = currentDate,
+				BrandId = brandId,
+				PlayerCode = playerCode,
+				Data = data
+			})
+			.ConfigureAwait(false);
 
         _ = await _tgsRepository
             .SaveChangesAsync()
@@ -99,7 +99,7 @@ internal class PlayerRepository : IPlayerRepository
                 RecordOn = DateTimeOffset.UtcNow
             };
 
-            _tgsRepository.PlayerIpRecords.Add(data);
+			_ = _tgsRepository.PlayerIpRecords.Add(data);
         }
         else
         {
@@ -107,10 +107,10 @@ internal class PlayerRepository : IPlayerRepository
             data.Host = host;
             data.RecordOn = DateTimeOffset.UtcNow;
 
-            _tgsRepository.PlayerIpRecords.Update(data);
+			_ = _tgsRepository.PlayerIpRecords.Update(data);
         }
 
-        await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
+		_ = await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
     }
 
     public async ValueTask PlayerRegisterIpAsync(string playerCode, string ip, string? host, DateTimeOffset registeredOn)
@@ -171,7 +171,7 @@ internal class PlayerRepository : IPlayerRepository
 
         playerData.UpdatedOn = DateTimeOffset.UtcNow;
 
-        await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
+		_ = await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
     }
 
     public async ValueTask TogglePlayerAutoTransferFlagAsync(string playerCode)
@@ -188,9 +188,9 @@ internal class PlayerRepository : IPlayerRepository
                 IsAutoTransferToGame = false
             };
 
-            await _tgsRepository.PlayerGameSettings
-                .AddAsync(settingData)
-                .ConfigureAwait(false);
+			_ = await _tgsRepository.PlayerGameSettings
+				.AddAsync(settingData)
+				.ConfigureAwait(false);
         }
 
         settingData.IsAutoTransferToGame = !settingData.IsAutoTransferToGame;

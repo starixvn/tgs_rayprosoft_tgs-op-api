@@ -8,11 +8,11 @@ public sealed class SetPayPasswordRequestValidator : AbstractValidator<SetPayPas
 {
     public SetPayPasswordRequestValidator()
     {
-        RuleFor(x => x.Password)
-            .NotEmpty()
-            .Length(6, 20)
-            .WithName(x => x
-                .WithPropertyExpression(o => o.Password)
-                .GetBindPropertyName(nameof(x.Password)));
+		_ = RuleFor(x => x.Password)
+			.NotEmpty()
+			.Length(6, 20)
+			.WithName(x => x
+				.WithPropertyExpression(o => o.Password)
+				.GetBindPropertyName(nameof(x.Password)));
     }
 }

@@ -18,7 +18,7 @@ public class AgentTests
 
         var query = new GetAgentInfoByInvitationCodeQuery("test");
 
-        await sut.GetAsync(query);
+		_ = await sut.GetAsync(query);
 
         _ = fakeAgentRepository.Received(1)
             .GetAgentInfoByInvitationCodeAsync(Arg.Is(query.InvitationCode));

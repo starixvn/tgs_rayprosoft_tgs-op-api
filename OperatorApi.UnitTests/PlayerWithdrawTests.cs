@@ -28,7 +28,7 @@ public class PlayerWithdrawTests
             new PageableRequest()
             );
 
-        await sut.GetAsync(query, default);
+		_ = await sut.GetAsync(query, default);
 
         _ = fakePaymentServiceClient
             .Received(1)
@@ -52,7 +52,7 @@ public class PlayerWithdrawTests
             null,
             new PageableRequest());
 
-        await sut.GetAsync(query, default);
+		_ = await sut.GetAsync(query, default);
 
         _ = fakePaymentServiceClient
             .Received(1)

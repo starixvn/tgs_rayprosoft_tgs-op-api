@@ -20,10 +20,10 @@ public class BannerTests
 
         var query = new GetBannersQuery(Guid.NewGuid());
 
-        await sut.QueryAsync(query).CountAsync();
+		_ = await sut.QueryAsync(query).CountAsync();
 
-        fakeBrandRepository.Received(1)
-            .QueryBrandBannersAsync(Arg.Is(query.BrandId));
+		_ = fakeBrandRepository.Received(1)
+			.QueryBrandBannersAsync(Arg.Is(query.BrandId));
     }
 
     [Test]
@@ -35,20 +35,20 @@ public class BannerTests
 
         var query = new GetBannersQuery(Guid.NewGuid());
 
-        fakeBrandRepository.QueryBrandBannersAsync(Arg.Is(query.BrandId))
-            .Returns(new[] {
-                new BannerInfo(Guid.NewGuid(), "Test1", null),
-                new BannerInfo(Guid.NewGuid(), "Test2", null),
-                new BannerInfo(Guid.NewGuid(), "Test3", null),
-                new BannerInfo(Guid.NewGuid(), "Test4", null),
-                new BannerInfo(Guid.NewGuid(), "Test5", null),
-                new BannerInfo(Guid.NewGuid(), "Test6", null),
-                new BannerInfo(Guid.NewGuid(), "Test7", null),
-                new BannerInfo(Guid.NewGuid(), "Test8", null),
-                new BannerInfo(Guid.NewGuid(), "Test9", null),
-                new BannerInfo(Guid.NewGuid(), "Test10", null),
-                new BannerInfo(Guid.NewGuid(), "Test11", null)
-            }.ToAsyncEnumerable());
+		_ = fakeBrandRepository.QueryBrandBannersAsync(Arg.Is(query.BrandId))
+			.Returns(new[] {
+				new BannerInfo(Guid.NewGuid(), "Test1", null),
+				new BannerInfo(Guid.NewGuid(), "Test2", null),
+				new BannerInfo(Guid.NewGuid(), "Test3", null),
+				new BannerInfo(Guid.NewGuid(), "Test4", null),
+				new BannerInfo(Guid.NewGuid(), "Test5", null),
+				new BannerInfo(Guid.NewGuid(), "Test6", null),
+				new BannerInfo(Guid.NewGuid(), "Test7", null),
+				new BannerInfo(Guid.NewGuid(), "Test8", null),
+				new BannerInfo(Guid.NewGuid(), "Test9", null),
+				new BannerInfo(Guid.NewGuid(), "Test10", null),
+				new BannerInfo(Guid.NewGuid(), "Test11", null)
+			}.ToAsyncEnumerable());
 
         var actual = await sut.QueryAsync(query).CountAsync();
 

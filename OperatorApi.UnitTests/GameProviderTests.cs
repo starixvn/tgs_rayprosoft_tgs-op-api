@@ -25,21 +25,21 @@ public class GameProviderTests
 
         var query = new GetGpCodeQuery(Guid.NewGuid(), "SubGpCode");
 
-        fakeGameProviderRepository
-            .QueryAllSubGameProvidersAsync(Arg.Is(query.BrandId))
-            .Returns(
-                new[]
-                {
-                    new BrandSubGameProviderInfo(
-                        "SubGpCode",
-                        "SubGpCode",
-                        "SubGpCode",
-                        Guid.NewGuid(),
-                        "GpCode",
-                        true,
-                        Status.Active,
-                        "{}")
-                }.ToAsyncEnumerable());
+		_ = fakeGameProviderRepository
+			.QueryAllSubGameProvidersAsync(Arg.Is(query.BrandId))
+			.Returns(
+				new[]
+				{
+					new BrandSubGameProviderInfo(
+						"SubGpCode",
+						"SubGpCode",
+						"SubGpCode",
+						Guid.NewGuid(),
+						"GpCode",
+						true,
+						Status.Active,
+						"{}")
+				}.ToAsyncEnumerable());
 
         var expected = "GpCode";
 
@@ -174,11 +174,11 @@ public class GameProviderTests
         };
 
 
-        fakeGameProviderRepository.QueryAllSubGameProvidersAsync(Arg.Is(brandId))
-            .Returns(subGameProviders.ToAsyncEnumerable());
+		_ = fakeGameProviderRepository.QueryAllSubGameProvidersAsync(Arg.Is(brandId))
+			.Returns(subGameProviders.ToAsyncEnumerable());
 
-        fakeGameProviderRepository.QueryAllGamesAsync(Arg.Is(brandId))
-            .Returns(games.ToAsyncEnumerable());
+		_ = fakeGameProviderRepository.QueryAllGamesAsync(Arg.Is(brandId))
+			.Returns(games.ToAsyncEnumerable());
 
         var sut = new GetGameProvidersQueryService(
             fakePlayerOperations,
@@ -315,11 +315,11 @@ public class GameProviderTests
                 0)
         };
 
-        fakeGameProviderRepository.QueryAllSubGameProvidersAsync(Arg.Is(brandId))
-            .Returns(subGameProviders.ToAsyncEnumerable());
+		_ = fakeGameProviderRepository.QueryAllSubGameProvidersAsync(Arg.Is(brandId))
+			.Returns(subGameProviders.ToAsyncEnumerable());
 
-        fakeGameProviderRepository.QueryAllGamesAsync(Arg.Is(brandId))
-            .Returns(games.ToAsyncEnumerable());
+		_ = fakeGameProviderRepository.QueryAllGamesAsync(Arg.Is(brandId))
+			.Returns(games.ToAsyncEnumerable());
 
         var sut = new GetGameProvidersQueryService(
             fakePlayerOperations,
@@ -459,11 +459,11 @@ public class GameProviderTests
                 0)
         };
 
-        fakeGameProviderRepository.QueryAllSubGameProvidersAsync(Arg.Is(brandId))
-            .Returns(subGameProviders.ToAsyncEnumerable());
+		_ = fakeGameProviderRepository.QueryAllSubGameProvidersAsync(Arg.Is(brandId))
+			.Returns(subGameProviders.ToAsyncEnumerable());
 
-        fakeGameProviderRepository.QueryAllGamesAsync(Arg.Is(brandId))
-            .Returns(games.ToAsyncEnumerable());
+		_ = fakeGameProviderRepository.QueryAllGamesAsync(Arg.Is(brandId))
+			.Returns(games.ToAsyncEnumerable());
 
         var sut = new GetGameProvidersQueryService(
             fakePlayerOperations,

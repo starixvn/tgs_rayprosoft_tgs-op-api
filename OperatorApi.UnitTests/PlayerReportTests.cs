@@ -52,15 +52,15 @@ public class PlayerReportTests
             Items = rounds
         };
 
-        fakeReportClient
-            .GetRoundsAsync(Arg.Any<GetRoundsRequest>())
-            .Returns(resp);
+		_ = fakeReportClient
+			.GetRoundsAsync(Arg.Any<GetRoundsRequest>())
+			.Returns(resp);
 
         var sut = new PlayerReportController(fakeReportClient);
         sut.ControllerContext = new ControllerContext { HttpContext = fakeHttpContext };
 
-        // act
-        await sut.GetRoundsAsync(playerRoundRequest);
+		// act
+		_ = await sut.GetRoundsAsync(playerRoundRequest);
 
         // assert
         _ = fakeReportClient.Received(1)

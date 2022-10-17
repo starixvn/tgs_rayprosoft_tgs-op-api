@@ -86,9 +86,9 @@ internal class CreateDepositFormCommandService : IGetService<CreateDepositFormCo
                 PromotionId = command.PromotionId
             };
 
-            await _paymentServiceClient
-                .CreateDepositFormAsync(createFormId, form)
-                .ConfigureAwait(false);
+			_ = await _paymentServiceClient
+				.CreateDepositFormAsync(createFormId, form)
+				.ConfigureAwait(false);
         }
         catch
         {

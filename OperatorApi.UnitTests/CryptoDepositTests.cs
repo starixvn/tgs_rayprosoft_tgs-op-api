@@ -19,7 +19,7 @@ public class CryptoDepositTests
         var subject = "tgs.payment.umpay.queryexchangerate";
         var setting = serializer.Serialize(new UmPayQueryExchangeRateSettings());
         var query = new GetUmPayExchangeRateQuery(subject, setting);
-        await sut.GetAsync(query);
+		_ = await sut.GetAsync(query);
 
         _ = await fakePaymentClient
             .Received(1)

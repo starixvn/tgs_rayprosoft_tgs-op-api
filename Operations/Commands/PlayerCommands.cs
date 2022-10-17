@@ -31,7 +31,7 @@ public sealed class PlayerCommands : IPlayerCommands
         player.Password = data.Password;
         player.UpdatedOn = data.UpdatedOn;
 
-        await _repository.SaveChangesAsync().ConfigureAwait(false);
+		_ = await _repository.SaveChangesAsync().ConfigureAwait(false);
     }
 
     public async Task<string> CreatePlayerAsync(CreatePlayerData data)
@@ -79,16 +79,16 @@ public sealed class PlayerCommands : IPlayerCommands
             }
         };
 
-        await _repository.Players.AddAsync(player);
+		_ = await _repository.Players.AddAsync(player);
 
         if (!string.IsNullOrWhiteSpace(data.UpperPlayerCode))
-            await _repository.PlayerParents.AddAsync(new PlayerParent
-            {
-                PlayerCode = playerCode,
-                ParentPlayerCode = data.UpperPlayerCode
-            }).ConfigureAwait(false);
+			_ = await _repository.PlayerParents.AddAsync(new PlayerParent
+			{
+				PlayerCode = playerCode,
+				ParentPlayerCode = data.UpperPlayerCode
+			}).ConfigureAwait(false);
 
-        await _repository.SaveChangesAsync();
+		_ = await _repository.SaveChangesAsync();
 
         return playerCode;
     }
@@ -142,8 +142,8 @@ public sealed class PlayerCommands : IPlayerCommands
             ExpiredOn = data.ExpiredOn
         };
 
-        await _repository.PlayerLoginRecords.AddAsync(loginRecord);
-        await _repository.SaveChangesAsync();
+		_ = await _repository.PlayerLoginRecords.AddAsync(loginRecord);
+		_ = await _repository.SaveChangesAsync();
 
         return loginRecord;
     }
@@ -169,7 +169,7 @@ public sealed class PlayerCommands : IPlayerCommands
         player.IdentityAuthentication = isAuthenticate;
         player.UpdatedOn = updatedOn;
 
-        await _repository.SaveChangesAsync().ConfigureAwait(false);
+		_ = await _repository.SaveChangesAsync().ConfigureAwait(false);
     }
 
     public async Task SetPayPasswordAsync(
@@ -181,7 +181,7 @@ public sealed class PlayerCommands : IPlayerCommands
         player.WithdrawPassword = newPassword;
         player.UpdatedOn = updatedOn;
 
-        await _repository.SaveChangesAsync().ConfigureAwait(false);
+		_ = await _repository.SaveChangesAsync().ConfigureAwait(false);
     }
 
     public async Task SetPhoneAsync(string playerCode, string phone, DateTimeOffset updatedOn)
@@ -192,7 +192,7 @@ public sealed class PlayerCommands : IPlayerCommands
         player.PhoneAuthentication = true;
         player.UpdatedOn = updatedOn;
 
-        await _repository.SaveChangesAsync().ConfigureAwait(false);
+		_ = await _repository.SaveChangesAsync().ConfigureAwait(false);
     }
 
     public async Task SetQqAsync(string playerCode, string qqId, DateTimeOffset updatedOn)
@@ -202,7 +202,7 @@ public sealed class PlayerCommands : IPlayerCommands
         player.QQ = qqId;
         player.UpdatedOn = updatedOn;
 
-        await _repository.SaveChangesAsync().ConfigureAwait(false);
+		_ = await _repository.SaveChangesAsync().ConfigureAwait(false);
     }
 
     public async Task SetWeChatAsync(string playerCode, string weChatId, DateTimeOffset updatedOn)
@@ -212,6 +212,6 @@ public sealed class PlayerCommands : IPlayerCommands
         player.Wechat = weChatId;
         player.UpdatedOn = updatedOn;
 
-        await _repository.SaveChangesAsync().ConfigureAwait(false);
+		_ = await _repository.SaveChangesAsync().ConfigureAwait(false);
     }
 }

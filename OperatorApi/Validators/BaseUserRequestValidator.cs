@@ -8,11 +8,11 @@ public abstract class BaseUserRequestValidator<T> : AbstractValidator<T> where T
 {
     protected BaseUserRequestValidator()
     {
-        RuleFor(x => x.Username)
-            .NotEmpty()
-            .Length(6, 32)
-            .WithName(x => x
-                .WithPropertyExpression(o => o.Username)
-                .GetJsonPropertyName(nameof(x.Username)));
+		_ = RuleFor(x => x.Username)
+			.NotEmpty()
+			.Length(6, 32)
+			.WithName(x => x
+				.WithPropertyExpression(o => o.Username)
+				.GetJsonPropertyName(nameof(x.Username)));
     }
 }

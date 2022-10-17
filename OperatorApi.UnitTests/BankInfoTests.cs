@@ -75,7 +75,7 @@ public class BankInfoTests
 
         var playerCode = "ThisIsPlayerCode";
 
-        sut.QueryAsync(new GetPlayerBankInfosQuery(playerCode));
+		_ = sut.QueryAsync(new GetPlayerBankInfosQuery(playerCode));
 
         _ = fakePaymentServiceClient.Received(1)
             .GetPlayerBankInfosAsync(Arg.Is(playerCode));

@@ -116,44 +116,44 @@ public class PlayerPasswordTests
             "886",
             "0912345678");
 
-        fakePlayerServiceClient
-            .GetPlayerInfoByPhoneAsync(
-                Arg.Is(command.BrandId),
-                Arg.Is(command.AreaCode),
-                Arg.Is(command.Phone))
-            .Returns(new Tgs.PlayerService.Client.PlayerInfo
-            {
-                PlayerCode = "TestCode",
-                BrandId = command.BrandId,
-                PhoneAuthentication = true
-            });
+		_ = fakePlayerServiceClient
+			.GetPlayerInfoByPhoneAsync(
+				Arg.Is(command.BrandId),
+				Arg.Is(command.AreaCode),
+				Arg.Is(command.Phone))
+			.Returns(new Tgs.PlayerService.Client.PlayerInfo
+			{
+				PlayerCode = "TestCode",
+				BrandId = command.BrandId,
+				PhoneAuthentication = true
+			});
 
         var validateCode = "123456";
         var token = "abc123";
 
-        fakeValidateCodeGenerator.GenerateCode().Returns(validateCode);
-        fakeValidateCodeGenerator.GenerateSecurityKey().Returns(token);
+		_ = fakeValidateCodeGenerator.GenerateCode().Returns(validateCode);
+		_ = fakeValidateCodeGenerator.GenerateSecurityKey().Returns(token);
 
-        fakeValidateCodeOperator.SaveValidateDataAsync(
-            Arg.Is(validateCode),
-            Arg.Is(token),
-            Arg.Any<ValidateCodeData>())
-            .Returns(true);
+		_ = fakeValidateCodeOperator.SaveValidateDataAsync(
+			Arg.Is(validateCode),
+			Arg.Is(token),
+			Arg.Any<ValidateCodeData>())
+			.Returns(true);
 
-        fakeBrandServiceClient
-            .GetBrandInfoAsync(Arg.Is(command.BrandId))
-            .Returns(new Tgs.BrandCertificate.Clients.BrandInfo
-            {
-                Id = command.BrandId,
-                Code = "brandCode",
-                Currency = "CNY",
-                SmsEnabled = true,
-                SmsRegisterFlowEnabled = true
-            });
+		_ = fakeBrandServiceClient
+			.GetBrandInfoAsync(Arg.Is(command.BrandId))
+			.Returns(new Tgs.BrandCertificate.Clients.BrandInfo
+			{
+				Id = command.BrandId,
+				Code = "brandCode",
+				Currency = "CNY",
+				SmsEnabled = true,
+				SmsRegisterFlowEnabled = true
+			});
 
         var expected = $"Your ID verification code is : {validateCode}";
 
-        await sut.GetAsync(command);
+		_ = await sut.GetAsync(command);
 
         _ = fakeSmsServiceClient.Received(1)
             .SendShortMessageAsync(
@@ -184,7 +184,7 @@ public class PlayerPasswordTests
             "886",
             "0912345678");
 
-        Assert.ThrowsAsync<PlayerNotFoundException>(async () => await sut.GetAsync(command));
+		_ = Assert.ThrowsAsync<PlayerNotFoundException>(async () => await sut.GetAsync(command));
     }
 
     [Test]
@@ -194,9 +194,9 @@ public class PlayerPasswordTests
 
         var dbContextOptionsBuilder = new DbContextOptionsBuilder<TgsRepository>();
 
-        dbContextOptionsBuilder
-            .UseInMemoryDatabase(Guid.NewGuid().ToString())
-            .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
+		_ = dbContextOptionsBuilder
+			.UseInMemoryDatabase(Guid.NewGuid().ToString())
+			.ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
 
         var fakeTgsRepository = new TgsRepository(dbContextOptionsBuilder.Options);
 
@@ -214,8 +214,8 @@ public class PlayerPasswordTests
             WithdrawSalt = Array.Empty<byte>()
         };
 
-        await fakeTgsRepository.Players.AddAsync(player);
-        await fakeTgsRepository.SaveChangesAsync();
+		_ = await fakeTgsRepository.Players.AddAsync(player);
+		_ = await fakeTgsRepository.SaveChangesAsync();
 
         var fakeValidateCodeGenerator = Substitute.For<IValidateCodeGenerator>();
         var fakeValidateCodeOperator = Substitute.For<IValidateCodeOperator>();
@@ -233,17 +233,17 @@ public class PlayerPasswordTests
         var validateCode = "123456";
         var token = "abc123";
 
-        fakeValidateCodeGenerator.GenerateCode().Returns(validateCode);
-        fakeValidateCodeGenerator.GenerateSecurityKey().Returns(token);
+		_ = fakeValidateCodeGenerator.GenerateCode().Returns(validateCode);
+		_ = fakeValidateCodeGenerator.GenerateSecurityKey().Returns(token);
 
-        fakeValidateCodeOperator
-            .SaveValidateDataAsync(
-                Arg.Is(validateCode),
-                Arg.Is(token),
-                Arg.Any<ValidateCodeData>())
-            .Returns(true);
+		_ = fakeValidateCodeOperator
+			.SaveValidateDataAsync(
+				Arg.Is(validateCode),
+				Arg.Is(token),
+				Arg.Any<ValidateCodeData>())
+			.Returns(true);
 
-        await sut.GetAsync(command);
+		_ = await sut.GetAsync(command);
 
         _ = fakeValidateCodeOperator
             .Received(1)
@@ -322,7 +322,7 @@ public class PlayerPasswordTests
 
         var command = new PlayerPasswordValidateCommand(playerCode, password);
 
-        await sut.GetAsync(command);
+		_ = await sut.GetAsync(command);
 
         _ = fakePasswordHandler
             .Received(1)

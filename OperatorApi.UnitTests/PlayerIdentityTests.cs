@@ -30,12 +30,12 @@ public class PlayerIdentityTests
             Currency = "CNY"
         };
 
-        fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId)).Returns(brandInfo);
+		_ = fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId)).Returns(brandInfo);
 
         var sut = new CreateIdentityAuthenticationFormCommandService(fakeBrandServiceClient, fakePlayerRepository);
 
-        Assert.ThrowsAsync<BrandEnablePlayerIdentityNotSetException>(
-            async () => await sut.ExecuteAsync(new CreateIdentityAuthenticationFormCommand("playerCode", brandId, "fileId")));
+		_ = Assert.ThrowsAsync<BrandEnablePlayerIdentityNotSetException>(
+			async () => await sut.ExecuteAsync(new CreateIdentityAuthenticationFormCommand("playerCode", brandId, "fileId")));
     }
 
     [Test]
@@ -51,7 +51,7 @@ public class PlayerIdentityTests
 
         var query = new GetPlayerIdentityFormQuery("playerCode");
 
-        await sut.GetAsync(query);
+		_ = await sut.GetAsync(query);
 
         _ = fakePlayerRepository
             .Received(1)
@@ -76,10 +76,10 @@ public class PlayerIdentityTests
         };
         var command = new SetIdentityCommand(player.PlayerCode, "RealName", "123456789", brandId);
 
-        moqPlayerOperations
-            .Setup(fake => fake.GetPlayerByCodeAsync(
-                It.Is<string>(x => x == player.PlayerCode)))
-            .Returns(Task.FromResult(player));
+		_ = moqPlayerOperations
+			.Setup(fake => fake.GetPlayerByCodeAsync(
+				It.Is<string>(x => x == player.PlayerCode)))
+			.Returns(Task.FromResult(player));
 
         await sut.ExecuteAsync(command);
 

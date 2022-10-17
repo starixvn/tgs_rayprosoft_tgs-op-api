@@ -24,7 +24,7 @@ public class VipTests
             Guid.NewGuid(),
             new PageableRequest());
 
-        await sut.GetAsync(query);
+		_ = await sut.GetAsync(query);
 
         _ = fakeVipLevelRepository
             .Received(1)
@@ -42,7 +42,7 @@ public class VipTests
             Guid.NewGuid(),
             new PageableRequest());
 
-        await sut.QueryAsync(query).ToArrayAsync();
+		_ = await sut.QueryAsync(query).ToArrayAsync();
 
         _ = fakeVipLevelRepository
             .Received(1)
