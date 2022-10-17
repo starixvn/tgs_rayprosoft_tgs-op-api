@@ -35,6 +35,8 @@ internal class SetPromotionJoinRegisterFlowStep : IRegisterFlowStep
 		PlayerLocationInfo locationInfo,
 		CancellationToken cancellationToken = default)
 	{
+		_logger.LogInformation("SetPromotionJoinRegisterFlowStep input:{input}", input);
+		_logger.LogInformation("SetPromotionJoinRegisterFlowStep locationInfo:{locationInfo}", locationInfo);
 		if (string.IsNullOrWhiteSpace(locationInfo.PlayerCode))
 			return new RegisterFlowProcessResult(false, null, null);
 
