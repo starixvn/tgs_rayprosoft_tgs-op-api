@@ -1664,8 +1664,9 @@ public class RegisterFlowTests
 	public async Task Set_Promotion_Join_Step()
 	{
 		var fakePromotionClient = Substitute.For<IPromotionClient>();
+		var fakeLogger = new NullLogger<SetPromotionJoinRegisterFlowStep>();
 
-		var sut = new SetPromotionJoinRegisterFlowStep(fakePromotionClient);
+		var sut = new SetPromotionJoinRegisterFlowStep(fakePromotionClient, fakeLogger);
 
 		var brandId = Guid.NewGuid();
 		var inputData = new Guid[]
