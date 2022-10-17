@@ -36,7 +36,7 @@ internal class RegisterFlow : IRegisterFlowStep
                 .ConfigureAwait(false);
 
             if (isCompleted)
-				_ = _flowSteps.Dequeue();
+                _ = _flowSteps.Dequeue();
             else
                 return false;
         }
@@ -60,7 +60,7 @@ internal class RegisterFlow : IRegisterFlowStep
 
         if (result.IsCompleted)
         {
-			_ = _flowSteps.Dequeue();
+            _ = _flowSteps.Dequeue();
 
             var isCompleted = await ConfirmCompletedAsync(locationInfo.PlayerCode).ConfigureAwait(false);
 
