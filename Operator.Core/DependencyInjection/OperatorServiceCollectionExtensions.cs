@@ -13,65 +13,66 @@ namespace Microsoft.Extensions.DependencyInjection;
 
 public static class OperatorServiceCollectionExtensions
 {
-    private static readonly Dictionary<string, Type> _FlowTypes = new()
-    {
-        ["InitPhone"] = typeof(SetPhoneRegisterFlowStep),
-        ["InitMail"] = typeof(SetEmailRegisterFlowStep),
-        ["SetWithdrawBankInfo"] = typeof(SetWithdrawBankInfoRegisterFlowStep),
-        ["SetPhoneDontCareDuplicate"] = typeof(SetPhoneDontCareDuplicateRegisterFlowStep),
-        ["SetEmailDontCareDuplicate"] = typeof(SetEmailDontCareDuplicateRegisterFlowStep),
-        ["SetRealName"] = typeof(SetRealNameRegisterFlowStep)
-    };
+	private static readonly Dictionary<string, Type> _FlowTypes = new()
+	{
+		["InitPhone"] = typeof(SetPhoneRegisterFlowStep),
+		["InitMail"] = typeof(SetEmailRegisterFlowStep),
+		["SetWithdrawBankInfo"] = typeof(SetWithdrawBankInfoRegisterFlowStep),
+		["SetPhoneDontCareDuplicate"] = typeof(SetPhoneDontCareDuplicateRegisterFlowStep),
+		["SetEmailDontCareDuplicate"] = typeof(SetEmailDontCareDuplicateRegisterFlowStep),
+		["SetRealName"] = typeof(SetRealNameRegisterFlowStep),
+		["JoinPromotion"] = typeof(SetPromotionJoinRegisterFlowStep)
+	};
 
-    public static OperatorConfiguration AddOperatorApiCore(this IServiceCollection services)
-    {
-        _ = services.RegisterAllServiceUtilityTypes(
-            typeof(OperatorServiceCollectionExtensions).Assembly,
-            ServiceLifetime.Transient);
+	public static OperatorConfiguration AddOperatorApiCore(this IServiceCollection services)
+	{
+		_ = services.RegisterAllServiceUtilityTypes(
+			typeof(OperatorServiceCollectionExtensions).Assembly,
+			ServiceLifetime.Transient);
 
-        _ = services
-            .AddOptions<OperatorOptions>()
-            .Services
-            .AddValidateCodeClient((options, sp) =>
-            {
-                var operatorOptions = sp.GetRequiredService<IOptions<OperatorOptions>>().Value;
+		_ = services
+			.AddOptions<OperatorOptions>()
+			.Services
+			.AddValidateCodeClient((options, sp) =>
+			{
+				var operatorOptions = sp.GetRequiredService<IOptions<OperatorOptions>>().Value;
 
-                options.ValidateCodeBaseUrl = operatorOptions.ValidateCodeBaseUrl;
-            })
-            .AddTransient<IGameProviderStatusValidator, GameProviderStatusValidator>()
-            .AddTransient<IValidateCodeOperator, RestValidateCodeOperator>()
-            .AddTransient<IRequestAnalyzer, RequestAnalyzer>()
-            .AddSingleton<IValidateCodeGenerator, RandomValidateCodeGenerator>()
-            .AddMail()
-            .AddSmsClient((sp, httpClient) =>
-            {
-                var options = sp.GetRequiredService<IOptions<OperatorOptions>>().Value;
+				options.ValidateCodeBaseUrl = operatorOptions.ValidateCodeBaseUrl;
+			})
+			.AddTransient<IGameProviderStatusValidator, GameProviderStatusValidator>()
+			.AddTransient<IValidateCodeOperator, RestValidateCodeOperator>()
+			.AddTransient<IRequestAnalyzer, RequestAnalyzer>()
+			.AddSingleton<IValidateCodeGenerator, RandomValidateCodeGenerator>()
+			.AddMail()
+			.AddSmsClient((sp, httpClient) =>
+			{
+				var options = sp.GetRequiredService<IOptions<OperatorOptions>>().Value;
 
-                httpClient.BaseAddress = options.SmsBaseUrl;
-            })
-            .AddFileServiceClient((sp, httpClient) =>
-            {
-                var options = sp.GetRequiredService<IOptions<OperatorOptions>>().Value;
+				httpClient.BaseAddress = options.SmsBaseUrl;
+			})
+			.AddFileServiceClient((sp, httpClient) =>
+			{
+				var options = sp.GetRequiredService<IOptions<OperatorOptions>>().Value;
 
-                httpClient.BaseAddress = options.FileServiceBaseUrl;
-            })
-            .AddPaymentClient()
-            .AddRouletteSignInClient()
-            .AddDepositAccumulateRouletteClient();
+				httpClient.BaseAddress = options.FileServiceBaseUrl;
+			})
+			.AddPaymentClient()
+			.AddRouletteSignInClient()
+			.AddDepositAccumulateRouletteClient();
 
-        services
-            .AddScoped(sp => new RegisterFlowBuilder(
-                sp,
-                _FlowTypes.ToImmutableDictionary()))
-            .AddScoped<IBrandRegisterFlowDefinitionManager, BrandFlowDefinitionManager>()
-            .AddScoped<CreatePlayerRegisterFlowStep>()
-            .AddScoped<FinalRegisterFlowStep>();
+		services
+			.AddScoped(sp => new RegisterFlowBuilder(
+				sp,
+				_FlowTypes.ToImmutableDictionary()))
+			.AddScoped<IBrandRegisterFlowDefinitionManager, BrandFlowDefinitionManager>()
+			.AddScoped<CreatePlayerRegisterFlowStep>()
+			.AddScoped<FinalRegisterFlowStep>();
 
-        foreach (var v in _FlowTypes.Values)
-            services.AddScoped(v);
+		foreach (var v in _FlowTypes.Values)
+			services.AddScoped(v);
 
-        var opConfiguration = new OperatorConfiguration(services);
+		var opConfiguration = new OperatorConfiguration(services);
 
-        return opConfiguration;
-    }
+		return opConfiguration;
+	}
 }
