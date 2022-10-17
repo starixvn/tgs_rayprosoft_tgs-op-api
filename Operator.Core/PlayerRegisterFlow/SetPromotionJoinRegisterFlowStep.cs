@@ -14,6 +14,8 @@ internal class SetPromotionJoinRegisterFlowStep : IRegisterFlowStep
 	private readonly IPromotionClient _promotionClient;
 	private Guid[]? _promotionIds;
 
+	public bool IsAuto => true;
+
 	public string Type => "JoinPromotion";
 
 	public SetPromotionJoinRegisterFlowStep(
