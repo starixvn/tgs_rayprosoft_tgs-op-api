@@ -96,7 +96,7 @@ internal class SetPhoneRegisterFlowStep : IRegisterFlowStep
 		var findPlayer = await _playerServiceClient
 			.GetPlayerInfoByPhoneAsync(
 				brandId,
-				data.AreaCode.Trim().Replace("+", ""),
+				data.AreaCode.Trim().TrimStart('+'),
 				data.Phone.Trim(),
 				cancellationToken)
 			.ConfigureAwait(false);
