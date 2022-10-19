@@ -9,39 +9,46 @@ using Tgs.BrandCertificate.Clients;
 
 namespace TGS.Services.Operator.PlayerRegisterFlow;
 
-internal class BrandFlowDefinitionManager : IBrandRegisterFlowDefinitionManager
+internal class BrandFlowDefinitionManager : IBrandRegisterFlowDefinitionManager, IBrandFrontendInfoCacheCleaner
 {
-    private readonly IBrandServiceClient _brandServiceClient;
-    private readonly IMemoryCache _memoryCache;
-    private readonly RegisterFlowBuilder _registerFlowBuilder;
+	private readonly IBrandServiceClient _brandServiceClient;
+	private readonly IMemoryCache _memoryCache;
+	private readonly RegisterFlowBuilder _registerFlowBuilder;
 
-    public BrandFlowDefinitionManager(
-        RegisterFlowBuilder registerFlowBuilder,
-        IBrandServiceClient brandServiceClient,
-        IMemoryCache memoryCache)
-    {
-        _registerFlowBuilder = registerFlowBuilder ?? throw new ArgumentNullException(nameof(registerFlowBuilder));
-        _brandServiceClient = brandServiceClient ?? throw new ArgumentNullException(nameof(brandServiceClient));
-        _memoryCache = memoryCache ?? throw new ArgumentNullException(nameof(memoryCache));
-    }
+	public BrandFlowDefinitionManager(
+		RegisterFlowBuilder registerFlowBuilder,
+		IBrandServiceClient brandServiceClient,
+		IMemoryCache memoryCache)
+	{
+		_registerFlowBuilder = registerFlowBuilder ?? throw new ArgumentNullException(nameof(registerFlowBuilder));
+		_brandServiceClient = brandServiceClient ?? throw new ArgumentNullException(nameof(brandServiceClient));
+		_memoryCache = memoryCache ?? throw new ArgumentNullException(nameof(memoryCache));
+	}
 
-    public async Task<RegisterFlowDefinition> GetRegisterFlowDefinitionAsync(Guid brandId, CancellationToken cancellationToken = default)
-    {
-        var key = $"Flow:{brandId}";
+	public void Clean(Guid brandId)
+	{
+		var key = $"Flow:{brandId}";
 
-        var settings = await _memoryCache.GetOrCreateAsync(
-            key,
-            async entry =>
-            {
-                var brandFrontendInfo = await _brandServiceClient
-                    .GetBrandFrontendInfoAsync(brandId)
-                    .ConfigureAwait(false);
+		_memoryCache.Remove(key);
+	}
 
-                entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(8D);
+	public async Task<RegisterFlowDefinition> GetRegisterFlowDefinitionAsync(Guid brandId, CancellationToken cancellationToken = default)
+	{
+		var key = $"Flow:{brandId}";
 
-                return brandFrontendInfo?.PlayerRegisterFlowSettings;
-            }).ConfigureAwait(false);
+		var settings = await _memoryCache.GetOrCreateAsync(
+			key,
+			async entry =>
+			{
+				var brandFrontendInfo = await _brandServiceClient
+					.GetBrandFrontendInfoAsync(brandId)
+					.ConfigureAwait(false);
 
-        return _registerFlowBuilder.LoadSettings(settings ?? JsonDocument.Parse("[]"));
-    }
+				entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(8D);
+
+				return brandFrontendInfo?.PlayerRegisterFlowSettings;
+			}).ConfigureAwait(false);
+
+		return _registerFlowBuilder.LoadSettings(settings ?? JsonDocument.Parse("[]"));
+	}
 }

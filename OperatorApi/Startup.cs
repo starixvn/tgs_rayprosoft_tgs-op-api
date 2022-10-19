@@ -41,23 +41,24 @@ using TGS.Core.Infrastructures.WebApiServices;
 using TGS.Payment.ManualDeposit;
 using TGS.Services.Operations.Extensions;
 using TGS.Services.Operator;
+using TGS.Services.Operator.MessageQueue;
 using TGS.Services.Operator.ValidateCode;
 
 namespace TGS.Apis.OperatorApi;
 
 public sealed class Startup
 {
-    private readonly IConfiguration _configuration;
-    private readonly IWebHostEnvironment _env;
+	private readonly IConfiguration _configuration;
+	private readonly IWebHostEnvironment _env;
 
-    public Startup(IConfiguration configuration, IWebHostEnvironment env)
-    {
-        _configuration = configuration;
-        _env = env;
-    }
+	public Startup(IConfiguration configuration, IWebHostEnvironment env)
+	{
+		_configuration = configuration;
+		_env = env;
+	}
 
-    public void Configure(IApplicationBuilder app, ILogger<Startup> logger)
-    {
+	public void Configure(IApplicationBuilder app, ILogger<Startup> logger)
+	{
 		_ = app.UseForwardedHeaders();
 		_ = app.UseRequestLocalization(options =>
 		{
@@ -86,10 +87,10 @@ public sealed class Startup
 
 		_ = app.UseSwagger();
 		_ = app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "TGS Operator API"));
-    }
+	}
 
-    public void ConfigureServices(IServiceCollection services)
-    {
+	public void ConfigureServices(IServiceCollection services)
+	{
 		_ = services
 			.AddOptions<ForwardedHeadersOptions>()
 			.Configure<IConfiguration>((options, config) =>
@@ -224,7 +225,10 @@ public sealed class Startup
 						var config = sp.GetRequiredService<IConfiguration>();
 
 						options.Url = config.GetValue<string>("NatsSetting:Urls");
-					});
+					})
+					.AddHandler(
+						ProcessorTypes.BrandFrontendInfoChangedEventHandlerType,
+						"tgs.brand.frontendinfo.changed");
 			})
 			.AddNatsGlobPatternExchange("*");
 
@@ -356,5 +360,5 @@ public sealed class Startup
 						.SetIsOriginAllowed(_ => true);
 				});
 		});
-    }
+	}
 }
