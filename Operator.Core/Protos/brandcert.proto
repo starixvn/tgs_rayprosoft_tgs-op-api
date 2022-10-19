@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+option csharp_namespace = "Tgs.BrandCertificateService.Protos";
+package brandcert;
+
+import "phoenix/protobuf/guid.proto";
+
+message BrandFrontendInfoChangedEvent {
+	phoenix.protobuf.GuidValue brand_id = 1;
+}
