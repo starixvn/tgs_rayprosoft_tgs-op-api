@@ -12,51 +12,64 @@ namespace TGS.Tests.OperatorApi.UnitTests;
 [TestFixture]
 public class PlayerDepositTests
 {
-    [Test]
-    public async Task Get_Player_Deposit_Info_Should_Success()
-    {
-        var fakePaymentServiceClient = Substitute.For<IPaymentServiceClient>();
+	[Test]
+	public async Task Get_Player_Deposit_Info_Should_Success()
+	{
+		var fakePaymentServiceClient = Substitute.For<IPaymentServiceClient>();
 
-        var sut = new QueryDepositFormsService(fakePaymentServiceClient);
+		var sut = new QueryDepositFormsService(fakePaymentServiceClient);
 
-        var query = new DepositFormsQuery(
-            BrandId: Guid.NewGuid(),
-            "playerCode",
-            new List<PaymentFlowState>(),
-            CreateOnRange: null,
-            UpdateOnRange: null,
-            new PageableRequest());
-
-		_ = await sut.GetAsync(query, default);
-
-        _ = fakePaymentServiceClient
-            .Received(1)
-            .QueryDepositFormsAsync(
-                Arg.Any<DepositFormQueryConditions>(),
-                Arg.Any<Tgs.Payment.Clients.Paging>());
-    }
-
-    [Test]
-    public async Task Get_Player_Deposit_Info_Should_Use_UserId_Condition()
-    {
-        var fakePaymentServiceClient = Substitute.For<IPaymentServiceClient>();
-
-        var sut = new QueryDepositFormsService(fakePaymentServiceClient);
-
-        var query = new DepositFormsQuery(
-            BrandId: Guid.NewGuid(),
-            "playerCode",
-            new List<PaymentFlowState>(),
-            CreateOnRange: null,
-            UpdateOnRange: null,
-            new PageableRequest());
+		var query = new DepositFormsQuery(
+			BrandId: Guid.NewGuid(),
+			"playerCode",
+			new List<PaymentFlowState>(),
+			CreateOnRange: null,
+			UpdateOnRange: null,
+			new PageableRequest());
 
 		_ = await sut.GetAsync(query, default);
 
-        _ = fakePaymentServiceClient
-            .Received(1)
-            .QueryDepositFormsAsync(
-                Arg.Is<DepositFormQueryConditions>(c => c.UserId == query.PlayerCode),
-                Arg.Any<Tgs.Payment.Clients.Paging>());
-    }
+		_ = fakePaymentServiceClient
+			.Received(1)
+			.QueryDepositFormsAsync(
+				Arg.Any<DepositFormQueryConditions>(),
+				Arg.Any<Tgs.Payment.Clients.Paging>());
+	}
+
+	[Test]
+	public async Task Get_Player_Deposit_Info_Should_Use_UserId_Condition()
+	{
+		var fakePaymentServiceClient = Substitute.For<IPaymentServiceClient>();
+
+		var sut = new QueryDepositFormsService(fakePaymentServiceClient);
+
+		var query = new DepositFormsQuery(
+			BrandId: Guid.NewGuid(),
+			"playerCode",
+			new List<PaymentFlowState>(),
+			CreateOnRange: null,
+			UpdateOnRange: null,
+			new PageableRequest());
+
+		_ = await sut.GetAsync(query, default);
+
+		_ = fakePaymentServiceClient
+			.Received(1)
+			.QueryDepositFormsAsync(
+				Arg.Is<DepositFormQueryConditions>(c => c.UserId == query.PlayerCode),
+				Arg.Any<Tgs.Payment.Clients.Paging>());
+	}
+
+	[Test]
+	public void Usdt_Despost_To_Sytem_Dollar()
+	{
+		var sendUsdt = 1000M;
+
+		var rate = 0.23M;
+
+		var actual = Math.Floor(sendUsdt / rate * 100) / 100;
+
+		var expected = 4347.82M;
+		Assert.AreEqual(expected, actual);
+	}
 }
