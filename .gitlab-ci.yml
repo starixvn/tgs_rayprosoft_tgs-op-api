@@ -149,7 +149,6 @@ deploy-staging:
     - export autoscaling=$(kubectl get cm autoscaling-setting -o jsonpath={.data.$TgsSettingKey})
     - |
       cat << EOF | yq e -P | helm template artifacts/k8s/$HelmTemplateFolderName \
-        --set mail.url=https://stg-email.rpgp.cc \
         -n $namespace \
         --name-template tgs \
         -f - 
@@ -162,7 +161,6 @@ deploy-staging:
       EOF
     - |
       cat << EOF | yq e -P | helm template artifacts/k8s/$HelmTemplateFolderName \
-        --set mail.url=https://stg-email.rpgp.cc \
         -n $namespace \
         --name-template tgs \
         -f - \
@@ -198,7 +196,6 @@ deploy-prod:
     - export autoscaling=$(kubectl get cm autoscaling-setting -o jsonpath={.data.$TgsSettingKey})
     - |
       cat << EOF | yq e -P | helm template artifacts/k8s/$HelmTemplateFolderName \
-        --set mail.url=https://email.srvptt.com \
         -n $namespace \
         --name-template tgs \
         -f - 

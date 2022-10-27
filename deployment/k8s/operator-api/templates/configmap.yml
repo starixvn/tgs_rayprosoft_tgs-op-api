@@ -40,9 +40,6 @@ data:
       "CorsDomain": {
         "Urls": []
       },
-      "Email": {
-        "Url": "{{ .Values.mail.url }}"
-      },
       "ForwardedHeaders": {
         "ForwardLimit": 1,
         "ForwardedForHeaderName": "cf-connecting-ip",
