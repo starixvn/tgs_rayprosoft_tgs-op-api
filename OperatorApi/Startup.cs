@@ -169,7 +169,14 @@ public sealed class Startup
 				var config = sp.GetRequiredService<IConfiguration>();
 
 				options.BaseUrl = config.GetValue<Uri>("Operator:PlayerServiceBaseUrl");
+			})
+			.AddDepositAccumulateRouletteClient((options, sp) =>
+			{
+				var config = sp.GetRequiredService<IConfiguration>();
+
+				options.BaseUrl = config.GetValue<Uri>("Operator:DepositAccumulateRouletteServiceBaseUrl");
 			});
+		;
 
 		_ = services
 			.AddRedis((options, sp) =>

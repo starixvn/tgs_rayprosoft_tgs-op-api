@@ -10,14 +10,14 @@ namespace TGS.Apis.OperatorApi;
 
 public class Program
 {
-    public static IHostBuilder CreateHostBuilder(string[] args) =>
-        Host.CreateDefaultBuilder(args)
-            .ConfigureAppConfiguration((ctx, builder) =>
-            {
+	public static IHostBuilder CreateHostBuilder(string[] args) =>
+		Host.CreateDefaultBuilder(args)
+			.ConfigureAppConfiguration((ctx, builder) =>
+			{
 				_ = builder.AddJsonFile("/config/appsettings.json", true).AddEnvironmentVariables();
-            })
-            .ConfigureLogging((ctx, logging) =>
-            {
+			})
+			.ConfigureLogging((ctx, logging) =>
+			{
 				_ = logging
 					.AddOpenTelemetry(options =>
 					{
@@ -31,15 +31,15 @@ public class Program
 							fluentOptions.UseMessagePack();
 						});
 					});
-            })
-            .ConfigureWebHostDefaults(webBuilder => webBuilder.UseStartup<Startup>());
+			})
+			.ConfigureWebHostDefaults(webBuilder => webBuilder.UseStartup<Startup>());
 
-    public static async Task Main(string[] args)
-    {
-        AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
-        ValidatorOptions.Global.LanguageManager.Enabled = false;
+	public static async Task Main(string[] args)
+	{
+		AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+		ValidatorOptions.Global.LanguageManager.Enabled = false;
 
-        var host = CreateHostBuilder(args).Build();
-        await host.RunAsync();
-    }
+		var host = CreateHostBuilder(args).Build();
+		await host.RunAsync();
+	}
 }

@@ -57,8 +57,7 @@ public static class OperatorServiceCollectionExtensions
 				httpClient.BaseAddress = options.FileServiceBaseUrl;
 			})
 			.AddPaymentClient()
-			.AddRouletteSignInClient()
-			.AddDepositAccumulateRouletteClient();
+			.AddRouletteSignInClient();
 
 		_ = services
 			.AddScoped(sp => new RegisterFlowBuilder(
