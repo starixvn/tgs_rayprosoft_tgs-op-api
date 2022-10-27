@@ -64,7 +64,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: tgs-connections
-                  value: tgs-email-url
+                  key: tgs-email-url
             - name: NatsSetting__Urls
               valueFrom:
                 secretKeyRef:
