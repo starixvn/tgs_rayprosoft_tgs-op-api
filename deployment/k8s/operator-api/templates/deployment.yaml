@@ -60,6 +60,11 @@ spec:
                 secretKeyRef:
                   name: tgs-connections
                   key: redis
+            - name: Email__Url
+              valueFrom:
+                secretKeyRef:
+                  name: tgs-connections
+                  value: tgs-email-url
             - name: NatsSetting__Urls
               valueFrom:
                 secretKeyRef:

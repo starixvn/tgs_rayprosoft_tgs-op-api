@@ -26,9 +26,6 @@ connectionStrings:
 nats:
   urls: nats://nats-client:4222
 
-mail:
-  url: https://email.srvptt.com
-
 podAnnotations:
   prometheus.io/path: /metrics
   prometheus.io/port: "52325"
