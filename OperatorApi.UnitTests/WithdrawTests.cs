@@ -14,12 +14,12 @@ using Tgs.CashService.Client;
 using Tgs.Core.Infrastructures.Security;
 using Tgs.Payment.Clients;
 using Tgs.PlayerService.Client;
+using Tgs.Service.PlayerBuckets;
 using TGS.Core.DataServices.Tgs;
 using TGS.Services.Operations.Queries;
 using TGS.Services.Operator;
 using TGS.Services.Operator.ApplicationServices.Withdraw;
 using TGS.Services.Operator.BrandPayment;
-using TGS.Services.PlayerBucket;
 using CoreModels = TGS.Core.DataServices.Tgs.Models;
 
 namespace TGS.Tests.OperatorApi.UnitTests;
@@ -124,13 +124,13 @@ public class WithdrawTests
 		var fakePaymentServiceClient = Substitute.For<IPaymentServiceClient>();
 		var fakeCashServiceClient = Substitute.For<ICashServiceClient>();
 		var fakePlayerService = Substitute.For<IPlayerServiceClient>();
-		var fakePlayerBucketRepository = Substitute.For<IPlayerBucketRepository>();
+		var fakePlayerBucketClient = Substitute.For<IPlayerBucketClient>();
 
 		var sut = new CreateWithdrawFormCommandService(
 			fakePaymentServiceClient,
 			fakeCashServiceClient,
 			fakePlayerService,
-			fakePlayerBucketRepository);
+			fakePlayerBucketClient);
 
 		var command = new CreateWithdrawFormCommand(
 			"ThisIsPlayerCode",
@@ -148,13 +148,13 @@ public class WithdrawTests
 		var fakePaymentServiceClient = Substitute.For<IPaymentServiceClient>();
 		var fakeCashServiceClient = Substitute.For<ICashServiceClient>();
 		var fakePlayerService = Substitute.For<IPlayerServiceClient>();
-		var fakePlayerBucketRepository = Substitute.For<IPlayerBucketRepository>();
+		var fakePlayerBucketClient = Substitute.For<IPlayerBucketClient>();
 
 		var sut = new CreateWithdrawFormCommandService(
 			fakePaymentServiceClient,
 			fakeCashServiceClient,
 			fakePlayerService,
-			fakePlayerBucketRepository);
+			fakePlayerBucketClient);
 
 		var command = new CreateWithdrawFormCommand(
 			"ThisIsPlayerCode",
@@ -189,9 +189,8 @@ public class WithdrawTests
 			.GetBalanceAsync(Arg.Any<Guid>())
 			.Returns(800M);
 
-		_ = fakePlayerBucketRepository
-			.IsBucketFullAsync(Arg.Any<string>())
-			.Returns(true);
+		_ = fakePlayerBucketClient.ReadBucketsAsync(Arg.Is(command.PlayerCode))
+			.Returns(new ReadBucketResult(0M, null));
 
 		var fakeBankInfo = new PlayerBankInfo
 		{
@@ -211,13 +210,13 @@ public class WithdrawTests
 		var fakePaymentServiceClient = Substitute.For<IPaymentServiceClient>();
 		var fakeCashServiceClient = Substitute.For<ICashServiceClient>();
 		var fakePlayerService = Substitute.For<IPlayerServiceClient>();
-		var fakePlayerBucketRepository = Substitute.For<IPlayerBucketRepository>();
+		var fakePlayerBucketClient = Substitute.For<IPlayerBucketClient>();
 
 		var sut = new CreateWithdrawFormCommandService(
 			fakePaymentServiceClient,
 			fakeCashServiceClient,
 			fakePlayerService,
-			fakePlayerBucketRepository);
+			fakePlayerBucketClient);
 
 		var command = new CreateWithdrawFormCommand(
 			"ThisIsPlayerCode",
@@ -243,9 +242,8 @@ public class WithdrawTests
 			.GetBalanceAsync(Arg.Any<Guid>())
 			.Returns(800M);
 
-		_ = fakePlayerBucketRepository
-			.IsBucketFullAsync(Arg.Any<string>())
-			.Returns(false);
+		_ = fakePlayerBucketClient.ReadBucketsAsync(Arg.Is(command.PlayerCode))
+			.Returns(new ReadBucketResult(100M, Guid.NewGuid()));
 
 		var fakeBankInfo = new PlayerBankInfo
 		{
@@ -265,13 +263,13 @@ public class WithdrawTests
 		var fakePaymentServiceClient = Substitute.For<IPaymentServiceClient>();
 		var fakeCashServiceClient = Substitute.For<ICashServiceClient>();
 		var fakePlayerService = Substitute.For<IPlayerServiceClient>();
-		var fakePlayerBucketRepository = Substitute.For<IPlayerBucketRepository>();
+		var fakePlayerBucketClient = Substitute.For<IPlayerBucketClient>();
 
 		var sut = new CreateWithdrawFormCommandService(
 			fakePaymentServiceClient,
 			fakeCashServiceClient,
 			fakePlayerService,
-			fakePlayerBucketRepository);
+			fakePlayerBucketClient);
 
 		var command = new CreateWithdrawFormCommand(
 			"ThisIsPlayerCode",
@@ -318,9 +316,8 @@ public class WithdrawTests
 				Balance = 12345M
 			});
 
-		_ = fakePlayerBucketRepository
-			.IsBucketFullAsync(Arg.Any<string>())
-			.Returns(true);
+		_ = fakePlayerBucketClient.ReadBucketsAsync(Arg.Is(command.PlayerCode))
+			.Returns(new ReadBucketResult(0M, null));
 
 		var fakeBankInfo = new PlayerBankInfo
 		{
@@ -504,13 +501,13 @@ public class WithdrawTests
 		var fakePaymentServiceClient = Substitute.For<IPaymentServiceClient>();
 		var fakeCashServiceClient = Substitute.For<ICashServiceClient>();
 		var fakePlayerService = Substitute.For<IPlayerServiceClient>();
-		var fakePlayerBucketRepository = Substitute.For<IPlayerBucketRepository>();
+		var fakePlayerBucketClient = Substitute.For<IPlayerBucketClient>();
 
 		var sut = new CreateWithdrawFormCommandService(
 			fakePaymentServiceClient,
 			fakeCashServiceClient,
 			fakePlayerService,
-			fakePlayerBucketRepository);
+			fakePlayerBucketClient);
 
 		var command = new CreateWithdrawFormCommand(
 			"ThisIsPlayerCode",
@@ -557,9 +554,8 @@ public class WithdrawTests
 				TransactionId = Guid.NewGuid()
 			});
 
-		_ = fakePlayerBucketRepository
-			.IsBucketFullAsync(Arg.Any<string>())
-			.Returns(true);
+		_ = fakePlayerBucketClient.ReadBucketsAsync(Arg.Is(command.PlayerCode))
+			.Returns(new ReadBucketResult(0M, null));
 
 		var fakeBankInfo = new PlayerBankInfo
 		{

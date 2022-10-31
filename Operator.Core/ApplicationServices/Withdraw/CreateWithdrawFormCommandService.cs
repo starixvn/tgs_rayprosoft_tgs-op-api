@@ -4,9 +4,9 @@ using System.Threading.Tasks;
 using Tgs.CashService.Client;
 using Tgs.Payment.Clients;
 using Tgs.PlayerService.Client;
+using Tgs.Service.PlayerBuckets;
 using Tgs.ServiceUtility;
 using TGS.Services.Operator.BrandPayment;
-using TGS.Services.PlayerBucket;
 
 namespace TGS.Services.Operator.ApplicationServices.Withdraw;
 
@@ -14,19 +14,19 @@ internal class CreateWithdrawFormCommandService : ICommandService<CreateWithdraw
 {
 	private readonly ICashServiceClient _cashServiceClient;
 	private readonly IPaymentServiceClient _paymentServiceClient;
-	private readonly IPlayerBucketRepository _playerBucketRepository;
 	private readonly IPlayerServiceClient _playerServiceClient;
+	private readonly IPlayerBucketClient _playerBucketClient;
 
 	public CreateWithdrawFormCommandService(
 		IPaymentServiceClient paymentServiceClient,
 		ICashServiceClient cashServiceClient,
 		IPlayerServiceClient playerServiceClient,
-		IPlayerBucketRepository playerBucketRepository)
+		IPlayerBucketClient playerBucketClient)
 	{
 		_paymentServiceClient = paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
 		_cashServiceClient = cashServiceClient ?? throw new ArgumentNullException(nameof(cashServiceClient));
 		_playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
-		_playerBucketRepository = playerBucketRepository ?? throw new ArgumentNullException(nameof(playerBucketRepository));
+		_playerBucketClient = playerBucketClient ?? throw new ArgumentNullException(nameof(playerBucketClient));
 	}
 
 	public async ValueTask ExecuteAsync(CreateWithdrawFormCommand command, CancellationToken cancellationToken = default)
@@ -38,11 +38,11 @@ internal class CreateWithdrawFormCommandService : ICommandService<CreateWithdraw
 		if (playerInfo is null)
 			throw new PlayerNotFoundException("Can't find player.");
 
-		var isBucketFull = await _playerBucketRepository
-			.IsBucketFullAsync(command.PlayerCode)
-			.ConfigureAwait(false);
+		var bucketResult = await _playerBucketClient.ReadBucketsAsync(
+			command.PlayerCode,
+			cancellationToken).ConfigureAwait(false);
 
-		if (!isBucketFull)
+		if (bucketResult.Amount > 0M)
 			throw new InsufficientBucketException();
 
 		var playerProps = await _playerServiceClient

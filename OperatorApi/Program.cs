@@ -19,6 +19,7 @@ using Tgs.Payment.SkyPay;
 using Tgs.Payment.TuPay;
 using Tgs.Payment.UmPay;
 using Tgs.Payment.ZeroNineNinePay;
+using Tgs.PlayerBucket.Clients.DependencyInjection;
 using TGS.Apis.OperatorApi;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
@@ -154,6 +155,7 @@ builder.Services
 	.AddErrorMapper<OperatorApiErrorMapper>();
 
 builder.Services
+	.AddPlayerBucketClient()
 	.AddOperatorApiCore()
 	.ConfigureOperatorOptions<IConfiguration>((options, config) => config
 		.GetSection("Operator").Bind(options))
@@ -206,8 +208,7 @@ builder.Services
 	.Decorate<IValidateCodeGenerator, ConstValidateCodeGenerator>();
 
 builder.Services
-	.AddIdentityVerifiers()
-	.AddPlayerBucketRepositoriesServices();
+	.AddIdentityVerifiers();
 
 builder.Services
 	.AddRouting(options => options.LowercaseUrls = true);

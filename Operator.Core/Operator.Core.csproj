@@ -34,6 +34,7 @@
     <PackageReference Include="Tgs.GameProviders.Pluggable.Client" Version="0.0.26" />
     <PackageReference Include="Tgs.Payment.Client" Version="0.4.7" />
     <PackageReference Include="Tgs.PaymentService.Client" Version="0.6.17" />
+    <PackageReference Include="Tgs.PlayerBucket.Client" Version="0.0.2" />
     <PackageReference Include="Tgs.PlayerService.Client" Version="0.0.19" />
     <PackageReference Include="Tgs.Promotion.Client" Version="1.0.26" />  
     <PackageReference Include="Tgs.RouletteSignInClient" Version="0.0.3" />
@@ -43,7 +44,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Bucket\PlayerBucket.Core.csproj" />
     <ProjectReference Include="..\Operations\Operations.csproj" />
   </ItemGroup>
 

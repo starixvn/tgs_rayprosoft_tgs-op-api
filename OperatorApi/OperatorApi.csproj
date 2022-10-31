@@ -83,7 +83,6 @@
 		<ProjectReference Include="..\IdentityVerifiers\IdentityVerifiers.csproj" />
 		<ProjectReference Include="..\Operator.Core\Operator.Core.csproj" />
 		<ProjectReference Include="..\Operator.Repositories\Operator.Repositories.csproj" />
-		<ProjectReference Include="..\PlayerBucket.Repositories\PlayerBucket.Repositories.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
