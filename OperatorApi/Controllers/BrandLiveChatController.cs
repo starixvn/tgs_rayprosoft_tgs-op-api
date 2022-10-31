@@ -1,6 +1,5 @@
 ﻿using System.ComponentModel;
 using System.Text.Json;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Tgs.ServiceUtility;
 using TGS.Apis.OperatorApi.Attributes;
@@ -15,27 +14,26 @@ namespace TGS.Apis.OperatorApi.Controllers;
 [ApiController]
 public class BrandLiveChatController : ControllerBase
 {
-    [HttpGet]
-    [Description("Get a brand's live chat")]
-    [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = false)]
-    public async Task<BrandLiveChatModel> GetBrandLiveChatAsync(
-        [FromServices] IGetService<BrandLiveChatQuery, BrandLiveChatInfo> queryService)
-    {
-        var brandId = HttpContext.Items.GetBrandId();
+	[HttpGet]
+	[Description("Get a brand's live chat")]
+	[AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = false)]
+	public async Task<BrandLiveChatModel> GetBrandLiveChatAsync(
+		[FromServices] IGetService<BrandLiveChatQuery, BrandLiveChatInfo> queryService)
+	{
+		var brandId = HttpContext.Items.GetBrandId();
 
-        var query = new BrandLiveChatQuery(brandId);
+		var query = new BrandLiveChatQuery(brandId);
 
-        var info = await queryService.GetAsync(query).ConfigureAwait(false);
+		var info = await queryService.GetAsync(query).ConfigureAwait(false);
 
-        if (info == null)
-            return null;
-
-        return new BrandLiveChatModel()
-        {
-            Name = info.Name,
-            Setting = string.IsNullOrEmpty(info.Setting)
-                ? JsonDocument.Parse("{}")
-                : JsonDocument.Parse(info.Setting)
-        };
-    }
+		return info == null
+			? null
+			: new BrandLiveChatModel()
+			{
+				Name = info.Name,
+				Setting = string.IsNullOrEmpty(info.Setting)
+					? JsonDocument.Parse("{}")
+					: JsonDocument.Parse(info.Setting)
+			};
+	}
 }

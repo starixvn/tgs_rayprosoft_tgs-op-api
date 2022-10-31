@@ -31,10 +31,7 @@ internal class RestValidateCodeOperator : IValidateCodeOperator
 			.GetValidateCodeDataAsync(validateCode, token)
 			.ConfigureAwait(false);
 
-		if (string.IsNullOrEmpty(result))
-			return default;
-
-		return DeserializeValidateCodeData<TData>(result);
+		return string.IsNullOrEmpty(result) ? default : DeserializeValidateCodeData<TData>(result);
 	}
 
 	public ValueTask<bool> SaveValidateDataAsync<TData>(string validateCode, string token, TData data)
@@ -63,7 +60,7 @@ internal class RestValidateCodeOperator : IValidateCodeOperator
 		return _smsServiceClient.SendShortMessageAsync(phone, shortMessage, brandId);
 	}
 
-	private TData? DeserializeValidateCodeData<TData>(string json) => JsonSerializer.Deserialize<TData>(json);
+	private static TData? DeserializeValidateCodeData<TData>(string json) => JsonSerializer.Deserialize<TData>(json);
 
 	private static string SerializeValidateCodeData<TData>(TData data) => JsonSerializer.Serialize(data);
 }

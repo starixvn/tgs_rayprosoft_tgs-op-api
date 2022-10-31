@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using FluentValidation;
+﻿using FluentValidation;
 using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models.Enums;
@@ -8,15 +7,15 @@ namespace TGS.Apis.OperatorApi.Validators;
 
 public class GetLobbyGameUrlRequestValidator : AbstractValidator<GetLobbyGameUrlRequest>
 {
-    private readonly GameType[] _allowedGameTypes =
-    {
-        GameType.Sportsbook, GameType.VirtualSportsLobby, GameType.ESports,
-        GameType.LiveDealerLobby, GameType.CardGameLobby, GameType.FishingLobby,
-        GameType.ArcadeLobby, GameType.LotteryLobby
-    };
+	private readonly GameType[] _allowedGameTypes =
+	{
+		GameType.Sportsbook, GameType.VirtualSportsLobby, GameType.ESports,
+		GameType.LiveDealerLobby, GameType.CardGameLobby, GameType.FishingLobby,
+		GameType.ArcadeLobby, GameType.LotteryLobby
+	};
 
-    public GetLobbyGameUrlRequestValidator()
-    {
+	public GetLobbyGameUrlRequestValidator()
+	{
 		_ = RuleFor(x => x.SubGameProviderCode)
 			.NotEmpty()
 			.WithName(x => x
@@ -37,5 +36,5 @@ public class GetLobbyGameUrlRequestValidator : AbstractValidator<GetLobbyGameUrl
 			.WithName(x => x
 				.WithPropertyExpression(o => o.LanguageCode)
 				.GetBindPropertyName(nameof(x.LanguageCode)));
-    }
+	}
 }

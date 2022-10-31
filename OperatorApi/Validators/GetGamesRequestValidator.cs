@@ -1,6 +1,4 @@
-﻿using System;
-using System.Linq;
-using FluentValidation;
+﻿using FluentValidation;
 using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models.Enums;
@@ -9,8 +7,8 @@ namespace TGS.Apis.OperatorApi.Validators;
 
 public sealed class GetGamesRequestValidator : AbstractValidator<GetGamesRequest>
 {
-    public GetGamesRequestValidator()
-    {
+	public GetGamesRequestValidator()
+	{
 		_ = RuleFor(x => x.LanguageCode)
 			.NotEmpty()
 			.WithName(x => x
@@ -37,8 +35,8 @@ public sealed class GetGamesRequestValidator : AbstractValidator<GetGamesRequest
 				"one of the {0} does not exist",
 				x.WithPropertyExpression(o => o.Types)
 					.GetBindPropertyName(nameof(x.Types))));
-    }
+	}
 
-    private static bool ValidateGameTypes(GameType[] gameTypes) =>
-        gameTypes.All(type => Enum.IsDefined(typeof(GameType), type));
+	private static bool ValidateGameTypes(GameType[] gameTypes) =>
+		gameTypes.All(type => Enum.IsDefined(typeof(GameType), type));
 }

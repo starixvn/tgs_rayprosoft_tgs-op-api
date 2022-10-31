@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
+﻿using System.Globalization;
 using System.Net.Mime;
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
@@ -18,65 +16,65 @@ namespace TGS.Apis.OperatorApi.Controllers;
 [Produces(MediaTypeNames.Application.Json)]
 public class GameProviderController : ControllerBase
 {
-    /// <summary>
-    /// Get game provider list
-    /// </summary>
-    [HttpGet("list")]
-    [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = true)]
-    public async IAsyncEnumerable<GameProviderModel> GetGameProvidersAsync(
-        [FromServices] IQueryService<GetGameProvidersQuery, GameProviderInfo> getGameProviderQueryService,
-        [FromQuery] GetGameProvidersRequest request)
-    {
-        var brandId = HttpContext.Items.GetBrandId();
-        var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+	/// <summary>
+	/// Get game provider list
+	/// </summary>
+	[HttpGet("list")]
+	[AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = true)]
+	public async IAsyncEnumerable<GameProviderModel> GetGameProvidersAsync(
+		[FromServices] IQueryService<GetGameProvidersQuery, GameProviderInfo> getGameProviderQueryService,
+		[FromQuery] GetGameProvidersRequest request)
+	{
+		var brandId = HttpContext.Items.GetBrandId();
+		var playerTokenData = HttpContext.Items.GetPlayerTokenData();
 
-        var currentCultureInfo = CultureInfo.CurrentUICulture;
-        var cultureCode = currentCultureInfo.Name;
+		var currentCultureInfo = CultureInfo.CurrentUICulture;
+		var cultureCode = currentCultureInfo.Name;
 
-        var query = new GetGameProvidersQuery(
-            brandId,
-            request.CurrencyCode,
-            playerTokenData,
-            request.PlatformType);
+		var query = new GetGameProvidersQuery(
+			brandId,
+			request.CurrencyCode,
+			playerTokenData,
+			request.PlatformType);
 
-        var infos = await getGameProviderQueryService
-            .QueryAsync(query)
-            .ToArrayAsync()
-            .ConfigureAwait(false);
+		var infos = await getGameProviderQueryService
+			.QueryAsync(query)
+			.ToArrayAsync()
+			.ConfigureAwait(false);
 
-        foreach (var info in infos)
-        {
-            var lang = info.Localization.ContainsKey(cultureCode)
-                ? info.Localization[cultureCode]
-                : JsonDocument.Parse("{}");
+		foreach (var info in infos)
+		{
+			var lang = info.Localization.ContainsKey(cultureCode)
+				? info.Localization[cultureCode]
+				: JsonDocument.Parse("{}");
 
-            yield return new GameProviderModel
-            {
-                Code = info.Code,
-                Description = GetLocalization(
-                    lang.RootElement,
-                    "description",
-                    info.Description),
-                GameTypes = info.GameTypes,
-                IsTransferWallet = info.IsTransferWallet,
-                Name = GetLocalization(
-                    lang.RootElement,
-                    "name",
-                    info.Name),
-                Status = info.Status
-            };
-        }
-    }
+			yield return new GameProviderModel
+			{
+				Code = info.Code,
+				Description = GetLocalization(
+					lang.RootElement,
+					"description",
+					info.Description),
+				GameTypes = info.GameTypes,
+				IsTransferWallet = info.IsTransferWallet,
+				Name = GetLocalization(
+					lang.RootElement,
+					"name",
+					info.Name),
+				Status = info.Status
+			};
+		}
+	}
 
-    private string GetLocalization(JsonElement element, string propertyName, string defaultValue)
-    {
-        if (!element.TryGetProperty(propertyName, out var value))
-        {
-            return defaultValue;
-        }
+	private static string GetLocalization(JsonElement element, string propertyName, string defaultValue)
+	{
+		if (!element.TryGetProperty(propertyName, out var value))
+		{
+			return defaultValue;
+		}
 
-        var val = value.GetString();
+		var val = value.GetString();
 
-        return string.IsNullOrEmpty(val) ? defaultValue : val;
-    }
+		return string.IsNullOrEmpty(val) ? defaultValue : val;
+	}
 }

@@ -2,5 +2,5 @@
 
 public class LogoutInfo
 {
-    public long UpdateTime { get; set; }
+	public long UpdateTime { get; set; }
 }

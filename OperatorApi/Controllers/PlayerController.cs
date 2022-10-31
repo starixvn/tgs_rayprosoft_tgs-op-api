@@ -1,14 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
+﻿using System.Collections.Immutable;
 using System.Globalization;
-using System.Linq;
 using System.Net.Mime;
 using System.Text.Json;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using Tgs.BrandCertificate;
 using Tgs.Payment.Clients;
 using Tgs.ServiceUtility;
@@ -16,7 +10,6 @@ using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models;
 using TGS.Apis.OperatorApi.Models.Messages;
-using TGS.Apis.OperatorApi.Resources;
 using TGS.Core.Models.Exceptions;
 using TGS.IdentityVerifiers;
 using TGS.Services.Operations;
@@ -71,7 +64,7 @@ public class PlayerController : ControllerBase
 		}
 		catch (InvalidCredentialsException)
 		{
-			throw new InvalidCredentialsException(Player.PasswordMismatched);
+			throw new InvalidCredentialsException("Password is mismatched.");
 		}
 
 		return new ChangePasswordResponse
@@ -220,16 +213,13 @@ public class PlayerController : ControllerBase
 	{
 		var brandId = HttpContext.Items.GetBrandId();
 
-		if (!string.IsNullOrWhiteSpace(request.Phone))
-		{
-			return forgotPasswordBySmsService.GetAsync(new ForgotPasswordBySmsCommand(
+		return !string.IsNullOrWhiteSpace(request.Phone)
+			? forgotPasswordBySmsService.GetAsync(new ForgotPasswordBySmsCommand(
 				brandId,
 				CultureInfo.CurrentUICulture,
 				request.AreaCode,
-				request.Phone));
-		}
-
-		return forgotPasswordService.GetAsync(new ForgotPasswordByMailCommand(
+				request.Phone))
+			: forgotPasswordService.GetAsync(new ForgotPasswordByMailCommand(
 			brandId,
 			CultureInfo.CurrentUICulture,
 			request.Email));
@@ -284,7 +274,7 @@ public class PlayerController : ControllerBase
 			.ConfigureAwait(false);
 
 		if (player == null)
-			throw new CoreExceptions.PlayerNotFoundException(playerCode, Player.NotFound);
+			throw new CoreExceptions.PlayerNotFoundException(playerCode, "Player not found.");
 
 		var vipLevel = await getPlayerVipLevelQueryService
 			.GetAsync(new GetPlayerVipLevelQuery(player.VipLevelId))
@@ -384,11 +374,11 @@ public class PlayerController : ControllerBase
 			switch (ex)
 			{
 				case CoreExceptions.PlayerNotFoundException playerNotFoundException:
-					_logger.LogWarning(playerNotFoundException, $"{request.Username} not found.");
+					_logger.LogWarning(playerNotFoundException, "{request.Username} not found.", request.Username);
 					break;
 
 				case InvalidCredentialsException invalidCredException:
-					_logger.LogWarning(invalidCredException, Player.PasswordMismatched);
+					_logger.LogWarning(invalidCredException, "Password is mismatched.");
 					break;
 
 				default:
@@ -422,7 +412,7 @@ public class PlayerController : ControllerBase
 		}
 		catch (CoreExceptions.PlayerNotFoundException)
 		{
-			throw new CoreExceptions.PlayerNotFoundException(playerTokenData.PlayerCode, Player.NotFound);
+			throw new CoreExceptions.PlayerNotFoundException(playerTokenData.PlayerCode, "Player not found.");
 		}
 
 		return new LogoutResponse { UpdateTime = info.UpdateTime };

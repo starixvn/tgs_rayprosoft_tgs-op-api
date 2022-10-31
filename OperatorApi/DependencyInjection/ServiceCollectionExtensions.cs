@@ -1,15 +1,14 @@
-﻿using System;
-using TGS.Apis.OperatorApi;
+﻿using TGS.Apis.OperatorApi;
 using TGS.Core.Infrastructures.Redis;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddRedis(
-        this IServiceCollection service,
-        Action<RedisOptions, IServiceProvider> configure)
-    {
+	public static IServiceCollection AddRedis(
+		this IServiceCollection service,
+		Action<RedisOptions, IServiceProvider> configure)
+	{
 		_ = service
 			.AddOptions<RedisOptions>()
 			.Configure(configure)
@@ -23,6 +22,6 @@ public static class ServiceCollectionExtensions
 			return connectionFactory.GetConnection();
 		});
 
-        return service;
-    }
+		return service;
+	}
 }

@@ -4,6 +4,6 @@ namespace TGS.Apis.OperatorApi.Models.Messages;
 
 public class SetWhatsAppIdRequest
 {
-    [JsonPropertyName("whatsapp")]
-    public string WhatsAppId { get; init; }
+	[JsonPropertyName("whatsapp")]
+	public string WhatsAppId { get; init; }
 }

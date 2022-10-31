@@ -4,6 +4,6 @@ namespace TGS.Apis.OperatorApi.Models.Messages;
 
 public class DepositAccumulateRouletteItemViewModel
 {
-    [JsonPropertyName("title")]
-    public string Title { get; init; } = default!;
+	[JsonPropertyName("title")]
+	public string Title { get; init; } = default!;
 }

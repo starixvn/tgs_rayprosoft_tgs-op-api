@@ -8,25 +8,25 @@ namespace TGS.Services.Operator.ApplicationServices.Player;
 
 internal class GetCurrentPlayerRegisterFlowStepQueryService : IGetService<GetCurrentPlayerRegisterFlowStepQuery, string?>
 {
-    private readonly IBrandRegisterFlowDefinitionManager _brandRegisterFlowDefinitionManager;
+	private readonly IBrandRegisterFlowDefinitionManager _brandRegisterFlowDefinitionManager;
 
-    public GetCurrentPlayerRegisterFlowStepQueryService(IBrandRegisterFlowDefinitionManager brandRegisterFlowDefinitionManager)
-    {
-        _brandRegisterFlowDefinitionManager = brandRegisterFlowDefinitionManager ?? throw new ArgumentNullException(nameof(brandRegisterFlowDefinitionManager));
-    }
+	public GetCurrentPlayerRegisterFlowStepQueryService(IBrandRegisterFlowDefinitionManager brandRegisterFlowDefinitionManager)
+	{
+		_brandRegisterFlowDefinitionManager = brandRegisterFlowDefinitionManager ?? throw new ArgumentNullException(nameof(brandRegisterFlowDefinitionManager));
+	}
 
-    public async ValueTask<string?> GetAsync(GetCurrentPlayerRegisterFlowStepQuery query, CancellationToken cancellationToken = default)
-    {
-        var flowDefinition = await _brandRegisterFlowDefinitionManager
-          .GetRegisterFlowDefinitionAsync(query.BrandId, cancellationToken)
-          .ConfigureAwait(false);
+	public async ValueTask<string?> GetAsync(GetCurrentPlayerRegisterFlowStepQuery query, CancellationToken cancellationToken = default)
+	{
+		var flowDefinition = await _brandRegisterFlowDefinitionManager
+		  .GetRegisterFlowDefinitionAsync(query.BrandId, cancellationToken)
+		  .ConfigureAwait(false);
 
-        var flow = flowDefinition.BuildRegisterFlow();
+		var flow = flowDefinition.BuildRegisterFlow();
 
-        _ = await flow
-            .ConfirmCompletedAsync(query.PlayerCode, cancellationToken)
-            .ConfigureAwait(false);
+		_ = await flow
+			.ConfirmCompletedAsync(query.PlayerCode, cancellationToken)
+			.ConfigureAwait(false);
 
-        return flow.CurrentStep;
-    }
+		return flow.CurrentStep;
+	}
 }

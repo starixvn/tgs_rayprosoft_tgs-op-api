@@ -3,16 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using System.Transactions;
 using Microsoft.EntityFrameworkCore;
 using Tgs.CashService.Client;
+using Tgs.MessageQueue;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
-using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models.Enums;
-using Tgs.MessageQueue;
 using TGS.Services.PlayerBucket;
 using TGS.Services.PlayerBucket.Models;
 
@@ -20,8 +18,8 @@ namespace PlayerBucket.Repositories;
 
 public class PlayerBucketRepository : IPlayerBucketRepository
 {
-	private readonly IMessageSender _messageSender;
 	private readonly ICashServiceClient _cashServiceClient;
+	private readonly IMessageSender _messageSender;
 	private readonly ITgsRepository _repository;
 
 	public PlayerBucketRepository(

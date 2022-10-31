@@ -4,9 +4,9 @@ namespace TGS.Apis.OperatorApi.Models.Messages;
 
 public record StartSetPhoneRequest
 {
-    [JsonPropertyName("area")]
-    public string AreaCode { get; init; }
+	[JsonPropertyName("area")]
+	public string AreaCode { get; init; }
 
-    [JsonPropertyName("phone")]
-    public string Phone { get; init; }
+	[JsonPropertyName("phone")]
+	public string Phone { get; init; }
 }

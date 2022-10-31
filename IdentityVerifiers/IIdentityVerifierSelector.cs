@@ -2,5 +2,5 @@
 
 public interface IIdentityVerifierSelector<TCondition>
 {
-    IIdentityVerifier GetIdentityVerifier(TCondition condition);
+	IIdentityVerifier GetIdentityVerifier(TCondition condition);
 }

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Immutable;
 using System.Globalization;
-using System.Threading;
 using System.Threading.Tasks;
 using Moq;
 using NSubstitute;
@@ -21,38 +20,65 @@ namespace TGS.Tests.OperatorApi.UnitTests;
 [TestFixture]
 public class PlayerPhoneTests
 {
-    [Test]
-    public async Task Commit_Init_Player_Phone_If_Brand_Use_SmsRegisterFlow_Should_Success()
-    {
-        var moqValidateCodeOperator = new Mock<IValidateCodeOperator>();
-        var moqCacheManager = new Mock<IRedisCacheManager>();
-        var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
+	[Test]
+	public async Task CheckPhone_If_Not_Input_PlayerCode()
+	{
+		var brandId = Guid.Parse("1D46DDD7-EB42-43A0-CB2F-724E59622CA5");
+		var areaCode = "+852";
+		var phone = "66666666";
 
-        var sut = new CommitInitPlayerPhoneCommandService(
-            moqValidateCodeOperator.Object,
-            moqCacheManager.Object,
-            fakePlayerServiceClient);
+		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
 
-        var playerCode = "testPlayerCode";
-        var validateCode = "123456";
-        var securityKey = "3F8E5681-50C8-4F2F-8379-3AA6EF2C6064";
-        var phone = "0988123456";
-        var areaCode = "886";
+		var sut = new CheckBrandPhoneCanUseQueryService(fakePlayerServiceClient);
 
-        var brandInfo = new Tgs.BrandCertificate.Clients.BrandInfo
-        {
-            Id = Guid.NewGuid(),
-            Code = "code",
-            Currency = "CNY",
-            SmsRegisterFlowEnabled = true
-        };
+		var query = new CheckBrandPhoneCanUseQuery(brandId, null, areaCode, phone);
 
-        var command = new CommitInitPlayerPhoneCommand(
-            securityKey,
-            validateCode,
-            "127.0.0.1",
-            "localhost",
-            brandInfo.Id);
+		_ = fakePlayerServiceClient.GetPlayerInfoByPhoneAsync(
+			Arg.Is(brandId),
+			Arg.Is(areaCode),
+			Arg.Is(phone))
+			.Returns(new Tgs.PlayerService.Client.PlayerInfo
+			{
+				PlayerCode = "playerCode"
+			});
+
+		var actual = await sut.GetAsync(query);
+
+		Assert.IsTrue(actual);
+	}
+
+	[Test]
+	public async Task Commit_Init_Player_Phone_If_Brand_Use_SmsRegisterFlow_Should_Success()
+	{
+		var moqValidateCodeOperator = new Mock<IValidateCodeOperator>();
+		var moqCacheManager = new Mock<IRedisCacheManager>();
+		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
+
+		var sut = new CommitInitPlayerPhoneCommandService(
+			moqValidateCodeOperator.Object,
+			moqCacheManager.Object,
+			fakePlayerServiceClient);
+
+		var playerCode = "testPlayerCode";
+		var validateCode = "123456";
+		var securityKey = "3F8E5681-50C8-4F2F-8379-3AA6EF2C6064";
+		var phone = "0988123456";
+		var areaCode = "886";
+
+		var brandInfo = new Tgs.BrandCertificate.Clients.BrandInfo
+		{
+			Id = Guid.NewGuid(),
+			Code = "code",
+			Currency = "CNY",
+			SmsRegisterFlowEnabled = true
+		};
+
+		var command = new CommitInitPlayerPhoneCommand(
+			securityKey,
+			validateCode,
+			"127.0.0.1",
+			"localhost",
+			brandInfo.Id);
 
 		_ = moqValidateCodeOperator
 			.Setup(
@@ -64,54 +90,54 @@ public class PlayerPhoneTests
 				phone,
 				playerCode)));
 
-        await sut.ExecuteAsync(command);
+		await sut.ExecuteAsync(command);
 
-        _ = fakePlayerServiceClient.Received(1)
-            .SetPlayerPropertiesAsync(
-                Arg.Is(playerCode),
-                Arg.Is<ImmutableDictionary<PlayerPropertyName, string>>(
-                    dict => dict.Count == 3
-                        && dict[PlayerPropertyName.AreaCode] == areaCode
-                        && dict[PlayerPropertyName.Phone] == phone
-                        && dict[PlayerPropertyName.PhoneAuthentication] == true.ToString()));
+		_ = fakePlayerServiceClient.Received(1)
+			.SetPlayerPropertiesAsync(
+				Arg.Is(playerCode),
+				Arg.Is<ImmutableDictionary<PlayerPropertyName, string>>(
+					dict => dict.Count == 3
+						&& dict[PlayerPropertyName.AreaCode] == areaCode
+						&& dict[PlayerPropertyName.Phone] == phone
+						&& dict[PlayerPropertyName.PhoneAuthentication] == true.ToString()));
 
-        moqCacheManager.Verify(
-            fake => fake.ClearCacheAsync(
-                It.Is<object>(x => x.ToString() == nameof(RedisCacheType.Player)),
-                It.Is<object>(x => x.ToString() == playerCode),
-                It.Is<bool>(x => x == false)),
-            Times.Exactly(1));
-    }
+		moqCacheManager.Verify(
+			fake => fake.ClearCacheAsync(
+				It.Is<object>(x => x.ToString() == nameof(RedisCacheType.Player)),
+				It.Is<object>(x => x.ToString() == playerCode),
+				It.Is<bool>(x => x == false)),
+			Times.Exactly(1));
+	}
 
-    [Test]
-    public void Commit_Init_Player_Phone_If_Not_Verify_ValidateCode_Should_Throw_Exception()
-    {
-        var moqValidateCodeOperator = new Mock<IValidateCodeOperator>();
-        var moqCacheManager = new Mock<IRedisCacheManager>();
-        var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
+	[Test]
+	public void Commit_Init_Player_Phone_If_Not_Verify_ValidateCode_Should_Throw_Exception()
+	{
+		var moqValidateCodeOperator = new Mock<IValidateCodeOperator>();
+		var moqCacheManager = new Mock<IRedisCacheManager>();
+		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
 
-        var sut = new CommitInitPlayerPhoneCommandService(
-            moqValidateCodeOperator.Object,
-            moqCacheManager.Object,
-            fakePlayerServiceClient);
+		var sut = new CommitInitPlayerPhoneCommandService(
+			moqValidateCodeOperator.Object,
+			moqCacheManager.Object,
+			fakePlayerServiceClient);
 
-        var validateCode = "123456";
-        var securityKey = "3F8E5681-50C8-4F2F-8379-3AA6EF2C6064";
+		var validateCode = "123456";
+		var securityKey = "3F8E5681-50C8-4F2F-8379-3AA6EF2C6064";
 
-        var brandInfo = new Tgs.BrandCertificate.Clients.BrandInfo
-        {
-            Id = Guid.NewGuid(),
-            Code = "code",
-            Currency = "CNY",
-            SmsRegisterFlowEnabled = true
-        };
+		var brandInfo = new Tgs.BrandCertificate.Clients.BrandInfo
+		{
+			Id = Guid.NewGuid(),
+			Code = "code",
+			Currency = "CNY",
+			SmsRegisterFlowEnabled = true
+		};
 
-        var command = new CommitInitPlayerPhoneCommand(
-            securityKey,
-            validateCode,
-            "127.0.0.1",
-            "localhost",
-            brandInfo.Id);
+		var command = new CommitInitPlayerPhoneCommand(
+			securityKey,
+			validateCode,
+			"127.0.0.1",
+			"localhost",
+			brandInfo.Id);
 
 		_ = moqValidateCodeOperator
 			.Setup(
@@ -121,30 +147,30 @@ public class PlayerPhoneTests
 			.Returns(ValueTask.FromResult<PhoneValidateData>(null));
 
 		_ = Assert.ThrowsAsync<ValidateCodeNotVerifyException>(async () => await sut.ExecuteAsync(command));
-    }
+	}
 
-    [Test]
-    public void Commit_Set_Player_Phone_If_Brand_Has_Same_Phone_Should_Throw_Exception()
-    {
-        var fakeValidateCodeOperator = Substitute.For<IValidateCodeOperator>();
-        var fakePlayerRepository = Substitute.For<IPlayerRepository>();
-        var fakeCacheManager = Substitute.For<IRedisCacheManager>();
-        var fakeCheckService = Substitute.For<IGetService<CheckBrandPhoneCanUseQuery, bool>>();
+	[Test]
+	public void Commit_Set_Player_Phone_If_Brand_Has_Same_Phone_Should_Throw_Exception()
+	{
+		var fakeValidateCodeOperator = Substitute.For<IValidateCodeOperator>();
+		var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+		var fakeCacheManager = Substitute.For<IRedisCacheManager>();
+		var fakeCheckService = Substitute.For<IGetService<CheckBrandPhoneCanUseQuery, bool>>();
 
-        var sut = new CommitSetPlayerPhoneCommandService(
-            fakeValidateCodeOperator,
-            fakePlayerRepository,
-            fakeCacheManager,
-            fakeCheckService);
+		var sut = new CommitSetPlayerPhoneCommandService(
+			fakeValidateCodeOperator,
+			fakePlayerRepository,
+			fakeCacheManager,
+			fakeCheckService);
 
-        var playerCode = "testPlayerCode";
-        var validateCode = "123456";
-        var securityKey = "3F8E5681-50C8-4F2F-8379-3AA6EF2C6064";
-        var brandId = Guid.Parse("4e86719f-243f-46f6-b010-5c758b7285af");
-        var areaCode = "852";
-        var phone = "67329548";
+		var playerCode = "testPlayerCode";
+		var validateCode = "123456";
+		var securityKey = "3F8E5681-50C8-4F2F-8379-3AA6EF2C6064";
+		var brandId = Guid.Parse("4e86719f-243f-46f6-b010-5c758b7285af");
+		var areaCode = "852";
+		var phone = "67329548";
 
-        var command = new CommitSetPlayerPhoneCommand(brandId, playerCode, securityKey, validateCode);
+		var command = new CommitSetPlayerPhoneCommand(brandId, playerCode, securityKey, validateCode);
 
 		_ = fakeValidateCodeOperator
 			.GetValidateCodeDataAsync<PhoneValidateData>(validateCode, Arg.Any<string>())
@@ -155,27 +181,27 @@ public class PlayerPhoneTests
 			.Returns(false);
 
 		_ = Assert.ThrowsAsync<BrandPhoneDuplicateException>(async () => await sut.ExecuteAsync(command));
-    }
+	}
 
-    [Test]
-    public void Commit_Set_Player_Phone_If_Not_Verify_ValidateCode_Should_Throw_Exception()
-    {
-        var moqValidateCodeOperator = new Mock<IValidateCodeOperator>();
-        var moqPlayerRepository = new Mock<IPlayerRepository>();
-        var moqCacheManager = new Mock<IRedisCacheManager>();
-        var moqCheckService = new Mock<IGetService<CheckBrandPhoneCanUseQuery, bool>>();
+	[Test]
+	public void Commit_Set_Player_Phone_If_Not_Verify_ValidateCode_Should_Throw_Exception()
+	{
+		var moqValidateCodeOperator = new Mock<IValidateCodeOperator>();
+		var moqPlayerRepository = new Mock<IPlayerRepository>();
+		var moqCacheManager = new Mock<IRedisCacheManager>();
+		var moqCheckService = new Mock<IGetService<CheckBrandPhoneCanUseQuery, bool>>();
 
-        var sut = new CommitSetPlayerPhoneCommandService(
-            moqValidateCodeOperator.Object,
-            moqPlayerRepository.Object,
-            moqCacheManager.Object,
-            moqCheckService.Object);
+		var sut = new CommitSetPlayerPhoneCommandService(
+			moqValidateCodeOperator.Object,
+			moqPlayerRepository.Object,
+			moqCacheManager.Object,
+			moqCheckService.Object);
 
-        var playerCode = "testPlayerCode";
-        var validateCode = "123456";
-        var securityKey = "3F8E5681-50C8-4F2F-8379-3AA6EF2C6064";
+		var playerCode = "testPlayerCode";
+		var validateCode = "123456";
+		var securityKey = "3F8E5681-50C8-4F2F-8379-3AA6EF2C6064";
 
-        var command = new CommitSetPlayerPhoneCommand(Guid.NewGuid(), playerCode, securityKey, validateCode);
+		var command = new CommitSetPlayerPhoneCommand(Guid.NewGuid(), playerCode, securityKey, validateCode);
 
 		_ = moqValidateCodeOperator
 			.Setup(
@@ -185,29 +211,29 @@ public class PlayerPhoneTests
 			.Returns(ValueTask.FromResult<PhoneValidateData>(null));
 
 		_ = Assert.ThrowsAsync<ValidateCodeNotVerifyException>(async () => await sut.ExecuteAsync(command));
-    }
+	}
 
-    [Test]
-    public async Task Commit_Set_Player_Phone_Should_Success()
-    {
-        var moqValidateCodeOperator = new Mock<IValidateCodeOperator>();
-        var moqPlayerRepository = new Mock<IPlayerRepository>();
-        var moqCacheManager = new Mock<IRedisCacheManager>();
-        var fakeCheckService = Substitute.For<IGetService<CheckBrandPhoneCanUseQuery, bool>>();
+	[Test]
+	public async Task Commit_Set_Player_Phone_Should_Success()
+	{
+		var moqValidateCodeOperator = new Mock<IValidateCodeOperator>();
+		var moqPlayerRepository = new Mock<IPlayerRepository>();
+		var moqCacheManager = new Mock<IRedisCacheManager>();
+		var fakeCheckService = Substitute.For<IGetService<CheckBrandPhoneCanUseQuery, bool>>();
 
-        var sut = new CommitSetPlayerPhoneCommandService(
-            moqValidateCodeOperator.Object,
-            moqPlayerRepository.Object,
-            moqCacheManager.Object,
-            fakeCheckService);
+		var sut = new CommitSetPlayerPhoneCommandService(
+			moqValidateCodeOperator.Object,
+			moqPlayerRepository.Object,
+			moqCacheManager.Object,
+			fakeCheckService);
 
-        var playerCode = "testPlayerCode";
-        var validateCode = "123456";
-        var securityKey = "3F8E5681-50C8-4F2F-8379-3AA6EF2C6064";
-        var phone = "0988123456";
-        var areaCode = "886";
+		var playerCode = "testPlayerCode";
+		var validateCode = "123456";
+		var securityKey = "3F8E5681-50C8-4F2F-8379-3AA6EF2C6064";
+		var phone = "0988123456";
+		var areaCode = "886";
 
-        var command = new CommitSetPlayerPhoneCommand(Guid.NewGuid(), playerCode, securityKey, validateCode);
+		var command = new CommitSetPlayerPhoneCommand(Guid.NewGuid(), playerCode, securityKey, validateCode);
 
 		_ = fakeCheckService.GetAsync(Arg.Any<CheckBrandPhoneCanUseQuery>())
 			.Returns(true);
@@ -222,132 +248,105 @@ public class PlayerPhoneTests
 				phone,
 				playerCode)));
 
-        await sut.ExecuteAsync(command);
+		await sut.ExecuteAsync(command);
 
-        moqPlayerRepository.Verify(
-            fake => fake.SetPlayerPhoneAsync(
-                It.Is<string>(x => x == playerCode),
-                It.Is<string>(x => x == areaCode),
-                It.Is<string>(x => x == phone)),
-            Times.Exactly(1));
-    }
+		moqPlayerRepository.Verify(
+			fake => fake.SetPlayerPhoneAsync(
+				It.Is<string>(x => x == playerCode),
+				It.Is<string>(x => x == areaCode),
+				It.Is<string>(x => x == phone)),
+			Times.Exactly(1));
+	}
 
-    [Test]
-    public async Task Same_Brand_And_Other_Player_Should_Get_False()
-    {
-        var brandId = Guid.Parse("1D46DDD7-EB42-43A0-CB2F-724E59622CA5");
-        var playerCode = "playerCode";
-        var areaCode = "+852";
-        var phone = "66666666";
+	[Test]
+	public async Task Same_Brand_And_Other_Player_Should_Get_False()
+	{
+		var brandId = Guid.Parse("1D46DDD7-EB42-43A0-CB2F-724E59622CA5");
+		var playerCode = "playerCode";
+		var areaCode = "+852";
+		var phone = "66666666";
 
-        var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
+		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
 
-        var sut = new CheckBrandPhoneCanUseQueryService(fakePlayerServiceClient);
+		var sut = new CheckBrandPhoneCanUseQueryService(fakePlayerServiceClient);
 
-        var query = new CheckBrandPhoneCanUseQuery(brandId, playerCode, areaCode, phone);
+		var query = new CheckBrandPhoneCanUseQuery(brandId, playerCode, areaCode, phone);
 
-        _ = fakePlayerServiceClient.GetPlayerInfoByPhoneAsync(
-            Arg.Is(brandId),
-            Arg.Is(areaCode),
-            Arg.Is(phone))
-            .Returns(new Tgs.PlayerService.Client.PlayerInfo
-            {
-                PlayerCode = "otherCode"
-            });
+		_ = fakePlayerServiceClient.GetPlayerInfoByPhoneAsync(
+			Arg.Is(brandId),
+			Arg.Is(areaCode),
+			Arg.Is(phone))
+			.Returns(new Tgs.PlayerService.Client.PlayerInfo
+			{
+				PlayerCode = "otherCode"
+			});
 
-        var actual = await sut.GetAsync(query);
+		var actual = await sut.GetAsync(query);
 
-        Assert.IsFalse(actual);
-    }
+		Assert.IsFalse(actual);
+	}
 
-    [Test]
-    public async Task CheckPhone_If_Not_Input_PlayerCode()
-    {
-        var brandId = Guid.Parse("1D46DDD7-EB42-43A0-CB2F-724E59622CA5");
-        var areaCode = "+852";
-        var phone = "66666666";
+	[Test]
+	public async Task Same_Brand_And_Same_Phone_And_Same_AreaCode_And_Same_Player_Should_Get_True()
+	{
+		var brandId = Guid.Parse("1D46DDD7-EB42-43A0-CB2F-724E59622CA5");
+		var playerCode = "playerCode";
+		var areaCode = "+852";
+		var phone = "66666666";
 
-        var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
+		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
 
-        var sut = new CheckBrandPhoneCanUseQueryService(fakePlayerServiceClient);
+		var sut = new CheckBrandPhoneCanUseQueryService(fakePlayerServiceClient);
 
-        var query = new CheckBrandPhoneCanUseQuery(brandId, null, areaCode, phone);
+		var query = new CheckBrandPhoneCanUseQuery(brandId, playerCode, areaCode, phone);
 
-        _ = fakePlayerServiceClient.GetPlayerInfoByPhoneAsync(
-            Arg.Is(brandId),
-            Arg.Is(areaCode),
-            Arg.Is(phone))
-            .Returns(new Tgs.PlayerService.Client.PlayerInfo
-            {
-                PlayerCode = "playerCode"
-            });
+		_ = fakePlayerServiceClient.GetPlayerInfoByPhoneAsync(
+			Arg.Is(brandId),
+			Arg.Is(areaCode),
+			Arg.Is(phone))
+			.Returns(new Tgs.PlayerService.Client.PlayerInfo
+			{
+				PlayerCode = playerCode
+			});
 
-        var actual = await sut.GetAsync(query);
+		var actual = await sut.GetAsync(query);
 
-        Assert.IsTrue(actual);
-    }
+		Assert.IsTrue(actual);
+	}
 
-    [Test]
-    public async Task Same_Brand_And_Same_Phone_And_Same_AreaCode_And_Same_Player_Should_Get_True()
-    {
-        var brandId = Guid.Parse("1D46DDD7-EB42-43A0-CB2F-724E59622CA5");
-        var playerCode = "playerCode";
-        var areaCode = "+852";
-        var phone = "66666666";
+	[Test]
+	public async Task Start_Set_Player_Phone_Should_Not_Send_Confirm_Message_When_Sms_Disabled()
+	{
+		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
+		var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
+		var moqValidateCodeGenerator = new Mock<IValidateCodeGenerator>();
+		var moqValidateCodeOperator = new Mock<IValidateCodeOperator>();
+		var moqSmsServiceClient = new Mock<ISmsServiceClient>();
 
-        var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
+		var sut = new StartSetPlayerPhoneCommandService(
+			fakePlayerServiceClient,
+			fakeBrandServiceClient,
+			moqValidateCodeGenerator.Object,
+			moqValidateCodeOperator.Object,
+			moqSmsServiceClient.Object);
 
-        var sut = new CheckBrandPhoneCanUseQueryService(fakePlayerServiceClient);
+		var areaCode = "886";
+		var phone = "0988123456";
+		var player = new Tgs.PlayerService.Client.PlayerInfo
+		{
+			PlayerCode = "abcdef123456",
+			BrandId = Guid.NewGuid()
+		};
 
-        var query = new CheckBrandPhoneCanUseQuery(brandId, playerCode, areaCode, phone);
+		var command = new StartSetPlayerPhoneCommand(
+			player.PlayerCode,
+			areaCode,
+			phone,
+			CultureInfo.GetCultureInfo("en-US"),
+			false);
 
-        _ = fakePlayerServiceClient.GetPlayerInfoByPhoneAsync(
-            Arg.Is(brandId),
-            Arg.Is(areaCode),
-            Arg.Is(phone))
-            .Returns(new Tgs.PlayerService.Client.PlayerInfo
-            {
-                PlayerCode = playerCode
-            });
-
-        var actual = await sut.GetAsync(query);
-
-        Assert.IsTrue(actual);
-    }
-
-    [Test]
-    public async Task Start_Set_Player_Phone_Should_Not_Send_Confirm_Message_When_Sms_Disabled()
-    {
-        var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
-        var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
-        var moqValidateCodeGenerator = new Mock<IValidateCodeGenerator>();
-        var moqValidateCodeOperator = new Mock<IValidateCodeOperator>();
-        var moqSmsServiceClient = new Mock<ISmsServiceClient>();
-
-        var sut = new StartSetPlayerPhoneCommandService(
-            fakePlayerServiceClient,
-            fakeBrandServiceClient,
-            moqValidateCodeGenerator.Object,
-            moqValidateCodeOperator.Object,
-            moqSmsServiceClient.Object);
-
-        var areaCode = "886";
-        var phone = "0988123456";
-        var player = new Tgs.PlayerService.Client.PlayerInfo
-        {
-            PlayerCode = "abcdef123456",
-            BrandId = Guid.NewGuid()
-        };
-
-        var command = new StartSetPlayerPhoneCommand(
-            player.PlayerCode,
-            areaCode,
-            phone,
-            CultureInfo.GetCultureInfo("en-US"),
-            false);
-
-        var validateCode = "123456";
-        var expectedSecurityKey = "3F8E5681-50C8-4F2F-8379-3AA6EF2C6064";
+		var validateCode = "123456";
+		var expectedSecurityKey = "3F8E5681-50C8-4F2F-8379-3AA6EF2C6064";
 
 		_ = fakePlayerServiceClient.GetPlayerInfoAsync(Arg.Is(player.PlayerCode))
 			.Returns(player);
@@ -376,17 +375,17 @@ public class PlayerPhoneTests
 				It.IsAny<PhoneValidateData>()))
 			.Returns(ValueTask.FromResult(true));
 
-        var expectedShortMessage = $"Your ID verification code is : {validateCode}";
+		var expectedShortMessage = $"Your ID verification code is : {validateCode}";
 
-        var actualSecurityKey = await sut.GetAsync(command);
+		var actualSecurityKey = await sut.GetAsync(command);
 
-        moqSmsServiceClient.Verify(
-            smsClient => smsClient.SendShortMessageAsync(
-                It.Is<string>(x => x == $"{areaCode}{phone}"),
-                It.Is<string>(x => x == expectedShortMessage),
-                It.IsAny<Guid>()),
-            Times.Exactly(0));
+		moqSmsServiceClient.Verify(
+			smsClient => smsClient.SendShortMessageAsync(
+				It.Is<string>(x => x == $"{areaCode}{phone}"),
+				It.Is<string>(x => x == expectedShortMessage),
+				It.IsAny<Guid>()),
+			Times.Exactly(0));
 
-        Assert.AreEqual(expectedSecurityKey, actualSecurityKey);
-    }
+		Assert.AreEqual(expectedSecurityKey, actualSecurityKey);
+	}
 }

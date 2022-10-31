@@ -8,26 +8,26 @@ namespace TGS.Services.Operations.Queries;
 
 public interface IGameProviderQueries
 {
-    Task<Guid> GetGameProviderIdByCodeAsync(string gameProviderCode);
+	Task<GetCachedGameProviderResult> GetCachedGameProviderAsync(Guid gameProviderId);
 
-    Task<Dictionary<string, string>> GetGameProviderCurrenciesByExternalCodeAsync(Guid gameProviderId);
+	Task<GetCachedGameProviderConfigurationResult> GetCachedGameProviderConfigurationAsync(
+		Guid gameProviderConfigurationId);
 
-    Task<Dictionary<string, string>> GetGameProviderCurrenciesByInternalCodeAsync(Guid gameProviderId);
+	Task<CachedGame[]> GetCachedGamesAsync(Guid gameProviderId);
 
-    Task<GetCachedGameProviderResult> GetCachedGameProviderAsync(Guid gameProviderId);
+	Task<Dictionary<string, string>> GetGameProviderCurrenciesByExternalCodeAsync(Guid gameProviderId);
 
-    Task<GetCachedGameProviderConfigurationResult> GetCachedGameProviderConfigurationAsync(
-        Guid gameProviderConfigurationId);
+	Task<Dictionary<string, string>> GetGameProviderCurrenciesByInternalCodeAsync(Guid gameProviderId);
 
-    Task<Dictionary<string, string>> GetGameProviderLanguagesByExternalCodeAsync(Guid gameProviderId);
+	Task<Guid> GetGameProviderIdByCodeAsync(string gameProviderCode);
 
-    Task<Dictionary<string, string>> GetGameProviderLanguagesByInternalCodeAsync(Guid gameProviderId);
+	Task<IdAndCodeAndConfigurationId> GetGameProviderIdsByCredentialsAsync(string clientId, string secretKey);
 
-    Task<CachedGame[]> GetCachedGamesAsync(Guid gameProviderId);
+	Task<Dictionary<string, string>> GetGameProviderLanguagesByExternalCodeAsync(Guid gameProviderId);
 
-    Task<CachedSubGame[]> GetSubGamesAsync(Guid gameProviderId);
+	Task<Dictionary<string, string>> GetGameProviderLanguagesByInternalCodeAsync(Guid gameProviderId);
 
-    Task<IdAndCodeAndConfigurationId> GetGameProviderIdsByCredentialsAsync(string clientId, string secretKey);
+	Task<Dictionary<Guid, string>> GetGameProvidersLocalizationByGameProviderIdsAsync(Guid[] gameProviderIds);
 
-    Task<Dictionary<Guid, string>> GetGameProvidersLocalizationByGameProviderIdsAsync(Guid[] gameProviderIds);
+	Task<CachedSubGame[]> GetSubGamesAsync(Guid gameProviderId);
 }

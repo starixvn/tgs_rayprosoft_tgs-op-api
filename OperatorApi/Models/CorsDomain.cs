@@ -2,5 +2,5 @@
 
 public class CorsDomain
 {
-    public string[] Urls { get; set; }
+	public string[] Urls { get; set; }
 }

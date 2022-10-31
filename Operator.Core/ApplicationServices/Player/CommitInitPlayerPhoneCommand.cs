@@ -3,8 +3,8 @@
 namespace TGS.Services.Operator.ApplicationServices.Player;
 
 public record CommitInitPlayerPhoneCommand(
-    string SecurityKey,
-    string ValidateCode,
-    string IpAddress,
-    string HostName,
-    Guid BrandId);
+	string SecurityKey,
+	string ValidateCode,
+	string IpAddress,
+	string HostName,
+	Guid BrandId);

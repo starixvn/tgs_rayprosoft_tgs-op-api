@@ -10,68 +10,68 @@ namespace TGS.Operator.Repositories;
 
 internal class PlayerLoginRecordRepository : IPlayerLoginRecordRepository
 {
-    private readonly ITgsRepository _tgsRepository;
+	private readonly ITgsRepository _tgsRepository;
 
-    public PlayerLoginRecordRepository(
-        ITgsRepository tgsRepository)
-    {
-        _tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
-    }
+	public PlayerLoginRecordRepository(
+		ITgsRepository tgsRepository)
+	{
+		_tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
+	}
 
-    public async ValueTask<LoginRecordInfo> AddPlayerLoginRecordAsync(Guid brandId, string playerCode, PlatformType platformType, string ipAddress)
-    {
-        const int expiredSeconds = 3600 * 12;
+	public async ValueTask<LoginRecordInfo> AddPlayerLoginRecordAsync(Guid brandId, string playerCode, PlatformType platformType, string ipAddress)
+	{
+		const int expiredSeconds = 3600 * 12;
 
-        var loginRecord = new PlayerLoginRecord
-        {
-            Id = GuidExtensions.NewSequentialGuid(),
-            PlayerCode = playerCode,
-            BrandId = brandId,
-            Status = LoginStatus.Enabled,
-            PlatformType = platformType,
-            IpAddress = ipAddress,
-            CreatedOn = DateTimeOffset.UtcNow,
-            ExpiredOn = DateTimeOffset.UtcNow.AddSeconds(expiredSeconds)
-        };
+		var loginRecord = new PlayerLoginRecord
+		{
+			Id = GuidExtensions.NewSequentialGuid(),
+			PlayerCode = playerCode,
+			BrandId = brandId,
+			Status = LoginStatus.Enabled,
+			PlatformType = platformType,
+			IpAddress = ipAddress,
+			CreatedOn = DateTimeOffset.UtcNow,
+			ExpiredOn = DateTimeOffset.UtcNow.AddSeconds(expiredSeconds)
+		};
 
-        _ = await _tgsRepository.PlayerLoginRecords.AddAsync(loginRecord);
-        _ = await _tgsRepository.SaveChangesAsync();
+		_ = await _tgsRepository.PlayerLoginRecords.AddAsync(loginRecord);
+		_ = await _tgsRepository.SaveChangesAsync();
 
-        return new LoginRecordInfo(
-            loginRecord.Id,
-            loginRecord.PlayerCode,
-            loginRecord.Status,
-            loginRecord.PlatformType,
-            loginRecord.CreatedOn,
-            loginRecord.ExpiredOn);
-    }
+		return new LoginRecordInfo(
+			loginRecord.Id,
+			loginRecord.PlayerCode,
+			loginRecord.Status,
+			loginRecord.PlatformType,
+			loginRecord.CreatedOn,
+			loginRecord.ExpiredOn);
+	}
 
-    public async ValueTask DeauthorizePlayerAsync(Guid loginRecordId)
-    {
-        var loginRecord = await _tgsRepository.PlayerLoginRecords
-            .FindAsync(loginRecordId)
-            .ConfigureAwait(false);
+	public async ValueTask DeauthorizePlayerAsync(Guid loginRecordId)
+	{
+		var loginRecord = await _tgsRepository.PlayerLoginRecords
+			.FindAsync(loginRecordId)
+			.ConfigureAwait(false);
 
-        loginRecord!.Status = LoginStatus.Deauthorized;
+		loginRecord!.Status = LoginStatus.Deauthorized;
 
-        _ = _tgsRepository.PlayerLoginRecords.Update(loginRecord);
-        _ = await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
-    }
+		_ = _tgsRepository.PlayerLoginRecords.Update(loginRecord);
+		_ = await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
+	}
 
-    public async ValueTask<LoginRecordInfo?> GetPlayerLoginRecordAsync(Guid loginRecordId)
-    {
-        var loginRecord = await _tgsRepository.PlayerLoginRecords
-            .FindAsync(loginRecordId)
-            .ConfigureAwait(false);
+	public async ValueTask<LoginRecordInfo?> GetPlayerLoginRecordAsync(Guid loginRecordId)
+	{
+		var loginRecord = await _tgsRepository.PlayerLoginRecords
+			.FindAsync(loginRecordId)
+			.ConfigureAwait(false);
 
-        return loginRecord == null
-            ? null
-            : new LoginRecordInfo(
-                loginRecord.Id,
-                loginRecord.PlayerCode,
-                loginRecord.Status,
-                loginRecord.PlatformType,
-                loginRecord.CreatedOn,
-                loginRecord.ExpiredOn);
-    }
+		return loginRecord == null
+			? null
+			: new LoginRecordInfo(
+				loginRecord.Id,
+				loginRecord.PlayerCode,
+				loginRecord.Status,
+				loginRecord.PlatformType,
+				loginRecord.CreatedOn,
+				loginRecord.ExpiredOn);
+	}
 }

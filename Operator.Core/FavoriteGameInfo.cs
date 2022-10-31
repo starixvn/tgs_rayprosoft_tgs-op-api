@@ -3,7 +3,7 @@
 namespace TGS.Services.Operator;
 
 public record FavoriteGameInfo(
-    string PlayerCode,
-    int GameId,
-    GameType GameType,
-    string SubGpCode);
+	string PlayerCode,
+	int GameId,
+	GameType GameType,
+	string SubGpCode);

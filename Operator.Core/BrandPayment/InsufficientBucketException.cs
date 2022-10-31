@@ -4,7 +4,7 @@ namespace TGS.Services.Operator.BrandPayment;
 
 public class InsufficientBucketException : Exception
 {
-    public InsufficientBucketException()
-    {
-    }
+	public InsufficientBucketException()
+	{
+	}
 }

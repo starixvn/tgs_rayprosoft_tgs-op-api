@@ -5,8 +5,8 @@ namespace TGS.Apis.OperatorApi.Models.Messages;
 
 public record BrandLiveChatModel
 {
-    [JsonPropertyName("name")]
-    public string Name { get; set; }
-    [JsonPropertyName("setting")]
-    public JsonDocument Setting { get; set; }
+	[JsonPropertyName("name")]
+	public string Name { get; set; }
+	[JsonPropertyName("setting")]
+	public JsonDocument Setting { get; set; }
 }

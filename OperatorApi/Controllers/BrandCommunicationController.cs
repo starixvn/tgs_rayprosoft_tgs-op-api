@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
+﻿using System.ComponentModel;
 using Microsoft.AspNetCore.Mvc;
 using Tgs.ServiceUtility;
 using TGS.Apis.OperatorApi.Attributes;
@@ -15,25 +13,25 @@ namespace TGS.Apis.OperatorApi.Controllers;
 [ApiController]
 public class BrandCommunicationController : ControllerBase
 {
-    [HttpGet]
-    [Description("Get a brand's communications")]
-    [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = false)]
-    public IAsyncEnumerable<BrandCommunicationModel> GetBrandCommunicationsAsync(
-        [FromServices] IQueryService<BrandCommunicationQuery, BrandCommunicationInfo> queryService)
-    {
-        var brandId = HttpContext.Items.GetBrandId();
+	[HttpGet]
+	[Description("Get a brand's communications")]
+	[AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = false)]
+	public IAsyncEnumerable<BrandCommunicationModel> GetBrandCommunicationsAsync(
+		[FromServices] IQueryService<BrandCommunicationQuery, BrandCommunicationInfo> queryService)
+	{
+		var brandId = HttpContext.Items.GetBrandId();
 
-        var query = new BrandCommunicationQuery(brandId);
-        var info = queryService.QueryAsync(query);
+		var query = new BrandCommunicationQuery(brandId);
+		var info = queryService.QueryAsync(query);
 
-        return info.Select(x =>
-            new BrandCommunicationModel()
-            {
-                Type = x.CommunicationType,
-                Phone = x.Phone,
-                AppId = x.AppId,
-                QRCodeUrl = x.QRCodeUrl
-            })
-            .Take(5);
-    }
+		return info.Select(x =>
+			new BrandCommunicationModel()
+			{
+				Type = x.CommunicationType,
+				Phone = x.Phone,
+				AppId = x.AppId,
+				QRCodeUrl = x.QRCodeUrl
+			})
+			.Take(5);
+	}
 }

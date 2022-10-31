@@ -10,22 +10,22 @@ namespace TGS.Services.Operator.ApplicationServices.Player;
 
 internal class CheckBrandPhoneQueryService : IGetService<CheckBrandPhoneQuery, bool>
 {
-    private readonly ITgsRepository _tgsRepository;
+	private readonly ITgsRepository _tgsRepository;
 
-    public CheckBrandPhoneQueryService(ITgsRepository tgsRepository)
-    {
-        _tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
-    }
+	public CheckBrandPhoneQueryService(ITgsRepository tgsRepository)
+	{
+		_tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
+	}
 
-    public async ValueTask<bool> GetAsync(CheckBrandPhoneQuery query, CancellationToken cancellationToken = default)
-    {
-        var player = await _tgsRepository.Players.AsQueryable()
-            .Where(p => p.BrandId == query.BrandId
-                && p.AreaCode == query.AreaCode
-                && p.Phone == query.Phone)
-            .FirstOrDefaultAsync(cancellationToken: cancellationToken)
-            .ConfigureAwait(false);
+	public async ValueTask<bool> GetAsync(CheckBrandPhoneQuery query, CancellationToken cancellationToken = default)
+	{
+		var player = await _tgsRepository.Players.AsQueryable()
+			.Where(p => p.BrandId == query.BrandId
+				&& p.AreaCode == query.AreaCode
+				&& p.Phone == query.Phone)
+			.FirstOrDefaultAsync(cancellationToken: cancellationToken)
+			.ConfigureAwait(false);
 
-        return player is null || query.PlayerCode is not null && player.PlayerCode == query.PlayerCode;
-    }
+		return player is null || query.PlayerCode is not null && player.PlayerCode == query.PlayerCode;
+	}
 }

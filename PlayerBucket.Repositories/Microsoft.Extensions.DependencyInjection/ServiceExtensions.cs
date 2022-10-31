@@ -5,10 +5,10 @@ namespace Microsoft.Extensions.DependencyInjection;
 
 public static class ServiceExtensions
 {
-    public static IServiceCollection AddPlayerBucketRepositoriesServices(this IServiceCollection services)
-    {
+	public static IServiceCollection AddPlayerBucketRepositoriesServices(this IServiceCollection services)
+	{
 		_ = services.AddTransient<IPlayerBucketRepository, PlayerBucketRepository>();
 
-        return services;
-    }
+		return services;
+	}
 }

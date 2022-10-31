@@ -9,36 +9,36 @@ namespace TGS.Services.Operator.ApplicationServices.Player;
 
 internal class CreateIdentityAuthenticationFormCommandService : ICommandService<CreateIdentityAuthenticationFormCommand>
 {
-    private readonly IBrandServiceClient _brandServiceClient;
-    private readonly IPlayerRepository _playerRepository;
+	private readonly IBrandServiceClient _brandServiceClient;
+	private readonly IPlayerRepository _playerRepository;
 
-    public CreateIdentityAuthenticationFormCommandService(
-        IBrandServiceClient brandServiceClient,
-        IPlayerRepository playerRepository)
-    {
-        _brandServiceClient = brandServiceClient ?? throw new ArgumentNullException(nameof(brandServiceClient));
-        _playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
-    }
+	public CreateIdentityAuthenticationFormCommandService(
+		IBrandServiceClient brandServiceClient,
+		IPlayerRepository playerRepository)
+	{
+		_brandServiceClient = brandServiceClient ?? throw new ArgumentNullException(nameof(brandServiceClient));
+		_playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
+	}
 
-    public async ValueTask ExecuteAsync(
-        CreateIdentityAuthenticationFormCommand command,
-        CancellationToken cancellationToken = default)
-    {
-        var brandInfo = await _brandServiceClient
-            .GetBrandInfoAsync(command.BrandId, cancellationToken)
-            .ConfigureAwait(false);
+	public async ValueTask ExecuteAsync(
+		CreateIdentityAuthenticationFormCommand command,
+		CancellationToken cancellationToken = default)
+	{
+		var brandInfo = await _brandServiceClient
+			.GetBrandInfoAsync(command.BrandId, cancellationToken)
+			.ConfigureAwait(false);
 
-        if (!brandInfo!.PlayerIdentityEnabled)
-            throw new BrandEnablePlayerIdentityNotSetException();
+		if (!brandInfo!.PlayerIdentityEnabled)
+			throw new BrandEnablePlayerIdentityNotSetException();
 
-        var data = JsonSerializer.Serialize(new PlayerAuthenticationFormData(command.FileId));
+		var data = JsonSerializer.Serialize(new PlayerAuthenticationFormData(command.FileId));
 
-        var formId = await _playerRepository
-            .CreatePlayerAuthenticationFormAsync(command.BrandId, command.PlayerCode, data)
-            .ConfigureAwait(false);
+		var formId = await _playerRepository
+			.CreatePlayerAuthenticationFormAsync(command.BrandId, command.PlayerCode, data)
+			.ConfigureAwait(false);
 
-        await _playerRepository
-            .UpdatePlayerIdentityAsync(command.PlayerCode, formId)
-            .ConfigureAwait(false);
-    }
+		await _playerRepository
+			.UpdatePlayerIdentityAsync(command.PlayerCode, formId)
+			.ConfigureAwait(false);
+	}
 }

@@ -5,7 +5,7 @@ namespace TGS.Services.Operator;
 
 public interface IAgentRepository
 {
-    ValueTask<AgentInfo?> GetAgentInfoByInvitationCodeAsync(
-        string invitationCode,
-        CancellationToken cancellationToken = default);
+	ValueTask<AgentInfo?> GetAgentInfoByInvitationCodeAsync(
+		string invitationCode,
+		CancellationToken cancellationToken = default);
 }

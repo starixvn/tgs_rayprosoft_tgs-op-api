@@ -1,19 +1,18 @@
-﻿using System;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 
 namespace TGS.Apis.OperatorApi.Models.Messages;
 
 public record SubmitManualDepositThirdPartyRequest
 {
-    [JsonPropertyName("amount")]
-    public decimal Amount { get; init; }
+	[JsonPropertyName("amount")]
+	public decimal Amount { get; init; }
 
-    [JsonPropertyName("paymentid")]
-    public Guid BrandPaymentId { get; init; }
+	[JsonPropertyName("paymentid")]
+	public Guid BrandPaymentId { get; init; }
 
-    [JsonPropertyName("promotionid")]
-    public Guid? PromotionId { get; init; }
+	[JsonPropertyName("promotionid")]
+	public Guid? PromotionId { get; init; }
 
-    [JsonPropertyName("banktype")]
-    public string BankType { get; init; }
+	[JsonPropertyName("banktype")]
+	public string BankType { get; init; }
 }

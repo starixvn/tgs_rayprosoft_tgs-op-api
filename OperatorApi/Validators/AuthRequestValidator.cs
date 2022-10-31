@@ -6,8 +6,8 @@ namespace TGS.Apis.OperatorApi.Validators;
 
 public sealed class AuthRequestValidator : AbstractValidator<AuthRequest>
 {
-    public AuthRequestValidator()
-    {
+	public AuthRequestValidator()
+	{
 		_ = RuleFor(x => x.ApiKey)
 			.NotEmpty()
 			.WithName(x => x
@@ -19,5 +19,5 @@ public sealed class AuthRequestValidator : AbstractValidator<AuthRequest>
 			.WithName(x => x
 				.WithPropertyExpression(o => o.Currency)
 				.GetJsonPropertyName(nameof(x.Currency)));
-    }
+	}
 }

@@ -1,7 +1,4 @@
-﻿using System;
-using System.Text.Json;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
+﻿using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Tgs.Payment.Clients;
 using Tgs.Payment.MalakiPay;
@@ -17,68 +14,68 @@ namespace TGS.Apis.OperatorApi.Controllers;
 [ApiController]
 public class ThirdPartyDepositController : ControllerBase
 {
-    [HttpPost("malakipay", Name = "SubmitMalakiPayDepositRequest")]
-    [HttpPost("~/api/deposit/bank/malakipay", Name = "SubmitMalakiPayBankDepositRequest")]
-    [EnableUserBlockedCheck]
-    [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-    public async Task<DepositFormCreatedResponse> SubmitMalakiPayDepositRequestAsync(
-        [FromServices] IGetService<CreateDepositFormCommand, Guid> createDepositFormService,
-        [FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
-        [FromServices] MalakiPaySerializer serializer,
-        [FromServices] IGetService<GetDepositFormQuery, DepositFormInfo> getDepositFormService,
-        [FromServices] ICommandService<SubmitDepositFormThirdPartyOrderNoCommand> updateDepositFormService,
-        [FromBody] SubmitDepositRequest request)
-    {
-        var playerTokenData = HttpContext.Items.GetPlayerTokenData();
-        var brandId = HttpContext.Items.GetBrandId();
+	[HttpPost("malakipay", Name = "SubmitMalakiPayDepositRequest")]
+	[HttpPost("~/api/deposit/bank/malakipay", Name = "SubmitMalakiPayBankDepositRequest")]
+	[EnableUserBlockedCheck]
+	[AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+	public async Task<DepositFormCreatedResponse> SubmitMalakiPayDepositRequestAsync(
+		[FromServices] IGetService<CreateDepositFormCommand, Guid> createDepositFormService,
+		[FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
+		[FromServices] MalakiPaySerializer serializer,
+		[FromServices] IGetService<GetDepositFormQuery, DepositFormInfo> getDepositFormService,
+		[FromServices] ICommandService<SubmitDepositFormThirdPartyOrderNoCommand> updateDepositFormService,
+		[FromBody] SubmitDepositRequest request)
+	{
+		var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+		var brandId = HttpContext.Items.GetBrandId();
 
-        var brandPayment = await getBrandPaymentService
-            .GetAsync(new GetBrandPaymentQuery(request.BrandPaymentId), HttpContext.RequestAborted)
-            .ConfigureAwait(false);
+		var brandPayment = await getBrandPaymentService
+			.GetAsync(new GetBrandPaymentQuery(request.BrandPaymentId), HttpContext.RequestAborted)
+			.ConfigureAwait(false);
 
-        var brandPaymentInfo = JsonDocument.Parse(brandPayment.ExtendedData);
+		var brandPaymentInfo = JsonDocument.Parse(brandPayment.ExtendedData);
 
-        var command = new CreateDepositFormCommand(
-            playerTokenData.PlayerCode,
-            brandId,
-            request.BrandPaymentId,
-            request.Amount,
-            "tgs.payment.malakipay.deposit",
-            request.PromotionId,
-            formId => serializer.Serialize(
-                new MalakiPayDepositSettings(
-                    brandPaymentInfo.RootElement.GetProperty("merchant").GetString(),
-                    brandPaymentInfo.RootElement.GetProperty("secret").GetString(),
-                    brandPaymentInfo.RootElement.GetProperty("payType").GetString(),
-                    formId)));
+		var command = new CreateDepositFormCommand(
+			playerTokenData.PlayerCode,
+			brandId,
+			request.BrandPaymentId,
+			request.Amount,
+			"tgs.payment.malakipay.deposit",
+			request.PromotionId,
+			formId => serializer.Serialize(
+				new MalakiPayDepositSettings(
+					brandPaymentInfo.RootElement.GetProperty("merchant").GetString(),
+					brandPaymentInfo.RootElement.GetProperty("secret").GetString(),
+					brandPaymentInfo.RootElement.GetProperty("payType").GetString(),
+					formId)));
 
-        var createdFormId = await createDepositFormService
-            .GetAsync(command, HttpContext.RequestAborted)
-            .ConfigureAwait(false);
+		var createdFormId = await createDepositFormService
+			.GetAsync(command, HttpContext.RequestAborted)
+			.ConfigureAwait(false);
 
-        var getDepositFormQuery = new GetDepositFormQuery(
-            playerTokenData.PlayerCode,
-            createdFormId,
-            brandId);
+		var getDepositFormQuery = new GetDepositFormQuery(
+			playerTokenData.PlayerCode,
+			createdFormId,
+			brandId);
 
-        var formData = await getDepositFormService
-            .GetAsync(getDepositFormQuery, HttpContext.RequestAborted)
-            .ConfigureAwait(false);
+		var formData = await getDepositFormService
+			.GetAsync(getDepositFormQuery, HttpContext.RequestAborted)
+			.ConfigureAwait(false);
 
-        var applyInfo = serializer.Deserialize<MalakiPayDepositApplyInfo>(formData.ApplyInfo!);
+		var applyInfo = serializer.Deserialize<MalakiPayDepositApplyInfo>(formData.ApplyInfo!);
 
-        var updateThirdPartyOrderNoCommand = new SubmitDepositFormThirdPartyOrderNoCommand(
-            createdFormId,
-            applyInfo.Response.TradeNo);
+		var updateThirdPartyOrderNoCommand = new SubmitDepositFormThirdPartyOrderNoCommand(
+			createdFormId,
+			applyInfo.Response.TradeNo);
 
-        await updateDepositFormService
-            .ExecuteAsync(updateThirdPartyOrderNoCommand, HttpContext.RequestAborted)
-            .ConfigureAwait(false);
+		await updateDepositFormService
+			.ExecuteAsync(updateThirdPartyOrderNoCommand, HttpContext.RequestAborted)
+			.ConfigureAwait(false);
 
-        return new DepositFormCreatedResponse
-        {
-            FormId = createdFormId,
-            PaymentUrl = applyInfo.Response.RedirectUrl.ToString()
-        };
-    }
+		return new DepositFormCreatedResponse
+		{
+			FormId = createdFormId,
+			PaymentUrl = applyInfo.Response.RedirectUrl.ToString()
+		};
+	}
 }

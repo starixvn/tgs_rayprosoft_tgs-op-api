@@ -3,6 +3,6 @@
 namespace TGS.Services.Operator;
 
 public record BannerInfo(
-    Guid Id,
-    string Title,
-    string? Localization);
+	Guid Id,
+	string Title,
+	string? Localization);

@@ -9,9 +9,9 @@ namespace TGS.Services.Operator;
 
 public interface IBrandRepository
 {
-    ValueTask<string?> GetSecretKeyAsync(Guid brandId, CancellationToken cancellationToken = default);
+	ValueTask<string?> GetSecretKeyAsync(Guid brandId, CancellationToken cancellationToken = default);
 
-    IAsyncEnumerable<AnnouncementInfo> QueryAnnouncementInfosAsync(Guid brandId, DateTimeOffset searchDate);
+	IAsyncEnumerable<AnnouncementInfo> QueryAnnouncementInfosAsync(Guid brandId, DateTimeOffset searchDate);
 
-    IAsyncEnumerable<BannerInfo> QueryBrandBannersAsync(Guid brandId);
+	IAsyncEnumerable<BannerInfo> QueryBrandBannersAsync(Guid brandId);
 }

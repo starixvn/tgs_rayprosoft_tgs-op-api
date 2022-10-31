@@ -5,7 +5,7 @@ namespace TGS.Apis.OperatorApi.Models;
 
 public record SuccessResponse<TResult> : TgsResponse
 {
-    [JsonPropertyName("data")]
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public TResult Data { get; init; }
+	[JsonPropertyName("data")]
+	[JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+	public TResult Data { get; init; }
 }

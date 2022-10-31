@@ -6,8 +6,8 @@ namespace TGS.Apis.OperatorApi.Validators;
 
 public sealed class GetGameProvidersRequestValidator : AbstractValidator<GetGameProvidersRequest>
 {
-    public GetGameProvidersRequestValidator()
-    {
+	public GetGameProvidersRequestValidator()
+	{
 		_ = RuleFor(x => x.CurrencyCode)
 			.NotEmpty()
 			.WithName(x => x
@@ -26,5 +26,5 @@ public sealed class GetGameProvidersRequestValidator : AbstractValidator<GetGame
 				"{0} does not exist",
 				x.WithPropertyExpression(o => o.PlatformType)
 					.GetBindPropertyName(nameof(x.PlatformType))));
-    }
+	}
 }

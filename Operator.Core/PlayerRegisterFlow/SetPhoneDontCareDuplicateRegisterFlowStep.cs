@@ -12,83 +12,83 @@ namespace TGS.Services.Operator.PlayerRegisterFlow;
 
 internal class SetPhoneDontCareDuplicateRegisterFlowStep : IRegisterFlowStep
 {
-    private readonly IPlayerServiceClient _playerServiceClient;
-    private bool _compatible;
+	private readonly IPlayerServiceClient _playerServiceClient;
+	private bool _compatible;
 
-    public string Type => "SetPhoneDontCareDuplicate";
+	public string Type => "SetPhoneDontCareDuplicate";
 
-    public SetPhoneDontCareDuplicateRegisterFlowStep(IPlayerServiceClient playerServiceClient)
-    {
-        _playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
-    }
+	public SetPhoneDontCareDuplicateRegisterFlowStep(IPlayerServiceClient playerServiceClient)
+	{
+		_playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
+	}
 
-    public async ValueTask<bool> ConfirmCompletedAsync(string? playerCode, CancellationToken cancellationToken = default)
-    {
-        if (string.IsNullOrWhiteSpace(playerCode))
-            return false;
+	public async ValueTask<bool> ConfirmCompletedAsync(string? playerCode, CancellationToken cancellationToken = default)
+	{
+		if (string.IsNullOrWhiteSpace(playerCode))
+			return false;
 
-        var player = await _playerServiceClient
-            .GetPlayerInfoAsync(playerCode, cancellationToken)
-            .ConfigureAwait(false);
+		var player = await _playerServiceClient
+			.GetPlayerInfoAsync(playerCode, cancellationToken)
+			.ConfigureAwait(false);
 
-        return player is not null && player.PhoneAuthentication;
-    }
+		return player is not null && player.PhoneAuthentication;
+	}
 
-    public async ValueTask<RegisterFlowProcessResult> ProcessInputAsync(
-        Guid brandId,
-        JsonDocument input,
-        PlayerLocationInfo locationInfo,
-        CancellationToken cancellationToken = default)
-    {
-        var request = DeserializeInputData(input);
+	public async ValueTask<RegisterFlowProcessResult> ProcessInputAsync(
+		Guid brandId,
+		JsonDocument input,
+		PlayerLocationInfo locationInfo,
+		CancellationToken cancellationToken = default)
+	{
+		var request = DeserializeInputData(input);
 
-        if (string.IsNullOrWhiteSpace(locationInfo.PlayerCode))
-            return new RegisterFlowProcessResult(false, null, null);
+		if (string.IsNullOrWhiteSpace(locationInfo.PlayerCode))
+			return new RegisterFlowProcessResult(false, null, null);
 
-        await _playerServiceClient.SetPlayerPropertiesAsync(
-            locationInfo.PlayerCode,
-            new Dictionary<PlayerPropertyName, string?>
-            {
-                [PlayerPropertyName.AreaCode] = request.AreaCode,
-                [PlayerPropertyName.Phone] = request.Phone,
-                [PlayerPropertyName.PhoneAuthentication] = true.ToString()
-            }.ToImmutableDictionary(),
-            cancellationToken).ConfigureAwait(false);
+		await _playerServiceClient.SetPlayerPropertiesAsync(
+			locationInfo.PlayerCode,
+			new Dictionary<PlayerPropertyName, string?>
+			{
+				[PlayerPropertyName.AreaCode] = request.AreaCode,
+				[PlayerPropertyName.Phone] = request.Phone,
+				[PlayerPropertyName.PhoneAuthentication] = true.ToString()
+			}.ToImmutableDictionary(),
+			cancellationToken).ConfigureAwait(false);
 
-        var player = await _playerServiceClient
-            .GetPlayerInfoAsync(locationInfo.PlayerCode!, cancellationToken)
-            .ConfigureAwait(false);
+		var player = await _playerServiceClient
+			.GetPlayerInfoAsync(locationInfo.PlayerCode!, cancellationToken)
+			.ConfigureAwait(false);
 
-        return new RegisterFlowProcessResult(
-            player is not null && player.PhoneAuthentication,
-            null,
-            null);
-    }
+		return new RegisterFlowProcessResult(
+			player is not null && player.PhoneAuthentication,
+			null,
+			null);
+	}
 
-    public void SetupStep(JsonElement jsonElement)
-    {
-        if (jsonElement.TryGetProperty("compatible", out var prop))
-            _compatible = prop.GetBoolean();
-    }
+	public void SetupStep(JsonElement jsonElement)
+	{
+		if (jsonElement.TryGetProperty("compatible", out var prop))
+			_compatible = prop.GetBoolean();
+	}
 
-    private PhoneData DeserializeInputData(JsonDocument input)
-    {
-        if (_compatible)
-        {
-            var inputData = input.Deserialize<InitPhoneStepInputData>()!;
+	private PhoneData DeserializeInputData(JsonDocument input)
+	{
+		if (_compatible)
+		{
+			var inputData = input.Deserialize<InitPhoneStepInputData>()!;
 
-            return inputData.Data.Deserialize<PhoneData>()!;
-        }
-        else
-            return input.Deserialize<PhoneData>()!;
-    }
+			return inputData.Data.Deserialize<PhoneData>()!;
+		}
+		else
+			return input.Deserialize<PhoneData>()!;
+	}
 
-    internal record PhoneData
-    {
-        [JsonPropertyName("areacode")]
-        public string AreaCode { get; init; } = default!;
+	internal record PhoneData
+	{
+		[JsonPropertyName("areacode")]
+		public string AreaCode { get; init; } = default!;
 
-        [JsonPropertyName("phone")]
-        public string Phone { get; init; } = default!;
-    }
+		[JsonPropertyName("phone")]
+		public string Phone { get; init; } = default!;
+	}
 }

@@ -10,7 +10,7 @@ namespace TGS.Services.Operator.PlayerRegisterFlow;
 
 internal class RegisterFlow : IRegisterFlowStep
 {
-	private readonly Queue<IRegisterFlowStep> _flowSteps = new Queue<IRegisterFlowStep>();
+	private readonly Queue<IRegisterFlowStep> _flowSteps = new();
 	private readonly ILogger<RegisterFlow> _logger;
 
 	public string? CurrentStep => _flowSteps.Count == 0 ? null : _flowSteps.Peek().Type;
@@ -70,7 +70,9 @@ internal class RegisterFlow : IRegisterFlowStep
 		{
 			_ = _flowSteps.Dequeue();
 
-			var isCompleted = await ConfirmCompletedAsync(locationInfo.PlayerCode).ConfigureAwait(false);
+			var isCompleted = await ConfirmCompletedAsync(
+				locationInfo.PlayerCode,
+				cancellationToken).ConfigureAwait(false);
 
 			result = result with
 			{

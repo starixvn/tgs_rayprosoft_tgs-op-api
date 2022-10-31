@@ -637,15 +637,13 @@ public class RegisterFlowTests
 				Arg.Is<IImmutableDictionary<PlayerPropertyName, string>>(dict => dict[PlayerPropertyName.AreaCode] == inputData.AreaCode
 					&& dict[PlayerPropertyName.Phone] == inputData.Phone
 					&& dict[PlayerPropertyName.PhoneAuthentication] == true.ToString())))
-			.Do(_ =>
-			{
-				fakePlayerServiceClient.GetPlayerInfoAsync(Arg.Is(locationInfo.PlayerCode))
-					.Returns(new Tgs.PlayerService.Client.PlayerInfo
-					{
-						PlayerCode = locationInfo.PlayerCode,
-						PhoneAuthentication = true
-					});
-			});
+			.Do(_ => fakePlayerServiceClient
+				.GetPlayerInfoAsync(Arg.Is(locationInfo.PlayerCode))
+				.Returns(new Tgs.PlayerService.Client.PlayerInfo
+				{
+					PlayerCode = locationInfo.PlayerCode,
+					PhoneAuthentication = true
+				}));
 
 		_ = await flow.ConfirmCompletedAsync("player1");
 		var actual = await flow.ProcessInputAsync(
@@ -1329,17 +1327,15 @@ public class RegisterFlowTests
 		fakeCommitMailService
 			.When(fake => fake.ExecuteAsync(
 				Arg.Is<CommitInitPlayerEmailCommand>(cmd => cmd.SecurityKey == securityKey)))
-			.Do(_ =>
-			{
-				fakePlayerServiceClient.GetPlayerInfoAsync(Arg.Is(playerCode))
-					.Returns(new Tgs.PlayerService.Client.PlayerInfo
-					{
-						PlayerCode = playerCode,
-						BrandId = brandId,
-						PhoneAuthentication = true,
-						EmailAuthentication = true
-					});
-			});
+			.Do(_ => fakePlayerServiceClient
+				.GetPlayerInfoAsync(Arg.Is(playerCode))
+				.Returns(new Tgs.PlayerService.Client.PlayerInfo
+				{
+					PlayerCode = playerCode,
+					BrandId = brandId,
+					PhoneAuthentication = true,
+					EmailAuthentication = true
+				}));
 
 		_ = await flow.ConfirmCompletedAsync(playerCode);
 		var actual = await flow.ProcessInputAsync(
@@ -1464,16 +1460,14 @@ public class RegisterFlowTests
 		fakeConfirmSetPhoneService
 			.When(fake => fake.ExecuteAsync(
 				Arg.Is<CommitInitPlayerPhoneCommand>(cmd => cmd.SecurityKey == securityKey)))
-			.Do(_ =>
-			{
-				fakePlayerServiceClient.GetPlayerInfoAsync(Arg.Is(playerCode))
-					.Returns(new Tgs.PlayerService.Client.PlayerInfo
-					{
-						PlayerCode = playerCode,
-						BrandId = brandId,
-						PhoneAuthentication = true
-					});
-			});
+			.Do(_ => fakePlayerServiceClient
+				.GetPlayerInfoAsync(Arg.Is(playerCode))
+				.Returns(new Tgs.PlayerService.Client.PlayerInfo
+				{
+					PlayerCode = playerCode,
+					BrandId = brandId,
+					PhoneAuthentication = true
+				}));
 
 		_ = await flow.ConfirmCompletedAsync(playerCode);
 		var actual = await flow.ProcessInputAsync(
@@ -1892,15 +1886,13 @@ public class RegisterFlowTests
 
 		fakeCommitMailService
 			.When(fake => fake.ExecuteAsync(Arg.Any<CommitInitPlayerEmailCommand>()))
-			.Do(_ =>
-			{
-				fakePlayerServiceClient.GetPlayerInfoAsync(Arg.Is(locationInfo.PlayerCode))
-					.Returns(new Tgs.PlayerService.Client.PlayerInfo
-					{
-						PlayerCode = locationInfo.PlayerCode,
-						EmailAuthentication = true
-					});
-			});
+			.Do(_ => fakePlayerServiceClient
+				.GetPlayerInfoAsync(Arg.Is(locationInfo.PlayerCode))
+				.Returns(new Tgs.PlayerService.Client.PlayerInfo
+				{
+					PlayerCode = locationInfo.PlayerCode,
+					EmailAuthentication = true
+				}));
 
 		var actual = await sut.ProcessInputAsync(
 			brandId,

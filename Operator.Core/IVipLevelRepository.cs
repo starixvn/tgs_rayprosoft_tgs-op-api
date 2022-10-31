@@ -8,11 +8,11 @@ namespace TGS.Services.Operator;
 
 public interface IVipLevelRepository
 {
-    ValueTask<int?> GetVipLevelAsync(Guid vipLevelId);
+	ValueTask<int?> GetVipLevelAsync(Guid vipLevelId);
 
-    IAsyncEnumerable<VipRecord> QueryVipLevelsAsync(Guid brandId, Paging<VipRecord> paging);
+	IAsyncEnumerable<VipRecord> QueryVipLevelsAsync(Guid brandId, Paging<VipRecord> paging);
 
-    IAsyncEnumerable<VipRecord> QueryVipLevelsAsync(Guid brandId);
+	IAsyncEnumerable<VipRecord> QueryVipLevelsAsync(Guid brandId);
 
-    ValueTask<int> QueryVipLevelsTotalCountAsync(Guid brandId);
+	ValueTask<int> QueryVipLevelsTotalCountAsync(Guid brandId);
 }

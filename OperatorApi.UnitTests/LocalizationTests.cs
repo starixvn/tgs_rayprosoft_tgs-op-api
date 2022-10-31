@@ -9,18 +9,18 @@ namespace TGS.Tests.OperatorApi.UnitTests;
 [TestFixture]
 public class LocalizationTests
 {
-    [Test]
-    public async Task Get_LocalizationStrings_By_CultureCode()
-    {
-        var fakeSysRepository = Substitute.For<ISysRepository>();
+	[Test]
+	public async Task Get_LocalizationStrings_By_CultureCode()
+	{
+		var fakeSysRepository = Substitute.For<ISysRepository>();
 
-        var sut = new GetAllLocalizationStringsQueryService(fakeSysRepository);
+		var sut = new GetAllLocalizationStringsQueryService(fakeSysRepository);
 
-        var query = new GetAllLocalizationStringsQuery("en-US");
+		var query = new GetAllLocalizationStringsQuery("en-US");
 
 		_ = await sut.GetAsync(query);
 
-        _ = fakeSysRepository.Received(1)
-            .QueryAllLocalizationStringsAsync(Arg.Is(query.CultureCode));
-    }
+		_ = fakeSysRepository.Received(1)
+			.QueryAllLocalizationStringsAsync(Arg.Is(query.CultureCode));
+	}
 }

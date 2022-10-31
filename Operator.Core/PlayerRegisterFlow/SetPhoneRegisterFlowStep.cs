@@ -52,14 +52,13 @@ internal class SetPhoneRegisterFlowStep : IRegisterFlowStep
 	{
 		var request = input.Deserialize<InitPhoneStepInputData>()!;
 
-		if (request.InputType == "Valid")
-			return ProcessValidPhoneAsync(
+		return request.InputType == "Valid"
+			? ProcessValidPhoneAsync(
 				brandId,
 				request.Data.Deserialize<ConfirmPhoneData>()!,
 				locationInfo,
-				cancellationToken);
-		else
-			return ProcessSetPhoneAsync(
+				cancellationToken)
+			: ProcessSetPhoneAsync(
 				brandId,
 				request.Data.Deserialize<PhoneData>()!,
 				locationInfo,

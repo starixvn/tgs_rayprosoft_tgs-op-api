@@ -6,7 +6,7 @@ namespace TGS.Apis.OperatorApi.Models.Messages;
 
 public class PlayerRegisterFlowViewModel
 {
-    public JsonDocument Input { get; set; } = default!;
+	public JsonDocument Input { get; set; } = default!;
 
-    public string Type { get; set; } = default!;
+	public string Type { get; set; } = default!;
 }

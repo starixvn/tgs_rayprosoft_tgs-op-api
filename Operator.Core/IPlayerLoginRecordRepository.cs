@@ -6,9 +6,9 @@ namespace TGS.Services.Operator;
 
 public interface IPlayerLoginRecordRepository
 {
-    ValueTask<LoginRecordInfo> AddPlayerLoginRecordAsync(Guid brandId, string playerCode, PlatformType platformType, string ipAddress);
+	ValueTask<LoginRecordInfo> AddPlayerLoginRecordAsync(Guid brandId, string playerCode, PlatformType platformType, string ipAddress);
 
-    ValueTask DeauthorizePlayerAsync(Guid loginRecordId);
+	ValueTask DeauthorizePlayerAsync(Guid loginRecordId);
 
-    ValueTask<LoginRecordInfo?> GetPlayerLoginRecordAsync(Guid loginRecordId);
+	ValueTask<LoginRecordInfo?> GetPlayerLoginRecordAsync(Guid loginRecordId);
 }

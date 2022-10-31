@@ -1,15 +1,13 @@
-﻿using System.Linq;
-using Microsoft.AspNetCore.Builder;
-using TGS.Apis.OperatorApi.Middlewares;
+﻿using TGS.Apis.OperatorApi.Middlewares;
 
 namespace TGS.Apis.OperatorApi.Extensions;
 
 public static class ApplicationBuilderExtensions
 {
-    public static IApplicationBuilder UseVerifyJwtTokenMiddlewares(this IApplicationBuilder app,
-        string[] bypassRouting)
-    {
-        var bypass = bypassRouting.Concat(new[] { "/api/auth" }).Distinct().ToArray();
+	public static IApplicationBuilder UseVerifyJwtTokenMiddlewares(this IApplicationBuilder app,
+		string[] bypassRouting)
+	{
+		var bypass = bypassRouting.Concat(new[] { "/api/auth" }).Distinct().ToArray();
 
 		_ = app.UseWhen(context => bypass.All(r => !context.Request.Path.StartsWithSegments(r)),
 			builder => builder
@@ -17,6 +15,6 @@ public static class ApplicationBuilderExtensions
 				.UseMiddleware<MaintenanceMiddleware>()
 				.UseMiddleware<VerifyPlayerTokenMiddleware>());
 
-        return app;
-    }
+		return app;
+	}
 }

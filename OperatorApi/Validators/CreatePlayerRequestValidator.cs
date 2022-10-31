@@ -6,8 +6,8 @@ namespace TGS.Apis.OperatorApi.Validators;
 
 public sealed class CreatePlayerRequestValidator : AbstractValidator<CreatePlayerRequest>
 {
-    public CreatePlayerRequestValidator()
-    {
+	public CreatePlayerRequestValidator()
+	{
 		_ = RuleFor(x => x.UserName)
 			.NotEmpty()
 			.Length(6, 32)
@@ -16,5 +16,5 @@ public sealed class CreatePlayerRequestValidator : AbstractValidator<CreatePlaye
 		_ = RuleFor(x => x.Password)
 			.NotEmpty()
 			.Length(6, 20);
-    }
+	}
 }

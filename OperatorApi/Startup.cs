@@ -1,16 +1,8 @@
-using System;
-using System.IO;
-using System.Linq;
-using System.Net;
+﻿using System.Net;
 using System.Reflection;
 using FluentValidation.AspNetCore;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using OpenTelemetry.Exporter;
@@ -49,15 +41,13 @@ namespace TGS.Apis.OperatorApi;
 public sealed class Startup
 {
 	private readonly IConfiguration _configuration;
-	private readonly IWebHostEnvironment _env;
 
-	public Startup(IConfiguration configuration, IWebHostEnvironment env)
+	public Startup(IConfiguration configuration)
 	{
 		_configuration = configuration;
-		_env = env;
 	}
 
-	public void Configure(IApplicationBuilder app, ILogger<Startup> logger)
+	public void Configure(IApplicationBuilder app)
 	{
 		_ = app.UseForwardedHeaders();
 		_ = app.UseRequestLocalization(options =>
@@ -184,10 +174,8 @@ public sealed class Startup
 
 		_ = services
 			.AddOperatorApiCore()
-			.ConfigureOperatorOptions<IConfiguration>((options, config) =>
-			{
-				config.GetSection("Operator").Bind(options);
-			})
+			.ConfigureOperatorOptions<IConfiguration>((options, config) => config
+				.GetSection("Operator").Bind(options))
 			.UseOperatorRepositories(sp
 				=> sp.GetRequiredService<IRedisConnectionFactory>().GetConnection().GetDatabase())
 			.ConfigureWallet((options, sp) =>
@@ -217,27 +205,22 @@ public sealed class Startup
 
 		_ = services
 			.AddMessageQueue()
-			.AddNatsMessageQueue(natsConfig =>
-			{
-				_ = natsConfig
-					.ConfigQueueOptions((options, sp) =>
-					{
-						var config = sp.GetRequiredService<IConfiguration>();
+			.AddNatsMessageQueue(natsConfig => natsConfig
+				.ConfigQueueOptions((options, sp) =>
+				{
+					var config = sp.GetRequiredService<IConfiguration>();
 
-						options.Url = config.GetValue<string>("NatsSetting:Urls");
-					})
-					.AddHandler(
-						ProcessorTypes.BrandFrontendInfoChangedEventHandlerType,
-						"tgs.brand.frontendinfo.changed");
-			})
+					options.Url = config.GetValue<string>("NatsSetting:Urls");
+				})
+				.AddHandler(
+					ProcessorTypes.BrandFrontendInfoChangedEventHandlerType,
+					"tgs.brand.frontendinfo.changed"))
 			.AddNatsGlobPatternExchange("*");
 
 		_ = services
 			.AddOptions<ConstValidateCodeOptions>()
-			.Configure<IConfiguration>((options, config) =>
-			{
-				config.GetSection("Operator").Bind(options);
-			})
+			.Configure<IConfiguration>((options, config) => config
+				.GetSection("Operator").Bind(options))
 			.Services
 			.Decorate<IValidateCodeGenerator, ConstValidateCodeGenerator>();
 
@@ -264,10 +247,8 @@ public sealed class Startup
 				_ = c.RegisterValidatorsFromAssemblyContaining<Startup>(lifetime: ServiceLifetime.Scoped);
 				c.DisableDataAnnotationsValidation = true;
 			})
-			.AddJsonOptions(jsonOptions =>
-			{
-				jsonOptions.JsonSerializerOptions.Converters.Add(new DateOnlyConverter());
-			});
+			.AddJsonOptions(jsonOptions => jsonOptions
+				.JsonSerializerOptions.Converters.Add(new DateOnlyConverter()));
 
 		_ = services.AddHttpClient<IEmailClient, EmailClient>((sp, c) =>
 		{
@@ -299,25 +280,17 @@ public sealed class Startup
 					.AddSource("TGS.*")
 					.AddAspNetCoreInstrumentation()
 					.AddHttpClientInstrumentation()
-					.AddEntityFrameworkCoreInstrumentation(options =>
-					{
-						options.SetDbStatementForText = true;
-					})
+					.AddEntityFrameworkCoreInstrumentation(options => options.SetDbStatementForText = true)
 					.AddProfileViewExporter()
 					.AddOtlpExporter())
-			.Configure<AspNetCoreInstrumentationOptions>(options =>
-			{
-				options.Filter = httpContext =>
-				{
-					return !httpContext.Request.Path.HasValue
-						|| !httpContext.Request.Path.StartsWithSegments("/swagger")
-						&& !httpContext.Request.Path.StartsWithSegments("/health")
-						&& !httpContext.Request.Path.StartsWithSegments("/profiler/")
-						&& !httpContext.Request.Path.StartsWithSegments("/metrics")
-						&& !new[] { "html", "ico", "png", "jpg" }.Any(
-							ext => httpContext.Request.Path.Value.EndsWith($".{ext}"));
-				};
-			});
+			.Configure<AspNetCoreInstrumentationOptions>(options => options.Filter =
+				httpContext => !httpContext.Request.Path.HasValue
+					|| !httpContext.Request.Path.StartsWithSegments("/swagger")
+					&& !httpContext.Request.Path.StartsWithSegments("/health")
+					&& !httpContext.Request.Path.StartsWithSegments("/profiler/")
+					&& !httpContext.Request.Path.StartsWithSegments("/metrics")
+					&& !new[] { "html", "ico", "png", "jpg" }.Any(
+						ext => httpContext.Request.Path.Value.EndsWith($".{ext}")));
 
 		_ = services.AddProfileViewer();
 
@@ -352,13 +325,11 @@ public sealed class Startup
 			var corsDomain = _configuration.GetSection("CorsDomain").Get<CorsDomain>();
 
 			options.AddDefaultPolicy(
-				builder =>
-				{
-					_ = builder.WithOrigins(corsDomain.Urls)
-						.AllowAnyHeader()
-						.AllowAnyMethod()
-						.SetIsOriginAllowed(_ => true);
-				});
+				builder => builder
+					.WithOrigins(corsDomain.Urls)
+					.AllowAnyHeader()
+					.AllowAnyMethod()
+					.SetIsOriginAllowed(_ => true));
 		});
 	}
 }

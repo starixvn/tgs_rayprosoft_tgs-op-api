@@ -15,14 +15,14 @@ namespace TGS.Tests.OperatorApi.UnitTests;
 [TestFixture]
 public class PaymentTests
 {
-    [Test]
-    public async Task Get_Payment_Channels_Should_Success()
-    {
-        var moqPaymentServiceClient = new Mock<IPaymentServiceClient>();
+	[Test]
+	public async Task Get_Payment_Channels_Should_Success()
+	{
+		var moqPaymentServiceClient = new Mock<IPaymentServiceClient>();
 
-        var sut = new AllPaymentChannelsQueryService(moqPaymentServiceClient.Object);
+		var sut = new AllPaymentChannelsQueryService(moqPaymentServiceClient.Object);
 
-        var query = new AllPaymentChannelsQuery();
+		var query = new AllPaymentChannelsQuery();
 
 		_ = moqPaymentServiceClient
 			.Setup(fake => fake.GetAllPaymentChannelsAsync(It.IsAny<CancellationToken>()))
@@ -39,21 +39,21 @@ public class PaymentTests
 				}
 			}.ToAsyncEnumerable());
 
-        _ = await sut.GetAsync(query);
+		_ = await sut.GetAsync(query);
 
-        moqPaymentServiceClient.Verify(
-            fake => fake.GetAllPaymentChannelsAsync(It.IsAny<CancellationToken>()),
-            Times.Exactly(1));
-    }
+		moqPaymentServiceClient.Verify(
+			fake => fake.GetAllPaymentChannelsAsync(It.IsAny<CancellationToken>()),
+			Times.Exactly(1));
+	}
 
-    [Test]
-    public async Task Get_Payment_Methods_Should_Success()
-    {
-        var moqPaymentServiceClient = new Mock<IPaymentServiceClient>();
+	[Test]
+	public async Task Get_Payment_Methods_Should_Success()
+	{
+		var moqPaymentServiceClient = new Mock<IPaymentServiceClient>();
 
-        var sut = new AllPaymentMethodsQueryService(moqPaymentServiceClient.Object);
+		var sut = new AllPaymentMethodsQueryService(moqPaymentServiceClient.Object);
 
-        var query = new AllPaymentMethodsQuery();
+		var query = new AllPaymentMethodsQuery();
 
 		_ = moqPaymentServiceClient
 			.Setup(fake => fake.GetAllPaymentMethodsAsync(It.IsAny<CancellationToken>()))
@@ -72,64 +72,64 @@ public class PaymentTests
 				}
 			}.ToAsyncEnumerable());
 
-        _ = await sut.GetAsync(query);
+		_ = await sut.GetAsync(query);
 
-        moqPaymentServiceClient.Verify(
-            fake => fake.GetAllPaymentMethodsAsync(It.IsAny<CancellationToken>()),
-            Times.Exactly(1));
-    }
+		moqPaymentServiceClient.Verify(
+			fake => fake.GetAllPaymentMethodsAsync(It.IsAny<CancellationToken>()),
+			Times.Exactly(1));
+	}
 
-    [Test]
-    public async Task User_Can_Get_PaymentInfo()
-    {
-        var moqPaymentServiceClient = new Mock<IPaymentServiceClient>();
+	[Test]
+	public async Task User_Can_Get_PaymentInfo()
+	{
+		var moqPaymentServiceClient = new Mock<IPaymentServiceClient>();
 
-        var sut = new GetPaymentQueryService(moqPaymentServiceClient.Object);
+		var sut = new GetPaymentQueryService(moqPaymentServiceClient.Object);
 
-        var paymentId = Guid.NewGuid();
+		var paymentId = Guid.NewGuid();
 
-        var query = new GetPaymentQuery(paymentId);
+		var query = new GetPaymentQuery(paymentId);
 
-        _ = await sut.GetAsync(query);
+		_ = await sut.GetAsync(query);
 
-        moqPaymentServiceClient.Verify(
-            fake => fake.GetPaymentByIdAsync(
-                It.Is<Guid>(x => x == paymentId),
-                It.IsAny<CancellationToken>()),
-            Times.Exactly(1));
-    }
+		moqPaymentServiceClient.Verify(
+			fake => fake.GetPaymentByIdAsync(
+				It.Is<Guid>(x => x == paymentId),
+				It.IsAny<CancellationToken>()),
+			Times.Exactly(1));
+	}
 
-    [Test]
-    public async Task User_Can_List_Available_BrandPayments()
-    {
-        var fakePaymentServiceClient = Substitute.For<IPaymentServiceClient>();
-        var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
+	[Test]
+	public async Task User_Can_List_Available_BrandPayments()
+	{
+		var fakePaymentServiceClient = Substitute.For<IPaymentServiceClient>();
+		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
 
-        var sut = new BrandPaymentsQueryService(fakePaymentServiceClient, fakePlayerServiceClient);
+		var sut = new BrandPaymentsQueryService(fakePaymentServiceClient, fakePlayerServiceClient);
 
-        var brandId = Guid.NewGuid();
-        var playerCode = "ThisIsPlayerCode";
+		var brandId = Guid.NewGuid();
+		var playerCode = "ThisIsPlayerCode";
 
-        var query = new BrandPaymentsQuery(brandId, playerCode);
+		var query = new BrandPaymentsQuery(brandId, playerCode);
 
 		_ = fakePaymentServiceClient
 			.GetBrandPaymentAclsAsync(Arg.Any<string>(), Arg.Any<IEnumerable<Guid>>())
 			.Returns(Array.Empty<BrandPaymentAcl>().ToAsyncEnumerable());
 
-        var playerInfo = new Tgs.PlayerService.Client.PlayerInfo
-        {
-            BrandId = brandId,
-            PlayerCode = playerCode,
-            IdentityAuthentication = false,
-            PhoneAuthentication = false,
-            VipLevelId = null
-        };
+		var playerInfo = new Tgs.PlayerService.Client.PlayerInfo
+		{
+			BrandId = brandId,
+			PlayerCode = playerCode,
+			IdentityAuthentication = false,
+			PhoneAuthentication = false,
+			VipLevelId = null
+		};
 
 		_ = fakePlayerServiceClient
 			.GetPlayerInfoAsync(query.PlayerCode)
 			.Returns(playerInfo);
 
-        _ = await sut.QueryAsync(query).ToArrayAsync();
+		_ = await sut.QueryAsync(query).ToArrayAsync();
 
 		_ = fakePaymentServiceClient
 			.Received(1)
@@ -143,5 +143,5 @@ public class PaymentTests
 				Arg.Any<IEnumerable<Guid>>(),
 				Arg.Any<IEnumerable<Guid>>(),
 				Arg.Any<ILookup<Guid, Guid>>());
-    }
+	}
 }

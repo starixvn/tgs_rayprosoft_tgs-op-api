@@ -3,5 +3,5 @@
 namespace TGS.Services.Operator.ApplicationServices.Withdraw;
 
 public record DeleteBankInfoCommand(
-    string PlayerCode,
-    Guid BankInfoId);
+	string PlayerCode,
+	Guid BankInfoId);

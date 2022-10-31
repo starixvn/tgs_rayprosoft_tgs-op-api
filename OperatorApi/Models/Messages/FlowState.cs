@@ -2,11 +2,11 @@
 
 public enum FlowState
 {
-    Unknown = 0,
-    WaitingPayment,
-    Review,
-    Approved,
-    Rejected,
-    WaitingPaid,
-    Paid
+	Unknown = 0,
+	WaitingPayment,
+	Review,
+	Approved,
+	Rejected,
+	WaitingPaid,
+	Paid
 }

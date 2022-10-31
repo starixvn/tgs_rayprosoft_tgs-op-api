@@ -4,6 +4,6 @@ namespace TGS.Apis.OperatorApi.Models.Messages;
 
 public class SetViberIdRequest
 {
-    [JsonPropertyName("viber")]
-    public string ViberId { get; init; }
+	[JsonPropertyName("viber")]
+	public string ViberId { get; init; }
 }

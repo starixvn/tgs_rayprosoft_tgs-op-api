@@ -6,8 +6,8 @@ namespace TGS.Apis.OperatorApi.Validators;
 
 public sealed class LoginRequestValidators : BaseUserRequestValidator<LoginRequest>
 {
-    public LoginRequestValidators()
-    {
+	public LoginRequestValidators()
+	{
 		_ = RuleFor(x => x.Password)
 			.NotEmpty()
 			.WithName(x => x
@@ -20,5 +20,5 @@ public sealed class LoginRequestValidators : BaseUserRequestValidator<LoginReque
 				"{0} does not exist",
 				x.WithPropertyExpression(o => o.PlatformType)
 					.GetJsonPropertyName(nameof(x.PlatformType))));
-    }
+	}
 }

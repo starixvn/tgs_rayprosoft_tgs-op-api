@@ -10,28 +10,27 @@ namespace TGS.Services.Operator.ApplicationServices.BrandLiveChat;
 
 internal class GetBrandLiveChatQueryService : IGetService<BrandLiveChatQuery, BrandLiveChatInfo?>
 {
-    private readonly ITgsRepository _tgsRepository;
+	private readonly ITgsRepository _tgsRepository;
 
-    public GetBrandLiveChatQueryService(ITgsRepository tgsRepository)
-    {
-        _tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
-    }
+	public GetBrandLiveChatQueryService(ITgsRepository tgsRepository)
+	{
+		_tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
+	}
 
-    public async ValueTask<BrandLiveChatInfo?> GetAsync(
-        BrandLiveChatQuery query,
-        CancellationToken cancellationToken = default)
-    {
-        var brandLiveChat = await _tgsRepository.BrandLiveChats
-            .FirstOrDefaultAsync(x => x.BrandId == query.BrandId);
-        if (brandLiveChat == null)
-        {
-            return null;
-        }
+	public async ValueTask<BrandLiveChatInfo?> GetAsync(
+		BrandLiveChatQuery query,
+		CancellationToken cancellationToken = default)
+	{
+		var brandLiveChat = await _tgsRepository.BrandLiveChats
+			.FirstOrDefaultAsync(x => x.BrandId == query.BrandId, cancellationToken: cancellationToken)
+			.ConfigureAwait(false);
 
-        return new BrandLiveChatInfo()
-        {
-            Name = brandLiveChat.ChatName,
-            Setting = brandLiveChat.ChatSetting
-        };
-    }
+		return brandLiveChat == null
+			? null
+			: new BrandLiveChatInfo()
+			{
+				Name = brandLiveChat.ChatName,
+				Setting = brandLiveChat.ChatSetting
+			};
+	}
 }

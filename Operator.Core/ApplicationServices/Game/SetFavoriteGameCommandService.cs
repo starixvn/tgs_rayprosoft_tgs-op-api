@@ -9,32 +9,32 @@ namespace TGS.Services.Operator.ApplicationServices.Game;
 
 internal class SetFavoriteGameCommandService : ICommandService<SetFavoriteGameCommand>
 {
-    private readonly IGameProviderRepository _gameProviderRepository;
+	private readonly IGameProviderRepository _gameProviderRepository;
 
-    public SetFavoriteGameCommandService(
-        IGameProviderRepository gameProviderRepository)
-    {
-        _gameProviderRepository = gameProviderRepository ?? throw new ArgumentNullException(nameof(gameProviderRepository));
-    }
+	public SetFavoriteGameCommandService(
+		IGameProviderRepository gameProviderRepository)
+	{
+		_gameProviderRepository = gameProviderRepository ?? throw new ArgumentNullException(nameof(gameProviderRepository));
+	}
 
-    public async ValueTask ExecuteAsync(SetFavoriteGameCommand command, CancellationToken cancellationToken = default)
-    {
-        var gameInfo = await _gameProviderRepository.QueryAllGamesAsync(command.BrandId)
-            .Where(g => g.Id == command.GameId)
-            .FirstOrDefaultAsync()
-            .ConfigureAwait(false);
+	public async ValueTask ExecuteAsync(SetFavoriteGameCommand command, CancellationToken cancellationToken = default)
+	{
+		var gameInfo = await _gameProviderRepository.QueryAllGamesAsync(command.BrandId)
+			.Where(g => g.Id == command.GameId)
+			.FirstOrDefaultAsync(cancellationToken: cancellationToken)
+			.ConfigureAwait(false);
 
-        if (gameInfo == null)
-            return;
+		if (gameInfo == null)
+			return;
 
-        var favoriteInfo = new FavoriteGameInfo(
-            command.PlayerCode,
-            gameInfo.Id,
-            gameInfo.Type,
-            gameInfo.SubGpCode);
+		var favoriteInfo = new FavoriteGameInfo(
+			command.PlayerCode,
+			gameInfo.Id,
+			gameInfo.Type,
+			gameInfo.SubGpCode);
 
-        await _gameProviderRepository
-            .AddFavoriteGameAsync(command.BrandId, favoriteInfo)
-            .ConfigureAwait(false);
-    }
+		await _gameProviderRepository
+			.AddFavoriteGameAsync(command.BrandId, favoriteInfo)
+			.ConfigureAwait(false);
+	}
 }

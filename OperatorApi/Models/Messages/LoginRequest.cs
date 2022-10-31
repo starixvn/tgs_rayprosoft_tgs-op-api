@@ -6,11 +6,11 @@ namespace TGS.Apis.OperatorApi.Models.Messages;
 
 public record LoginRequest : BaseUserRequest
 {
-    [Required]
-    [JsonPropertyName("password")]
-    public string Password { get; init; }
+	[Required]
+	[JsonPropertyName("password")]
+	public string Password { get; init; }
 
-    [Required]
-    [JsonPropertyName("platformtype")]
-    public PlatformType PlatformType { get; init; }
+	[Required]
+	[JsonPropertyName("platformtype")]
+	public PlatformType PlatformType { get; init; }
 }

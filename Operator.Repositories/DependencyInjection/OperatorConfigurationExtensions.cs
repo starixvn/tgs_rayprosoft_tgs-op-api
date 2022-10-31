@@ -10,9 +10,9 @@ namespace Microsoft.Extensions.DependencyInjection;
 
 public static class OperatorConfigurationExtensions
 {
-    public static OperatorConfiguration UseOperatorRepositories(this OperatorConfiguration configuration,
-        Func<IServiceProvider, IDatabase> redisDatabaseResolver)
-    {
+	public static OperatorConfiguration UseOperatorRepositories(this OperatorConfiguration configuration,
+		Func<IServiceProvider, IDatabase> redisDatabaseResolver)
+	{
 		_ = configuration.Services
 			.AddSingleton<RedisConnectionFactory>();
 
@@ -23,16 +23,16 @@ public static class OperatorConfigurationExtensions
 			.AddTransient<IPlayerOnlineRepository>(sp
 				=> ActivatorUtilities.CreateInstance<PlayerOnlineRepository>(sp, redisDatabaseResolver(sp)));
 
-        return configuration
-            .AddWalletRepository<PlayerRepository>()
-            .AddStationLetterRepository<StationLetterRepository>()
-            .AddGameProviderRepository<GameProviderRepository>()
-            .AddMaintenanceRedisRepository<MaintenanceRedisRepository>()
-            .AddSysRepository<SysRepository>()
-            .AddBrandRepository<BrandRepository>()
-            .AddHelp2PayRedisRepository<Help2PayRedisRepository>(redisDatabaseResolver)
-            .AddVipLevelRepository<VipLevelRepository>()
-            .AddAgentRepository<AgentRepository>()
-            .AddPlayerLoginRecordRepository<PlayerLoginRecordRepository>();
-    }
+		return configuration
+			.AddWalletRepository<PlayerRepository>()
+			.AddStationLetterRepository<StationLetterRepository>()
+			.AddGameProviderRepository<GameProviderRepository>()
+			.AddMaintenanceRedisRepository<MaintenanceRedisRepository>()
+			.AddSysRepository<SysRepository>()
+			.AddBrandRepository<BrandRepository>()
+			.AddHelp2PayRedisRepository<Help2PayRedisRepository>(redisDatabaseResolver)
+			.AddVipLevelRepository<VipLevelRepository>()
+			.AddAgentRepository<AgentRepository>()
+			.AddPlayerLoginRecordRepository<PlayerLoginRecordRepository>();
+	}
 }

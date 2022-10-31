@@ -1,6 +1,4 @@
 ﻿using System.Globalization;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Tgs.ServiceUtility;
 using TGS.Apis.OperatorApi.Attributes;
@@ -14,45 +12,45 @@ namespace TGS.Apis.OperatorApi.Controllers;
 [ApiController]
 public class PayPasswordController : ControllerBase
 {
-    [HttpPatch]
-    [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-    public ValueTask ChangePayPasswordAsync(
-        [FromServices] ICommandService<ChangePayPasswordCommand> changePayPasswordService,
-        ChangePayPasswordRequest request)
-    {
-        var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+	[HttpPatch]
+	[AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+	public ValueTask ChangePayPasswordAsync(
+		[FromServices] ICommandService<ChangePayPasswordCommand> changePayPasswordService,
+		ChangePayPasswordRequest request)
+	{
+		var playerTokenData = HttpContext.Items.GetPlayerTokenData();
 
-        var command = new ChangePayPasswordCommand(
-            playerTokenData.PlayerCode,
-            request.NewPassword,
-            request.ValidateCode,
-            request.SecurityKey);
+		var command = new ChangePayPasswordCommand(
+			playerTokenData.PlayerCode,
+			request.NewPassword,
+			request.ValidateCode,
+			request.SecurityKey);
 
-        return changePayPasswordService.ExecuteAsync(command);
-    }
+		return changePayPasswordService.ExecuteAsync(command);
+	}
 
-    [HttpPost]
-    [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-    public async Task SetPayPasswordAsync(
-        [FromServices] ICommandService<SetFirstPayPasswordCommand> setPayPasswordService,
-        [FromBody] SetPayPasswordRequest request)
-    {
-        var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+	[HttpPost]
+	[AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+	public async Task SetPayPasswordAsync(
+		[FromServices] ICommandService<SetFirstPayPasswordCommand> setPayPasswordService,
+		[FromBody] SetPayPasswordRequest request)
+	{
+		var playerTokenData = HttpContext.Items.GetPlayerTokenData();
 
-        var command = new SetFirstPayPasswordCommand(playerTokenData.PlayerCode, request.Password);
+		var command = new SetFirstPayPasswordCommand(playerTokenData.PlayerCode, request.Password);
 
-        await setPayPasswordService.ExecuteAsync(command).ConfigureAwait(false);
-    }
+		await setPayPasswordService.ExecuteAsync(command).ConfigureAwait(false);
+	}
 
-    [HttpPost("validate-code")]
-    [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-    public ValueTask<string> StartChangePayPasswordAsync(
-        [FromServices] IGetService<StartChangePayPasswordCommand, string> startChangePayPasswordService)
-    {
-        var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+	[HttpPost("validate-code")]
+	[AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+	public ValueTask<string> StartChangePayPasswordAsync(
+		[FromServices] IGetService<StartChangePayPasswordCommand, string> startChangePayPasswordService)
+	{
+		var playerTokenData = HttpContext.Items.GetPlayerTokenData();
 
-        var command = new StartChangePayPasswordCommand(playerTokenData.PlayerCode, CultureInfo.CurrentUICulture);
+		var command = new StartChangePayPasswordCommand(playerTokenData.PlayerCode, CultureInfo.CurrentUICulture);
 
-        return startChangePayPasswordService.GetAsync(command);
-    }
+		return startChangePayPasswordService.GetAsync(command);
+	}
 }

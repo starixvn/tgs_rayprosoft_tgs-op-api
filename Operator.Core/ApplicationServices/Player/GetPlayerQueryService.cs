@@ -11,64 +11,61 @@ namespace TGS.Services.Operator.ApplicationServices.Player;
 
 internal class GetPlayerQueryService : IGetService<GetPlayerQuery, PlayerInfo>
 {
-    private readonly IBrandServiceClient _brandServiceClient;
-    private readonly IPlayerRepository _playerRepository;
-    private readonly IPlayerServiceClient _playerServiceClient;
+	private readonly IBrandServiceClient _brandServiceClient;
+	private readonly IPlayerServiceClient _playerServiceClient;
 
-    public GetPlayerQueryService(
-        IPlayerRepository playerRepository,
-        IPlayerServiceClient playerServiceClient,
-        IBrandServiceClient brandServiceClient)
-    {
-        _playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
-        _playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
-        _brandServiceClient = brandServiceClient ?? throw new ArgumentNullException(nameof(brandServiceClient));
-    }
+	public GetPlayerQueryService(
+		IPlayerServiceClient playerServiceClient,
+		IBrandServiceClient brandServiceClient)
+	{
+		_playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
+		_brandServiceClient = brandServiceClient ?? throw new ArgumentNullException(nameof(brandServiceClient));
+	}
 
-    public async ValueTask<PlayerInfo> GetAsync(
-        GetPlayerQuery query,
-        CancellationToken cancellationToken = default)
-    {
-        var player = await _playerServiceClient
-            .GetPlayerInfoAsync(query.PlayerCode, cancellationToken)
-            .ConfigureAwait(false);
+	public async ValueTask<PlayerInfo> GetAsync(
+		GetPlayerQuery query,
+		CancellationToken cancellationToken = default)
+	{
+		var player = await _playerServiceClient
+			.GetPlayerInfoAsync(query.PlayerCode, cancellationToken)
+			.ConfigureAwait(false);
 
-        if (player is null)
-            throw new PlayerNotFoundException("Player not found.");
+		if (player is null)
+			throw new PlayerNotFoundException("Player not found.");
 
-        var playerProperties = await _playerServiceClient
-            .GetPlayerPropertiesAsync(query.PlayerCode, cancellationToken)
-            .ConfigureAwait(false);
+		var playerProperties = await _playerServiceClient
+			.GetPlayerPropertiesAsync(query.PlayerCode, cancellationToken)
+			.ConfigureAwait(false);
 
-        var depositedAmount = await _playerServiceClient
-            .GetPlayerDepositedAmountAsync(query.PlayerCode, cancellationToken)
-            .ConfigureAwait(false);
+		var depositedAmount = await _playerServiceClient
+			.GetPlayerDepositedAmountAsync(query.PlayerCode, cancellationToken)
+			.ConfigureAwait(false);
 
-        var brandVipLevels = await _brandServiceClient
-            .GetVipLevelInfosAsync(player.BrandId, cancellationToken)
-            .ToDictionaryAsync(info => info.Id, info => info.Level)
-            .ConfigureAwait(false);
+		var brandVipLevels = await _brandServiceClient
+			.GetVipLevelInfosAsync(player.BrandId, cancellationToken)
+			.ToDictionaryAsync(info => info.Id, info => info.Level, cancellationToken: cancellationToken)
+			.ConfigureAwait(false);
 
-        var playerStatus = await _playerServiceClient
-            .GetPlayerStatusAsync(query.PlayerCode, cancellationToken)
-            .ConfigureAwait(false);
+		var playerStatus = await _playerServiceClient
+			.GetPlayerStatusAsync(query.PlayerCode, cancellationToken)
+			.ConfigureAwait(false);
 
-        return new PlayerInfo(
-            player.PlayerCode,
-            player.BrandId,
-            depositedAmount,
-            player.IdentityAuthentication,
-            player.PhoneAuthentication,
-            playerProperties.GetValueOrDefault("Phone"),
-            playerProperties.GetValueOrDefault("AreaCode"),
-            player.VipLevelId,
-            playerStatus,
-            player.UserName,
-            playerProperties["RealName"],
-            playerProperties["Email"],
-            player.VipLevelId is null ? 1 : brandVipLevels.GetValueOrDefault(player.VipLevelId.Value),
-            playerProperties.GetValueOrDefault("QQ"),
-            playerProperties.GetValueOrDefault("Wechat"),
-            player.IsSetPayPassword);
-    }
+		return new PlayerInfo(
+			player.PlayerCode,
+			player.BrandId,
+			depositedAmount,
+			player.IdentityAuthentication,
+			player.PhoneAuthentication,
+			playerProperties.GetValueOrDefault("Phone"),
+			playerProperties.GetValueOrDefault("AreaCode"),
+			player.VipLevelId,
+			playerStatus,
+			player.UserName,
+			playerProperties["RealName"],
+			playerProperties["Email"],
+			player.VipLevelId is null ? 1 : brandVipLevels.GetValueOrDefault(player.VipLevelId.Value),
+			playerProperties.GetValueOrDefault("QQ"),
+			playerProperties.GetValueOrDefault("Wechat"),
+			player.IsSetPayPassword);
+	}
 }

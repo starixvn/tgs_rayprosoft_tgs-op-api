@@ -2,5 +2,5 @@
 
 public class SoutheastAsiaIdentityVerifier : IIdentityVerifier
 {
-    public bool Verify(string id) => true;
+	public bool Verify(string id) => true;
 }

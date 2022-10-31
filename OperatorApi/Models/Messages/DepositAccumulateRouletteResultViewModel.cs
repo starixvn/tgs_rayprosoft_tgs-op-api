@@ -4,6 +4,6 @@ namespace TGS.Apis.OperatorApi.Models.Messages;
 
 public class DepositAccumulateRouletteResultViewModel
 {
-    [JsonPropertyName("itemindex")]
-    public int ItemIndex { get; init; }
+	[JsonPropertyName("itemindex")]
+	public int ItemIndex { get; init; }
 }

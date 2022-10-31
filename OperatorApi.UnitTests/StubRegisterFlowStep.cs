@@ -11,7 +11,7 @@ public class StubRegisterFlowStep : IRegisterFlowStep
 {
 	private Func<string, bool> _confirmCompletedDelegate = _ => false;
 
-	private Func<Guid, JsonDocument, PlayerLocationInfo, Task<RegisterFlowProcessResult>> _ProcessInputDelegate =
+	private Func<Guid, JsonDocument, PlayerLocationInfo, Task<RegisterFlowProcessResult>> _processInputDelegate =
 		(_, _, _) => Task.FromResult(new RegisterFlowProcessResult(false, null, null));
 
 	public bool IsAuto { get; set; } = false;
@@ -19,18 +19,18 @@ public class StubRegisterFlowStep : IRegisterFlowStep
 	public string Type { get; set; }
 
 	public ValueTask<bool> ConfirmCompletedAsync(string playerCode, CancellationToken cancellationToken = default)
-		=> new ValueTask<bool>(_confirmCompletedDelegate(playerCode));
+		=> ValueTask.FromResult(_confirmCompletedDelegate(playerCode));
 
 	public async ValueTask<RegisterFlowProcessResult> ProcessInputAsync(
 		Guid brandId,
 		JsonDocument input,
 		PlayerLocationInfo locationInfo,
 		CancellationToken cancellationToken = default)
-		=> await _ProcessInputDelegate(brandId, input, locationInfo).ConfigureAwait(false);
+		=> await _processInputDelegate(brandId, input, locationInfo).ConfigureAwait(false);
 
 	internal void SetConfirmCompletedDelegate(Func<string, bool> confirmCompletedDelegate)
 		=> _confirmCompletedDelegate = confirmCompletedDelegate;
 
 	internal void SetProcessInputDelegate(Func<Guid, JsonDocument, PlayerLocationInfo, Task<RegisterFlowProcessResult>> processInputDelegate)
-		=> _ProcessInputDelegate = processInputDelegate;
+		=> _processInputDelegate = processInputDelegate;
 }

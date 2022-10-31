@@ -11,121 +11,121 @@ namespace TGS.Services.Operations.Queries;
 
 public interface IRoundQueries
 {
-    ValueTask<Round> GetRoundByRoundIdAsync(Guid roundId, bool includeGameActions = false,
-        bool includeRoundDetail = false);
+	ValueTask<Round> GetRoundByRoundIdAsync(Guid roundId, bool includeGameActions = false,
+		bool includeRoundDetail = false);
 
-    ValueTask<RoundWithGameActionExternalIds[]> GetRoundWithGameActionExternalIdsAsync(Guid gameProviderId,
-        DateTimeOffset start, DateTimeOffset end, RoundStatus? roundStatus = RoundStatus.Closed,
-        GameType? gameType = null);
+	ValueTask<(RoundStatus RoundStatus, int GameId)?> GetRoundStatusAndGameIdAsync(Guid gameProviderId,
+		string playerCode, string externalRoundId, string externalTransactionId);
 
-    ValueTask<(RoundStatus RoundStatus, int GameId)?> GetRoundStatusAndGameIdAsync(Guid gameProviderId,
-        string playerCode, string externalRoundId, string externalTransactionId);
+	ValueTask<RoundStatus?> GetRoundStatusAsync(Guid gameProviderId, string playerCode, string externalRoundId,
+		int gameId);
 
-    ValueTask<RoundStatus?> GetRoundStatusAsync(Guid gameProviderId, string playerCode, string externalRoundId,
-        int gameId);
+	ValueTask<RoundWithGameActionExternalIds[]> GetRoundWithGameActionExternalIdsAsync(Guid gameProviderId,
+				DateTimeOffset start, DateTimeOffset end, RoundStatus? roundStatus = RoundStatus.Closed,
+		GameType? gameType = null);
 }
 
 public sealed class RoundQueries : IRoundQueries
 {
-    private readonly ITgsRepository _repository;
+	private readonly ITgsRepository _repository;
 
-    public RoundQueries(ITgsRepository repository)
-    {
-        _repository = repository;
-    }
+	public RoundQueries(ITgsRepository repository)
+	{
+		_repository = repository;
+	}
 
-    async ValueTask<Round> IRoundQueries.GetRoundByRoundIdAsync(Guid roundId, bool includeGameActions,
-        bool includeRoundDetail)
-    {
-        IQueryable<Round> query = _repository.Rounds.Include(r => r.RoundDetail);
+	async ValueTask<Round> IRoundQueries.GetRoundByRoundIdAsync(Guid roundId, bool includeGameActions,
+		bool includeRoundDetail)
+	{
+		IQueryable<Round> query = _repository.Rounds.Include(r => r.RoundDetail);
 
-        if (includeGameActions)
-        {
-            query = query.Include(c => c.GameActions);
-        }
+		if (includeGameActions)
+		{
+			query = query.Include(c => c.GameActions);
+		}
 
-        if (includeRoundDetail)
-        {
-            query = query.Include(c => c.RoundDetail);
-        }
+		if (includeRoundDetail)
+		{
+			query = query.Include(c => c.RoundDetail);
+		}
 
-        return await query.FirstOrDefaultAsync(c => c.Id == roundId).ConfigureAwait(false);
-    }
+		return await query.FirstOrDefaultAsync(c => c.Id == roundId).ConfigureAwait(false);
+	}
 
-    async ValueTask<RoundWithGameActionExternalIds[]> IRoundQueries.GetRoundWithGameActionExternalIdsAsync(
-        Guid gameProviderId, DateTimeOffset start, DateTimeOffset end, RoundStatus? roundStatus, GameType? gameType)
-    {
-        var query = _repository.Rounds
-            .Where(r => r.GameProviderId == gameProviderId &&
-                r.CreatedOn >= start && r.CreatedOn <= end &&
-                r.Status == roundStatus)
-            .Include(r => r.GameActions)
-            .Join(_repository.Games, r => r.GameId, g => g.Id, (r, g) => new
-            {
-                Round = r,
-                Game = g
-            });
+	async ValueTask<(RoundStatus RoundStatus, int GameId)?> IRoundQueries.
+		GetRoundStatusAndGameIdAsync(
+		Guid gameProviderId,
+		string playerCode,
+		string externalRoundId,
+		string externalTransactionId)
+	{
+		var data = await (from ga in _repository.GameActions
+						  let r = ga.Round
+						  where r.GameProviderId == gameProviderId &&
+							  r.PlayerCode == playerCode &&
+							  r.ExternalRoundId == externalRoundId &&
+							  ga.ExternalTransactionId == externalTransactionId
+						  select new
+						  {
+							  r.Status,
+							  r.GameId
+						  }).FirstOrDefaultAsync().ConfigureAwait(false);
 
-        if (gameType.HasValue)
-        {
-            query = query.Where(a => a.Game.Type == gameType);
-        }
+		return data == null ? null : (data.Status, data.GameId);
+	}
 
-        return await query.Select(a => new RoundWithGameActionExternalIds
-        {
-            Id = a.Round.Id,
-            PlayerCode = a.Round.PlayerCode,
-            CurrencyCode = a.Round.CurrencyCode,
-            ExternalRoundId = a.Round.ExternalRoundId,
-            GameId = a.Game.Id,
-            ExternalGameId = a.Game.ExternalId,
-            Status = a.Round.Status,
-            ExternalCreatedOn = a.Round.ExternalCreatedOn ?? a.Round.CreatedOn,
-            GameActionExternalIds = a.Round.GameActions.Select(ga => new GameActionExternalIds
-            {
-                ExternalGameActionGroupId = ga.ExternalGameActionGroupId,
-                ExternalBetId = ga.ExternalBetId,
-                ExternalTransactionId = ga.ExternalTransactionId,
-                ExternalReferencedTransactionId =
-                    a.Round.GameActions.Where(act => act.Id == ga.ReferencedGameActionId)
-                        .Select(act => act.ExternalTransactionId).FirstOrDefault(),
-                ExternalRoundId = a.Round.ExternalRoundId,
-                Amount = ga.Amount,
-                GameActionType = ga.Type,
-                RecordedOn = ga.RecordedOn
-            }).ToArray()
-        }).ToArrayAsync().ConfigureAwait(false);
-    }
+	async ValueTask<RoundStatus?> IRoundQueries.GetRoundStatusAsync(Guid gameProviderId, string playerCode,
+		string externalRoundId, int gameId) =>
+		await (from round in _repository.Rounds
+			   where round.GameProviderId == gameProviderId &&
+				   round.PlayerCode == playerCode &&
+				   round.ExternalRoundId == externalRoundId &&
+				   round.GameId == gameId
+			   select (RoundStatus?)round.Status)
+			.FirstOrDefaultAsync().ConfigureAwait(false);
 
-    async ValueTask<(RoundStatus RoundStatus, int GameId)?> IRoundQueries.
-        GetRoundStatusAndGameIdAsync(
-        Guid gameProviderId,
-        string playerCode,
-        string externalRoundId,
-        string externalTransactionId)
-    {
-        var data = await (from ga in _repository.GameActions
-                          let r = ga.Round
-                          where r.GameProviderId == gameProviderId &&
-                              r.PlayerCode == playerCode &&
-                              r.ExternalRoundId == externalRoundId &&
-                              ga.ExternalTransactionId == externalTransactionId
-                          select new
-                          {
-                              r.Status,
-                              r.GameId
-                          }).FirstOrDefaultAsync().ConfigureAwait(false);
+	async ValueTask<RoundWithGameActionExternalIds[]> IRoundQueries.GetRoundWithGameActionExternalIdsAsync(
+				Guid gameProviderId, DateTimeOffset start, DateTimeOffset end, RoundStatus? roundStatus, GameType? gameType)
+	{
+		var query = _repository.Rounds
+			.Where(r => r.GameProviderId == gameProviderId &&
+				r.CreatedOn >= start && r.CreatedOn <= end &&
+				r.Status == roundStatus)
+			.Include(r => r.GameActions)
+			.Join(_repository.Games, r => r.GameId, g => g.Id, (r, g) => new
+			{
+				Round = r,
+				Game = g
+			});
 
-        return data == null ? null : (data.Status, data.GameId);
-    }
+		if (gameType.HasValue)
+		{
+			query = query.Where(a => a.Game.Type == gameType);
+		}
 
-    async ValueTask<RoundStatus?> IRoundQueries.GetRoundStatusAsync(Guid gameProviderId, string playerCode,
-        string externalRoundId, int gameId) =>
-        await (from round in _repository.Rounds
-               where round.GameProviderId == gameProviderId &&
-                   round.PlayerCode == playerCode &&
-                   round.ExternalRoundId == externalRoundId &&
-                   round.GameId == gameId
-               select (RoundStatus?)round.Status)
-            .FirstOrDefaultAsync().ConfigureAwait(false);
+		return await query.Select(a => new RoundWithGameActionExternalIds
+		{
+			Id = a.Round.Id,
+			PlayerCode = a.Round.PlayerCode,
+			CurrencyCode = a.Round.CurrencyCode,
+			ExternalRoundId = a.Round.ExternalRoundId,
+			GameId = a.Game.Id,
+			ExternalGameId = a.Game.ExternalId,
+			Status = a.Round.Status,
+			ExternalCreatedOn = a.Round.ExternalCreatedOn ?? a.Round.CreatedOn,
+			GameActionExternalIds = a.Round.GameActions.Select(ga => new GameActionExternalIds
+			{
+				ExternalGameActionGroupId = ga.ExternalGameActionGroupId,
+				ExternalBetId = ga.ExternalBetId,
+				ExternalTransactionId = ga.ExternalTransactionId,
+				ExternalReferencedTransactionId =
+					a.Round.GameActions.Where(act => act.Id == ga.ReferencedGameActionId)
+						.Select(act => act.ExternalTransactionId).FirstOrDefault(),
+				ExternalRoundId = a.Round.ExternalRoundId,
+				Amount = ga.Amount,
+				GameActionType = ga.Type,
+				RecordedOn = ga.RecordedOn
+			}).ToArray()
+		}).ToArrayAsync().ConfigureAwait(false);
+	}
 }

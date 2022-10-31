@@ -2,5 +2,5 @@
 
 public interface IIdentityVerifier
 {
-    bool Verify(string id);
+	bool Verify(string id);
 }

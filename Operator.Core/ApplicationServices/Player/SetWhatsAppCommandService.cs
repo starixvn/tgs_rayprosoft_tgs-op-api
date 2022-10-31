@@ -10,20 +10,20 @@ namespace TGS.Services.Operator.ApplicationServices.Player;
 
 internal class SetWhatsAppCommandService : ICommandService<SetWhatsAppCommand>
 {
-    private readonly IPlayerServiceClient _client;
+	private readonly IPlayerServiceClient _client;
 
-    public SetWhatsAppCommandService(IPlayerServiceClient client)
-    {
-        _client = client ?? throw new ArgumentNullException(nameof(client));
-    }
+	public SetWhatsAppCommandService(IPlayerServiceClient client)
+	{
+		_client = client ?? throw new ArgumentNullException(nameof(client));
+	}
 
-    public ValueTask ExecuteAsync(SetWhatsAppCommand command, CancellationToken cancellationToken = default)
-    {
-        var properties = new Dictionary<PlayerPropertyName, string?>
-        {
-            [PlayerPropertyName.WhatsApp] = command.WhatsAppId
-        }.ToImmutableDictionary();
+	public ValueTask ExecuteAsync(SetWhatsAppCommand command, CancellationToken cancellationToken = default)
+	{
+		var properties = new Dictionary<PlayerPropertyName, string?>
+		{
+			[PlayerPropertyName.WhatsApp] = command.WhatsAppId
+		}.ToImmutableDictionary();
 
-        return _client.SetPlayerPropertiesAsync(command.PlayerCode, properties);
-    }
+		return _client.SetPlayerPropertiesAsync(command.PlayerCode, properties, cancellationToken);
+	}
 }

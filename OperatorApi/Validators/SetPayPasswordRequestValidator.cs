@@ -6,13 +6,13 @@ namespace TGS.Apis.OperatorApi.Validators;
 
 public sealed class SetPayPasswordRequestValidator : AbstractValidator<SetPayPasswordRequest>
 {
-    public SetPayPasswordRequestValidator()
-    {
+	public SetPayPasswordRequestValidator()
+	{
 		_ = RuleFor(x => x.Password)
 			.NotEmpty()
 			.Length(6, 20)
 			.WithName(x => x
 				.WithPropertyExpression(o => o.Password)
 				.GetBindPropertyName(nameof(x.Password)));
-    }
+	}
 }

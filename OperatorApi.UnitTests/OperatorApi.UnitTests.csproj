@@ -27,4 +27,12 @@
     <ProjectReference Include="..\OperatorApi\OperatorApi.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <EditorConfigFiles Remove="D:\Users\Phoenix\source\repos\tgs-op-api\OperatorApi.UnitTests\.editorconfig" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="D:\Users\Phoenix\source\repos\tgs-op-api\OperatorApi.UnitTests\.editorconfig" />
+  </ItemGroup>
+
 </Project>
