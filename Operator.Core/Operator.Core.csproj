@@ -28,7 +28,7 @@
     <PackageReference Include="Tgs.CashService.Client" Version="0.1.5" />
     <PackageReference Include="TGS.Core.Infrastructures.Mail" Version="0.0.6" />
     <PackageReference Include="Tgs.Core.Infrastructures.Security" Version="0.0.1" />
-    <PackageReference Include="Tgs.DepositAccumulateRoulette.Client" Version="0.0.3-alpha" />
+    <PackageReference Include="Tgs.DepositAccumulateRoulette.Client" Version="0.0.4" />
     <PackageReference Include="TGS.FileService.Client" Version="0.0.5" />
     <PackageReference Include="Tgs.GameProviders.Pluggable.Client" Version="0.0.26" />
     <PackageReference Include="Tgs.Payment.Client" Version="0.4.7" />
