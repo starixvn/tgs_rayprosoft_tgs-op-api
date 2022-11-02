@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Tgs.Promotion.Clients;
@@ -47,20 +48,40 @@ public class DepositAccumulateRouletteController : ControllerBase
 
 	[HttpGet("setting/{promotionId}", Name = "GetDepositAccumulateRouletteSetting")]
 	[AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-	public async ValueTask<DepositAccumulateRouletteSettingViewModel> GetDepositAccumulateRouletteSettingAsync(
-			[FromServices] IPromotionServiceClient promotionServiceClient,
-			Guid promotionId)
+	public async ValueTask<DepositAccumulateRouletteSettingViewModel?> GetDepositAccumulateRouletteSettingAsync(
+		[FromServices] IPromotionServiceClient promotionServiceClient,
+		Guid promotionId)
 	{
-		var rule = await promotionServiceClient
+		var promotionMainInfo = await promotionServiceClient
+			.GetPromotionMainInfoAsync(promotionId, HttpContext.RequestAborted)
+			.ConfigureAwait(false);
+
+		if (promotionMainInfo is not { PromotionType: "DepositAccumulateRoulette" })
+			return null;
+
+		var promotionContent = await promotionServiceClient
+			.GetPromotionContentAsync(promotionId, HttpContext.RequestAborted)
+			.ConfigureAwait(false);
+
+		var promotionRule = await promotionServiceClient
 			.GetPromotionRuleAsync<PromotionRule<RouletteSetting>>(promotionId, HttpContext.RequestAborted)
 			.ConfigureAwait(false);
 
 		return new DepositAccumulateRouletteSettingViewModel
 		{
-			RouletteItems = rule?.CampaignDetail?
-				.RouletteItems
-				.Select(item => new DepositAccumulateRouletteItemViewModel { Title = item.Title })
-							?? Array.Empty<DepositAccumulateRouletteItemViewModel>()
+			Name = promotionMainInfo.Name,
+			From = promotionMainInfo.EventDuring.From,
+			To = promotionMainInfo.EventDuring.To,
+			Content = promotionContent?.Content,
+			Terms = promotionContent?.Convention,
+			Localization = promotionContent?.Localization ?? JsonDocument.Parse("{}"),
+			SubSubject = promotionContent?.SubSubject,
+			RouletteItems = promotionRule?.CampaignDetail?.RouletteItems
+				.Select(item => new DepositAccumulateRouletteItemViewModel
+				{
+					Title = item.Title
+				}) ?? Array.Empty<DepositAccumulateRouletteItemViewModel>(),
+			VipLevels = promotionRule?.VipLevels ?? Array.Empty<int>()
 		};
 	}
 
