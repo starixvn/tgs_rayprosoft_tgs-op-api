@@ -5,16 +5,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Tgs.DepositAccumulateRoulette.Clients;
 using Tgs.Promotion.Clients;
 using Tgs.ServiceUtility;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models;
 using TGS.Apis.OperatorApi.Models.Messages;
-using Tgs.DepositAccumulateRoulette.Clients;
 using TGS.Services.Operator.ApplicationServices.Promotions;
 using RouletteResult = Tgs.DepositAccumulateRoulette.Clients.RouletteResult;
-using RouletteSetting = TGS.Apis.OperatorApi.Models.RouletteSetting;
 
 namespace TGS.Apis.OperatorApi.Controllers;
 
@@ -47,20 +46,43 @@ public class DepositAccumulateRouletteController : ControllerBase
 
 	[HttpGet("setting/{promotionId}", Name = "GetDepositAccumulateRouletteSetting")]
 	[AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-	public async ValueTask<DepositAccumulateRouletteSettingViewModel> GetDepositAccumulateRouletteSettingAsync(
-			[FromServices] IPromotionServiceClient promotionServiceClient,
-			Guid promotionId)
+	public async ValueTask<DepositAccumulateRouletteSettingViewModel?> GetDepositAccumulateRouletteSettingAsync(
+		[FromServices] IPromotionServiceClient promotionServiceClient,
+		Guid promotionId)
 	{
-		var rule = await promotionServiceClient
-			.GetPromotionRuleAsync<PromotionRule<RouletteSetting>>(promotionId, HttpContext.RequestAborted)
+		var promotionMainInfo = await promotionServiceClient
+			.GetPromotionMainInfoAsync(promotionId, HttpContext.RequestAborted)
 			.ConfigureAwait(false);
+
+		if (promotionMainInfo is null or not { PromotionType: "DepositAccumulateRoulette" })
+			return null;
+
+		var promotionContent = (await promotionServiceClient
+			.GetPromotionContentAsync(promotionId, HttpContext.RequestAborted)
+			.ConfigureAwait(false))!;
+
+		var promotionRule = (await promotionServiceClient
+			.GetPromotionRuleAsync<DepositAccumulateRouletteSettings>(promotionId, HttpContext.RequestAborted)
+			.ConfigureAwait(false))!;
 
 		return new DepositAccumulateRouletteSettingViewModel
 		{
-			RouletteItems = rule?.CampaignDetail?
-				.RouletteItems
-				.Select(item => new DepositAccumulateRouletteItemViewModel { Title = item.Title })
-							?? Array.Empty<DepositAccumulateRouletteItemViewModel>()
+			Name = promotionMainInfo.Name,
+			Period = new ValueRange<DateTime>
+			{
+				From = promotionMainInfo.EventDuring.From,
+				To = promotionMainInfo.EventDuring.To
+			},
+			Content = promotionContent.Content,
+			Terms = promotionContent.Convention,
+			Localization = promotionContent.Localization,
+			SubSubject = promotionContent.SubSubject,
+			RouletteItems = promotionRule.CampaignDetail!.RouletteItems
+				.Select(item => new DepositAccumulateRouletteItemViewModel
+				{
+					Title = item.Title
+				}),
+			VipLevels = promotionRule.VipLevels
 		};
 	}
 
