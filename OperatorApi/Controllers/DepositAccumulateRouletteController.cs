@@ -77,7 +77,7 @@ public class DepositAccumulateRouletteController : ControllerBase
 			Content = promotionContent.Content,
 			Terms = promotionContent.Convention,
 			Localization = promotionContent.Localization,
-			SubSubject = promotionContent?.SubSubject,
+			SubSubject = promotionContent.SubSubject,
 			RouletteItems = promotionRule.CampaignDetail!.RouletteItems
 				.Select(item => new DepositAccumulateRouletteItemViewModel
 				{
