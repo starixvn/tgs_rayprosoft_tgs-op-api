@@ -3,16 +3,15 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Tgs.DepositAccumulateRoulette.Clients;
 using Tgs.Promotion.Clients;
 using Tgs.ServiceUtility;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models;
 using TGS.Apis.OperatorApi.Models.Messages;
-using Tgs.DepositAccumulateRoulette.Clients;
 using TGS.Services.Operator.ApplicationServices.Promotions;
 using RouletteResult = Tgs.DepositAccumulateRoulette.Clients.RouletteResult;
 using RouletteSetting = TGS.Apis.OperatorApi.Models.RouletteSetting;
@@ -56,32 +55,35 @@ public class DepositAccumulateRouletteController : ControllerBase
 			.GetPromotionMainInfoAsync(promotionId, HttpContext.RequestAborted)
 			.ConfigureAwait(false);
 
-		if (promotionMainInfo is not { PromotionType: "DepositAccumulateRoulette" })
+		if (promotionMainInfo is null or not { PromotionType: "DepositAccumulateRoulette" })
 			return null;
 
-		var promotionContent = await promotionServiceClient
+		var promotionContent = (await promotionServiceClient
 			.GetPromotionContentAsync(promotionId, HttpContext.RequestAborted)
-			.ConfigureAwait(false);
+			.ConfigureAwait(false))!;
 
-		var promotionRule = await promotionServiceClient
+		var promotionRule = (await promotionServiceClient
 			.GetPromotionRuleAsync<PromotionRule<RouletteSetting>>(promotionId, HttpContext.RequestAborted)
-			.ConfigureAwait(false);
+			.ConfigureAwait(false))!;
 
 		return new DepositAccumulateRouletteSettingViewModel
 		{
 			Name = promotionMainInfo.Name,
-			From = promotionMainInfo.EventDuring.From,
-			To = promotionMainInfo.EventDuring.To,
-			Content = promotionContent?.Content,
-			Terms = promotionContent?.Convention,
-			Localization = promotionContent?.Localization ?? JsonDocument.Parse("{}"),
+			Period = new ValueRange<DateTime>
+			{
+				From = promotionMainInfo.EventDuring.From,
+				To = promotionMainInfo.EventDuring.To
+			},
+			Content = promotionContent.Content,
+			Terms = promotionContent.Convention,
+			Localization = promotionContent.Localization,
 			SubSubject = promotionContent?.SubSubject,
-			RouletteItems = promotionRule?.CampaignDetail?.RouletteItems
+			RouletteItems = promotionRule.CampaignDetail!.RouletteItems
 				.Select(item => new DepositAccumulateRouletteItemViewModel
 				{
 					Title = item.Title
-				}) ?? Array.Empty<DepositAccumulateRouletteItemViewModel>(),
-			VipLevels = promotionRule?.VipLevels ?? Array.Empty<int>()
+				}),
+			VipLevels = promotionRule.VipLevels
 		};
 	}
 

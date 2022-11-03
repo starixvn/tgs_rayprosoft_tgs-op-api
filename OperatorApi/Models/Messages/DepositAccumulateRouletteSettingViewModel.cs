@@ -12,18 +12,17 @@ public class DepositAccumulateRouletteSettingViewModel
 	[JsonPropertyName("content")]
 	public string? Content { get; init; }
 
-	[JsonPropertyName("from")]
-	public DateTime From { get; init; }
-
 	[JsonPropertyName("localization")]
 	public JsonDocument Localization { get; init; } = default!;
 
 	[JsonPropertyName("name")]
 	public string Name { get; init; } = default!;
 
+	[JsonPropertyName("period")]
+	public ValueRange<DateTime> Period { get; init; }
+
 	[JsonPropertyName("rouletteitems")]
-	public IEnumerable<DepositAccumulateRouletteItemViewModel> RouletteItems { get; init; } =
-		Array.Empty<DepositAccumulateRouletteItemViewModel>();
+	public IEnumerable<DepositAccumulateRouletteItemViewModel> RouletteItems { get; init; } = default!;
 
 	[JsonPropertyName("subsubject")]
 	public string? SubSubject { get; init; }
@@ -31,9 +30,6 @@ public class DepositAccumulateRouletteSettingViewModel
 	[JsonPropertyName("terms")]
 	public string? Terms { get; init; }
 
-	[JsonPropertyName("to")]
-	public DateTime To { get; init; }
-
 	[JsonPropertyName("viplevels")]
-	public IEnumerable<int> VipLevels { get; init; } = Array.Empty<int>();
+	public IEnumerable<int> VipLevels { get; init; } = default!;
 }
