@@ -14,7 +14,6 @@ using TGS.Apis.OperatorApi.Models;
 using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Services.Operator.ApplicationServices.Promotions;
 using RouletteResult = Tgs.DepositAccumulateRoulette.Clients.RouletteResult;
-using RouletteSetting = TGS.Apis.OperatorApi.Models.RouletteSetting;
 
 namespace TGS.Apis.OperatorApi.Controllers;
 
@@ -63,7 +62,7 @@ public class DepositAccumulateRouletteController : ControllerBase
 			.ConfigureAwait(false))!;
 
 		var promotionRule = (await promotionServiceClient
-			.GetPromotionRuleAsync<PromotionRule<RouletteSetting>>(promotionId, HttpContext.RequestAborted)
+			.GetPromotionRuleAsync<DepositAccumulateRouletteSettings>(promotionId, HttpContext.RequestAborted)
 			.ConfigureAwait(false))!;
 
 		return new DepositAccumulateRouletteSettingViewModel

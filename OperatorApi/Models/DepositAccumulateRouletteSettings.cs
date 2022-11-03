@@ -1,16 +1,15 @@
 ﻿#nullable enable
 
-using System;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
 namespace TGS.Apis.OperatorApi.Models;
 
-public class PromotionRule<T>
+public class DepositAccumulateRouletteSettings
 {
 	[JsonPropertyName("compaignDetail")]
-	public T? CampaignDetail { get; init; }
+	public DepositAccumulateRouletteCollection CampaignDetail { get; init; } = default!;
 
 	[JsonPropertyName("vipLevels")]
-	public IEnumerable<int> VipLevels { get; init; } = Array.Empty<int>();
+	public IEnumerable<int> VipLevels { get; init; } = default!;
 }
