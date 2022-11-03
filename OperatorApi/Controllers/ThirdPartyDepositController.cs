@@ -64,11 +64,11 @@ public class ThirdPartyDepositController : ControllerBase
 			.GetAsync(getDepositFormQuery, HttpContext.RequestAborted)
 			.ConfigureAwait(false);
 
-		var applyInfo = serializer.Deserialize<MalakiPayDepositApplyInfo>(formData.ApplyInfo!);
+		var applyInfo = serializer.Deserialize<AlfaPayDepositApplyInfo>(formData.ApplyInfo!);
 
 		var updateThirdPartyOrderNoCommand = new SubmitDepositFormThirdPartyOrderNoCommand(
 			createdFormId,
-			applyInfo.Response.TradeNo);
+			applyInfo.Response.Data.OutTradeNo);
 
 		await updateDepositFormService
 			.ExecuteAsync(updateThirdPartyOrderNoCommand, HttpContext.RequestAborted)
@@ -77,7 +77,7 @@ public class ThirdPartyDepositController : ControllerBase
 		return new DepositFormCreatedResponse
 		{
 			FormId = createdFormId,
-			PaymentUrl = applyInfo.Response.RedirectUrl.ToString()
+			PaymentUrl = applyInfo.Response.Data.Uri.ToString()
 		};
 	}
 
