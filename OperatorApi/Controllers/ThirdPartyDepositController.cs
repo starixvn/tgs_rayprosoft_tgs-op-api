@@ -48,6 +48,7 @@ public class ThirdPartyDepositController : ControllerBase
 			formId => serializer.Serialize(
 				new AlfaPayDepositSettings(
 					brandPaymentInfo.RootElement.GetProperty("apiToken").GetString(),
+					brandPaymentInfo.RootElement.GetProperty("notifyToken").GetString(),
 					formId,
 					null)));
 
