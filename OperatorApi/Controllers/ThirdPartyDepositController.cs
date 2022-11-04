@@ -24,7 +24,7 @@ public class ThirdPartyDepositController : ControllerBase
 	public async Task<DepositFormCreatedResponse> SubmitAlfaPayDepositRequestAsync(
 		[FromServices] IGetService<CreateDepositFormCommand, Guid> createDepositFormService,
 		[FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
-		[FromServices] MalakiPaySerializer serializer,
+		[FromServices] AlfaPaySerializer serializer,
 		[FromServices] IGetService<GetDepositFormQuery, DepositFormInfo> getDepositFormService,
 		[FromServices] ICommandService<SubmitDepositFormThirdPartyOrderNoCommand> updateDepositFormService,
 		[FromBody] SubmitDepositRequest request)
