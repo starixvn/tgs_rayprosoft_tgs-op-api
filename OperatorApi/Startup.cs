@@ -17,6 +17,7 @@ using OpenTelemetry.Exporter;
 using OpenTelemetry.Instrumentation.AspNetCore;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
+using Tgs.Payment.AlfaPay;
 using Tgs.Payment.Help2Pay;
 using Tgs.Payment.LeePay;
 using Tgs.Payment.MalakiPay;
@@ -220,7 +221,8 @@ public sealed class Startup
 			.AddSingleton<SkyPaySerializer>()
 			.AddSingleton<ZeroNineNinePaySerializer>()
 			.AddSingleton<TuPaySerializer>()
-			.AddSingleton<MalakiPaySerializer>();
+			.AddSingleton<MalakiPaySerializer>()
+			.AddSingleton<AlfaPaySerializer>();
 
 		_ = services
 			.AddMessageQueue()
