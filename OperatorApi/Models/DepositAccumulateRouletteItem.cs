@@ -1,6 +1,6 @@
 ﻿namespace TGS.Apis.OperatorApi.Models;
 
-public class RouletteItem
+public class DepositAccumulateRouletteItem
 {
 	public string Id { get; init; } = default!;
 

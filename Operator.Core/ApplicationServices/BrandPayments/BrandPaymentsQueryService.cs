@@ -28,6 +28,7 @@ internal class BrandPaymentsQueryService : IQueryService<BrandPaymentsQuery, Bra
 	{
 		var brandPayments = await _paymentServiceClient
 			.GetBrandPaymentsAsync(query.BrandId, cancellationToken)
+			.Where(bp => bp.Enabled == true)
 			.ToArrayAsync(cancellationToken: cancellationToken)
 			.ConfigureAwait(false)!;
 
@@ -53,7 +54,10 @@ internal class BrandPaymentsQueryService : IQueryService<BrandPaymentsQuery, Bra
 
 		var brandPaymentVipLevels = await _paymentServiceClient
 			.GetBrandPaymentVipsAsync(brandPayments.Select(bp => bp.Id), cancellationToken)
-			.ToLookupAsync(bv => bv.BrandPaymentId, bv => bv.VipLevelId, cancellationToken: cancellationToken)
+			.ToLookupAsync(
+				bv => bv.BrandPaymentId,
+				bv => bv.VipLevelId,
+				cancellationToken: cancellationToken)
 			.ConfigureAwait(false);
 
 		var playerInfo = await _playerServiceClient

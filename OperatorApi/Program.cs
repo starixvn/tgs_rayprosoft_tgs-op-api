@@ -10,6 +10,7 @@ using OpenTelemetry.Exporter;
 using OpenTelemetry.Instrumentation.AspNetCore;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
+using Tgs.Payment.AlfaPay;
 using Tgs.Payment.Help2Pay;
 using Tgs.Payment.LeePay;
 using Tgs.Payment.MalakiPay;
@@ -140,6 +141,12 @@ builder.Services
 		var config = sp.GetRequiredService<IConfiguration>();
 
 		options.BaseUrl = config.GetValue<Uri>("Operator:PlayerServiceBaseUrl");
+	})
+	.AddDepositAccumulateRouletteClient((options, sp) =>
+	{
+		var config = sp.GetRequiredService<IConfiguration>();
+
+		options.BaseUrl = config.GetValue<Uri>("Operator:DepositAccumulateRouletteServiceBaseUrl");
 	});
 
 builder.Services
@@ -184,7 +191,8 @@ builder.Services
 	.AddSingleton<SkyPaySerializer>()
 	.AddSingleton<ZeroNineNinePaySerializer>()
 	.AddSingleton<TuPaySerializer>()
-	.AddSingleton<MalakiPaySerializer>();
+	.AddSingleton<MalakiPaySerializer>()
+	.AddSingleton<AlfaPaySerializer>();
 
 builder.Services
 	.AddMessageQueue()
