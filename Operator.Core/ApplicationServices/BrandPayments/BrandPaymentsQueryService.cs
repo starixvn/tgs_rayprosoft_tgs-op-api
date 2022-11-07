@@ -27,14 +27,17 @@ internal class BrandPaymentsQueryService : IQueryService<BrandPaymentsQuery, Bra
 		[EnumeratorCancellation] CancellationToken cancellationToken = default)
 	{
 		var brandPayments = await _paymentServiceClient
-			.GetBrandPaymentsAsync(query.BrandId)
+			.GetBrandPaymentsAsync(query.BrandId, cancellationToken)
 			.Where(bp => bp.Enabled == true)
-			.ToArrayAsync()
+			.ToArrayAsync(cancellationToken: cancellationToken)
 			.ConfigureAwait(false)!;
 
 		var acls = await _paymentServiceClient
-			.GetBrandPaymentAclsAsync(query.PlayerCode, brandPayments.Select(bp => bp.Id))
-			.ToArrayAsync()
+			.GetBrandPaymentAclsAsync(
+				query.PlayerCode,
+				brandPayments.Select(bp => bp.Id),
+				cancellationToken)
+			.ToArrayAsync(cancellationToken: cancellationToken)
 			.ConfigureAwait(false);
 
 		var blockList = acls
@@ -50,8 +53,11 @@ internal class BrandPaymentsQueryService : IQueryService<BrandPaymentsQuery, Bra
 			.ToArray();
 
 		var brandPaymentVipLevels = await _paymentServiceClient
-			.GetBrandPaymentVipsAsync(brandPayments.Select(bp => bp.Id))
-			.ToLookupAsync(bv => bv.BrandPaymentId, bv => bv.VipLevelId)
+			.GetBrandPaymentVipsAsync(brandPayments.Select(bp => bp.Id), cancellationToken)
+			.ToLookupAsync(
+				bv => bv.BrandPaymentId,
+				bv => bv.VipLevelId,
+				cancellationToken: cancellationToken)
 			.ConfigureAwait(false);
 
 		var playerInfo = await _playerServiceClient

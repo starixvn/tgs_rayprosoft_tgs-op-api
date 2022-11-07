@@ -8,28 +8,28 @@ namespace TGS.Services.Operator.ApplicationServices.Withdraw;
 
 internal class CreateBankInfoCommandService : ICommandService<CreateBankInfoCommand>
 {
-    private readonly IPaymentServiceClient _paymentServiceClient;
+	private readonly IPaymentServiceClient _paymentServiceClient;
 
-    public CreateBankInfoCommandService(IPaymentServiceClient paymentServiceClient)
-    {
-        _paymentServiceClient = paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
-    }
+	public CreateBankInfoCommandService(IPaymentServiceClient paymentServiceClient)
+	{
+		_paymentServiceClient = paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
+	}
 
-    public async ValueTask ExecuteAsync(CreateBankInfoCommand command, CancellationToken cancellationToken = default)
-    {
-        var bankInfo = new BankCreateInfo
-        {
-            BankType = command.BankType,
-            PaymentChannelId = command.PaymentChannelId,
-            Detail = command.Detail
-        };
+	public async ValueTask ExecuteAsync(CreateBankInfoCommand command, CancellationToken cancellationToken = default)
+	{
+		var bankInfo = new BankCreateInfo
+		{
+			BankType = command.BankType,
+			PaymentChannelId = command.PaymentChannelId,
+			Detail = command.Detail
+		};
 
-        _ = await _paymentServiceClient
-             .CreatePlayerBankInfoAsync(
-                 command.BrandId,
-                 command.PlayerCode,
-                 bankInfo,
-                 cancellationToken: cancellationToken)
-             .ConfigureAwait(false);
-    }
+		_ = await _paymentServiceClient
+			 .CreatePlayerBankInfoAsync(
+				 command.BrandId,
+				 command.PlayerCode,
+				 bankInfo,
+				 cancellationToken: cancellationToken)
+			 .ConfigureAwait(false);
+	}
 }

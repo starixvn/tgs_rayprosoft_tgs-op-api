@@ -4,8 +4,8 @@ namespace TGS.Apis.OperatorApi.Models.Messages;
 
 public record SubmitGameBalanceFundOutRequest
 {
-    [JsonPropertyName("gpcode")]
-    public string GameProviderCode { get; init; }
-    [JsonPropertyName("amount")]
-    public int Amount { get; init; }
+	[JsonPropertyName("gpcode")]
+	public string GameProviderCode { get; init; }
+	[JsonPropertyName("amount")]
+	public int Amount { get; init; }
 }

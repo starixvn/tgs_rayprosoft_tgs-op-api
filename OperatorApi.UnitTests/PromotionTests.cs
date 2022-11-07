@@ -14,66 +14,66 @@ namespace TGS.Tests.OperatorApi.UnitTests;
 
 public class PromotionTests
 {
-    [Test]
-    public async Task Deposit_Accumulate_Roulette_Should_Get_Result()
-    {
-        var fakeDepositAccumulateRouletteClient = Substitute.For<IDepositAccumulateRouletteClient>();
+	[Test]
+	public async Task Deposit_Accumulate_Roulette_Should_Get_Result()
+	{
+		var fakeDepositAccumulateRouletteClient = Substitute.For<IDepositAccumulateRouletteClient>();
 
-        var command = new PlayDepositAccumulateRouletteCommand(Guid.NewGuid(), "player1");
+		var command = new PlayDepositAccumulateRouletteCommand(Guid.NewGuid(), "player1");
 
-        var expected = new RouletteResult(Guid.NewGuid(), 3);
+		var expected = new RouletteResult(Guid.NewGuid(), 3);
 
-        _ = fakeDepositAccumulateRouletteClient
-            .RouletteAsync(
-                Arg.Is(command.PromotionId),
-                Arg.Is(command.PlayerCode),
-                Arg.Any<CancellationToken>())
-            .Returns(expected);
+		_ = fakeDepositAccumulateRouletteClient
+			.RouletteAsync(
+				Arg.Is(command.PromotionId),
+				Arg.Is(command.PlayerCode),
+				Arg.Any<CancellationToken>())
+			.Returns(expected);
 
-        var sut = new PlayDepositAccumulateRouletteCommandService(fakeDepositAccumulateRouletteClient);
+		var sut = new PlayDepositAccumulateRouletteCommandService(fakeDepositAccumulateRouletteClient);
 
-        var actual = await sut.GetAsync(command);
+		var actual = await sut.GetAsync(command);
 
-        Assert.AreEqual(expected, actual);
+		Assert.AreEqual(expected, actual);
 
-        _ = fakeDepositAccumulateRouletteClient.Received(1)
-            .RouletteAsync(
-                Arg.Is(command.PromotionId),
-                Arg.Is(command.PlayerCode),
-                Arg.Any<CancellationToken>());
-    }
+		_ = fakeDepositAccumulateRouletteClient.Received(1)
+			.RouletteAsync(
+				Arg.Is(command.PromotionId),
+				Arg.Is(command.PlayerCode),
+				Arg.Any<CancellationToken>());
+	}
 
-    [Test]
-    public async Task Get_Roulette_Record()
-    {
-        var fakeRouletteSignInClient = Substitute.For<IRouletteSignInClient>();
-        var sut = new GetSignInRouletteRecordQueryService(fakeRouletteSignInClient);
+	[Test]
+	public async Task Get_Roulette_Record()
+	{
+		var fakeRouletteSignInClient = Substitute.For<IRouletteSignInClient>();
+		var sut = new GetSignInRouletteRecordQueryService(fakeRouletteSignInClient);
 
-        var query = new GetSignInRouletteRecordQuery("player1", Guid.NewGuid());
+		var query = new GetSignInRouletteRecordQuery("player1", Guid.NewGuid());
 
 		_ = await sut.GetAsync(query);
 
-        _ = fakeRouletteSignInClient.Received(1)
-            .GetRouletteRecordAsync(
-                Arg.Is(query.PromotionId),
-                Arg.Is(query.PlayerCode),
-                Arg.Any<DateOnly>());
-    }
+		_ = fakeRouletteSignInClient.Received(1)
+			.GetRouletteRecordAsync(
+				Arg.Is(query.PromotionId),
+				Arg.Is(query.PlayerCode),
+				Arg.Any<DateOnly>());
+	}
 
-    [Test]
-    public async Task Roulette_Should_Get_Result()
-    {
-        var fakeRouletteSignInClient = Substitute.For<IRouletteSignInClient>();
-        var sut = new SignInRouletteCommandService(fakeRouletteSignInClient);
+	[Test]
+	public async Task Roulette_Should_Get_Result()
+	{
+		var fakeRouletteSignInClient = Substitute.For<IRouletteSignInClient>();
+		var sut = new SignInRouletteCommandService(fakeRouletteSignInClient);
 
-        var command = new SignInRouletteCommand("player1", Guid.NewGuid());
+		var command = new SignInRouletteCommand("player1", Guid.NewGuid());
 
 		_ = await sut.GetAsync(command);
 
-        _ = fakeRouletteSignInClient.Received(1)
-            .RouletteAsync(
-                Arg.Is(command.PromotionId),
-                Arg.Is(command.PlayerCode),
-                Arg.Any<DateOnly>());
-    }
+		_ = fakeRouletteSignInClient.Received(1)
+			.RouletteAsync(
+				Arg.Is(command.PromotionId),
+				Arg.Is(command.PlayerCode),
+				Arg.Any<DateOnly>());
+	}
 }

@@ -9,23 +9,23 @@ namespace TGS.Services.Operations.Queries;
 
 public interface IGameQueries
 {
-    Task<Dictionary<int, string>> GetGamesLocalizationByGameIdsAsync(int[] gameIds);
+	Task<Dictionary<int, string>> GetGamesLocalizationByGameIdsAsync(int[] gameIds);
 }
 
 public sealed class GameQueries : IGameQueries
 {
-    private readonly ITgsRepository _repository;
+	private readonly ITgsRepository _repository;
 
-    public GameQueries(ITgsRepository repository)
-    {
-        _repository = repository;
-    }
+	public GameQueries(ITgsRepository repository)
+	{
+		_repository = repository;
+	}
 
-    Task<Dictionary<int, string>> IGameQueries.GetGamesLocalizationByGameIdsAsync(int[] gameIds)
-    {
-        return _repository.Games
-            .Where(x => gameIds.Contains(x.Id)
-                && x.Localization != null)
-            .ToDictionaryAsync(x => x.Id, x => x.Localization);
-    }
+	Task<Dictionary<int, string>> IGameQueries.GetGamesLocalizationByGameIdsAsync(int[] gameIds)
+	{
+		return _repository.Games
+			.Where(x => gameIds.Contains(x.Id)
+				&& x.Localization != null)
+			.ToDictionaryAsync(x => x.Id, x => x.Localization);
+	}
 }

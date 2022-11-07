@@ -9,28 +9,25 @@ namespace TGS.Services.Operator.ApplicationServices.Game;
 
 internal class GetGpCodeQueryService : IGetService<GetGpCodeQuery, BrandSubGameProviderInfo>
 {
-    private readonly IGameProviderRepository _gameProviderRepository;
+	private readonly IGameProviderRepository _gameProviderRepository;
 
-    public GetGpCodeQueryService(
-        IGameProviderRepository gameProviderRepository)
-    {
-        _gameProviderRepository = gameProviderRepository ?? throw new ArgumentNullException(nameof(gameProviderRepository));
-    }
+	public GetGpCodeQueryService(
+		IGameProviderRepository gameProviderRepository)
+	{
+		_gameProviderRepository = gameProviderRepository ?? throw new ArgumentNullException(nameof(gameProviderRepository));
+	}
 
-    public async ValueTask<BrandSubGameProviderInfo> GetAsync(
-        GetGpCodeQuery query,
-        CancellationToken cancellationToken = default)
-    {
-        var subGp = await _gameProviderRepository
-            .QueryAllSubGameProvidersAsync(query.BrandId)
-            .Where(bgp => bgp.Code == query.SubGpCode)
-            .FirstOrDefaultAsync()
-            .ConfigureAwait(false);
+	public async ValueTask<BrandSubGameProviderInfo> GetAsync(
+		GetGpCodeQuery query,
+		CancellationToken cancellationToken = default)
+	{
+		var subGp = await _gameProviderRepository
+			.QueryAllSubGameProvidersAsync(query.BrandId)
+			.Where(bgp => bgp.Code == query.SubGpCode)
+			.FirstOrDefaultAsync(cancellationToken: cancellationToken)
+			.ConfigureAwait(false);
 
-        if (subGp == null)
-            throw new ArgumentException(
-                $"No game provider of code '{query.SubGpCode}' is found");
-
-        return subGp;
-    }
+		return subGp ?? throw new ArgumentException(
+			$"No game provider of code '{query.SubGpCode}' is found");
+	}
 }

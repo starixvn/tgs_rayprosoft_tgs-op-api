@@ -5,6 +5,6 @@ namespace TGS.Apis.OperatorApi.Models.Messages;
 
 public record GetGameBalanceResponse : TgsResponse
 {
-    [JsonPropertyName("balance")]
-    public decimal Balance { get; init; }
+	[JsonPropertyName("balance")]
+	public decimal Balance { get; init; }
 }

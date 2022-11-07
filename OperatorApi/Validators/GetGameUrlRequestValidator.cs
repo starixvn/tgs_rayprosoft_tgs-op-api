@@ -6,8 +6,8 @@ namespace TGS.Apis.OperatorApi.Validators;
 
 public sealed class GetGameUrlRequestValidator : AbstractValidator<GetGameUrlRequest>
 {
-    public GetGameUrlRequestValidator()
-    {
+	public GetGameUrlRequestValidator()
+	{
 		_ = RuleFor(x => x.SubGameProviderCode)
 			.NotEmpty()
 			.WithName(x => x
@@ -19,5 +19,5 @@ public sealed class GetGameUrlRequestValidator : AbstractValidator<GetGameUrlReq
 			.WithName(x => x
 				.WithPropertyExpression(o => o.LanguageCode)
 				.GetBindPropertyName(nameof(x.LanguageCode)));
-    }
+	}
 }

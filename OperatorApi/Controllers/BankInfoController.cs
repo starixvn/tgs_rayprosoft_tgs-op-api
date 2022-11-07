@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Tgs.Payment.Clients;
 using Tgs.ServiceUtility;
 using TGS.Apis.OperatorApi.Attributes;
@@ -16,57 +12,57 @@ namespace TGS.Apis.OperatorApi.Controllers;
 [ApiController]
 public class BankInfoController : ControllerBase
 {
-    [HttpPost(Name = "CreatePlayerBankInfo")]
-    [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-    public async Task CreateBankInfoAsync(
-        [FromServices] ICommandService<CreateBankInfoCommand> createService,
-        CreateBankInfoRequest request)
-    {
-        var brandId = HttpContext.Items.GetBrandId();
-        var playerData = HttpContext.Items.GetPlayerTokenData();
+	[HttpPost(Name = "CreatePlayerBankInfo")]
+	[AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+	public async Task CreateBankInfoAsync(
+		[FromServices] ICommandService<CreateBankInfoCommand> createService,
+		CreateBankInfoRequest request)
+	{
+		var brandId = HttpContext.Items.GetBrandId();
+		var playerData = HttpContext.Items.GetPlayerTokenData();
 
-        var command = new CreateBankInfoCommand(
-            brandId,
-            playerData.PlayerCode,
-            request.PaymentChannelId,
-            request.BankType,
-            request.Detail);
+		var command = new CreateBankInfoCommand(
+			brandId,
+			playerData.PlayerCode,
+			request.PaymentChannelId,
+			request.BankType,
+			request.Detail);
 
-        await createService.ExecuteAsync(command).ConfigureAwait(false);
-    }
+		await createService.ExecuteAsync(command).ConfigureAwait(false);
+	}
 
-    [HttpDelete("{bankInfoId}", Name = "DeletePlayerBankInfo")]
-    [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-    public async Task DeleteBankInfoAsync(
-        [FromServices] ICommandService<DeleteBankInfoCommand> deleteService,
-        Guid bankInfoId)
-    {
-        var playerData = HttpContext.Items.GetPlayerTokenData();
+	[HttpDelete("{bankInfoId}", Name = "DeletePlayerBankInfo")]
+	[AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+	public async Task DeleteBankInfoAsync(
+		[FromServices] ICommandService<DeleteBankInfoCommand> deleteService,
+		Guid bankInfoId)
+	{
+		var playerData = HttpContext.Items.GetPlayerTokenData();
 
-        var command = new DeleteBankInfoCommand(
-            playerData.PlayerCode,
-            bankInfoId);
+		var command = new DeleteBankInfoCommand(
+			playerData.PlayerCode,
+			bankInfoId);
 
-        await deleteService.ExecuteAsync(command).ConfigureAwait(false);
-    }
+		await deleteService.ExecuteAsync(command).ConfigureAwait(false);
+	}
 
-    [HttpGet(Name = "GetPlayerBankInfos")]
-    [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-    public IAsyncEnumerable<BankInfoResponse> GetPlayerBankInfosAsync(
-        [FromServices] IQueryService<GetPlayerBankInfosQuery, PlayerBankInfo> queryService)
-    {
-        var playerData = HttpContext.Items.GetPlayerTokenData();
+	[HttpGet(Name = "GetPlayerBankInfos")]
+	[AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+	public IAsyncEnumerable<BankInfoResponse> GetPlayerBankInfosAsync(
+		[FromServices] IQueryService<GetPlayerBankInfosQuery, PlayerBankInfo> queryService)
+	{
+		var playerData = HttpContext.Items.GetPlayerTokenData();
 
-        var query = new GetPlayerBankInfosQuery(playerData.PlayerCode);
+		var query = new GetPlayerBankInfosQuery(playerData.PlayerCode);
 
-        return queryService.QueryAsync(query)
-            .Select(info => new BankInfoResponse
-            {
-                Id = info.Id,
-                PaymentChannelId = info.PaymentChannelId,
-                BankType = info.BankType,
-                Detail = info.Detail,
-                IsDefault = info.IsDefault
-            });
-    }
+		return queryService.QueryAsync(query)
+			.Select(info => new BankInfoResponse
+			{
+				Id = info.Id,
+				PaymentChannelId = info.PaymentChannelId,
+				BankType = info.BankType,
+				Detail = info.Detail,
+				IsDefault = info.IsDefault
+			});
+	}
 }

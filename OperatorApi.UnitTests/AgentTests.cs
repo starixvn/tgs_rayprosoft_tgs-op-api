@@ -9,18 +9,18 @@ namespace TGS.Tests.OperatorApi.UnitTests;
 [TestFixture]
 public class AgentTests
 {
-    [Test]
-    public async Task Can_Get_AgentInfo_By_InvitationCode()
-    {
-        var fakeAgentRepository = Substitute.For<IAgentRepository>();
+	[Test]
+	public async Task Can_Get_AgentInfo_By_InvitationCode()
+	{
+		var fakeAgentRepository = Substitute.For<IAgentRepository>();
 
-        var sut = new GetAgentInfoByInvitationCodeQueryService(fakeAgentRepository);
+		var sut = new GetAgentInfoByInvitationCodeQueryService(fakeAgentRepository);
 
-        var query = new GetAgentInfoByInvitationCodeQuery("test");
+		var query = new GetAgentInfoByInvitationCodeQuery("test");
 
 		_ = await sut.GetAsync(query);
 
-        _ = fakeAgentRepository.Received(1)
-            .GetAgentInfoByInvitationCodeAsync(Arg.Is(query.InvitationCode));
-    }
+		_ = fakeAgentRepository.Received(1)
+			.GetAgentInfoByInvitationCodeAsync(Arg.Is(query.InvitationCode));
+	}
 }

@@ -4,7 +4,7 @@ namespace TGS.Services.Operator;
 
 public class CannotJoinPromotionException : Exception
 {
-    public CannotJoinPromotionException()
-    {
-    }
+	public CannotJoinPromotionException()
+	{
+	}
 }

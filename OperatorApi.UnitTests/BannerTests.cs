@@ -11,29 +11,29 @@ namespace TGS.Tests.OperatorApi.UnitTests;
 [TestFixture]
 public class BannerTests
 {
-    [Test]
-    public async Task User_Can_Get_Banners()
-    {
-        var fakeBrandRepository = Substitute.For<IBrandRepository>();
+	[Test]
+	public async Task User_Can_Get_Banners()
+	{
+		var fakeBrandRepository = Substitute.For<IBrandRepository>();
 
-        var sut = new GetBannersQueryService(fakeBrandRepository);
+		var sut = new GetBannersQueryService(fakeBrandRepository);
 
-        var query = new GetBannersQuery(Guid.NewGuid());
+		var query = new GetBannersQuery(Guid.NewGuid());
 
 		_ = await sut.QueryAsync(query).CountAsync();
 
 		_ = fakeBrandRepository.Received(1)
 			.QueryBrandBannersAsync(Arg.Is(query.BrandId));
-    }
+	}
 
-    [Test]
-    public async Task User_Can_Get_Max_10_Banners()
-    {
-        var fakeBrandRepository = Substitute.For<IBrandRepository>();
+	[Test]
+	public async Task User_Can_Get_Max_10_Banners()
+	{
+		var fakeBrandRepository = Substitute.For<IBrandRepository>();
 
-        var sut = new GetBannersQueryService(fakeBrandRepository);
+		var sut = new GetBannersQueryService(fakeBrandRepository);
 
-        var query = new GetBannersQuery(Guid.NewGuid());
+		var query = new GetBannersQuery(Guid.NewGuid());
 
 		_ = fakeBrandRepository.QueryBrandBannersAsync(Arg.Is(query.BrandId))
 			.Returns(new[] {
@@ -50,8 +50,8 @@ public class BannerTests
 				new BannerInfo(Guid.NewGuid(), "Test11", null)
 			}.ToAsyncEnumerable());
 
-        var actual = await sut.QueryAsync(query).CountAsync();
+		var actual = await sut.QueryAsync(query).CountAsync();
 
-        Assert.AreEqual(10, actual);
-    }
+		Assert.AreEqual(10, actual);
+	}
 }

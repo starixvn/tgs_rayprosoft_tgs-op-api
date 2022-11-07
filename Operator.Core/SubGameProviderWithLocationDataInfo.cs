@@ -3,9 +3,9 @@
 namespace TGS.Services.Operator;
 
 public record SubGameProviderWithLocationDataInfo(
-    Guid GameProviderId,
-    string GpCode,
-    string Code,
-    string Name,
-    string Description,
-    string Localization);
+	Guid GameProviderId,
+	string GpCode,
+	string Code,
+	string Name,
+	string Description,
+	string Localization);

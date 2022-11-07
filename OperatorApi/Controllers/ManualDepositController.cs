@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text.Json;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
+﻿using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Tgs.Payment.Clients;
 using Tgs.Payment.ManualDeposit;
@@ -59,9 +55,8 @@ public class ManualDepositController : ControllerBase
 
 		var bankInfo = GetApplyInfo(serializer, paymentMethodInfo.BankType, form.ApplyInfo);
 
-		if (paymentMethodInfo.BankType == "Bank")
-		{
-			return new ManualDepositBankFormResponse()
+		return paymentMethodInfo.BankType == "Bank"
+			? new ManualDepositBankFormResponse()
 			{
 				MethodName = paymentMethods[brandPayment.MethodId].Name,
 				ChannelName = paymentChannels[brandPayment.ChannelId].Name,
@@ -69,33 +64,27 @@ public class ManualDepositController : ControllerBase
 				BankAccountName = ((ManualDepositBankApplyInfo)bankInfo).ReceiveAccountName,
 				BankAccount = ((ManualDepositBankApplyInfo)bankInfo).ReceiveBankAccount,
 				BankName = brandPayment.ChannelName
-			};
-		}
-		else if (paymentMethodInfo.BankType == "Fps")
-		{
-			return new ManualDepositFpsFormResponse()
-			{
-				MethodName = paymentMethods[brandPayment.MethodId].Name,
-				ChannelName = paymentChannels[brandPayment.ChannelId].Name,
-				Amount = form.Amount,
-				QrCodeFileUrl = ((ManualDepositFpsApplyInfo)bankInfo).QrCodeFileUrl,
-				Email = ((ManualDepositFpsApplyInfo)bankInfo).Email,
-				FpsId = ((ManualDepositFpsApplyInfo)bankInfo).FpsId,
-				Phone = ((ManualDepositFpsApplyInfo)bankInfo).Phone,
-				BankName = brandPayment.ChannelName
-			};
-		}
-		else
-		{
-			return new ManualDepositThirdPartyFormResponse()
-			{
-				MethodName = paymentMethods[brandPayment.MethodId].Name,
-				ChannelName = paymentChannels[brandPayment.ChannelId].Name,
-				Amount = form.Amount,
-				QrCode = ((ManualDepositThirdPartyApplyInfo)bankInfo).QrCode,
-				BankName = brandPayment.ChannelName
-			};
-		}
+			}
+			: paymentMethodInfo.BankType == "Fps"
+				? new ManualDepositFpsFormResponse()
+				{
+					MethodName = paymentMethods[brandPayment.MethodId].Name,
+					ChannelName = paymentChannels[brandPayment.ChannelId].Name,
+					Amount = form.Amount,
+					QrCodeFileUrl = ((ManualDepositFpsApplyInfo)bankInfo).QrCodeFileUrl,
+					Email = ((ManualDepositFpsApplyInfo)bankInfo).Email,
+					FpsId = ((ManualDepositFpsApplyInfo)bankInfo).FpsId,
+					Phone = ((ManualDepositFpsApplyInfo)bankInfo).Phone,
+					BankName = brandPayment.ChannelName
+				}
+				: new ManualDepositThirdPartyFormResponse()
+				{
+					MethodName = paymentMethods[brandPayment.MethodId].Name,
+					ChannelName = paymentChannels[brandPayment.ChannelId].Name,
+					Amount = form.Amount,
+					QrCode = ((ManualDepositThirdPartyApplyInfo)bankInfo).QrCode,
+					BankName = brandPayment.ChannelName
+				};
 	}
 
 	[HttpPut]
@@ -376,7 +365,7 @@ public class ManualDepositController : ControllerBase
 			.ConfigureAwait(false);
 	}
 
-	private ManualDepositApplyInfo GetApplyInfo(ManualDepositSerializer serializer, string bankType, string applyInfo)
+	private static ManualDepositApplyInfo GetApplyInfo(ManualDepositSerializer serializer, string bankType, string applyInfo)
 	{
 		return bankType switch
 		{

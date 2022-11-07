@@ -2,7 +2,7 @@
 
 public interface IValidateCodeGenerator
 {
-    string GenerateCode();
+	string GenerateCode();
 
-    string GenerateSecurityKey();
+	string GenerateSecurityKey();
 }

@@ -4,6 +4,6 @@ namespace TGS.Apis.OperatorApi.Models.Messages;
 
 public class SetWeChatIdRequest
 {
-    [JsonPropertyName("wechat")]
-    public string WebChatId { get; init; }
+	[JsonPropertyName("wechat")]
+	public string WebChatId { get; init; }
 }

@@ -4,7 +4,7 @@ namespace TGS.Services.Operator;
 
 public class EmailNotVerifyException : Exception
 {
-    public EmailNotVerifyException()
-    {
-    }
+	public EmailNotVerifyException()
+	{
+	}
 }

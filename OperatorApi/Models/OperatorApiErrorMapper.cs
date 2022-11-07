@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using Microsoft.AspNetCore.Http;
-using Tgs.Payment.Clients;
+﻿using Tgs.Payment.Clients;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.Interfaces;
@@ -65,7 +62,6 @@ public class OperatorApiErrorMapper : IErrorMapper
 			[OpApiError.InvalidOrExpiredPlayerToken] = StatusCodes.Status401Unauthorized,
 			[OpApiError.InvalidCaptcha] = StatusCodes.Status401Unauthorized,
 			[OpApiError.ClientIdNotFound] = StatusCodes.Status401Unauthorized,
-			[OpApiError.PlayerNotFound] = StatusCodes.Status401Unauthorized,
 			[OpApiError.UserBlocked] = StatusCodes.Status403Forbidden,
 			[OpApiError.CountryRestricted] = StatusCodes.Status403Forbidden,
 			[OpApiError.CurrencyMismatch] = StatusCodes.Status500InternalServerError,
@@ -182,9 +178,10 @@ public class OperatorApiErrorMapper : IErrorMapper
 	public string GetMessageKeyByException(Exception exception)
 	{
 		var type = exception.GetType();
-		if (_OpApiErrorByException.TryGetValue(type, out var errorType)
-			&& _ErrorCodeMessageIdMap.TryGetValue(errorType, out var messageKey))
-			return messageKey;
-		return _ErrorCodeMessageIdMap[OpApiError.SystemError];
+
+		return _OpApiErrorByException.TryGetValue(type, out var errorType)
+			&& _ErrorCodeMessageIdMap.TryGetValue(errorType, out var messageKey)
+			? messageKey
+			: _ErrorCodeMessageIdMap[OpApiError.SystemError];
 	}
 }

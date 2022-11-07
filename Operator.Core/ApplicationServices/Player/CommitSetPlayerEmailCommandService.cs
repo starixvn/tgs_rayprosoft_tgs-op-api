@@ -9,44 +9,44 @@ namespace TGS.Services.Operator.ApplicationServices.Player;
 
 internal class CommitSetPlayerEmailCommandService : ICommandService<CommitSetPlayerEmailCommand>
 {
-    private readonly IGetService<CheckBrandEmailQuery, bool> _getService;
-    private readonly IPlayerOperations _playerOperations;
-    private readonly IValidateCodeOperator _validateCodeOperator;
+	private readonly IGetService<CheckBrandEmailQuery, bool> _getService;
+	private readonly IPlayerOperations _playerOperations;
+	private readonly IValidateCodeOperator _validateCodeOperator;
 
-    public CommitSetPlayerEmailCommandService(
-        IValidateCodeOperator validateCodeOperator,
-        IPlayerOperations playerOperations,
-        IGetService<CheckBrandEmailQuery, bool> getService)
-    {
-        _validateCodeOperator = validateCodeOperator ?? throw new ArgumentNullException(nameof(validateCodeOperator));
-        _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
-        _getService = getService ?? throw new ArgumentNullException(nameof(getService));
-    }
+	public CommitSetPlayerEmailCommandService(
+		IValidateCodeOperator validateCodeOperator,
+		IPlayerOperations playerOperations,
+		IGetService<CheckBrandEmailQuery, bool> getService)
+	{
+		_validateCodeOperator = validateCodeOperator ?? throw new ArgumentNullException(nameof(validateCodeOperator));
+		_playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
+		_getService = getService ?? throw new ArgumentNullException(nameof(getService));
+	}
 
-    public async ValueTask ExecuteAsync(CommitSetPlayerEmailCommand command, CancellationToken cancellationToken = default)
-    {
-        var result = await _validateCodeOperator
-            .GetValidateCodeDataAsync<EmailValidateData>(command.ValidateCode, command.SecurityKey)
-            .ConfigureAwait(false);
+	public async ValueTask ExecuteAsync(CommitSetPlayerEmailCommand command, CancellationToken cancellationToken = default)
+	{
+		var result = await _validateCodeOperator
+			.GetValidateCodeDataAsync<EmailValidateData>(command.ValidateCode, command.SecurityKey)
+			.ConfigureAwait(false);
 
-        if (result == null)
-            throw new ValidateCodeNotVerifyException();
+		if (result == null)
+			throw new ValidateCodeNotVerifyException();
 
-        var updatedOn = DateTimeOffset.UtcNow;
+		var updatedOn = DateTimeOffset.UtcNow;
 
-        var isBrandHasSameEmail = await _getService
-            .GetAsync(new CheckBrandEmailQuery(
-                command.BrandId,
-                result.Email,
-                command.PlayerCode),
-                cancellationToken)
-            .ConfigureAwait(false);
+		var isBrandHasSameEmail = await _getService
+			.GetAsync(new CheckBrandEmailQuery(
+				command.BrandId,
+				result.Email,
+				command.PlayerCode),
+				cancellationToken)
+			.ConfigureAwait(false);
 
-        if (isBrandHasSameEmail)
-            throw new BrandEmailDuplicateException();
+		if (isBrandHasSameEmail)
+			throw new BrandEmailDuplicateException();
 
-        await _playerOperations
-            .SetEmailAsync(command.PlayerCode, result.Email, updatedOn)
-            .ConfigureAwait(false);
-    }
+		await _playerOperations
+			.SetEmailAsync(command.PlayerCode, result.Email, updatedOn)
+			.ConfigureAwait(false);
+	}
 }

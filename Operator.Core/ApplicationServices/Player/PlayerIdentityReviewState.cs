@@ -2,7 +2,7 @@
 
 public enum PlayerIdentityReviewState
 {
-    WaitingVerify = 0,
-    Approve = 1,
-    Reject = 2
+	WaitingVerify = 0,
+	Approve = 1,
+	Reject = 2
 }

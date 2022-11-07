@@ -1,10 +1,7 @@
-﻿using System;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Data.SqlClient;
-using System.Linq;
 using System.Net.Mime;
 using System.Text.Json;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Tgs.Promotion.Clients;
 using Tgs.Promotion.Clients.Models.Promotion;
@@ -20,107 +17,107 @@ namespace TGS.Apis.OperatorApi.Controllers;
 [Produces(MediaTypeNames.Application.Json)]
 public class PlayerPromotionController : ControllerBase
 {
-    private readonly IPromotionClient _client;
+	private readonly IPromotionClient _client;
 
-    public PlayerPromotionController(IPromotionClient client) => _client = client;
+	public PlayerPromotionController(IPromotionClient client) => _client = client;
 
-    /// <summary>
-    /// Get promotions that the player has already joined in.
-    /// </summary>
-    [HttpGet("joined", Name = "GetJoinedPromotions")]
-    [Description("Get promotions that the player has already joined in")]
-    [Consumes(MediaTypeNames.Application.Json)]
-    [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-    public async Task<PagingResponse<JoinedPromotionsResponse>> GetJoinedPromotionsAsync(
-        [FromQuery] GetPlayerPromotionRecordRequest request)
-    {
-        var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+	/// <summary>
+	/// Get promotions that the player has already joined in.
+	/// </summary>
+	[HttpGet("joined", Name = "GetJoinedPromotions")]
+	[Description("Get promotions that the player has already joined in")]
+	[Consumes(MediaTypeNames.Application.Json)]
+	[AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+	public async Task<PagingResponse<JoinedPromotionsResponse>> GetJoinedPromotionsAsync(
+		[FromQuery] GetPlayerPromotionRecordRequest request)
+	{
+		var playerTokenData = HttpContext.Items.GetPlayerTokenData();
 
-        var joinedPromotionRequest = new GetJoinedPromotionsRequest
-        {
-            PlayerCode = playerTokenData.PlayerCode,
-            From = request.From,
-            To = request.To,
-            Page = request.Page,
-            Rows = request.Rows,
-            OrderBy = request.IsDesc ? (short)SortOrder.Descending : (short)SortOrder.Ascending,
-            SortBy = request.SortBy,
-            ShowAll = request.ShowAll
-        };
+		var joinedPromotionRequest = new GetJoinedPromotionsRequest
+		{
+			PlayerCode = playerTokenData.PlayerCode,
+			From = request.From,
+			To = request.To,
+			Page = request.Page,
+			Rows = request.Rows,
+			OrderBy = request.IsDesc ? (short)SortOrder.Descending : (short)SortOrder.Ascending,
+			SortBy = request.SortBy,
+			ShowAll = request.ShowAll
+		};
 
-        var response = await _client.GetJoinedPromotionsAsync(joinedPromotionRequest);
+		var response = await _client.GetJoinedPromotionsAsync(joinedPromotionRequest);
 
-        return new PagingResponse<JoinedPromotionsResponse>
-        {
-            TotalCount = response.TotalCount,
-            Items = response.Items.Select(item => new JoinedPromotionsResponse
-            {
-                PromotionName = item.PromotionName,
-                JoinedOn = item.CreatedOn
-            })
-        };
-    }
+		return new PagingResponse<JoinedPromotionsResponse>
+		{
+			TotalCount = response.TotalCount,
+			Items = response.Items.Select(item => new JoinedPromotionsResponse
+			{
+				PromotionName = item.PromotionName,
+				JoinedOn = item.CreatedOn
+			})
+		};
+	}
 
-    [HttpGet("{language}", Name = "GetPlayerPromotions")]
-    [Description("Get player's promotions")]
-    [Consumes(MediaTypeNames.Application.Json)]
-    [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-    [Obsolete("預計淘汰")]
-    public async ValueTask<PagingResponse<PromotionResponse>> GetPlayerPromotionsAsync(string language,
-        [FromQuery] PagingRequest request)
-    {
-        var playerTokenData = HttpContext.Items.GetPlayerTokenData();
-        var brandId = HttpContext.Items.GetBrandId();
+	[HttpGet("{language}", Name = "GetPlayerPromotions")]
+	[Description("Get player's promotions")]
+	[Consumes(MediaTypeNames.Application.Json)]
+	[AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+	[Obsolete("預計淘汰")]
+	public async ValueTask<PagingResponse<PromotionResponse>> GetPlayerPromotionsAsync(string language,
+		[FromQuery] PagingRequest request)
+	{
+		var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+		var brandId = HttpContext.Items.GetBrandId();
 
-        var promotionsRequest = new GetValidPromotionsRequest
-        {
-            BrandId = brandId,
-            Language = language,
-            PlayerCode = playerTokenData.PlayerCode,
-            Page = request.Page,
-            Rows = request.Rows,
-            OrderBy = request.IsDesc ? (short)SortOrder.Descending : (short)SortOrder.Ascending,
-            SortBy = request.SortBy,
-            ShowAll = request.ShowAll
-        };
+		var promotionsRequest = new GetValidPromotionsRequest
+		{
+			BrandId = brandId,
+			Language = language,
+			PlayerCode = playerTokenData.PlayerCode,
+			Page = request.Page,
+			Rows = request.Rows,
+			OrderBy = request.IsDesc ? (short)SortOrder.Descending : (short)SortOrder.Ascending,
+			SortBy = request.SortBy,
+			ShowAll = request.ShowAll
+		};
 
-        var response = await _client.GetValidPromotionsAsync(promotionsRequest);
+		var response = await _client.GetValidPromotionsAsync(promotionsRequest);
 
-        return new PagingResponse<PromotionResponse>
-        {
-            TotalCount = response.TotalCount,
-            Items = response.Items.Select(item => new PromotionResponse
-            {
-                AmountUsed = item.AmountUsed,
-                AutoSentPlayerBonus = item.AutoSentPlayerBonus,
-                BonusAmountLimit = item.BonusAmountLimit,
-                BrandId = item.BrandId,
-                Content = item.Content,
-                CreatedByUsername = item.CreatedByUsername,
-                CreatedOn = item.CreatedOn,
-                DesktopBanner = item.DesktopBanner,
-                From = item.From,
-                GameProviderIds = item.GameProviderIds,
-                GameType = (GameType?)item.GameType,
-                Id = item.Id,
-                Localization = item.Localization?.ContainsKey(language) == true
-                    ? item.Localization[language]
-                    : JsonDocument.Parse("{}"),
-                MobileBanner = item.MobileBanner,
-                Name = item.Name,
-                Percentage = item.Percentage,
-                PromotionType = item.PromotionType,
-                Status = (SwitchStatus)item.Status,
-                SubSubject = item.SubSubject,
-                Terms = item.Terms,
-                To = item.To,
-                TotalAmountLimit = item.TotalAmountLimit,
-                TurnoverMultiple = item.TurnoverMultiple,
-                Unlimited = item.Unlimited,
-                UpdatedByUsername = item.UpdatedByUsername,
-                UpdatedOn = item.UpdatedOn,
-                VipLevels = item.VipLevels
-            })
-        };
-    }
+		return new PagingResponse<PromotionResponse>
+		{
+			TotalCount = response.TotalCount,
+			Items = response.Items.Select(item => new PromotionResponse
+			{
+				AmountUsed = item.AmountUsed,
+				AutoSentPlayerBonus = item.AutoSentPlayerBonus,
+				BonusAmountLimit = item.BonusAmountLimit,
+				BrandId = item.BrandId,
+				Content = item.Content,
+				CreatedByUsername = item.CreatedByUsername,
+				CreatedOn = item.CreatedOn,
+				DesktopBanner = item.DesktopBanner,
+				From = item.From,
+				GameProviderIds = item.GameProviderIds,
+				GameType = (GameType?)item.GameType,
+				Id = item.Id,
+				Localization = item.Localization?.ContainsKey(language) == true
+					? item.Localization[language]
+					: JsonDocument.Parse("{}"),
+				MobileBanner = item.MobileBanner,
+				Name = item.Name,
+				Percentage = item.Percentage,
+				PromotionType = item.PromotionType,
+				Status = (SwitchStatus)item.Status,
+				SubSubject = item.SubSubject,
+				Terms = item.Terms,
+				To = item.To,
+				TotalAmountLimit = item.TotalAmountLimit,
+				TurnoverMultiple = item.TurnoverMultiple,
+				Unlimited = item.Unlimited,
+				UpdatedByUsername = item.UpdatedByUsername,
+				UpdatedOn = item.UpdatedOn,
+				VipLevels = item.VipLevels
+			})
+		};
+	}
 }

@@ -5,7 +5,7 @@ namespace TGS.Apis.OperatorApi.Models.Messages;
 
 public class StartInitEmailRequest
 {
-    [Required]
-    [JsonPropertyName("email")]
-    public string Email { get; init; }
+	[Required]
+	[JsonPropertyName("email")]
+	public string Email { get; init; }
 }

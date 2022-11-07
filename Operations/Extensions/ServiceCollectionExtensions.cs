@@ -8,13 +8,13 @@ namespace TGS.Services.Operations.Extensions;
 
 public static class ServiceCollectionExtensions
 {
-    /// <summary>
-    ///     Dependency Injection of Operations, need to add the following dependencies beforehand:
-    ///     1. AddRepository of Tgs database
-    ///     2. AddRedis() in Infrastructures.Redis
-    /// </summary>
-    public static IServiceCollection AddOperations(this IServiceCollection services)
-    {
+	/// <summary>
+	///     Dependency Injection of Operations, need to add the following dependencies beforehand:
+	///     1. AddRepository of Tgs database
+	///     2. AddRedis() in Infrastructures.Redis
+	/// </summary>
+	public static IServiceCollection AddOperations(this IServiceCollection services)
+	{
 		#region Code Mappers
 
 		_ = services.AddScoped<IGameProviderCurrencyCodeMapper, GameProviderCurrencyCodeMapper>();
@@ -22,26 +22,26 @@ public static class ServiceCollectionExtensions
 		_ = services.AddScoped<IBrandCurrencyCodeMapper, BrandCurrencyCodeMapper>();
 		_ = services.AddScoped<IBrandLanguageCodeMapper, BrandLanguageCodeMapper>();
 
-        #endregion Code Mappers
+		#endregion Code Mappers
 
-        #region Queries
+		#region Queries
 
-        services.AddFactory<IBrandQueries, BrandQueries>();
-        services.AddFactory<IGameProviderQueries, GameProviderQueries>();
-        services.AddFactory<IPlayerQueries, PlayerQueries>();
-        services.AddFactory<IWalletQueries, WalletQueries>();
-        services.AddFactory<IGameQueries, GameQueries>();
+		services.AddFactory<IBrandQueries, BrandQueries>();
+		services.AddFactory<IGameProviderQueries, GameProviderQueries>();
+		services.AddFactory<IPlayerQueries, PlayerQueries>();
+		services.AddFactory<IWalletQueries, WalletQueries>();
+		services.AddFactory<IGameQueries, GameQueries>();
 
-        services.AddFactory<IGameActionQueries, GameActionQueries>();
-        services.AddFactory<IRoundQueries, RoundQueries>();
+		services.AddFactory<IGameActionQueries, GameActionQueries>();
+		services.AddFactory<IRoundQueries, RoundQueries>();
 
-        services.AddFactory<IBetLimitQueries, BetLimitQueries>();
+		services.AddFactory<IBetLimitQueries, BetLimitQueries>();
 
-        #endregion Queries
+		#endregion Queries
 
-        #region Commands
+		#region Commands
 
-        services.AddFactory<IPlayerCommands, PlayerCommands>();
+		services.AddFactory<IPlayerCommands, PlayerCommands>();
 
 		#endregion Commands
 
@@ -52,16 +52,16 @@ public static class ServiceCollectionExtensions
 		_ = services.AddScoped<IPlayerOperations, PlayerOperations>();
 		_ = services.AddScoped<IBrandGameProviderOperations, BrandGameProviderOperations>();
 
-        #endregion Operations
+		#endregion Operations
 
-        return services;
-    }
+		return services;
+	}
 
-    private static void AddFactory<TInterface, TServices>(this IServiceCollection services)
-        where TInterface : class
-        where TServices : class, TInterface
-    {
+	private static void AddFactory<TInterface, TServices>(this IServiceCollection services)
+		where TInterface : class
+		where TServices : class, TInterface
+	{
 		_ = services.AddScoped<TInterface, TServices>();
 		_ = services.AddTransient<Func<TInterface>>(c => c.GetRequiredService<TInterface>);
-    }
+	}
 }

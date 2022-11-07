@@ -119,11 +119,14 @@
   </resheader>
   <data name="ForgotPasswordMessage" xml:space="preserve">
     <value>Your ID verification code is : {0}</value>
+    <comment>忘記密碼</comment>
   </data>
   <data name="ValidateCodeMailSubject" xml:space="preserve">
     <value>Verification Code</value>
+    <comment>驗證碼</comment>
   </data>
   <data name="ValidateCodeMailBody" xml:space="preserve">
     <value>Your ID verification code is : {0}</value>
+    <comment>驗證碼</comment>
   </data>
 </root>

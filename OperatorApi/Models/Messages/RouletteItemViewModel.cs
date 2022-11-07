@@ -1,14 +1,12 @@
-﻿using System;
-
-#nullable enable
+﻿#nullable enable
 
 namespace TGS.Apis.OperatorApi.Models.Messages;
 
 public class RouletteItemViewModel
 {
-    public decimal Bonus { get; set; }
+	public decimal Bonus { get; set; }
 
-    public Guid Id { get; set; }
+	public Guid Id { get; set; }
 
-    public string Title { get; set; } = default!;
+	public string Title { get; set; } = default!;
 }

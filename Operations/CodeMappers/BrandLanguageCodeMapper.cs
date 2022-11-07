@@ -16,65 +16,61 @@ public interface IBrandLanguageCodeMapper : ICodeMapper
 
 public sealed class BrandLanguageCodeMapper : BaseCodeMapper, IBrandLanguageCodeMapper
 {
-    private const int CacheForMinutes = 30;
-    private readonly IBrandQueries _brandQueries;
+	private const int CacheForMinutes = 30;
+	private readonly IBrandQueries _brandQueries;
 
-    public BrandLanguageCodeMapper(
-        IRedisCacheManager cacheManager,
-        IJsonSerializationProvider json,
-        IBrandQueries brandQueries)
-        : base(cacheManager, json)
-    {
-        _brandQueries = brandQueries;
-    }
+	public BrandLanguageCodeMapper(
+		IRedisCacheManager cacheManager,
+		IJsonSerializationProvider json,
+		IBrandQueries brandQueries)
+		: base(cacheManager, json)
+	{
+		_brandQueries = brandQueries;
+	}
 
-    async Task<string> ICodeMapper.ExternalToInternalAsync(string externalCode, Guid brandId)
-    {
-        var (found, code) = await GetMappedCodeAsync(
-            externalCode,
-            brandId,
-            RedisCacheType.Languages,
-            Consts.CachePrefix.BrandToTgsMap,
-            "language",
-            CacheForMinutes,
-            id => _brandQueries.GetBrandLanguagesByExternalCodeAsync(id));
+	async Task<string> ICodeMapper.ExternalToInternalAsync(string externalCode, Guid brandId)
+	{
+		var (found, code) = await GetMappedCodeAsync(
+			externalCode,
+			brandId,
+			RedisCacheType.Languages,
+			Consts.CachePrefix.BrandToTgsMap,
+			"language",
+			CacheForMinutes,
+			id => _brandQueries.GetBrandLanguagesByExternalCodeAsync(id));
 
-        if (!found)
-        {
-            throw new InvalidOperationException(
-                $"Not found code '{externalCode}' for '{Consts.CachePrefix.BrandToTgsMap}' used for 'language' with filter id '{brandId}' (intended to be cached as {RedisCacheType.Languages})");
-        }
+		return !found
+			? throw new InvalidOperationException(
+				$"Not found code '{externalCode}' for '{Consts.CachePrefix.BrandToTgsMap}' "
+					+ $"used for 'language' with filter id '{brandId}' (intended to be cached as {RedisCacheType.Languages})")
+			: code;
+	}
 
-        return code;
-    }
+	Task<Dictionary<string, string>> ICodeMapper.GetMapByExternalCodeAsync(Guid brandId) =>
+		GetMappedCodesAsync(brandId, RedisCacheType.Languages,
+			Consts.CachePrefix.BrandToTgsMap, CacheForMinutes,
+			id => _brandQueries.GetBrandLanguagesByExternalCodeAsync(id));
 
-    async Task<string> ICodeMapper.InternalToExternalAsync(string internalCode, Guid brandId)
-    {
-        var (found, code) = await GetMappedCodeAsync(
-            internalCode,
-            brandId,
-            RedisCacheType.Languages,
-            Consts.CachePrefix.TgsToBrandMap,
-            "language",
-            CacheForMinutes,
-            id => _brandQueries.GetBrandLanguagesByInternalCodeAsync(id));
+	Task<Dictionary<string, string>> ICodeMapper.GetMapByInternalCodeAsync(Guid brandId) =>
+		GetMappedCodesAsync(brandId, RedisCacheType.Languages,
+			Consts.CachePrefix.TgsToBrandMap, CacheForMinutes,
+			id => _brandQueries.GetBrandLanguagesByInternalCodeAsync(id));
 
-        if (!found)
-        {
-            throw new InvalidOperationException(
-                $"Not found code '{internalCode}' for '{Consts.CachePrefix.TgsToBrandMap}' used for 'language' with filter id '{brandId}' (intended to be cached as {RedisCacheType.Languages})");
-        }
+	async Task<string> ICodeMapper.InternalToExternalAsync(string internalCode, Guid brandId)
+	{
+		var (found, code) = await GetMappedCodeAsync(
+			internalCode,
+			brandId,
+			RedisCacheType.Languages,
+			Consts.CachePrefix.TgsToBrandMap,
+			"language",
+			CacheForMinutes,
+			id => _brandQueries.GetBrandLanguagesByInternalCodeAsync(id));
 
-        return code;
-    }
-
-    Task<Dictionary<string, string>> ICodeMapper.GetMapByExternalCodeAsync(Guid brandId) =>
-        GetMappedCodesAsync(brandId, RedisCacheType.Languages,
-            Consts.CachePrefix.BrandToTgsMap, CacheForMinutes,
-            id => _brandQueries.GetBrandLanguagesByExternalCodeAsync(id));
-
-    Task<Dictionary<string, string>> ICodeMapper.GetMapByInternalCodeAsync(Guid brandId) =>
-        GetMappedCodesAsync(brandId, RedisCacheType.Languages,
-            Consts.CachePrefix.TgsToBrandMap, CacheForMinutes,
-            id => _brandQueries.GetBrandLanguagesByInternalCodeAsync(id));
+		return !found
+			? throw new InvalidOperationException(
+				$"Not found code '{internalCode}' for '{Consts.CachePrefix.TgsToBrandMap}' "
+					+ $"used for 'language' with filter id '{brandId}' (intended to be cached as {RedisCacheType.Languages})")
+			: code;
+	}
 }

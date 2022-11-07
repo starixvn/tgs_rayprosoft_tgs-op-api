@@ -8,19 +8,19 @@ namespace TGS.Services.Operator.ApplicationServices.Player;
 
 internal class CheckBrandEmailQueryService : IGetService<CheckBrandEmailQuery, bool>
 {
-    private readonly IPlayerServiceClient _playerServiceClient;
+	private readonly IPlayerServiceClient _playerServiceClient;
 
-    public CheckBrandEmailQueryService(IPlayerServiceClient playerServiceClient)
-    {
-        _playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
-    }
+	public CheckBrandEmailQueryService(IPlayerServiceClient playerServiceClient)
+	{
+		_playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
+	}
 
-    public async ValueTask<bool> GetAsync(CheckBrandEmailQuery query, CancellationToken cancellationToken = default)
-    {
-        var player = await _playerServiceClient
-            .GetPlayerInfoByEmailAsync(query.BrandId, query.Email, cancellationToken)
-            .ConfigureAwait(false);
+	public async ValueTask<bool> GetAsync(CheckBrandEmailQuery query, CancellationToken cancellationToken = default)
+	{
+		var player = await _playerServiceClient
+			.GetPlayerInfoByEmailAsync(query.BrandId, query.Email, cancellationToken)
+			.ConfigureAwait(false);
 
-        return player is not null && player.PlayerCode != query.PlayerCode;
-    }
+		return player is not null && player.PlayerCode != query.PlayerCode;
+	}
 }

@@ -2,5 +2,5 @@
 
 public class BetConstructHtmlContentInfo
 {
-    public string Html { get; init; } = default!;
+	public string Html { get; init; } = default!;
 }

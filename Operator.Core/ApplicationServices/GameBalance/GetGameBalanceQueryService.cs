@@ -8,16 +8,16 @@ namespace TGS.Services.Operator.ApplicationServices.GameBalance;
 
 internal class GetGameBalanceQueryService : IGetService<GetGameBalanceQuery, decimal>
 {
-    private readonly IGameProvidersOperatorPluggableClient _providersOperatorPluggableClient;
+	private readonly IGameProvidersOperatorPluggableClient _providersOperatorPluggableClient;
 
-    public GetGameBalanceQueryService(IGameProvidersOperatorPluggableClient providersOperatorPluggableClient)
-    {
-        _providersOperatorPluggableClient = providersOperatorPluggableClient ?? throw new ArgumentNullException(nameof(providersOperatorPluggableClient));
-    }
+	public GetGameBalanceQueryService(IGameProvidersOperatorPluggableClient providersOperatorPluggableClient)
+	{
+		_providersOperatorPluggableClient = providersOperatorPluggableClient ?? throw new ArgumentNullException(nameof(providersOperatorPluggableClient));
+	}
 
-    public ValueTask<decimal> GetAsync(GetGameBalanceQuery query, CancellationToken cancellationToken = default)
-        => _providersOperatorPluggableClient.GetBalanceAsync(
-            playerCode: query.PlayerCode,
-            gameProviderCode: query.GameProviderCode,
-            cancellationToken: cancellationToken);
+	public ValueTask<decimal> GetAsync(GetGameBalanceQuery query, CancellationToken cancellationToken = default)
+		=> _providersOperatorPluggableClient.GetBalanceAsync(
+			playerCode: query.PlayerCode,
+			gameProviderCode: query.GameProviderCode,
+			cancellationToken: cancellationToken);
 }

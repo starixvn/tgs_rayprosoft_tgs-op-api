@@ -6,15 +6,15 @@ namespace TGS.Apis.OperatorApi.Models.Messages;
 
 public record GetGameProvidersRequest
 {
-    [Required]
-    [BindProperty(Name = "platformtype", SupportsGet = true)]
-    public PlatformType PlatformType { get; init; }
+	[Required]
+	[BindProperty(Name = "platformtype", SupportsGet = true)]
+	public PlatformType PlatformType { get; init; }
 
-    [Required]
-    [BindProperty(Name = "language", SupportsGet = true)]
-    public string LanguageCode { get; init; }
+	[Required]
+	[BindProperty(Name = "language", SupportsGet = true)]
+	public string LanguageCode { get; init; }
 
-    [Required]
-    [BindProperty(Name = "currency", SupportsGet = true)]
-    public string CurrencyCode { get; init; }
+	[Required]
+	[BindProperty(Name = "currency", SupportsGet = true)]
+	public string CurrencyCode { get; init; }
 }

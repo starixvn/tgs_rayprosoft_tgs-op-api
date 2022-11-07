@@ -6,27 +6,27 @@ namespace TGS.Services.Operator;
 
 public interface IPlayerRepository
 {
-    ValueTask<Guid> CreatePlayerAuthenticationFormAsync(Guid brandId, string playerCode, string data);
+	ValueTask<Guid> CreatePlayerAuthenticationFormAsync(Guid brandId, string playerCode, string data);
 
-    ValueTask<bool> GetPlayerAutoTransferFlagAsync(string playerCode);
+	ValueTask<bool> GetPlayerAutoTransferFlagAsync(string playerCode);
 
-    ValueTask<PlayerIdentityFormInfo> GetPlayerIdentityFormQueryAsync(string playerCode);
+	ValueTask<PlayerIdentityFormInfo> GetPlayerIdentityFormQueryAsync(string playerCode);
 
-    ValueTask<PasswordInfo> GetPlayerLoginPasswordInfoAsync(string playerCode);
+	ValueTask<PasswordInfo> GetPlayerLoginPasswordInfoAsync(string playerCode);
 
-    ValueTask PlayerLoginIpAsync(string playerCode, string ip, string host);
+	ValueTask PlayerLoginIpAsync(string playerCode, string ip, string host);
 
-    ValueTask PlayerRegisterIpAsync(string playerCode, string ip, string? host, DateTimeOffset registeredOn);
+	ValueTask PlayerRegisterIpAsync(string playerCode, string ip, string? host, DateTimeOffset registeredOn);
 
-    ValueTask SetPlayerEmailAsync(string playerCode, string email);
+	ValueTask SetPlayerEmailAsync(string playerCode, string email);
 
-    ValueTask SetPlayerPhoneAsync(string playerCode, string areaCode, string phone);
+	ValueTask SetPlayerPhoneAsync(string playerCode, string areaCode, string phone);
 
-    ValueTask TogglePlayerAutoTransferFlagAsync(string playerCode);
+	ValueTask TogglePlayerAutoTransferFlagAsync(string playerCode);
 
-    ValueTask UpdatePlayerIdentityAsync(string playerCode, Guid identityAuthenticationFormId);
+	ValueTask UpdatePlayerIdentityAsync(string playerCode, Guid identityAuthenticationFormId);
 
-    ValueTask UpdatePlayerLoginPasswordAsync(string playerCode, byte[] salt, byte[] password);
+	ValueTask UpdatePlayerLoginPasswordAsync(string playerCode, byte[] salt, byte[] password);
 
-    ValueTask UpdatePlayerStatusAsync(string playerCode, PlayerStatus playerStatus);
+	ValueTask UpdatePlayerStatusAsync(string playerCode, PlayerStatus playerStatus);
 }

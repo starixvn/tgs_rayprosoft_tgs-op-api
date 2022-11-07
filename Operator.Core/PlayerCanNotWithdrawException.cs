@@ -4,7 +4,7 @@ namespace TGS.Services.Operator;
 
 public class PlayerCanNotWithdrawException : Exception
 {
-    public PlayerCanNotWithdrawException()
-    {
-    }
+	public PlayerCanNotWithdrawException()
+	{
+	}
 }

@@ -6,17 +6,17 @@ namespace TGS.Services.Operator;
 
 public record GameProviderInfo
 {
-    public string Code { get; init; } = default!;
+	public string Code { get; init; } = default!;
 
-    public string Description { get; init; } = default!;
+	public string Description { get; init; } = default!;
 
-    public GameType[] GameTypes { get; init; } = default!;
+	public GameType[] GameTypes { get; init; } = default!;
 
-    public bool IsTransferWallet { get; init; }
+	public bool IsTransferWallet { get; init; }
 
-    public IDictionary<string, JsonDocument>? Localization { get; init; }
+	public IDictionary<string, JsonDocument>? Localization { get; init; }
 
-    public string Name { get; init; } = default!;
+	public string Name { get; init; } = default!;
 
-    public Status Status { get; init; }
+	public Status Status { get; init; }
 }

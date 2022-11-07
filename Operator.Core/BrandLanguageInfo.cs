@@ -2,5 +2,5 @@
 
 public class BrandLanguageInfo
 {
-    public string CultureCode { get; init; } = default!;
+	public string CultureCode { get; init; } = default!;
 }

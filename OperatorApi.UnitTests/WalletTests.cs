@@ -16,17 +16,17 @@ namespace TGS.Tests.OperatorApi.UnitTests;
 [TestFixture]
 public class WalletTests
 {
-    [Test]
-    public async Task Player_Can_Get_Balance_Info()
-    {
-        var moqCashServiceClient = new Mock<ICashServiceClient>();
-        var moqPlayerOperations = new Mock<IPlayerOperations>();
-        var moqPlayerOnlineRepository = new Mock<IPlayerOnlineRepository>();
+	[Test]
+	public async Task Player_Can_Get_Balance_Info()
+	{
+		var moqCashServiceClient = new Mock<ICashServiceClient>();
+		var moqPlayerOperations = new Mock<IPlayerOperations>();
+		var moqPlayerOnlineRepository = new Mock<IPlayerOnlineRepository>();
 
-        var sut = new GetBalanceQueryService(moqCashServiceClient.Object, moqPlayerOperations.Object, moqPlayerOnlineRepository.Object);
+		var sut = new GetBalanceQueryService(moqCashServiceClient.Object, moqPlayerOperations.Object, moqPlayerOnlineRepository.Object);
 
-        var playerCode = "ThisIsPlayerCode";
-        var brandId = Guid.NewGuid();
+		var playerCode = "ThisIsPlayerCode";
+		var brandId = Guid.NewGuid();
 		_ = moqPlayerOperations.Setup(fake => fake.GetCachedPlayerAsync(It.Is<string>(x => x == playerCode)))
 			.Returns(Task.FromResult(new CachedPlayer
 			{
@@ -41,7 +41,7 @@ public class WalletTests
 				Status = PlayerStatus.Enabled,
 				Type = PlayerType.RealPlayer
 			}));
-        var expected = new BalanceInfo(10000M).ToExpectedObject();
+		var expected = new BalanceInfo(10000M).ToExpectedObject();
 
 		_ = moqCashServiceClient
 			.Setup(fake => fake.GetBalanceAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
@@ -49,8 +49,8 @@ public class WalletTests
 
 		_ = moqPlayerOnlineRepository.Setup(fake => fake.SetAsync(brandId, playerCode));
 
-        var actual = await sut.GetAsync(new GetBalanceQuery(playerCode));
+		var actual = await sut.GetAsync(new GetBalanceQuery(playerCode));
 
-        expected.ShouldMatch(actual);
-    }
+		expected.ShouldMatch(actual);
+	}
 }

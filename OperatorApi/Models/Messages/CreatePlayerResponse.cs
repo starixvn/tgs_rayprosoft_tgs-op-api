@@ -5,9 +5,9 @@ namespace TGS.Apis.OperatorApi.Models.Messages;
 
 public record CreatePlayerResponse : TgsResponse
 {
-    [JsonPropertyName("uid")]
-    public string PlayerCode { get; init; }
+	[JsonPropertyName("uid")]
+	public string PlayerCode { get; init; }
 
-    [JsonPropertyName("isnew")]
-    public bool IsNew { get; init; }
+	[JsonPropertyName("isnew")]
+	public bool IsNew { get; init; }
 }

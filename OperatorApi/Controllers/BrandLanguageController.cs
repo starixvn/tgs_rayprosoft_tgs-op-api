@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
+﻿using System.ComponentModel;
 using Microsoft.AspNetCore.Mvc;
 using Tgs.ServiceUtility;
 using TGS.Apis.OperatorApi.Attributes;
@@ -15,21 +13,21 @@ namespace TGS.Apis.OperatorApi.Controllers;
 [ApiController]
 public class BrandLanguageController : ControllerBase
 {
-    [HttpGet]
-    [Description("Get a brand's languages")]
-    [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = false)]
-    public IAsyncEnumerable<BrandLanguageModel> GetBrandLanguagesAsync(
-       [FromServices] IQueryService<BrandLanguageQuery, BrandLanguageInfo> queryService)
-    {
-        var brandId = HttpContext.Items.GetBrandId();
+	[HttpGet]
+	[Description("Get a brand's languages")]
+	[AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = false)]
+	public IAsyncEnumerable<BrandLanguageModel> GetBrandLanguagesAsync(
+	   [FromServices] IQueryService<BrandLanguageQuery, BrandLanguageInfo> queryService)
+	{
+		var brandId = HttpContext.Items.GetBrandId();
 
-        var query = new BrandLanguageQuery(brandId);
-        var info = queryService.QueryAsync(query);
+		var query = new BrandLanguageQuery(brandId);
+		var info = queryService.QueryAsync(query);
 
-        return info.Select(x =>
-            new BrandLanguageModel()
-            {
-                CultureCode = x.CultureCode
-            });
-    }
+		return info.Select(x =>
+			new BrandLanguageModel()
+			{
+				CultureCode = x.CultureCode
+			});
+	}
 }

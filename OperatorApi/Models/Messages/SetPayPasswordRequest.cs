@@ -4,6 +4,6 @@ namespace TGS.Apis.OperatorApi.Models.Messages;
 
 public record SetPayPasswordRequest
 {
-    [JsonPropertyName("pwd")]
-    public string Password { get; init; }
+	[JsonPropertyName("pwd")]
+	public string Password { get; init; }
 }

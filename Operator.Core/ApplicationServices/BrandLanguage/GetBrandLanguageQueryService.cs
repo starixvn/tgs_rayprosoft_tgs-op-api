@@ -11,25 +11,25 @@ namespace TGS.Services.Operator.ApplicationServices.BrandLanguage;
 
 internal class GetBrandLanguageQueryService : IQueryService<BrandLanguageQuery, BrandLanguageInfo>
 {
-    private readonly ITgsRepository _tgsRepository;
+	private readonly ITgsRepository _tgsRepository;
 
-    public GetBrandLanguageQueryService(ITgsRepository tgsRepository)
-    {
-        _tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
-    }
+	public GetBrandLanguageQueryService(ITgsRepository tgsRepository)
+	{
+		_tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
+	}
 
-    public async IAsyncEnumerable<BrandLanguageInfo> QueryAsync(
-        BrandLanguageQuery query,
-        [EnumeratorCancellation] CancellationToken cancellationToken = default)
-    {
-        var brand = await _tgsRepository.Brands.FirstAsync(x => x.Id == query.BrandId);
+	public async IAsyncEnumerable<BrandLanguageInfo> QueryAsync(
+		BrandLanguageQuery query,
+		[EnumeratorCancellation] CancellationToken cancellationToken = default)
+	{
+		var brand = await _tgsRepository.Brands.FirstAsync(x => x.Id == query.BrandId, cancellationToken: cancellationToken);
 
-        foreach (var language in brand.Languages)
-        {
-            yield return new BrandLanguageInfo()
-            {
-                CultureCode = language.CultureCode
-            };
-        }
-    }
+		foreach (var language in brand.Languages)
+		{
+			yield return new BrandLanguageInfo()
+			{
+				CultureCode = language.CultureCode
+			};
+		}
+	}
 }

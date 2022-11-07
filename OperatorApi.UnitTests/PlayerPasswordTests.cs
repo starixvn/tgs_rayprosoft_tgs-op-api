@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Globalization;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
@@ -21,100 +21,100 @@ namespace TGS.Tests.OperatorApi.UnitTests;
 
 public class PlayerPasswordTests
 {
-    [Test]
-    public async Task Change_Player_Password_Should_Success()
-    {
-        var playerCode = "testPlayerCode";
-        var fakeHttpContext = new DefaultHttpContext();
+	[Test]
+	public async Task Change_Player_Password_Should_Success()
+	{
+		var playerCode = "testPlayerCode";
+		var fakeHttpContext = new DefaultHttpContext();
 
-        fakeHttpContext.Items.Add("playerToken",
-            new PlayerTokenData
-            {
-                PlayerCode = playerCode
-            });
+		fakeHttpContext.Items.Add("playerToken",
+			new PlayerTokenData
+			{
+				PlayerCode = playerCode
+			});
 
-        var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+		var fakePlayerRepository = Substitute.For<IPlayerRepository>();
 
-        _ = fakePlayerRepository
-              .GetPlayerLoginPasswordInfoAsync(Arg.Any<string>())
-              .Returns(new PasswordInfo(
-                  Salt: new byte[]
-                  {
-                    1,
-                    2,
-                    3
-                  },
-                  Password: new byte[]
-                  {
-                    4,
-                    5,
-                    6
-                  }));
+		_ = fakePlayerRepository
+			  .GetPlayerLoginPasswordInfoAsync(Arg.Any<string>())
+			  .Returns(new PasswordInfo(
+				  Salt: new byte[]
+				  {
+					1,
+					2,
+					3
+				  },
+				  Password: new byte[]
+				  {
+					4,
+					5,
+					6
+				  }));
 
-        var fakePasswordHandler = Substitute.For<IPasswordHandler>();
+		var fakePasswordHandler = Substitute.For<IPasswordHandler>();
 
-        var sut = new ChangePasswordQueryService(
-            fakePlayerRepository,
-            fakePasswordHandler);
+		var sut = new ChangePasswordQueryService(
+			fakePlayerRepository,
+			fakePasswordHandler);
 
-        var brandId = Guid.NewGuid();
-        var query = new ChangePasswordQuery(brandId, playerCode, "oldPassword", "newPassword");
+		var brandId = Guid.NewGuid();
+		var query = new ChangePasswordQuery(brandId, playerCode, "oldPassword", "newPassword");
 
-        _ = fakePasswordHandler
-            .Verify(Arg.Any<byte[]>(), Arg.Any<byte[]>(), Arg.Is(query.OldPassword))
-            .Returns(true);
+		_ = fakePasswordHandler
+			.Verify(Arg.Any<byte[]>(), Arg.Any<byte[]>(), Arg.Is(query.OldPassword))
+			.Returns(true);
 
-        _ = fakePasswordHandler
-             .GenerateCredential(Arg.Is(query.NewPassword))
-             .Returns((
-                 Salt: new byte[]
-                 {
-                    1,
-                    2,
-                    3
-                 },
-                 HashedPassword: new byte[]
-                 {
-                    4,
-                    5,
-                    6
-                 }));
+		_ = fakePasswordHandler
+			 .GenerateCredential(Arg.Is(query.NewPassword))
+			 .Returns((
+				 Salt: new byte[]
+				 {
+					1,
+					2,
+					3
+				 },
+				 HashedPassword: new byte[]
+				 {
+					4,
+					5,
+					6
+				 }));
 
-        var expected = playerCode;
+		var expected = playerCode;
 
-        var actual = await sut.GetAsync(query);
+		var actual = await sut.GetAsync(query);
 
-        Assert.AreEqual(expected, actual.PlayerCode);
+		Assert.AreEqual(expected, actual.PlayerCode);
 
-        _ = fakePlayerRepository
-            .Received(1)
-            .UpdatePlayerLoginPasswordAsync(
-                Arg.Is(playerCode),
-                Arg.Is<byte[]>(x => x.Length > 0),
-                Arg.Is<byte[]>(x => x.Length > 0));
-    }
+		_ = fakePlayerRepository
+			.Received(1)
+			.UpdatePlayerLoginPasswordAsync(
+				Arg.Is(playerCode),
+				Arg.Is<byte[]>(x => x.Length > 0),
+				Arg.Is<byte[]>(x => x.Length > 0));
+	}
 
-    [Test]
-    public async Task Forgot_Password_By_Sms_Will_Send_Message()
-    {
-        var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
-        var fakeValidateCodeGenerator = Substitute.For<IValidateCodeGenerator>();
-        var fakeValidateCodeOperator = Substitute.For<IValidateCodeOperator>();
-        var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
-        var fakeSmsServiceClient = Substitute.For<ISmsServiceClient>();
+	[Test]
+	public async Task Forgot_Password_By_Sms_Will_Send_Message()
+	{
+		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
+		var fakeValidateCodeGenerator = Substitute.For<IValidateCodeGenerator>();
+		var fakeValidateCodeOperator = Substitute.For<IValidateCodeOperator>();
+		var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
+		var fakeSmsServiceClient = Substitute.For<ISmsServiceClient>();
 
-        var sut = new ForgotPasswordBySmsCommandService(
-            fakePlayerServiceClient,
-            fakeValidateCodeGenerator,
-            fakeValidateCodeOperator,
-            fakeBrandServiceClient,
-            fakeSmsServiceClient);
+		var sut = new ForgotPasswordBySmsCommandService(
+			fakePlayerServiceClient,
+			fakeValidateCodeGenerator,
+			fakeValidateCodeOperator,
+			fakeBrandServiceClient,
+			fakeSmsServiceClient);
 
-        var command = new ForgotPasswordBySmsCommand(
-            Guid.NewGuid(),
-            CultureInfo.GetCultureInfo("en-US"),
-            "886",
-            "0912345678");
+		var command = new ForgotPasswordBySmsCommand(
+			Guid.NewGuid(),
+			CultureInfo.GetCultureInfo("en-US"),
+			"886",
+			"0912345678");
 
 		_ = fakePlayerServiceClient
 			.GetPlayerInfoByPhoneAsync(
@@ -128,8 +128,8 @@ public class PlayerPasswordTests
 				PhoneAuthentication = true
 			});
 
-        var validateCode = "123456";
-        var token = "abc123";
+		var validateCode = "123456";
+		var token = "abc123";
 
 		_ = fakeValidateCodeGenerator.GenerateCode().Returns(validateCode);
 		_ = fakeValidateCodeGenerator.GenerateSecurityKey().Returns(token);
@@ -151,87 +151,87 @@ public class PlayerPasswordTests
 				SmsRegisterFlowEnabled = true
 			});
 
-        var expected = $"Your ID verification code is : {validateCode}";
+		var expected = $"Your ID verification code is : {validateCode}";
 
 		_ = await sut.GetAsync(command);
 
-        _ = fakeSmsServiceClient.Received(1)
-            .SendShortMessageAsync(
-                Arg.Is($"{command.AreaCode}{command.Phone}"),
-                Arg.Is(expected),
-                Arg.Is(command.BrandId));
-    }
+		_ = fakeSmsServiceClient.Received(1)
+			.SendShortMessageAsync(
+				Arg.Is($"{command.AreaCode}{command.Phone}"),
+				Arg.Is(expected),
+				Arg.Is(command.BrandId));
+	}
 
-    [Test]
-    public void Forgot_Password_Not_Found_Player_By_Phone_Will_Throw_Exception()
-    {
-        var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
-        var fakeValidateCodeGenerator = Substitute.For<IValidateCodeGenerator>();
-        var fakeValidateCodeOperator = Substitute.For<IValidateCodeOperator>();
-        var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
-        var fakeSmsServiceClient = Substitute.For<ISmsServiceClient>();
+	[Test]
+	public void Forgot_Password_Not_Found_Player_By_Phone_Will_Throw_Exception()
+	{
+		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
+		var fakeValidateCodeGenerator = Substitute.For<IValidateCodeGenerator>();
+		var fakeValidateCodeOperator = Substitute.For<IValidateCodeOperator>();
+		var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
+		var fakeSmsServiceClient = Substitute.For<ISmsServiceClient>();
 
-        var sut = new ForgotPasswordBySmsCommandService(
-            fakePlayerServiceClient,
-            fakeValidateCodeGenerator,
-            fakeValidateCodeOperator,
-            fakeBrandServiceClient,
-            fakeSmsServiceClient);
+		var sut = new ForgotPasswordBySmsCommandService(
+			fakePlayerServiceClient,
+			fakeValidateCodeGenerator,
+			fakeValidateCodeOperator,
+			fakeBrandServiceClient,
+			fakeSmsServiceClient);
 
-        var command = new ForgotPasswordBySmsCommand(
-            Guid.NewGuid(),
-            CultureInfo.GetCultureInfo("en-US"),
-            "886",
-            "0912345678");
+		var command = new ForgotPasswordBySmsCommand(
+			Guid.NewGuid(),
+			CultureInfo.GetCultureInfo("en-US"),
+			"886",
+			"0912345678");
 
 		_ = Assert.ThrowsAsync<PlayerNotFoundException>(async () => await sut.GetAsync(command));
-    }
+	}
 
-    [Test]
-    public async Task Forgot_Password_Will_Sent_Email()
-    {
-        var email = "email@test.com";
+	[Test]
+	public async Task Forgot_Password_Will_Sent_Email()
+	{
+		var email = "email@test.com";
 
-        var dbContextOptionsBuilder = new DbContextOptionsBuilder<TgsRepository>();
+		var dbContextOptionsBuilder = new DbContextOptionsBuilder<TgsRepository>();
 
 		_ = dbContextOptionsBuilder
 			.UseInMemoryDatabase(Guid.NewGuid().ToString())
 			.ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
 
-        var fakeTgsRepository = new TgsRepository(dbContextOptionsBuilder.Options);
+		var fakeTgsRepository = new TgsRepository(dbContextOptionsBuilder.Options);
 
-        var player = new Player
-        {
-            PlayerCode = "abcdef123456",
-            Username = "Tester",
-            BrandId = Guid.NewGuid(),
-            Email = email,
-            PhoneAuthentication = true,
-            DefaultWalletCurrencyCode = "CNY",
-            Password = Array.Empty<byte>(),
-            Salt = Array.Empty<byte>(),
-            WithdrawPassword = Array.Empty<byte>(),
-            WithdrawSalt = Array.Empty<byte>()
-        };
+		var player = new Player
+		{
+			PlayerCode = "abcdef123456",
+			Username = "Tester",
+			BrandId = Guid.NewGuid(),
+			Email = email,
+			PhoneAuthentication = true,
+			DefaultWalletCurrencyCode = "CNY",
+			Password = Array.Empty<byte>(),
+			Salt = Array.Empty<byte>(),
+			WithdrawPassword = Array.Empty<byte>(),
+			WithdrawSalt = Array.Empty<byte>()
+		};
 
 		_ = await fakeTgsRepository.Players.AddAsync(player);
 		_ = await fakeTgsRepository.SaveChangesAsync();
 
-        var fakeValidateCodeGenerator = Substitute.For<IValidateCodeGenerator>();
-        var fakeValidateCodeOperator = Substitute.For<IValidateCodeOperator>();
+		var fakeValidateCodeGenerator = Substitute.For<IValidateCodeGenerator>();
+		var fakeValidateCodeOperator = Substitute.For<IValidateCodeOperator>();
 
-        var sut = new ForgotPasswordByMailCommandService(
-            fakeTgsRepository,
-            fakeValidateCodeGenerator,
-            fakeValidateCodeOperator);
+		var sut = new ForgotPasswordByMailCommandService(
+			fakeTgsRepository,
+			fakeValidateCodeGenerator,
+			fakeValidateCodeOperator);
 
-        var command = new ForgotPasswordByMailCommand(
-            player.BrandId,
-            CultureInfo.GetCultureInfo("en-US"),
-            email);
+		var command = new ForgotPasswordByMailCommand(
+			player.BrandId,
+			CultureInfo.GetCultureInfo("en-US"),
+			email);
 
-        var validateCode = "123456";
-        var token = "abc123";
+		var validateCode = "123456";
+		var token = "abc123";
 
 		_ = fakeValidateCodeGenerator.GenerateCode().Returns(validateCode);
 		_ = fakeValidateCodeGenerator.GenerateSecurityKey().Returns(token);
@@ -245,87 +245,87 @@ public class PlayerPasswordTests
 
 		_ = await sut.GetAsync(command);
 
-        _ = fakeValidateCodeOperator
-            .Received(1)
-            .SendEmailAsync(
-                Arg.Is(command.CultureInfo),
-                Arg.Is(player.Email),
-                Arg.Is(validateCode));
-    }
+		_ = fakeValidateCodeOperator
+			.Received(1)
+			.SendEmailAsync(
+				Arg.Is(command.CultureInfo),
+				Arg.Is(player.Email),
+				Arg.Is(validateCode));
+	}
 
-    [Test]
-    public void Reset_Password_If_Not_Verify_ValidateCode_Should_Throw_Exception()
-    {
-        var fakePlayerRepository = Substitute.For<IPlayerRepository>();
-        var fakeValidateCodeOperator = Substitute.For<IValidateCodeOperator>();
+	[Test]
+	public void Reset_Password_If_Not_Verify_ValidateCode_Should_Throw_Exception()
+	{
+		var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+		var fakeValidateCodeOperator = Substitute.For<IValidateCodeOperator>();
 
-        var sut = new ResetPasswordCommandService(
-            fakePlayerRepository,
-            Substitute.For<IPasswordHandler>(),
-            fakeValidateCodeOperator);
+		var sut = new ResetPasswordCommandService(
+			fakePlayerRepository,
+			Substitute.For<IPasswordHandler>(),
+			fakeValidateCodeOperator);
 
-        var command = new ResetPasswordCommand("31B51623-2D9D-4A5B-B6F4-32924C5A91EB", "654321", "newPassword");
+		var command = new ResetPasswordCommand("31B51623-2D9D-4A5B-B6F4-32924C5A91EB", "654321", "newPassword");
 
-        _ = fakeValidateCodeOperator.GetValidateCodeDataAsync<ValidateCodeData>(Arg.Any<string>(), Arg.Any<string>())
-             .Returns((ValidateCodeData)null);
+		_ = fakeValidateCodeOperator.GetValidateCodeDataAsync<ValidateCodeData>(Arg.Any<string>(), Arg.Any<string>())
+			 .Returns((ValidateCodeData)null);
 
-        _ = Assert.ThrowsAsync<ValidateCodeNotVerifyException>(async () => await sut.ExecuteAsync(command));
-    }
+		_ = Assert.ThrowsAsync<ValidateCodeNotVerifyException>(async () => await sut.ExecuteAsync(command));
+	}
 
-    [Test]
-    public async Task Reset_Password_Should_Success()
-    {
-        var fakePlayerRepository = Substitute.For<IPlayerRepository>();
-        var fakeValidateCodeOperator = Substitute.For<IValidateCodeOperator>();
+	[Test]
+	public async Task Reset_Password_Should_Success()
+	{
+		var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+		var fakeValidateCodeOperator = Substitute.For<IValidateCodeOperator>();
 
-        var sut = new ResetPasswordCommandService(
-            fakePlayerRepository,
-            Substitute.For<IPasswordHandler>(),
-            fakeValidateCodeOperator);
+		var sut = new ResetPasswordCommandService(
+			fakePlayerRepository,
+			Substitute.For<IPasswordHandler>(),
+			fakeValidateCodeOperator);
 
-        var command = new ResetPasswordCommand("31B51623-2D9D-4A5B-B6F4-32924C5A91EB", "123456", "newPassword");
+		var command = new ResetPasswordCommand("31B51623-2D9D-4A5B-B6F4-32924C5A91EB", "123456", "newPassword");
 
-        _ = fakeValidateCodeOperator.GetValidateCodeDataAsync<ValidateCodeData>(Arg.Any<string>(), Arg.Any<string>())
-              .Returns(callInfo =>
-              {
-                  var token = callInfo.ArgAt<string>(0);
+		_ = fakeValidateCodeOperator.GetValidateCodeDataAsync<ValidateCodeData>(Arg.Any<string>(), Arg.Any<string>())
+			  .Returns(callInfo =>
+			  {
+				  var token = callInfo.ArgAt<string>(0);
 
-                  return new ValidateCodeData("testPlayerCode", token);
-              });
+				  return new ValidateCodeData("testPlayerCode", token);
+			  });
 
-        await sut.ExecuteAsync(command);
+		await sut.ExecuteAsync(command);
 
-        _ = fakePlayerRepository
-            .Received(1)
-            .UpdatePlayerLoginPasswordAsync(
-                Arg.Is("testPlayerCode"),
-            Arg.Any<byte[]>(),
-                Arg.Any<byte[]>());
-    }
+		_ = fakePlayerRepository
+			.Received(1)
+			.UpdatePlayerLoginPasswordAsync(
+				Arg.Is("testPlayerCode"),
+			Arg.Any<byte[]>(),
+				Arg.Any<byte[]>());
+	}
 
-    [Test]
-    public async Task Validate_Password_Should_Success()
-    {
-        var playerCode = "playerCode";
-        var password = "password";
+	[Test]
+	public async Task Validate_Password_Should_Success()
+	{
+		var playerCode = "playerCode";
+		var password = "password";
 
-        var fakePlayerRepository = Substitute.For<IPlayerRepository>();
-        var fakePasswordHandler = Substitute.For<IPasswordHandler>();
+		var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+		var fakePasswordHandler = Substitute.For<IPasswordHandler>();
 
-        _ = fakePlayerRepository.GetPlayerLoginPasswordInfoAsync(Arg.Any<string>())
-            .Returns(new PasswordInfo(
-                Array.Empty<byte>(),
-                Array.Empty<byte>()
-            ));
+		_ = fakePlayerRepository.GetPlayerLoginPasswordInfoAsync(Arg.Any<string>())
+			.Returns(new PasswordInfo(
+				Array.Empty<byte>(),
+				Array.Empty<byte>()
+			));
 
-        var sut = new PlayerPasswordValidateCommandService(fakePlayerRepository, fakePasswordHandler);
+		var sut = new PlayerPasswordValidateCommandService(fakePlayerRepository, fakePasswordHandler);
 
-        var command = new PlayerPasswordValidateCommand(playerCode, password);
+		var command = new PlayerPasswordValidateCommand(playerCode, password);
 
 		_ = await sut.GetAsync(command);
 
-        _ = fakePasswordHandler
-            .Received(1)
-            .Verify(Arg.Any<byte[]>(), Arg.Any<byte[]>(), Arg.Any<string>());
-    }
+		_ = fakePasswordHandler
+			.Received(1)
+			.Verify(Arg.Any<byte[]>(), Arg.Any<byte[]>(), Arg.Any<string>());
+	}
 }

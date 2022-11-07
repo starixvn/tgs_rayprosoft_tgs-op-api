@@ -5,9 +5,9 @@ namespace TGS.Services.Operator;
 
 public interface IMaintenanceRedisRepository
 {
-    ValueTask<string?> GetBrandMaintenanceAsync(Guid id);
+	ValueTask<string?> GetBrandMaintenanceAsync(Guid id);
 
-    ValueTask<string?> GetLicenseeMaintenanceAsync(Guid id);
+	ValueTask<string?> GetLicenseeMaintenanceAsync(Guid id);
 
-    ValueTask<string?> GetResellerMaintenanceAsync(Guid ids);
+	ValueTask<string?> GetResellerMaintenanceAsync(Guid ids);
 }

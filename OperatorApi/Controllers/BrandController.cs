@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Tgs.ServiceUtility;
 using TGS.Apis.OperatorApi.Attributes;
@@ -14,29 +13,29 @@ namespace TGS.Apis.OperatorApi.Controllers;
 [ApiController]
 public class BrandController : ControllerBase
 {
-    [HttpGet]
-    [Description("Get a brand")]
-    [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = false)]
-    public async ValueTask<BrandInfoResponse> GetBrandAsync(
-        [FromServices] IGetService<BrandQuery, BrandInfo> queryService,
-        [FromHeader(Name = "Agent-Invitation-Code")] string invitationCode)
-    {
-        var brandId = HttpContext.GetBrandId().Value;
+	[HttpGet]
+	[Description("Get a brand")]
+	[AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = false)]
+	public async ValueTask<BrandInfoResponse> GetBrandAsync(
+		[FromServices] IGetService<BrandQuery, BrandInfo> queryService,
+		[FromHeader(Name = "Agent-Invitation-Code")] string invitationCode)
+	{
+		var brandId = HttpContext.GetBrandId().Value;
 
-        var brandInfo = await queryService
-            .GetAsync(new BrandQuery(brandId))
-            .ConfigureAwait(false);
+		var brandInfo = await queryService
+			.GetAsync(new BrandQuery(brandId))
+			.ConfigureAwait(false);
 
-        return new BrandInfoResponse
-        {
-            BrandId = brandId,
-            Code = brandInfo.Code,
-            DesktopLogoUrl = brandInfo.DesktopLogoUrl,
-            HasInvitationCode = !string.IsNullOrWhiteSpace(invitationCode),
-            LoadingUrl = brandInfo.LoadingUrl,
-            MobileLogoUrl = brandInfo.MobileLogoUrl,
-            SmsEnable = brandInfo.SmsEnabled,
-            PlayerRegisterFlowSettings = brandInfo.PlayerRegisterFlowSettings
-        };
-    }
+		return new BrandInfoResponse
+		{
+			BrandId = brandId,
+			Code = brandInfo.Code,
+			DesktopLogoUrl = brandInfo.DesktopLogoUrl,
+			HasInvitationCode = !string.IsNullOrWhiteSpace(invitationCode),
+			LoadingUrl = brandInfo.LoadingUrl,
+			MobileLogoUrl = brandInfo.MobileLogoUrl,
+			SmsEnable = brandInfo.SmsEnabled,
+			PlayerRegisterFlowSettings = brandInfo.PlayerRegisterFlowSettings
+		};
+	}
 }

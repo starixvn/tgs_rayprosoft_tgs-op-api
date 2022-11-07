@@ -9,15 +9,15 @@ namespace TGS.Services.Operator.ApplicationServices.Game;
 
 internal class CountPlayerFavoriteGameQueryService : IGetService<CountPlayerFavoriteGameQuery, int>
 {
-    private readonly IGameProviderRepository _gameProviderRepository;
+	private readonly IGameProviderRepository _gameProviderRepository;
 
-    public CountPlayerFavoriteGameQueryService(IGameProviderRepository gameProviderRepository)
-    {
-        _gameProviderRepository = gameProviderRepository ?? throw new ArgumentNullException(nameof(gameProviderRepository));
-    }
+	public CountPlayerFavoriteGameQueryService(IGameProviderRepository gameProviderRepository)
+	{
+		_gameProviderRepository = gameProviderRepository ?? throw new ArgumentNullException(nameof(gameProviderRepository));
+	}
 
-    public ValueTask<int> GetAsync(CountPlayerFavoriteGameQuery query, CancellationToken cancellationToken = default)
-        => _gameProviderRepository
-            .QueryPlayerFavoriteGamesAsync(query.BrandId, query.PlayerCode)
-            .CountAsync(cancellationToken);
+	public ValueTask<int> GetAsync(CountPlayerFavoriteGameQuery query, CancellationToken cancellationToken = default)
+		=> _gameProviderRepository
+			.QueryPlayerFavoriteGamesAsync(query.BrandId, query.PlayerCode)
+			.CountAsync(cancellationToken);
 }

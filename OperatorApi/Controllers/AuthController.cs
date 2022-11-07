@@ -1,10 +1,7 @@
-﻿using System;
-using System.IdentityModel.Tokens.Jwt;
+﻿using System.IdentityModel.Tokens.Jwt;
 using System.Net.Mime;
 using System.Security.Claims;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Tgs.ServiceUtility;
 using TGS.Apis.OperatorApi.Models.Messages;
@@ -19,48 +16,47 @@ namespace TGS.Apis.OperatorApi.Controllers;
 [Produces(MediaTypeNames.Application.Json)]
 public class AuthController : ControllerBase
 {
-    [HttpPost("jwt")]
-    [AllowAnonymous]
-    public async Task<AuthResponse> AuthenticateAsync(
-        [FromServices] IGetService<GetAuthQuery, ClaimsIdentity> getAuthQueryService,
-        [FromServices] IMaintenanceRedisRepository maintenanceRedisService,
-        [FromServices] IGetService<MakeBrandAuthTokenCommand, AuthInfo> makeTokenService,
-        [FromBody] AuthRequest request)
-    {
-        var query = new GetAuthQuery(
-            request.ApiKey,
-            request.Currency);
+	[HttpPost("jwt")]
+	[AllowAnonymous]
+	public async Task<AuthResponse> AuthenticateAsync(
+		[FromServices] IGetService<GetAuthQuery, ClaimsIdentity> getAuthQueryService,
+		[FromServices] IMaintenanceRedisRepository maintenanceRedisService,
+		[FromServices] IGetService<MakeBrandAuthTokenCommand, AuthInfo> makeTokenService,
+		[FromBody] AuthRequest request)
+	{
+		var query = new GetAuthQuery(
+			request.ApiKey,
+			request.Currency);
 
-        var id = await getAuthQueryService
-            .GetAsync(query)
-            .ConfigureAwait(false);
+		var id = await getAuthQueryService
+			.GetAsync(query)
+			.ConfigureAwait(false);
 
-        var brandId = Guid.Parse(id.FindFirst(JwtRegisteredClaimNames.Sub)!.Value);
+		var brandId = Guid.Parse(id.FindFirst(JwtRegisteredClaimNames.Sub)!.Value);
 
-        var isMaintenance = !string.IsNullOrEmpty(
-            await maintenanceRedisService
-                .GetBrandMaintenanceAsync(brandId)
-                .ConfigureAwait(false));
+		var isMaintenance = !string.IsNullOrEmpty(
+			await maintenanceRedisService
+				.GetBrandMaintenanceAsync(brandId)
+				.ConfigureAwait(false));
 
-        var tokenInfo = await makeTokenService.GetAsync(
-            new MakeBrandAuthTokenCommand(
-                brandId,
-                id,
-                Consts.Site)).ConfigureAwait(false);
+		var tokenInfo = await makeTokenService.GetAsync(
+			new MakeBrandAuthTokenCommand(
+				brandId,
+				id,
+				Consts.Site)).ConfigureAwait(false);
 
-        if (isMaintenance)
-            return this.Fail<AuthResponse, AuthResponse>(
-                StatusCodes.Status503ServiceUnavailable,
-                new AuthResponse()
-                {
-                    Token = tokenInfo.Token,
-                    ExpiredOn = tokenInfo.ExpiredOn
-                });
-        else
-            return new AuthResponse()
-            {
-                Token = tokenInfo.Token,
-                ExpiredOn = tokenInfo.ExpiredOn
-            };
-    }
+		return isMaintenance
+			? this.Fail<AuthResponse, AuthResponse>(
+				StatusCodes.Status503ServiceUnavailable,
+				new AuthResponse()
+				{
+					Token = tokenInfo.Token,
+					ExpiredOn = tokenInfo.ExpiredOn
+				})
+			: new AuthResponse()
+			{
+				Token = tokenInfo.Token,
+				ExpiredOn = tokenInfo.ExpiredOn
+			};
+	}
 }

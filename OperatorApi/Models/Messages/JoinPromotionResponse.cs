@@ -5,6 +5,6 @@ namespace TGS.Apis.OperatorApi.Models.Messages;
 
 public record JoinPromotionResponse : TgsResponse
 {
-    [JsonPropertyName("success")]
-    public bool Success { get; init; }
+	[JsonPropertyName("success")]
+	public bool Success { get; init; }
 }

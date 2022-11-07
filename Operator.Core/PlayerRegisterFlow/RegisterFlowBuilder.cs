@@ -8,37 +8,37 @@ namespace TGS.Services.Operator.PlayerRegisterFlow;
 
 internal class RegisterFlowBuilder
 {
-    private readonly IImmutableDictionary<string, Type> _registerFlowStepTypes;
-    private readonly IServiceProvider _serviceProvider;
+	private readonly IImmutableDictionary<string, Type> _registerFlowStepTypes;
+	private readonly IServiceProvider _serviceProvider;
 
-    public RegisterFlowBuilder(IServiceProvider serviceProvider, IImmutableDictionary<string, Type> registerFlowStepTypes)
-    {
-        _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
-        _registerFlowStepTypes = registerFlowStepTypes ?? throw new ArgumentNullException(nameof(registerFlowStepTypes));
-    }
+	public RegisterFlowBuilder(IServiceProvider serviceProvider, IImmutableDictionary<string, Type> registerFlowStepTypes)
+	{
+		_serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+		_registerFlowStepTypes = registerFlowStepTypes ?? throw new ArgumentNullException(nameof(registerFlowStepTypes));
+	}
 
-    public RegisterFlowDefinition LoadSettings(JsonDocument settingsJson)
-    {
-        var definition = new RegisterFlowDefinition(_serviceProvider.GetRequiredService<ILogger<RegisterFlow>>());
+	public RegisterFlowDefinition LoadSettings(JsonDocument settingsJson)
+	{
+		var definition = new RegisterFlowDefinition(_serviceProvider.GetRequiredService<ILogger<RegisterFlow>>());
 
-        definition.AddStep(_serviceProvider.GetRequiredService<CreatePlayerRegisterFlowStep>());
+		definition.AddStep(_serviceProvider.GetRequiredService<CreatePlayerRegisterFlowStep>());
 
-        foreach (var element in settingsJson.RootElement.EnumerateArray())
-        {
-            var type = element.GetProperty("type").GetString();
+		foreach (var element in settingsJson.RootElement.EnumerateArray())
+		{
+			var type = element.GetProperty("type").GetString();
 
-            if (string.IsNullOrWhiteSpace(type))
-                throw new InvalidOperationException("RegisterFlowStep type is not specified");
+			if (string.IsNullOrWhiteSpace(type))
+				throw new InvalidOperationException("RegisterFlowStep type is not specified");
 
-            var step = (IRegisterFlowStep)_serviceProvider.GetRequiredService(_registerFlowStepTypes[type]);
+			var step = (IRegisterFlowStep)_serviceProvider.GetRequiredService(_registerFlowStepTypes[type]);
 
-            step.SetupStep(element);
+			step.SetupStep(element);
 
-            definition.AddStep(step);
-        }
+			definition.AddStep(step);
+		}
 
-        definition.AddStep(_serviceProvider.GetRequiredService<FinalRegisterFlowStep>());
+		definition.AddStep(_serviceProvider.GetRequiredService<FinalRegisterFlowStep>());
 
-        return definition;
-    }
+		return definition;
+	}
 }

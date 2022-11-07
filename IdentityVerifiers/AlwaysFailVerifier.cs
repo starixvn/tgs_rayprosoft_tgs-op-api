@@ -2,5 +2,5 @@
 
 public class AlwaysFailVerifier : IIdentityVerifier
 {
-    public bool Verify(string id) => false;
+	public bool Verify(string id) => false;
 }

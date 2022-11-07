@@ -2,7 +2,7 @@
 
 public class LoginInfo
 {
-    public long LoginTime { get; set; }
+	public long LoginTime { get; set; }
 
-    public string PlayerToken { get; set; } = default!;
+	public string PlayerToken { get; set; } = default!;
 }
