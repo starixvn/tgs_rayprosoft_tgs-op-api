@@ -66,7 +66,7 @@ public class ThirdPartyDepositController : ControllerBase
 
 		var updateThirdPartyOrderNoCommand = new SubmitDepositFormThirdPartyOrderNoCommand(
 			createdFormId,
-			applyInfo.Response.Data.OutTradeNo);
+			applyInfo.Response.Data.TradeNo);
 
 		await updateDepositFormService
 			.ExecuteAsync(updateThirdPartyOrderNoCommand, HttpContext.RequestAborted)
