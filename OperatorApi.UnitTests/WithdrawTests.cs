@@ -5,8 +5,6 @@ using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using ExpectedObjects;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Diagnostics;
 using NSubstitute;
 using NUnit.Framework;
 using Tgs.BrandCertificate.Clients;
@@ -15,12 +13,10 @@ using Tgs.Core.Infrastructures.Security;
 using Tgs.Payment.Clients;
 using Tgs.PlayerService.Client;
 using Tgs.Service.PlayerBuckets;
-using TGS.Core.DataServices.Tgs;
 using TGS.Services.Operations.Queries;
 using TGS.Services.Operator;
 using TGS.Services.Operator.ApplicationServices.Withdraw;
 using TGS.Services.Operator.BrandPayment;
-using CoreModels = TGS.Core.DataServices.Tgs.Models;
 
 namespace TGS.Tests.OperatorApi.UnitTests;
 
@@ -366,34 +362,18 @@ public class WithdrawTests
 	[Test]
 	public async Task Player_Can_Get_Withdraw_Required_Amount()
 	{
-		var dbContextOptionsBuilder = new DbContextOptionsBuilder<TgsRepository>();
+		var fakePlayerBucketClient = Substitute.For<IPlayerBucketClient>();
 
-		_ = dbContextOptionsBuilder
-			.UseInMemoryDatabase(Guid.NewGuid().ToString())
-			.ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
-		ITgsRepository repository = new TgsRepository(dbContextOptionsBuilder.Options);
-		var playerCode = "4ucmqplxb029";
+		var sut = new GetRequireBucketAmountQueryService(fakePlayerBucketClient);
 
-		repository.PlayerBuckets.AddRange(
-			new CoreModels.PlayerBucket
-			{
-				PlayerCode = playerCode,
-				BucketAmount = 100,
-				CurrentBucketAmount = 100
-			},
-			new CoreModels.PlayerBucket
-			{
-				PlayerCode = playerCode,
-				BucketAmount = 200,
-				CurrentBucketAmount = 100
-			});
+		var query = new GetRequireBucketAmountQuery("4ucmqplxb029");
 
-		_ = await repository.SaveChangesAsync();
+		_ = fakePlayerBucketClient.ReadBucketsAsync(Arg.Is(query.PlayerCode))
+			.Returns(new ReadBucketResult(12345M, Guid.NewGuid()));
 
-		var sut = new GetRequireAmountQueryService(repository);
-		var actual = await sut.GetAsync(new GetRequireAmountQuery(playerCode));
+		var actual = await sut.GetAsync(query);
 
-		Assert.AreEqual(100, actual);
+		Assert.AreEqual(12345M, actual);
 	}
 
 	[Test]

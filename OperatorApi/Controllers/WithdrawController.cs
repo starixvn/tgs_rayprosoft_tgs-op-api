@@ -192,11 +192,11 @@ public class WithdrawController : ControllerBase
 	[HttpGet("player/amount")]
 	[AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
 	public async Task<decimal> GetWithdrawRequireAmountAsync(
-		[FromServices] IGetService<GetRequireAmountQuery, decimal> getService)
+		[FromServices] IGetService<GetRequireBucketAmountQuery, decimal> getService)
 	{
 		var playerTokenData = HttpContext.Items.GetPlayerTokenData();
 
-		var query = new GetRequireAmountQuery(playerTokenData.PlayerCode);
+		var query = new GetRequireBucketAmountQuery(playerTokenData.PlayerCode);
 		var wageringRequirement = await getService.GetAsync(query).ConfigureAwait(false);
 
 		return wageringRequirement;

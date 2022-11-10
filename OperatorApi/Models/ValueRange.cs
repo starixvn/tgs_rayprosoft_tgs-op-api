@@ -1,6 +1,6 @@
 ﻿namespace TGS.Apis.OperatorApi.Models;
 
-public struct ValueRange<T> where T : IComparable<T>
+public readonly struct ValueRange<T> where T : IComparable<T>
 {
 	public T From { get; init; }
 
