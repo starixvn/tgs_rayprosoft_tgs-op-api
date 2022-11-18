@@ -266,6 +266,13 @@ public class GameController : ControllerBase
 
 		var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? string.Empty;
 
+		await fundInAllService
+			.ExecuteAsync(new FundInAllGameBalanceCommand(
+				brandId,
+				playerTokenData.PlayerCode,
+				subGp.GpCode))
+			.ConfigureAwait(false);
+
 		var query = new GetLobbyGameUrlQuery(
 			brandId,
 			subGp.GameProviderId,
@@ -277,13 +284,6 @@ public class GameController : ControllerBase
 
 		var gameUrl = await getLobbyGameUrlQueryService
 			.GetAsync(query)
-			.ConfigureAwait(false);
-
-		await fundInAllService
-			.ExecuteAsync(new FundInAllGameBalanceCommand(
-				brandId,
-				playerTokenData.PlayerCode,
-				subGp.GpCode))
 			.ConfigureAwait(false);
 
 		if (subGp.IsTransferWallet)
