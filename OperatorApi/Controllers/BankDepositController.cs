@@ -8,6 +8,7 @@ using Tgs.Payment.PrimePay;
 using Tgs.Payment.SkyPay;
 using Tgs.Payment.TuPay;
 using Tgs.Payment.UmPay;
+using Tgs.Payment.WandaPay.Client;
 using Tgs.Payment.ZeroNineNinePay;
 using Tgs.PlayerService.Client;
 using Tgs.ServiceUtility;
@@ -523,6 +524,84 @@ public class BankDepositController : ControllerBase
 		{
 			throw new PaymentFailException(applyInfo.Response.Msg);
 		}
+	}
+
+	[HttpPost("wandapay", Name = "SubmitWandaPayDepositRequest")]
+	[EnableUserBlockedCheck]
+	[AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+	public async Task<DepositFormCreatedResponse> SubmitWandaPayDepositRequestAsync(
+		[FromServices] IGetService<CreateDepositFormCommand, Guid> createDepositFormService,
+		[FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
+		[FromServices] IGetService<GetDepositFormQuery, DepositFormInfo> getDepositFormService,
+		[FromServices] ICommandService<SubmitDepositFormThirdPartyOrderNoCommand> updateDepositFormService,
+		[FromServices] IPlayerServiceClient playerServiceClient,
+		[FromBody] SubmitDepositRequest request)
+	{
+		var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+		var brandId = HttpContext.Items.GetBrandId();
+
+		var brandPayment = await getBrandPaymentService
+			.GetAsync(new GetBrandPaymentQuery(request.BrandPaymentId))
+			.ConfigureAwait(false);
+
+		var brandPaymentInfo = JsonDocument.Parse(brandPayment.ExtendedData);
+
+		var player = await playerServiceClient
+			.GetPlayerInfoAsync(playerTokenData.PlayerCode, HttpContext.RequestAborted)
+			.ConfigureAwait(false);
+
+		if (player is null || !player.IdentityAuthentication)
+			throw new MaticPayDepositNeedRealNameException();
+
+		var playerProperties = await playerServiceClient
+			.GetPlayerPropertiesAsync(playerTokenData.PlayerCode, HttpContext.RequestAborted)
+			.ConfigureAwait(false);
+
+		var realName = playerProperties.GetValueOrDefault("RealName");
+
+		var command = new CreateDepositFormCommand(
+			playerTokenData.PlayerCode,
+			brandId,
+			request.BrandPaymentId,
+			request.Amount,
+			"tgs.payment.wandapay.deposit",
+			request.PromotionId,
+			formId => JsonSerializer.Serialize(
+				new WandaPayDepositSettings(
+					brandPaymentInfo.RootElement.GetProperty("storeCode").GetString(),
+					brandPaymentInfo.RootElement.GetProperty("signKey").GetString(),
+					brandPaymentInfo.RootElement.GetProperty("payType").GetString(),
+					formId,
+					realName)));
+
+		var createdFormId = await createDepositFormService
+			.GetAsync(command, HttpContext.RequestAborted)
+			.ConfigureAwait(false);
+
+		var getDepositFormQuery = new GetDepositFormQuery(
+			playerTokenData.PlayerCode,
+			createdFormId,
+			brandId);
+
+		var formData = await getDepositFormService
+			.GetAsync(getDepositFormQuery, HttpContext.RequestAborted)
+			.ConfigureAwait(false);
+
+		var applyInfo = JsonSerializer.Deserialize<WandaPayDepositApplyInfo>(formData.ApplyInfo!);
+
+		var updateThirdPartyOrderNoCommand = new SubmitDepositFormThirdPartyOrderNoCommand(
+			createdFormId,
+			applyInfo.Response.OrderNo);
+
+		await updateDepositFormService
+			.ExecuteAsync(updateThirdPartyOrderNoCommand, HttpContext.RequestAborted)
+			.ConfigureAwait(false);
+
+		return new DepositFormCreatedResponse
+		{
+			FormId = createdFormId,
+			PaymentUrl = applyInfo.Response.PayUrl
+		};
 	}
 
 	[HttpPost("zeronineninepay", Name = "SubmitZeroNineNinePayDepositRequest")]
