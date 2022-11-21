@@ -481,6 +481,7 @@ public class RegisterFlowTests
 
 		var command = new ExecutePlayerRegisterFlowCommand(
 			Guid.NewGuid(),
+			"CreatePlayer",
 			JsonDocument.Parse("{}"),
 			new PlayerLocationInfo(null, "127.0.0.1", null, null));
 
@@ -502,6 +503,37 @@ public class RegisterFlowTests
 		var actual = await sut.GetAsync(command);
 
 		Assert.IsTrue(actual.IsCompleted);
+	}
+
+	[Test]
+	public void ExecutePlayerRegisterFlow_If_Step_Invalid_Will_Throw_Exception()
+	{
+		var fakeBrandRegisterFlowDefinitionManager = Substitute.For<IBrandRegisterFlowDefinitionManager>();
+
+		var sut = new ExecutePlayerRegisterFlowCommandService(fakeBrandRegisterFlowDefinitionManager);
+
+		var command = new ExecutePlayerRegisterFlowCommand(
+			Guid.NewGuid(),
+			"CreatePlayer",
+			JsonDocument.Parse("{}"),
+			new PlayerLocationInfo(null, "127.0.0.1", null, null));
+
+		var flowDefinition = new RegisterFlowDefinition(NullLogger<RegisterFlow>.Instance);
+
+		var fakeCreatePlayerStep = new StubRegisterFlowStep()
+		{
+			Type = "NotCreatePlayer"
+		};
+
+		fakeCreatePlayerStep.SetProcessInputDelegate((_, _, _) => Task.FromResult(
+			new RegisterFlowProcessResult(true, null, null)));
+
+		flowDefinition.AddStep(fakeCreatePlayerStep);
+
+		_ = fakeBrandRegisterFlowDefinitionManager.GetRegisterFlowDefinitionAsync(Arg.Is(command.BrandId))
+			.Returns(flowDefinition);
+
+		Assert.ThrowsAsync<Exception>(async () => await sut.GetAsync(command));
 	}
 
 	[Test]

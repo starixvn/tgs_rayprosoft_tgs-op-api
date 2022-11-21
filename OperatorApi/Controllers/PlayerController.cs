@@ -160,6 +160,7 @@ public class PlayerController : ControllerBase
 
 		var command = new ExecutePlayerRegisterFlowCommand(
 			brandId,
+			"SetWithdrawBankInfo",
 			JsonSerializer.SerializeToDocument(viewModel),
 			locationInfo);
 
@@ -457,6 +458,7 @@ public class PlayerController : ControllerBase
 
 		var command = new ExecutePlayerRegisterFlowCommand(
 			brandId,
+			"CreatePlayer",
 			JsonSerializer.SerializeToDocument(request),
 			locationInfo);
 
@@ -801,6 +803,7 @@ public class PlayerController : ControllerBase
 
 		var command = new ExecutePlayerRegisterFlowCommand(
 			brandId,
+			"InitMail",
 			JsonSerializer.SerializeToDocument(new
 			{
 				input = "Init",
@@ -844,6 +847,7 @@ public class PlayerController : ControllerBase
 
 		var command = new ExecutePlayerRegisterFlowCommand(
 			brandId,
+			"InitPhone",
 			JsonSerializer.SerializeToDocument(new
 			{
 				input = "Init",
@@ -879,6 +883,7 @@ public class PlayerController : ControllerBase
 
 		var command = new ExecutePlayerRegisterFlowCommand(
 			brandId,
+			"InitMail",
 			JsonSerializer.SerializeToDocument(new
 			{
 				input = "Valid",
@@ -968,6 +973,7 @@ public class PlayerController : ControllerBase
 
 		var command = new ExecutePlayerRegisterFlowCommand(
 			brandId,
+			"Init-Phone",
 			JsonSerializer.SerializeToDocument(new
 			{
 				input = "Valid",
