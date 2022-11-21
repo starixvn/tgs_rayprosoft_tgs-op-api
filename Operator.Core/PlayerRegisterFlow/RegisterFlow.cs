@@ -53,6 +53,11 @@ internal class RegisterFlow : IRegisterFlowStep
 		var currentStep = _flowSteps.Peek();
 		var inputLocationInfo = locationInfo;
 
+		var inputType = input.RootElement.GetProperty("type").GetString();
+
+		if (inputType != currentStep.Type)
+			throw new Exception("Input type not match current step type");
+
 		var result = await currentStep
 			.ProcessInputAsync(brandId, input, inputLocationInfo, cancellationToken)
 			.ConfigureAwait(false);
