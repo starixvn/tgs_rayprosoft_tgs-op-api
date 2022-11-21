@@ -504,6 +504,7 @@ public class PlayerController : ControllerBase
 
 		var command = new ExecutePlayerRegisterFlowCommand(
 			brandId,
+			model.Type,
 			model.Input,
 			locationInfo);
 
