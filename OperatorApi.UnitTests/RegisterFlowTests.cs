@@ -506,7 +506,6 @@ public class RegisterFlowTests
 	}
 
 	[Test]
-	[Ignore("暫時忽略")]
 	public void ExecutePlayerRegisterFlow_If_Step_Invalid_Will_Throw_Exception()
 	{
 		var fakeBrandRegisterFlowDefinitionManager = Substitute.For<IBrandRegisterFlowDefinitionManager>();
