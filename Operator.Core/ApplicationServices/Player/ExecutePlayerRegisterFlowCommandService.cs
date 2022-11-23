@@ -35,8 +35,8 @@ internal class ExecutePlayerRegisterFlowCommandService : IGetService<ExecutePlay
 				null,
 				null);
 
-		//if (command.StepType != flow.CurrentStep)
-		//	throw new Exception("Input type not match current step type");
+		if (command.StepType != flow.CurrentStep)
+			throw new Exception("Input type not match current step type");
 
 		var result = await flow.ProcessInputAsync(
 			command.BrandId,
