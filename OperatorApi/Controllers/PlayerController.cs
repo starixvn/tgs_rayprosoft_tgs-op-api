@@ -737,7 +737,6 @@ public class PlayerController : ControllerBase
 	/// <param name="request">The request.</param>
 	[HttpPost("phone", Name = "StartChangePhone")]
 	[AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-	[Obsolete("已過時")]
 	public async ValueTask<string> StartChangePhoneAsync(
 		[FromServices] IGetService<BrandQuery, BrandInfo> getBrandInfoService,
 		[FromServices] IGetService<CheckBrandPhoneCanUseQuery, bool> checkService,
