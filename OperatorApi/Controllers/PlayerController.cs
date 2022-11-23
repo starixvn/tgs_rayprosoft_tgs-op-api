@@ -424,6 +424,7 @@ public class PlayerController : ControllerBase
 	/// </summary>
 	[HttpPost("create", Name = "RegisterPlayer")]
 	[Consumes(MediaTypeNames.Application.Json)]
+	[Obsolete("已過時")]
 	public async Task<CreatePlayerResponse> RegisterPlayerAsync(
 		[FromServices] IGetService<BrandQuery, BrandInfo> getBrandService,
 		[FromServices] IGetService<ExecutePlayerRegisterFlowCommand, RegisterFlowProcessResult> executeFlowService,
@@ -736,6 +737,7 @@ public class PlayerController : ControllerBase
 	/// <param name="request">The request.</param>
 	[HttpPost("phone", Name = "StartChangePhone")]
 	[AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+	[Obsolete("已過時")]
 	public async ValueTask<string> StartChangePhoneAsync(
 		[FromServices] IGetService<BrandQuery, BrandInfo> getBrandInfoService,
 		[FromServices] IGetService<CheckBrandPhoneCanUseQuery, bool> checkService,
@@ -785,6 +787,7 @@ public class PlayerController : ControllerBase
 	[HttpPost("init-email", Name = "StartSetEmailOfPlayerRegister")]
 	[AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
 	[IgnoreUserBlacklistCheck]
+	[Obsolete("已過時")]
 	public async ValueTask<string> StartSetEmailAsync(
 		[FromServices] IGetService<ExecutePlayerRegisterFlowCommand, RegisterFlowProcessResult> executeFlowService,
 		[FromBody] StartInitEmailRequest request)
@@ -825,6 +828,7 @@ public class PlayerController : ControllerBase
 	[HttpPost("init-phone", Name = "StartSetPhoneOfPlayerRegister")]
 	[AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
 	[IgnoreUserBlacklistCheck]
+	[Obsolete("已過時")]
 	public async ValueTask<string> StartSetPhoneAsync(
 		[FromServices] IGetService<ExecutePlayerRegisterFlowCommand, RegisterFlowProcessResult> executeFlowService,
 		[FromBody] StartInitPhoneRequest request)
@@ -865,6 +869,7 @@ public class PlayerController : ControllerBase
 	[HttpPut("init-email", Name = "SubmitChangeEmailOfPlayerRegister")]
 	[AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
 	[IgnoreUserBlacklistCheck]
+	[Obsolete("已過時")]
 	public async ValueTask SubmitChangeEmailAsync(
 		[FromServices] IGetService<ExecutePlayerRegisterFlowCommand, RegisterFlowProcessResult> executeFlowService,
 		[FromBody] SubmitInitEmailRequest request)
@@ -955,6 +960,7 @@ public class PlayerController : ControllerBase
 	[HttpPut("init-phone", Name = "SubmitChangePhoneOfPlayerRegister")]
 	[AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
 	[IgnoreUserBlacklistCheck]
+	[Obsolete("已過時")]
 	public async ValueTask SubmitChangePhoneAsync(
 		[FromServices] IGetService<ExecutePlayerRegisterFlowCommand, RegisterFlowProcessResult> executeFlowService,
 		[FromBody] SubmitInitPhoneRequest request)
