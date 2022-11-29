@@ -1,4 +1,5 @@
 ﻿using Tgs.Payment.Clients;
+using Tgs.Payment.WandaPay.Client;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.Interfaces;
@@ -52,7 +53,8 @@ public class OperatorApiErrorMapper : IErrorMapper
 			[OpApiError.BrandPhoneDuplicate] = "BrandPhoneDuplicate",
 			[OpApiError.ZeroNineNinePayDepositNeedRealName] = "ZeroNineNinePayDepositNeedRealName",
 			[OpApiError.PreviousDepositStillProcessing] = "PreviousDepositStillProcessing",
-			[OpApiError.BankInfoDuplicate] = "BankInfoDuplicate"
+			[OpApiError.BankInfoDuplicate] = "BankInfoDuplicate",
+			[OpApiError.WandaPayDepositNeedRealName] = "WandaPayDepositNeedChineseRealName"
 		};
 
 	private static readonly IReadOnlyDictionary<OpApiError, int> _HttpCodeByException =
@@ -95,7 +97,8 @@ public class OperatorApiErrorMapper : IErrorMapper
 			[OpApiError.BrandPhoneDuplicate] = StatusCodes.Status400BadRequest,
 			[OpApiError.ZeroNineNinePayDepositNeedRealName] = StatusCodes.Status400BadRequest,
 			[OpApiError.PreviousDepositStillProcessing] = StatusCodes.Status400BadRequest,
-			[OpApiError.BankInfoDuplicate] = StatusCodes.Status409Conflict
+			[OpApiError.BankInfoDuplicate] = StatusCodes.Status409Conflict,
+			[OpApiError.WandaPayDepositNeedRealName] = StatusCodes.Status400BadRequest
 		};
 
 	private static readonly IReadOnlyDictionary<Type, OpApiError> _OpApiErrorByException =
@@ -139,7 +142,8 @@ public class OperatorApiErrorMapper : IErrorMapper
 			[typeof(BrandPhoneDuplicateException)] = OpApiError.BrandPhoneDuplicate,
 			[typeof(ZeroNineNinePayDepositNeedRealNameException)] = OpApiError.ZeroNineNinePayDepositNeedRealName,
 			[typeof(PreviousDepositStillProcessingException)] = OpApiError.PreviousDepositStillProcessing,
-			[typeof(PlayerBankInfoDuplicateException)] = OpApiError.BankInfoDuplicate
+			[typeof(PlayerBankInfoDuplicateException)] = OpApiError.BankInfoDuplicate,
+			[typeof(WandaPayNeedChineseRealNameException)] = OpApiError.WandaPayDepositNeedRealName
 		};
 
 	public bool CanProcess(Exception exception)

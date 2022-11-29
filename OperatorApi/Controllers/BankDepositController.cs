@@ -551,7 +551,7 @@ public class BankDepositController : ControllerBase
 			.ConfigureAwait(false);
 
 		if (player is null || !player.IdentityAuthentication)
-			throw new MaticPayDepositNeedRealNameException();
+			throw new WandaPayNeedChineseRealNameException();
 
 		var playerProperties = await playerServiceClient
 			.GetPlayerPropertiesAsync(playerTokenData.PlayerCode, HttpContext.RequestAborted)

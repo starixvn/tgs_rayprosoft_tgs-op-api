@@ -44,6 +44,7 @@ public enum OpApiError
 	ZeroNineNinePayDepositNeedRealName = 413,
 	PreviousDepositStillProcessing = 414,
 	BankInfoDuplicate = 415,
+	WandaPayDepositNeedRealName = 416,
 	DividendConditionError = 600,
 	DividendPercentageError = 601,
 	SystemError = 900,

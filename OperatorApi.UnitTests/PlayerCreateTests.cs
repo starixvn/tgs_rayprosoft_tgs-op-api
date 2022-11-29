@@ -132,7 +132,7 @@ public class PlayerCreateTests
 				Currency = "CNY"
 			});
 
-		_ = fakePlayerOperations.CreatePlayerAsync(Arg.Any<CreatePlayerData>())
+		_ = fakePlayerOperations.CreatePlayerAsync(Arg.Any<Services.Operations.Models.Services.CreatePlayerData>())
 			.Returns("TestPlayerCode");
 
 		var sut = new CreateAgentInvitationPlayerCommandService(
@@ -158,7 +158,7 @@ public class PlayerCreateTests
 		Assert.IsTrue(actual.IsNew);
 
 		_ = fakePlayerOperations.Received(1)
-			.CreatePlayerAsync(Arg.Is<CreatePlayerData>(data => data.BrandId == command.BrandId
+			.CreatePlayerAsync(Arg.Is<Services.Operations.Models.Services.CreatePlayerData>(data => data.BrandId == command.BrandId
 				&& data.UserName == command.UserName
 				&& data.PlayerStatus == Core.Models.Enums.PlayerStatus.RegisterUndone
 				&& data.AgentInvitationCode == command.AgentInvitationCode));
@@ -213,7 +213,7 @@ public class PlayerCreateTests
 		Assert.IsTrue(actual.IsNew);
 
 		_ = fakePlayerOperations.Received(1)
-			.CreatePlayerAsync(Arg.Is<CreatePlayerData>(data => data.BrandId == command.BrandId
+			.CreatePlayerAsync(Arg.Is<Services.Operations.Models.Services.CreatePlayerData>(data => data.BrandId == command.BrandId
 				&& data.UserName == command.UserName
 				&& data.PlayerStatus == Core.Models.Enums.PlayerStatus.RegisterUndone
 				&& data.UpperPlayerCode == command.UpperPlayerCode));
@@ -264,7 +264,7 @@ public class PlayerCreateTests
 		Assert.IsTrue(actual.IsNew);
 
 		_ = fakePlayerOperations.Received(1)
-			.CreatePlayerAsync(Arg.Is<CreatePlayerData>(data => data.BrandId == command.BrandId
+			.CreatePlayerAsync(Arg.Is<Services.Operations.Models.Services.CreatePlayerData>(data => data.BrandId == command.BrandId
 				&& data.UserName == command.UserName
 				&& data.PlayerStatus == Core.Models.Enums.PlayerStatus.RegisterUndone));
 	}
