@@ -72,7 +72,7 @@ internal class CreatePlayerCommandService : IGetService<CreatePlayerCommand, Cre
 		int betLimitId,
 		PlayerStatus status)
 		=> _playerOperations.CreatePlayerAsync(
-			new CreatePlayerData
+			new Operations.Models.Services.CreatePlayerData
 			{
 				BrandId = command.BrandId,
 				UserName = command.UserName,

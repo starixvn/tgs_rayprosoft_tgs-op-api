@@ -87,7 +87,7 @@ internal class CreateAgentInvitationPlayerCommandService : IGetService<CreatePla
 
 		var result = await _playerOperations
 			.CreatePlayerAsync(
-				new CreatePlayerData
+				new Operations.Models.Services.CreatePlayerData
 				{
 					BrandId = command.BrandId,
 					UserName = command.UserName,
