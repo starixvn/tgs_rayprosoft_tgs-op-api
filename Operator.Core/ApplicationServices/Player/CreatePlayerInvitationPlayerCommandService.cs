@@ -1,13 +1,13 @@
 ﻿using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Tgs.BrandCertificate.Clients;
 using Tgs.Core.Infrastructures.Security;
-using Tgs.PlayerService.Client;
-using Tgs.ServiceUtility;
 using TGS.Core.Models.Exceptions;
+using Tgs.PlayerService.Client;
 using TGS.Services.Operations;
-using TGS.Services.Operations.Models.Services;
+using Tgs.ServiceUtility;
 
 namespace TGS.Services.Operator.ApplicationServices.Player;
 
@@ -54,13 +54,16 @@ internal class CreatePlayerInvitationPlayerCommandService : IGetService<CreatePl
 			.GetBrandDefaultBetLimitAsync(command.BrandId, command.CurrencyCode)
 			.ConfigureAwait(false);
 
+		var vipInfo = await _brandServiceClient
+			.GetVipLevelInfosAsync(command.BrandId, cancellationToken)
+			.FirstOrDefaultAsync(x => x.Level == 1, cancellationToken)
+			.ConfigureAwait(false);
+
 		var resultPlayerCode = await CreatePlayerByUpperPlayerAsync(
 			command,
-			salt!,
-			password!,
 			command.CurrencyCode,
 			betLimitId,
-			PlayerStatus.RegisterUndone,
+			vipInfo!.Id,
 			cancellationToken).ConfigureAwait(false);
 
 		return new CreatePlayerInfo(resultPlayerCode, true);
@@ -68,11 +71,9 @@ internal class CreatePlayerInvitationPlayerCommandService : IGetService<CreatePl
 
 	private async Task<string> CreatePlayerByUpperPlayerAsync(
 		CreatePlayerWithPlayerInvitationCommand command,
-		byte[] salt,
-		byte[] password,
 		string currency,
 		int betLimitId,
-		PlayerStatus status,
+		Guid vipId,
 		CancellationToken cancellationToken)
 	{
 		var upperPlayer = await _playerServiceClient
@@ -90,23 +91,21 @@ internal class CreatePlayerInvitationPlayerCommandService : IGetService<CreatePl
 				command.UpperPlayerCode,
 				"Can't find the player info");
 
-		var result = await _playerOperations
-			.CreatePlayerAsync(
-				new CreatePlayerData
-				{
-					BrandId = command.BrandId,
-					UserName = command.UserName,
-					Salt = salt,
-					Password = password,
-					CurrencyCode = currency,
-					BetLimitId = betLimitId,
-					UpperPlayerCode = upperPlayer.PlayerCode,
-					Type = command.IsTestPlayer
-						? Core.Models.Enums.PlayerType.TestPlayer
-						: Core.Models.Enums.PlayerType.RealPlayer,
-					PlayerStatus = (Core.Models.Enums.PlayerStatus)status
-				})
-			.ConfigureAwait(false);
+		var result = await _playerServiceClient.CreatePlayerAsync(
+			new CreatePlayerData(
+				command.BrandId,
+				null,
+				vipId,
+				currency,
+				command.UserName,
+				command.Password,
+				upperPlayer.PlayerCode,
+				betLimitId,
+				command.IsTestPlayer
+					? PlayerType.TestPlayer
+					: PlayerType.RealPlayer,
+				RegisterPlatformType.Player,
+				command.UserName), cancellationToken);
 
 		return result;
 	}

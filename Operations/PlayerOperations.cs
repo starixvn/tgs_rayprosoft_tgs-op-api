@@ -41,9 +41,6 @@ public sealed class PlayerOperations : IPlayerOperations
 		await _cacheManager.ClearCacheAsync(RedisCacheType.Player, data.PlayerCode);
 	}
 
-	public Task<string> CreatePlayerAsync(CreatePlayerData data)
-		=> _playerCommands.CreatePlayerAsync(data);
-
 	public Task<Guid> GetBrandIdByPlayerCodeAsync(string playerCode) =>
 		GetCachedPlayerValueAsync(playerCode, CachedPlayerFields.BrandId,
 			v => Guid.Parse(v),
