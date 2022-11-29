@@ -3,7 +3,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Tgs.BrandCertificate.Clients;
-using Tgs.Core.Infrastructures.Security;
 using TGS.Core.Models.Exceptions;
 using Tgs.PlayerService.Client;
 using TGS.Services.Operations;
@@ -15,19 +14,13 @@ internal class CreatePlayerInvitationPlayerCommandService : IGetService<CreatePl
 {
 	private readonly IBrandOperations _brandOperations;
 	private readonly IBrandServiceClient _brandServiceClient;
-	private readonly IPasswordHandler _passwordHandler;
-	private readonly IPlayerOperations _playerOperations;
 	private readonly IPlayerServiceClient _playerServiceClient;
 
 	public CreatePlayerInvitationPlayerCommandService(
-		IPlayerOperations playerOperations,
-		IPasswordHandler passwordHandler,
 		IBrandOperations brandOperations,
 		IPlayerServiceClient playerServiceClient,
 		IBrandServiceClient brandServiceClient)
 	{
-		_playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
-		_passwordHandler = passwordHandler ?? throw new ArgumentNullException(nameof(passwordHandler));
 		_brandOperations = brandOperations ?? throw new ArgumentNullException(nameof(brandOperations));
 		_playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
 		_brandServiceClient = brandServiceClient ?? throw new ArgumentNullException(nameof(brandServiceClient));
@@ -43,8 +36,6 @@ internal class CreatePlayerInvitationPlayerCommandService : IGetService<CreatePl
 
 		if (player != null)
 			return new CreatePlayerInfo(player.PlayerCode, false);
-
-		var (salt, password) = _passwordHandler.GenerateCredential(command.Password);
 
 		_ = await _brandServiceClient
 			.GetBrandInfoAsync(command.BrandId, cancellationToken)

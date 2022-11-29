@@ -10,7 +10,6 @@ using NUnit.Framework;
 using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Apis.OperatorApi.Validators;
 using Tgs.BrandCertificate.Clients;
-using Tgs.Core.Infrastructures.Security;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
 using Tgs.PlayerService.Client;
@@ -178,8 +177,6 @@ public class PlayerCreateTests
 		var brandId = Guid.NewGuid();
 		var upperPlayerCode = "upper";
 
-		var fakePlayerOperations = Substitute.For<IPlayerOperations>();
-		var fakePasswordHandler = Substitute.For<IPasswordHandler>();
 		var fakeBrandOperations = Substitute.For<IBrandOperations>();
 		var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
 		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
@@ -208,8 +205,6 @@ public class PlayerCreateTests
 		_ = fakeBrandServiceClient.GetVipLevelInfosAsync(Arg.Is(brandId)).Returns(vipLevelInfos.ToAsyncEnumerable());
 
 		var sut = new CreatePlayerInvitationPlayerCommandService(
-			fakePlayerOperations,
-			fakePasswordHandler,
 			fakeBrandOperations,
 			fakePlayerServiceClient,
 			fakeBrandServiceClient);
@@ -337,8 +332,6 @@ public class PlayerCreateTests
 		var brandId = Guid.NewGuid();
 		var upperPlayerCode = "upper";
 
-		var fakePlayerOperations = Substitute.For<IPlayerOperations>();
-		var fakePasswordHandler = Substitute.For<IPasswordHandler>();
 		var fakeBrandOperations = Substitute.For<IBrandOperations>();
 		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
 		var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
@@ -359,8 +352,6 @@ public class PlayerCreateTests
 		_ = fakeBrandServiceClient.GetVipLevelInfosAsync(Arg.Is(brandId)).Returns(vipLevelInfos.ToAsyncEnumerable());
 
 		var sut = new CreatePlayerInvitationPlayerCommandService(
-			fakePlayerOperations,
-			fakePasswordHandler,
 			fakeBrandOperations,
 			fakePlayerServiceClient,
 			fakeBrandServiceClient);
@@ -382,8 +373,6 @@ public class PlayerCreateTests
 		var brandId = Guid.NewGuid();
 		var upperPlayerCode = "upper";
 
-		var fakePlayerOperations = Substitute.For<IPlayerOperations>();
-		var fakePasswordHandler = Substitute.For<IPasswordHandler>();
 		var fakeBrandOperations = Substitute.For<IBrandOperations>();
 		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
 		var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
@@ -412,8 +401,6 @@ public class PlayerCreateTests
 		_ = fakeBrandServiceClient.GetVipLevelInfosAsync(Arg.Is(brandId)).Returns(vipLevelInfos.ToAsyncEnumerable());
 
 		var sut = new CreatePlayerInvitationPlayerCommandService(
-			fakePlayerOperations,
-			fakePasswordHandler,
 			fakeBrandOperations,
 			fakePlayerServiceClient,
 			fakeBrandServiceClient);
