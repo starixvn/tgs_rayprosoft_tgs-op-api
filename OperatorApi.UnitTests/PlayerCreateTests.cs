@@ -167,7 +167,7 @@ public class PlayerCreateTests
 		Assert.IsTrue(actual.IsNew);
 
 		_ = fakePlayerServiceClient.Received(1)
-			.CreatePlayerAsync(Arg.Is<CreatePlayerData>(data => data.BrandId == command.BrandId
+			.CreatePlayerAsync(Arg.Is<Services.Operations.Models.Services.CreatePlayerData>(data => data.BrandId == command.BrandId
 				&& data.Username == command.UserName
 				&& data.AgentId == agentId));
 	}
@@ -228,7 +228,7 @@ public class PlayerCreateTests
 		Assert.IsTrue(actual.IsNew);
 
 		_ = fakePlayerServiceClient.Received(1)
-			.CreatePlayerAsync(Arg.Is<CreatePlayerData>(data => data.BrandId == command.BrandId
+			.CreatePlayerAsync(Arg.Is<Services.Operations.Models.Services.CreatePlayerData>(data => data.BrandId == command.BrandId
 				&& data.Username == command.UserName
 				&& data.UpperPlayerCode == command.UpperPlayerCode));
 	}
@@ -281,7 +281,7 @@ public class PlayerCreateTests
 		Assert.IsTrue(actual.IsNew);
 
 		_ = fakePlayerServiceClient.Received(1)
-			.CreatePlayerAsync(Arg.Is<CreatePlayerData>(data => data.BrandId == command.BrandId
+			.CreatePlayerAsync(Arg.Is<Services.Operations.Models.Services.CreatePlayerData>(data => data.BrandId == command.BrandId
 				&& data.Username == command.UserName));
 	}
 

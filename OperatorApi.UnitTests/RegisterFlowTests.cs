@@ -533,7 +533,7 @@ public class RegisterFlowTests
 		_ = fakeBrandRegisterFlowDefinitionManager.GetRegisterFlowDefinitionAsync(Arg.Is(command.BrandId))
 			.Returns(flowDefinition);
 
-		Assert.ThrowsAsync<Exception>(async () => await sut.GetAsync(command));
+		_ = Assert.ThrowsAsync<Exception>(async () => await sut.GetAsync(command));
 	}
 
 	[Test]
