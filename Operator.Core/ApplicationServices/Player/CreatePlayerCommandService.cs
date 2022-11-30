@@ -4,8 +4,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using Tgs.BrandCertificate.Clients;
 using Tgs.PlayerService.Client;
-using TGS.Services.Operations;
 using Tgs.ServiceUtility;
+using TGS.Services.Operations;
 
 namespace TGS.Services.Operator.ApplicationServices.Player;
 
@@ -58,12 +58,12 @@ internal class CreatePlayerCommandService : IGetService<CreatePlayerCommand, Cre
 		return new CreatePlayerInfo(resultPlayerCode, true);
 	}
 
-	private async Task<string> CreatePlayerAsync(
+	private ValueTask<string> CreatePlayerAsync(
 		CreatePlayerCommand command,
 		string currency,
 		int betLimitId,
 		Guid vipId)
-		=> await _playerServiceClient.CreatePlayerAsync(
+		=> _playerServiceClient.CreatePlayerAsync(
 			new CreatePlayerData(
 				command.BrandId,
 				null,

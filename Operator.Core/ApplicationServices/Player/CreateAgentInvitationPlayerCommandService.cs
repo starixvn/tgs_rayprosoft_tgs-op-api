@@ -3,11 +3,11 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Tgs.BrandCertificate.Clients;
+using Tgs.PlayerService.Client;
+using Tgs.ServiceUtility;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
-using Tgs.PlayerService.Client;
 using TGS.Services.Operations;
-using Tgs.ServiceUtility;
 using PlayerType = Tgs.PlayerService.Client.PlayerType;
 
 namespace TGS.Services.Operator.ApplicationServices.Player;
