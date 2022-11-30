@@ -76,6 +76,6 @@ internal class CreatePlayerCommandService : IGetService<CreatePlayerCommand, Cre
 				command.IsTestPlayer
 					? PlayerType.TestPlayer
 					: PlayerType.RealPlayer,
-				RegisterPlatformType.Player,
+				RegisterSiteType.Player,
 				command.UserName));
 }

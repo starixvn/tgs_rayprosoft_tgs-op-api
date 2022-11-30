@@ -95,7 +95,7 @@ internal class CreatePlayerInvitationPlayerCommandService : IGetService<CreatePl
 				command.IsTestPlayer
 					? PlayerType.TestPlayer
 					: PlayerType.RealPlayer,
-				RegisterPlatformType.Player,
+				RegisterSiteType.Player,
 				command.UserName), cancellationToken);
 
 		return result;

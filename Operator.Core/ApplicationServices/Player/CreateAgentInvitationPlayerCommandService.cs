@@ -92,7 +92,7 @@ internal class
 				command.IsTestPlayer
 					? PlayerType.TestPlayer
 					: PlayerType.RealPlayer,
-				RegisterPlatformType.Player,
+				RegisterSiteType.Player,
 				command.UserName));
 
 		return result;
