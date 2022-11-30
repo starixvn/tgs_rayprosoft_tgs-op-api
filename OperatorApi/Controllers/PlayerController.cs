@@ -606,7 +606,11 @@ public class PlayerController : ControllerBase
 		var brandId = HttpContext.Items.GetBrandId();
 		var playerTokenData = HttpContext.Items.GetPlayerTokenData();
 
-		var command = new SetIdentityCommand(playerTokenData.PlayerCode, request.RealName, request.Identity, brandId);
+		var command = new SetIdentityCommand(
+			playerTokenData.PlayerCode,
+			request.RealName,
+			request.Identity,
+			brandId);
 
 		return setIdentityService.ExecuteAsync(command);
 	}
