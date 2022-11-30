@@ -160,6 +160,7 @@ public class PlayerController : ControllerBase
 
 		var command = new ExecutePlayerRegisterFlowCommand(
 			brandId,
+			"SetWithdrawBankInfo",
 			JsonSerializer.SerializeToDocument(viewModel),
 			locationInfo);
 
@@ -423,6 +424,7 @@ public class PlayerController : ControllerBase
 	/// </summary>
 	[HttpPost("create", Name = "RegisterPlayer")]
 	[Consumes(MediaTypeNames.Application.Json)]
+	[Obsolete("已過時")]
 	public async Task<CreatePlayerResponse> RegisterPlayerAsync(
 		[FromServices] IGetService<BrandQuery, BrandInfo> getBrandService,
 		[FromServices] IGetService<ExecutePlayerRegisterFlowCommand, RegisterFlowProcessResult> executeFlowService,
@@ -457,6 +459,7 @@ public class PlayerController : ControllerBase
 
 		var command = new ExecutePlayerRegisterFlowCommand(
 			brandId,
+			"CreatePlayer",
 			JsonSerializer.SerializeToDocument(request),
 			locationInfo);
 
@@ -504,6 +507,7 @@ public class PlayerController : ControllerBase
 
 		var command = new ExecutePlayerRegisterFlowCommand(
 			brandId,
+			model.Type,
 			model.Input,
 			locationInfo);
 
@@ -786,6 +790,7 @@ public class PlayerController : ControllerBase
 	[HttpPost("init-email", Name = "StartSetEmailOfPlayerRegister")]
 	[AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
 	[IgnoreUserBlacklistCheck]
+	[Obsolete("已過時")]
 	public async ValueTask<string> StartSetEmailAsync(
 		[FromServices] IGetService<ExecutePlayerRegisterFlowCommand, RegisterFlowProcessResult> executeFlowService,
 		[FromBody] StartInitEmailRequest request)
@@ -804,6 +809,7 @@ public class PlayerController : ControllerBase
 
 		var command = new ExecutePlayerRegisterFlowCommand(
 			brandId,
+			"InitMail",
 			JsonSerializer.SerializeToDocument(new
 			{
 				input = "Init",
@@ -825,6 +831,7 @@ public class PlayerController : ControllerBase
 	[HttpPost("init-phone", Name = "StartSetPhoneOfPlayerRegister")]
 	[AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
 	[IgnoreUserBlacklistCheck]
+	[Obsolete("已過時")]
 	public async ValueTask<string> StartSetPhoneAsync(
 		[FromServices] IGetService<ExecutePlayerRegisterFlowCommand, RegisterFlowProcessResult> executeFlowService,
 		[FromBody] StartInitPhoneRequest request)
@@ -847,6 +854,7 @@ public class PlayerController : ControllerBase
 
 		var command = new ExecutePlayerRegisterFlowCommand(
 			brandId,
+			"InitPhone",
 			JsonSerializer.SerializeToDocument(new
 			{
 				input = "Init",
@@ -864,6 +872,7 @@ public class PlayerController : ControllerBase
 	[HttpPut("init-email", Name = "SubmitChangeEmailOfPlayerRegister")]
 	[AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
 	[IgnoreUserBlacklistCheck]
+	[Obsolete("已過時")]
 	public async ValueTask SubmitChangeEmailAsync(
 		[FromServices] IGetService<ExecutePlayerRegisterFlowCommand, RegisterFlowProcessResult> executeFlowService,
 		[FromBody] SubmitInitEmailRequest request)
@@ -882,6 +891,7 @@ public class PlayerController : ControllerBase
 
 		var command = new ExecutePlayerRegisterFlowCommand(
 			brandId,
+			"InitMail",
 			JsonSerializer.SerializeToDocument(new
 			{
 				input = "Valid",
@@ -953,6 +963,7 @@ public class PlayerController : ControllerBase
 	[HttpPut("init-phone", Name = "SubmitChangePhoneOfPlayerRegister")]
 	[AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
 	[IgnoreUserBlacklistCheck]
+	[Obsolete("已過時")]
 	public async ValueTask SubmitChangePhoneAsync(
 		[FromServices] IGetService<ExecutePlayerRegisterFlowCommand, RegisterFlowProcessResult> executeFlowService,
 		[FromBody] SubmitInitPhoneRequest request)
@@ -971,6 +982,7 @@ public class PlayerController : ControllerBase
 
 		var command = new ExecutePlayerRegisterFlowCommand(
 			brandId,
+			"Init-Phone",
 			JsonSerializer.SerializeToDocument(new
 			{
 				input = "Valid",

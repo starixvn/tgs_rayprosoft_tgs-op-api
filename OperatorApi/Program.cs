@@ -162,7 +162,7 @@ builder.Services
 	.AddErrorMapper<OperatorApiErrorMapper>();
 
 builder.Services
-	.AddPlayerBucketClient()
+	.AddPlayerBucketClient(httpBuilder => { })
 	.AddOperatorApiCore()
 	.ConfigureOperatorOptions<IConfiguration>((options, config) => config
 		.GetSection("Operator").Bind(options))
