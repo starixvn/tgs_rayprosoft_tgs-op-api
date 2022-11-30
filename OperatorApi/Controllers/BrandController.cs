@@ -35,6 +35,7 @@ public class BrandController : ControllerBase
 			LoadingUrl = brandInfo.LoadingUrl,
 			MobileLogoUrl = brandInfo.MobileLogoUrl,
 			SmsEnable = brandInfo.SmsEnabled,
+			PlayerIdentityAuthenticationEnabled = brandInfo.PlayerIdentityEnabled,
 			PlayerRegisterFlowSettings = brandInfo.PlayerRegisterFlowSettings
 		};
 	}
