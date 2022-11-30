@@ -557,7 +557,7 @@ public class BankDepositController : ControllerBase
 		var realName = playerProperties.GetValueOrDefault("RealName");
 
 		if (string.IsNullOrWhiteSpace(realName))
-			throw new MaticPayDepositNeedRealNameException();
+			throw new WandaPayNeedChineseRealNameException();
 
 		var command = new CreateDepositFormCommand(
 			playerTokenData.PlayerCode,
