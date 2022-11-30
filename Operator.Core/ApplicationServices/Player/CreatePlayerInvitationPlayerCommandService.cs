@@ -1,13 +1,12 @@
 ﻿using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Tgs.BrandCertificate.Clients;
-using Tgs.Core.Infrastructures.Security;
 using Tgs.PlayerService.Client;
 using Tgs.ServiceUtility;
 using TGS.Core.Models.Exceptions;
 using TGS.Services.Operations;
-using TGS.Services.Operations.Models.Services;
 
 namespace TGS.Services.Operator.ApplicationServices.Player;
 
@@ -15,19 +14,13 @@ internal class CreatePlayerInvitationPlayerCommandService : IGetService<CreatePl
 {
 	private readonly IBrandOperations _brandOperations;
 	private readonly IBrandServiceClient _brandServiceClient;
-	private readonly IPasswordHandler _passwordHandler;
-	private readonly IPlayerOperations _playerOperations;
 	private readonly IPlayerServiceClient _playerServiceClient;
 
 	public CreatePlayerInvitationPlayerCommandService(
-		IPlayerOperations playerOperations,
-		IPasswordHandler passwordHandler,
 		IBrandOperations brandOperations,
 		IPlayerServiceClient playerServiceClient,
 		IBrandServiceClient brandServiceClient)
 	{
-		_playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
-		_passwordHandler = passwordHandler ?? throw new ArgumentNullException(nameof(passwordHandler));
 		_brandOperations = brandOperations ?? throw new ArgumentNullException(nameof(brandOperations));
 		_playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
 		_brandServiceClient = brandServiceClient ?? throw new ArgumentNullException(nameof(brandServiceClient));
@@ -44,8 +37,6 @@ internal class CreatePlayerInvitationPlayerCommandService : IGetService<CreatePl
 		if (player != null)
 			return new CreatePlayerInfo(player.PlayerCode, false);
 
-		var (salt, password) = _passwordHandler.GenerateCredential(command.Password);
-
 		_ = await _brandServiceClient
 			.GetBrandInfoAsync(command.BrandId, cancellationToken)
 			.ConfigureAwait(false) ?? throw new BrandNotFoundException();
@@ -54,13 +45,16 @@ internal class CreatePlayerInvitationPlayerCommandService : IGetService<CreatePl
 			.GetBrandDefaultBetLimitAsync(command.BrandId, command.CurrencyCode)
 			.ConfigureAwait(false);
 
+		var vipInfo = await _brandServiceClient
+			.GetVipLevelInfosAsync(command.BrandId, cancellationToken)
+			.FirstOrDefaultAsync(x => x.Level == 1, cancellationToken)
+			.ConfigureAwait(false);
+
 		var resultPlayerCode = await CreatePlayerByUpperPlayerAsync(
 			command,
-			salt!,
-			password!,
 			command.CurrencyCode,
 			betLimitId,
-			PlayerStatus.RegisterUndone,
+			vipInfo!.Id,
 			cancellationToken).ConfigureAwait(false);
 
 		return new CreatePlayerInfo(resultPlayerCode, true);
@@ -68,11 +62,9 @@ internal class CreatePlayerInvitationPlayerCommandService : IGetService<CreatePl
 
 	private async Task<string> CreatePlayerByUpperPlayerAsync(
 		CreatePlayerWithPlayerInvitationCommand command,
-		byte[] salt,
-		byte[] password,
 		string currency,
 		int betLimitId,
-		PlayerStatus status,
+		Guid vipId,
 		CancellationToken cancellationToken)
 	{
 		var upperPlayer = await _playerServiceClient
@@ -90,23 +82,21 @@ internal class CreatePlayerInvitationPlayerCommandService : IGetService<CreatePl
 				command.UpperPlayerCode,
 				"Can't find the player info");
 
-		var result = await _playerOperations
-			.CreatePlayerAsync(
-				new Operations.Models.Services.CreatePlayerData
-				{
-					BrandId = command.BrandId,
-					UserName = command.UserName,
-					Salt = salt,
-					Password = password,
-					CurrencyCode = currency,
-					BetLimitId = betLimitId,
-					UpperPlayerCode = upperPlayer.PlayerCode,
-					Type = command.IsTestPlayer
-						? Core.Models.Enums.PlayerType.TestPlayer
-						: Core.Models.Enums.PlayerType.RealPlayer,
-					PlayerStatus = (Core.Models.Enums.PlayerStatus)status
-				})
-			.ConfigureAwait(false);
+		var result = await _playerServiceClient.CreatePlayerAsync(
+			new CreatePlayerData(
+				command.BrandId,
+				null,
+				vipId,
+				currency,
+				command.UserName,
+				command.Password,
+				upperPlayer.PlayerCode,
+				betLimitId,
+				command.IsTestPlayer
+					? PlayerType.TestPlayer
+					: PlayerType.RealPlayer,
+				RegisterSiteType.Player,
+				command.UserName), cancellationToken);
 
 		return result;
 	}

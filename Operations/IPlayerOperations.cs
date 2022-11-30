@@ -10,8 +10,6 @@ public interface IPlayerOperations
 {
 	Task ChangePlayerPasswordAsync(ChangePlayerPasswordData data);
 
-	Task<string> CreatePlayerAsync(CreatePlayerData data);
-
 	Task<Guid> GetBrandIdByPlayerCodeAsync(string playerCode);
 
 	Task<CachedPlayer> GetCachedPlayerAsync(string playerCode);

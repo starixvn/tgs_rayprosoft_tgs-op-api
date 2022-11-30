@@ -2,12 +2,10 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Extensions;
-using TGS.Core.Infrastructures.Utility;
 using TGS.Core.Models.Enums;
 using TGS.Services.Operations.Models.Services;
 
@@ -32,65 +30,6 @@ public sealed class PlayerCommands : IPlayerCommands
 		player.UpdatedOn = data.UpdatedOn;
 
 		_ = await _repository.SaveChangesAsync().ConfigureAwait(false);
-	}
-
-	public async Task<string> CreatePlayerAsync(CreatePlayerData data)
-	{
-		var username = data.UserName;
-		var walletId = GuidExtensions.NewSequentialGuid();
-		var createdOn = DateTimeOffset.UtcNow;
-		var playerCode = default(string);
-
-		var vip = await _repository.VipLevels.FirstOrDefaultAsync(x => x.BrandId == data.BrandId && x.Level == 1);
-
-		playerCode = PlayerCodeGenerator.NewId();
-
-		var player = new Player
-		{
-			PlayerCode = playerCode,
-			Username = username,
-			Password = data.Password,
-			Salt = data.Salt,
-			WithdrawPassword = data.WithdrawPassword,
-			WithdrawSalt = data.WithdrawSalt,
-			BrandId = data.BrandId,
-			DefaultWalletId = walletId,
-			DefaultWalletCurrencyCode = data.CurrencyCode,
-			LastActiveOn = createdOn,
-			Status = data.PlayerStatus,
-			Type = data.Type,
-			BetLimitId = data.BetLimitId,
-			AgentId = data.AgentId,
-			UpdatedByUsername = username,
-			UpdatedOn = createdOn,
-			VipId = vip.Id,
-			Wallets = new HashSet<Wallet>
-			{
-				new()
-				{
-					Id = walletId,
-					PlayerCode = playerCode,
-					CurrencyCode = data.CurrencyCode,
-					ExternalCurrencyCode = data.CurrencyCode,
-					Balance = 0,
-					CreatedOn = createdOn,
-					UpdatedOn = createdOn
-				}
-			}
-		};
-
-		_ = await _repository.Players.AddAsync(player);
-
-		if (!string.IsNullOrWhiteSpace(data.UpperPlayerCode))
-			_ = await _repository.PlayerParents.AddAsync(new PlayerParent
-			{
-				PlayerCode = playerCode,
-				ParentPlayerCode = data.UpperPlayerCode
-			}).ConfigureAwait(false);
-
-		_ = await _repository.SaveChangesAsync();
-
-		return playerCode;
 	}
 
 	public Task DeauthorizePlayerAsync(string playerCode, Guid loginRecordId)

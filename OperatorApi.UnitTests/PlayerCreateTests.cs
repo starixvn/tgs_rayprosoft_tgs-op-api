@@ -1,23 +1,24 @@
 ﻿#nullable enable
 
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using FluentValidation.TestHelper;
 using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
 using NUnit.Framework;
-using Tgs.BrandCertificate.Clients;
-using Tgs.Core.Infrastructures.Security;
-using Tgs.PlayerService.Client;
 using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Apis.OperatorApi.Validators;
+using Tgs.BrandCertificate.Clients;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
+using Tgs.PlayerService.Client;
 using TGS.Services.Operations;
-using TGS.Services.Operations.Models.Services;
 using TGS.Services.Operator;
 using TGS.Services.Operator.ApplicationServices.Player;
 using TGS.Services.Operator.PlayerRegisterFlow;
+using BrandInfo = Tgs.BrandCertificate.Clients.BrandInfo;
+using PlayerInfo = Tgs.PlayerService.Client.PlayerInfo;
 
 namespace TGS.Tests.OperatorApi.UnitTests;
 
@@ -59,8 +60,6 @@ public class PlayerCreateTests
 		var brandId = Guid.NewGuid();
 		var invitationCode = "6rd4mq";
 
-		var fakePlayerOperations = Substitute.For<IPlayerOperations>();
-		var fakePasswordHandler = Substitute.For<IPasswordHandler>();
 		var fakeAgentRepository = Substitute.For<IAgentRepository>();
 		var fakeBrandOperations = Substitute.For<IBrandOperations>();
 		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
@@ -73,16 +72,21 @@ public class PlayerCreateTests
 
 		_ = fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId))
 			 .Returns(
-				 new Tgs.BrandCertificate.Clients.BrandInfo
+				 new BrandInfo
 				 {
 					 Id = brandId,
 					 Code = "code",
 					 Currency = "CNY"
 				 });
 
+		var vipLevelInfos = new[]
+		{
+			new VipLevelInfo(Guid.NewGuid(), 1)
+		};
+
+		_ = fakeBrandServiceClient.GetVipLevelInfosAsync(Arg.Is(brandId)).Returns(vipLevelInfos.ToAsyncEnumerable());
+
 		var sut = new CreateAgentInvitationPlayerCommandService(
-			fakePlayerOperations,
-			fakePasswordHandler,
 			fakeBrandOperations,
 			fakeAgentRepository,
 			fakePlayerServiceClient,
@@ -107,37 +111,41 @@ public class PlayerCreateTests
 		// arrange
 		var brandId = Guid.NewGuid();
 		var invitationCode = "6rd4mq";
+		var agentId = Guid.NewGuid();
 
-		var fakePlayerOperations = Substitute.For<IPlayerOperations>();
-		var fakePasswordHandler = Substitute.For<IPasswordHandler>();
 		var fakeAgentRepository = Substitute.For<IAgentRepository>();
 		var fakeBrandOperations = Substitute.For<IBrandOperations>();
 		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
 		var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
 
 		_ = fakeAgentRepository
-			  .GetAgentInfoByInvitationCodeAsync(
-				  Arg.Is(invitationCode))
-			  .Returns(new AgentInfo(
-				  Guid.NewGuid(),
-				  "AgentUserName",
-				  invitationCode,
-				  AgentStatus.Enabled));
+			.GetAgentInfoByInvitationCodeAsync(
+				Arg.Is(invitationCode))
+			.Returns(new AgentInfo(
+				agentId,
+				"AgentUserName",
+				invitationCode,
+				AgentStatus.Enabled));
 
 		_ = fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId))
-			.Returns(new Tgs.BrandCertificate.Clients.BrandInfo
+			.Returns(new BrandInfo
 			{
 				Id = brandId,
 				Code = "code",
 				Currency = "CNY"
 			});
 
-		_ = fakePlayerOperations.CreatePlayerAsync(Arg.Any<Services.Operations.Models.Services.CreatePlayerData>())
+		_ = fakePlayerServiceClient.CreatePlayerAsync(Arg.Any<CreatePlayerData>())
 			.Returns("TestPlayerCode");
 
+		var vipLevelInfos = new[]
+		{
+			new VipLevelInfo(Guid.NewGuid(), 1)
+		};
+
+		_ = fakeBrandServiceClient.GetVipLevelInfosAsync(Arg.Is(brandId)).Returns(vipLevelInfos.ToAsyncEnumerable());
+
 		var sut = new CreateAgentInvitationPlayerCommandService(
-			fakePlayerOperations,
-			fakePasswordHandler,
 			fakeBrandOperations,
 			fakeAgentRepository,
 			fakePlayerServiceClient,
@@ -157,11 +165,10 @@ public class PlayerCreateTests
 		// assert
 		Assert.IsTrue(actual.IsNew);
 
-		_ = fakePlayerOperations.Received(1)
-			.CreatePlayerAsync(Arg.Is<Services.Operations.Models.Services.CreatePlayerData>(data => data.BrandId == command.BrandId
-				&& data.UserName == command.UserName
-				&& data.PlayerStatus == Core.Models.Enums.PlayerStatus.RegisterUndone
-				&& data.AgentInvitationCode == command.AgentInvitationCode));
+		_ = fakePlayerServiceClient.Received(1)
+			.CreatePlayerAsync(Arg.Is<CreatePlayerData>(data => data.BrandId == command.BrandId
+				&& data.Username == command.UserName
+				&& data.AgentId == agentId));
 	}
 
 	[Test]
@@ -170,15 +177,13 @@ public class PlayerCreateTests
 		var brandId = Guid.NewGuid();
 		var upperPlayerCode = "upper";
 
-		var fakePlayerOperations = Substitute.For<IPlayerOperations>();
-		var fakePasswordHandler = Substitute.For<IPasswordHandler>();
 		var fakeBrandOperations = Substitute.For<IBrandOperations>();
 		var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
 		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
 
 		_ = fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId))
-			.Returns(ValueTask.FromResult<Tgs.BrandCertificate.Clients.BrandInfo?>(
-				new Tgs.BrandCertificate.Clients.BrandInfo
+			.Returns(ValueTask.FromResult<BrandInfo?>(
+				new BrandInfo
 				{
 					Id = brandId,
 					Code = "code",
@@ -186,15 +191,20 @@ public class PlayerCreateTests
 				}));
 
 		_ = fakePlayerServiceClient.GetPlayerInfoAsync(Arg.Is(upperPlayerCode))
-			.Returns(new Tgs.PlayerService.Client.PlayerInfo
+			.Returns(new PlayerInfo
 			{
 				PlayerCode = upperPlayerCode,
 				BrandId = brandId
 			});
 
+		var vipLevelInfos = new[]
+		{
+			new VipLevelInfo(Guid.NewGuid(), 1)
+		};
+
+		_ = fakeBrandServiceClient.GetVipLevelInfosAsync(Arg.Is(brandId)).Returns(vipLevelInfos.ToAsyncEnumerable());
+
 		var sut = new CreatePlayerInvitationPlayerCommandService(
-			fakePlayerOperations,
-			fakePasswordHandler,
 			fakeBrandOperations,
 			fakePlayerServiceClient,
 			fakeBrandServiceClient);
@@ -212,10 +222,9 @@ public class PlayerCreateTests
 		// assert
 		Assert.IsTrue(actual.IsNew);
 
-		_ = fakePlayerOperations.Received(1)
-			.CreatePlayerAsync(Arg.Is<Services.Operations.Models.Services.CreatePlayerData>(data => data.BrandId == command.BrandId
-				&& data.UserName == command.UserName
-				&& data.PlayerStatus == Core.Models.Enums.PlayerStatus.RegisterUndone
+		_ = fakePlayerServiceClient.Received(1)
+			.CreatePlayerAsync(Arg.Is<CreatePlayerData>(data => data.BrandId == command.BrandId
+				&& data.Username == command.UserName
 				&& data.UpperPlayerCode == command.UpperPlayerCode));
 	}
 
@@ -225,25 +234,28 @@ public class PlayerCreateTests
 		// arrange
 		var brandId = Guid.NewGuid();
 
-		var fakePlayerOperations = Substitute.For<IPlayerOperations>();
 		var fakeBrandOperations = Substitute.For<IBrandOperations>();
 
-		var fakePasswordHandler = Substitute.For<IPasswordHandler>();
 		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
 		var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
 
 		_ = fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId))
-			.Returns(ValueTask.FromResult<Tgs.BrandCertificate.Clients.BrandInfo?>(
-				new Tgs.BrandCertificate.Clients.BrandInfo
+			.Returns(ValueTask.FromResult<BrandInfo?>(
+				new BrandInfo
 				{
 					Id = brandId,
 					Code = "code",
 					Currency = "CNY"
 				}));
 
+		var vipLevelInfos = new[]
+		{
+			new VipLevelInfo(Guid.NewGuid(), 1)
+		};
+
+		_ = fakeBrandServiceClient.GetVipLevelInfosAsync(Arg.Is(brandId)).Returns(vipLevelInfos.ToAsyncEnumerable());
+
 		var sut = new CreatePlayerCommandService(
-			fakePlayerOperations,
-			fakePasswordHandler,
 			fakeBrandOperations,
 			fakePlayerServiceClient,
 			fakeBrandServiceClient);
@@ -263,10 +275,9 @@ public class PlayerCreateTests
 		// assert
 		Assert.IsTrue(actual.IsNew);
 
-		_ = fakePlayerOperations.Received(1)
-			.CreatePlayerAsync(Arg.Is<Services.Operations.Models.Services.CreatePlayerData>(data => data.BrandId == command.BrandId
-				&& data.UserName == command.UserName
-				&& data.PlayerStatus == Core.Models.Enums.PlayerStatus.RegisterUndone));
+		_ = fakePlayerServiceClient.Received(1)
+			.CreatePlayerAsync(Arg.Is<CreatePlayerData>(data => data.BrandId == command.BrandId
+				&& data.Username == command.UserName));
 	}
 
 	[Test]
@@ -275,24 +286,27 @@ public class PlayerCreateTests
 		// arrange
 		var brandId = Guid.NewGuid();
 
-		var fakePlayerOperations = Substitute.For<IPlayerOperations>();
 		var fakeBrandOperations = Substitute.For<IBrandOperations>();
-		var fakePasswordHandler = Substitute.For<IPasswordHandler>();
 		var fakeAgentRepository = Substitute.For<IAgentRepository>();
 		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
 		var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
 
 		_ = fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId))
-			.Returns(new Tgs.BrandCertificate.Clients.BrandInfo
+			.Returns(new BrandInfo
 			{
 				Id = brandId,
 				Code = "code",
 				Currency = "CNY"
 			});
 
+		var vipLevelInfos = new[]
+		{
+			new VipLevelInfo(Guid.NewGuid(), 1)
+		};
+
+		_ = fakeBrandServiceClient.GetVipLevelInfosAsync(Arg.Is(brandId)).Returns(vipLevelInfos.ToAsyncEnumerable());
+
 		var sut = new CreateAgentInvitationPlayerCommandService(
-			fakePlayerOperations,
-			fakePasswordHandler,
 			fakeBrandOperations,
 			fakeAgentRepository,
 			fakePlayerServiceClient,
@@ -318,23 +332,26 @@ public class PlayerCreateTests
 		var brandId = Guid.NewGuid();
 		var upperPlayerCode = "upper";
 
-		var fakePlayerOperations = Substitute.For<IPlayerOperations>();
-		var fakePasswordHandler = Substitute.For<IPasswordHandler>();
 		var fakeBrandOperations = Substitute.For<IBrandOperations>();
 		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
 		var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
 
 		_ = fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId))
-			  .Returns(new Tgs.BrandCertificate.Clients.BrandInfo
+			  .Returns(new BrandInfo
 			  {
 				  Id = brandId,
 				  Code = "code",
 				  Currency = "CNY"
 			  });
 
+		var vipLevelInfos = new[]
+		{
+			new VipLevelInfo(Guid.NewGuid(), 1)
+		};
+
+		_ = fakeBrandServiceClient.GetVipLevelInfosAsync(Arg.Is(brandId)).Returns(vipLevelInfos.ToAsyncEnumerable());
+
 		var sut = new CreatePlayerInvitationPlayerCommandService(
-			fakePlayerOperations,
-			fakePasswordHandler,
 			fakeBrandOperations,
 			fakePlayerServiceClient,
 			fakeBrandServiceClient);
@@ -356,15 +373,13 @@ public class PlayerCreateTests
 		var brandId = Guid.NewGuid();
 		var upperPlayerCode = "upper";
 
-		var fakePlayerOperations = Substitute.For<IPlayerOperations>();
-		var fakePasswordHandler = Substitute.For<IPasswordHandler>();
 		var fakeBrandOperations = Substitute.For<IBrandOperations>();
 		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
 		var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
 
 		_ = fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId))
-			.Returns(ValueTask.FromResult<Tgs.BrandCertificate.Clients.BrandInfo?>(
-				new Tgs.BrandCertificate.Clients.BrandInfo
+			.Returns(ValueTask.FromResult<BrandInfo?>(
+				new BrandInfo
 				{
 					Id = brandId,
 					Code = "code",
@@ -372,15 +387,20 @@ public class PlayerCreateTests
 				}));
 
 		_ = fakePlayerServiceClient.GetPlayerInfoAsync(Arg.Is(upperPlayerCode))
-			.Returns(new Tgs.PlayerService.Client.PlayerInfo
+			.Returns(new PlayerInfo
 			{
 				PlayerCode = upperPlayerCode,
 				BrandId = Guid.NewGuid()
 			});
 
+		var vipLevelInfos = new[]
+		{
+			new VipLevelInfo(Guid.NewGuid(), 1)
+		};
+
+		_ = fakeBrandServiceClient.GetVipLevelInfosAsync(Arg.Is(brandId)).Returns(vipLevelInfos.ToAsyncEnumerable());
+
 		var sut = new CreatePlayerInvitationPlayerCommandService(
-			fakePlayerOperations,
-			fakePasswordHandler,
 			fakeBrandOperations,
 			fakePlayerServiceClient,
 			fakeBrandServiceClient);

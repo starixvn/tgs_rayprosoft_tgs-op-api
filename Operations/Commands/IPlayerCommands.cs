@@ -10,8 +10,6 @@ public interface IPlayerCommands
 {
 	Task ChangePlayerPasswordAsync(ChangePlayerPasswordData data);
 
-	Task<string> CreatePlayerAsync(CreatePlayerData data);
-
 	Task DeauthorizePlayerAsync(string playerCode, Guid loginRecordId);
 
 	Task DeauthorizePlayerAsync(string playerCode, PlatformType? platformType);

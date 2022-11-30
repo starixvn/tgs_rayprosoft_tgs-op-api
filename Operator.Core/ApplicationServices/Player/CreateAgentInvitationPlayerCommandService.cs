@@ -1,37 +1,32 @@
 ﻿using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Tgs.BrandCertificate.Clients;
-using Tgs.Core.Infrastructures.Security;
 using Tgs.PlayerService.Client;
 using Tgs.ServiceUtility;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
 using TGS.Services.Operations;
-using TGS.Services.Operations.Models.Services;
-using PlayerStatus = Tgs.PlayerService.Client.PlayerStatus;
+using PlayerType = Tgs.PlayerService.Client.PlayerType;
 
 namespace TGS.Services.Operator.ApplicationServices.Player;
 
-internal class CreateAgentInvitationPlayerCommandService : IGetService<CreatePlayerWithAgentInvitationCodeCommand, CreatePlayerInfo>
+internal class
+	CreateAgentInvitationPlayerCommandService : IGetService<CreatePlayerWithAgentInvitationCodeCommand,
+		CreatePlayerInfo>
 {
 	private readonly IAgentRepository _agentRepository;
 	private readonly IBrandOperations _brandOperations;
 	private readonly IBrandServiceClient _brandServiceClient;
-	private readonly IPasswordHandler _passwordHandler;
-	private readonly IPlayerOperations _playerOperations;
 	private readonly IPlayerServiceClient _playerServiceClient;
 
 	public CreateAgentInvitationPlayerCommandService(
-		IPlayerOperations playerOperations,
-		IPasswordHandler passwordHandler,
 		IBrandOperations brandOperations,
 		IAgentRepository agentRepository,
 		IPlayerServiceClient playerServiceClient,
 		IBrandServiceClient brandServiceClient)
 	{
-		_playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
-		_passwordHandler = passwordHandler ?? throw new ArgumentNullException(nameof(passwordHandler));
 		_brandOperations = brandOperations ?? throw new ArgumentNullException(nameof(brandOperations));
 		_agentRepository = agentRepository ?? throw new ArgumentNullException(nameof(agentRepository));
 		_playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
@@ -49,8 +44,6 @@ internal class CreateAgentInvitationPlayerCommandService : IGetService<CreatePla
 		if (player != null)
 			return new CreatePlayerInfo(player.PlayerCode, false);
 
-		var (salt, password) = _passwordHandler.GenerateCredential(command.Password);
-
 		_ = await _brandServiceClient
 			.GetBrandInfoAsync(command.BrandId, cancellationToken)
 			.ConfigureAwait(false) ?? throw new BrandNotFoundException();
@@ -59,24 +52,25 @@ internal class CreateAgentInvitationPlayerCommandService : IGetService<CreatePla
 			.GetBrandDefaultBetLimitAsync(command.BrandId, command.CurrencyCode)
 			.ConfigureAwait(false);
 
+		var vipInfo = await _brandServiceClient
+			.GetVipLevelInfosAsync(command.BrandId, cancellationToken)
+			.FirstOrDefaultAsync(x => x.Level == 1, cancellationToken)
+			.ConfigureAwait(false);
+
 		var resultPlayerCode = await CreatePlayerByAgentAsync(
 			command,
-			salt!,
-			password!,
 			command.CurrencyCode,
 			betLimitId,
-			PlayerStatus.RegisterUndone).ConfigureAwait(false);
+			vipInfo!.Id).ConfigureAwait(false);
 
 		return new CreatePlayerInfo(resultPlayerCode, true);
 	}
 
 	private async Task<string> CreatePlayerByAgentAsync(
 		CreatePlayerWithAgentInvitationCodeCommand command,
-		byte[] salt,
-		byte[] password,
 		string currency,
 		int betLimitId,
-		PlayerStatus status)
+		Guid vipId)
 	{
 		var agent = await _agentRepository
 			.GetAgentInfoByInvitationCodeAsync(command.AgentInvitationCode)
@@ -85,24 +79,21 @@ internal class CreateAgentInvitationPlayerCommandService : IGetService<CreatePla
 		if (agent is not { Status: AgentStatus.Enabled })
 			throw new InvalidInvitationCodeException(command.AgentInvitationCode, "Can't find the agent info");
 
-		var result = await _playerOperations
-			.CreatePlayerAsync(
-				new Operations.Models.Services.CreatePlayerData
-				{
-					BrandId = command.BrandId,
-					UserName = command.UserName,
-					Salt = salt,
-					Password = password,
-					CurrencyCode = currency,
-					BetLimitId = betLimitId,
-					AgentId = agent.Id,
-					AgentInvitationCode = command.AgentInvitationCode,
-					Type = command.IsTestPlayer
-						? Core.Models.Enums.PlayerType.TestPlayer
-						: Core.Models.Enums.PlayerType.RealPlayer,
-					PlayerStatus = (Core.Models.Enums.PlayerStatus)status
-				})
-			.ConfigureAwait(false);
+		var result = await _playerServiceClient.CreatePlayerAsync(
+			new CreatePlayerData(
+				command.BrandId,
+				agent.Id,
+				vipId,
+				currency,
+				command.UserName,
+				command.Password,
+				null,
+				betLimitId,
+				command.IsTestPlayer
+					? PlayerType.TestPlayer
+					: PlayerType.RealPlayer,
+				RegisterSiteType.Player,
+				command.UserName));
 
 		return result;
 	}
