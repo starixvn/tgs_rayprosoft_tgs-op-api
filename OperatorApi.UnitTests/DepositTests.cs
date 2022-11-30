@@ -146,7 +146,7 @@ public class DepositTests
 				It.Is<DepositFormCreateInfo>(form => expected.Matches(form)),
 				It.IsAny<CancellationToken>()),
 			Times.Exactly(1));
-	}
+	}	
 
 	[Test]
 	public async Task Create_Crypto_Deposit_Form_Should_Success()

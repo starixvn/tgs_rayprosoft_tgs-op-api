@@ -557,6 +557,9 @@ public class BankDepositController : ControllerBase
 		var realName = playerProperties.GetValueOrDefault("RealName");
 
 		if (string.IsNullOrWhiteSpace(realName))
+			throw new MaticPayDepositNeedRealNameException();
+
+		if (IsChinese(realName) == false)
 			throw new WandaPayNeedChineseRealNameException();
 
 		var command = new CreateDepositFormCommand(
@@ -602,6 +605,28 @@ public class BankDepositController : ControllerBase
 			FormId = createdFormId,
 			PaymentUrl = applyInfo.Response.PayUrl
 		};
+	}
+
+	private static bool IsChinese(string strRealName)
+	{
+		var flag = true;
+		var dRange = 0;
+		int dstringmax = Convert.ToInt32("9fff", 16);
+		int dstringmin = Convert.ToInt32("4e00", 16);
+		for (var i = 0; i < strRealName.Length; i++)
+		{
+			dRange = Convert.ToInt32(Convert.ToChar(strRealName.Substring(i, 1)));
+			if (dRange >= dstringmin && dRange < dstringmax)
+			{
+				flag = true;
+			}
+			else
+			{
+				flag = false;
+				break;
+			}
+		}
+		return flag;
 	}
 
 	[HttpPost("zeronineninepay", Name = "SubmitZeroNineNinePayDepositRequest")]
