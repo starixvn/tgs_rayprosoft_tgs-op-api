@@ -18,6 +18,8 @@ public class BrandInfoResponse
 
 	public Uri? MobileLogoUrl { get; set; }
 
+	public bool PlayerIdentityAuthenticationEnabled { get; set; }
+
 	public JsonDocument? PlayerRegisterFlowSettings { get; set; }
 
 	public bool SmsEnable { get; set; }

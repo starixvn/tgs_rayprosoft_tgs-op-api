@@ -550,14 +550,14 @@ public class BankDepositController : ControllerBase
 			.GetPlayerInfoAsync(playerTokenData.PlayerCode, HttpContext.RequestAborted)
 			.ConfigureAwait(false);
 
-		if (player is null || !player.IdentityAuthentication)
-			throw new WandaPayNeedChineseRealNameException();
-
 		var playerProperties = await playerServiceClient
 			.GetPlayerPropertiesAsync(playerTokenData.PlayerCode, HttpContext.RequestAborted)
 			.ConfigureAwait(false);
 
 		var realName = playerProperties.GetValueOrDefault("RealName");
+
+		if (string.IsNullOrWhiteSpace(realName))
+			throw new WandaPayNeedChineseRealNameException();
 
 		var command = new CreateDepositFormCommand(
 			playerTokenData.PlayerCode,
