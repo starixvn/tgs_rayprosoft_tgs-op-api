@@ -31,6 +31,7 @@
     <PackageReference Include="Tgs.Core.Infrastructures.Security" Version="0.0.1" />
     <PackageReference Include="Tgs.DepositAccumulateRoulette.Client" Version="0.0.5" />
     <PackageReference Include="TGS.FileService.Client" Version="0.0.5" />
+    <PackageReference Include="Tgs.GameProviders.Client" Version="0.0.49" />
     <PackageReference Include="Tgs.GameProviders.Pluggable.Client" Version="0.0.26" />
     <PackageReference Include="Tgs.Payment.Client" Version="0.4.8" />
     <PackageReference Include="Tgs.PaymentService.Client" Version="0.6.18" />

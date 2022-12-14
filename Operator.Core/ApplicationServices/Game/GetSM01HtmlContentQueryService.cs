@@ -1,0 +1,61 @@
+﻿using System;
+using System.Threading;
+using System.Threading.Tasks;
+using Tgs.GameProviders.Client;
+using Tgs.ServiceUtility;
+using TGS.Core.Models.Exceptions;
+
+namespace TGS.Services.Operator.ApplicationServices.Game;
+
+internal class GetSM01HtmlContentQueryService : IGetService<GetSM01HtmlContentQuery, SM01HtmlContentInfo>
+{
+	private readonly IGameProvidersClient _client;
+
+	public GetSM01HtmlContentQueryService(
+		IGameProvidersClient client)
+	{
+		_client = client ?? throw new ArgumentNullException(nameof(client));
+	}
+
+	public async ValueTask<SM01HtmlContentInfo> GetAsync(GetSM01HtmlContentQuery query, CancellationToken cancellationToken = default)
+	{
+		var loginInfo = await _client
+			.GamePlatformLoginBySM01Async(query.PlayerCode, cancellationToken)
+			.ConfigureAwait(false);
+
+		if (loginInfo == null)
+		{
+			throw new GameProviderUnderMaintenanceException();
+		}
+
+		var html =
+			"<!DOCTYPE html>" +
+			"<html>" +
+			"<head>" +
+				"<meta charset=\"UTF-8\">" +
+				"<meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\">" +
+				"<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">" +
+				"<title>SM01</title>" +
+				"<script>" +
+					"window.onload = function(){" +
+						"document.getElementById(\"submit\").click();" +
+					"}" +
+				"</script>" +
+			"</head>" +
+			"<body>" +
+				"<form action=\"https://cn.ucfclive.com/auth/platformLogin\" method=\"post\" target=\"_blank\">" +
+					"<input type=\"text\" name=\"merchantId\" value=\"" + loginInfo.MerchantId + "\" style=\"display:none\" />" +
+					"<input type=\"text\" name=\"customerName\" value=\"" + loginInfo.CustomerName + "\" style=\"display:none\" />" +
+					"<input type=\"text\" name=\"timestamp\" value=\"" + loginInfo.Timestamp + "\" style=\"display:none\" />" +
+					"<input type=\"text\" name=\"sign\" value=\"" + loginInfo.Sign + "\" style=\"display:none\" />" +
+					"<input type=\"submit\" id=\"submit\" style=\"display:none\" />" +
+				"</form>" +
+			"</body>" +
+			"</html>";
+
+		return new SM01HtmlContentInfo
+		{
+			Html = html
+		};
+	}
+}

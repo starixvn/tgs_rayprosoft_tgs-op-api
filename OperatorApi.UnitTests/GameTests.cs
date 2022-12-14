@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using NSubstitute;
 using NUnit.Framework;
+using Tgs.GameProviders.Client;
 using Tgs.GameProviders.Pluggable.Client;
 using Tgs.ServiceUtility;
 using TGS.Apis.OperatorApi.Controllers;
@@ -1218,5 +1219,20 @@ public class GameTests
 
 		_ = fakeFundInAllService.Received(1)
 			.ExecuteAsync(Arg.Any<FundInAllGameBalanceCommand>());
+	}
+
+	[Test]
+	public async Task Get_SM01_Login_Html_Should_Success()
+	{
+		var fakeGameProvidersClient = Substitute.For<IGameProvidersClient>();
+		var sut = new GetSM01HtmlContentQueryService(fakeGameProvidersClient);
+
+		var playerCode = "4ucmqplxb029";
+
+		var actual = await sut.GetAsync(new GetSM01HtmlContentQuery(playerCode));
+
+		_ = fakeGameProvidersClient.Received(1).GamePlatformLoginBySM01Async(playerCode);
+
+		Assert.IsNotNull(actual);
 	}
 }

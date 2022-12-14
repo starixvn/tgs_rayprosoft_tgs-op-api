@@ -346,6 +346,39 @@ public class GameController : ControllerBase
 			.ConfigureAwait(false);
 	}
 
+	[HttpGet("sm01")]
+	[AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+	public async ValueTask<ContentResult> SM01HtmlAsync(
+		[FromServices] ICommandService<FundInAllGameBalanceCommand> fundInAllService,
+		[FromServices] IGetService<GetSM01HtmlContentQuery, SM01HtmlContentInfo> getService)
+	{
+		var currentCultureName = CultureInfo.CurrentUICulture.Name;
+
+		var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+		var brandId = HttpContext.Items.GetBrandId();
+		var ip = HttpContext.Connection.RemoteIpAddress?.ToString() ?? string.Empty;
+
+		await fundInAllService
+			.ExecuteAsync(new FundInAllGameBalanceCommand(
+				brandId,
+				playerTokenData.PlayerCode,
+				null), HttpContext.RequestAborted)
+			.ConfigureAwait(false);
+
+		var query = new GetSM01HtmlContentQuery(playerTokenData.PlayerCode);
+
+		var result = await getService
+			.GetAsync(query, HttpContext.RequestAborted)
+			.ConfigureAwait(false);
+
+		return new ContentResult
+		{
+			Content = result.Html,
+			ContentType = "text/html",
+			StatusCode = StatusCodes.Status200OK
+		};
+	}
+
 	private static string GetLocalization(JsonElement element, string propertyName, string defaultValue)
 	{
 		if (!element.TryGetProperty(propertyName, out var value))
