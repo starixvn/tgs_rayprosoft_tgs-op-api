@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Tgs.GameProviders.Client;
+using Tgs.GameProviders.Pluggable.Client;
 using Tgs.ServiceUtility;
 using TGS.Core.Models.Exceptions;
 
@@ -9,10 +9,10 @@ namespace TGS.Services.Operator.ApplicationServices.Game;
 
 internal class GetSM01HtmlContentQueryService : IGetService<GetSM01HtmlContentQuery, SM01HtmlContentInfo>
 {
-	private readonly IGameProvidersClient _client;
+	private readonly IGameProvidersOperatorPluggableClient _client;
 
 	public GetSM01HtmlContentQueryService(
-		IGameProvidersClient client)
+		IGameProvidersOperatorPluggableClient client)
 	{
 		_client = client ?? throw new ArgumentNullException(nameof(client));
 	}
@@ -20,7 +20,7 @@ internal class GetSM01HtmlContentQueryService : IGetService<GetSM01HtmlContentQu
 	public async ValueTask<SM01HtmlContentInfo> GetAsync(GetSM01HtmlContentQuery query, CancellationToken cancellationToken = default)
 	{
 		var loginInfo = await _client
-			.GamePlatformLoginBySM01Async(query.PlayerCode, cancellationToken)
+			.GetGameSM01PlatformLoginInfoAsync(query.PlayerCode, cancellationToken)
 			.ConfigureAwait(false);
 
 		if (loginInfo == null)
