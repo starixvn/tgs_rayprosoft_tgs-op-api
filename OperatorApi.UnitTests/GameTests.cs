@@ -813,6 +813,23 @@ public class GameTests
 	}
 
 	[Test]
+	public async Task Get_Game_SM01_Login()
+	{
+		var fakeGameProvidersClient = Substitute.For<IGameProvidersOperatorPluggableClient>();
+		var sut = new GetSM01HtmlContentQueryService(fakeGameProvidersClient);
+
+		var playerCode = "4ucmqplxb029";
+
+		_ = fakeGameProvidersClient.GetGameSM01PlatformLoginInfoAsync(playerCode).Returns(ValueTask.FromResult(new SM01PlatformLoginResponse("merchantId", playerCode, 1670390195123, "46C9EA4F03900B74379A15A56ED14229")));
+
+		var actual = await sut.GetAsync(new GetSM01HtmlContentQuery(playerCode));
+
+		_ = fakeGameProvidersClient.Received(1).GetGameSM01PlatformLoginInfoAsync(playerCode);
+
+		Assert.IsFalse(string.IsNullOrEmpty(actual.Html));
+	}
+
+	[Test]
 	public async Task Get_Game_Url_With_Extend_Data()
 	{
 		// arrange
