@@ -20,7 +20,7 @@ internal class GetSM01HtmlContentQueryService : IGetService<GetSM01HtmlContentQu
 	public async ValueTask<SM01HtmlContentInfo> GetAsync(GetSM01HtmlContentQuery query, CancellationToken cancellationToken = default)
 	{
 		var loginInfo = await _client
-			.GetGameSM01PlatformLoginInfoAsync(query.PlayerCode, 5200001, cancellationToken)
+			.GetGameSM01PlatformLoginInfoAsync(query.PlayerCode, cancellationToken)
 			.ConfigureAwait(false);
 
 		if (loginInfo == null)
