@@ -350,13 +350,12 @@ public class GameController : ControllerBase
 	[AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
 	public async ValueTask<ContentResult> SM01HtmlAsync(
 		[FromServices] ICommandService<FundInAllGameBalanceCommand> fundInAllService,
+		[FromServices] IGetService<GetGpCodeQuery, BrandSubGameProviderInfo> getGpCodeService,
+		[FromServices] ICommandService<FundOutBeforeEnterGameCommand> fundService,
 		[FromServices] IGetService<GetSM01HtmlContentQuery, SM01HtmlContentInfo> getService)
 	{
-		var currentCultureName = CultureInfo.CurrentUICulture.Name;
-
 		var playerTokenData = HttpContext.Items.GetPlayerTokenData();
 		var brandId = HttpContext.Items.GetBrandId();
-		var ip = HttpContext.Connection.RemoteIpAddress?.ToString() ?? string.Empty;
 
 		await fundInAllService
 			.ExecuteAsync(new FundInAllGameBalanceCommand(
@@ -364,6 +363,20 @@ public class GameController : ControllerBase
 				playerTokenData.PlayerCode,
 				null), HttpContext.RequestAborted)
 			.ConfigureAwait(false);
+
+		var subGp = await getGpCodeService
+		.GetAsync(new GetGpCodeQuery(brandId, "SM01"))
+		.ConfigureAwait(false);
+
+		if (subGp.IsTransferWallet)
+		{
+			await fundService
+				.ExecuteAsync(new FundOutBeforeEnterGameCommand(
+					brandId,
+					playerTokenData.PlayerCode,
+					subGp.GpCode))
+				.ConfigureAwait(false);
+		}
 
 		var query = new GetSM01HtmlContentQuery(playerTokenData.PlayerCode);
 
