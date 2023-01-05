@@ -12,76 +12,24 @@ stages:
   - deploy-prod
 
 build-code:
-  stage: build
-  script:
-    - dotnet build -c $BuildConfiguration
-  only:
-    - merge_requests
-    - main
-  cache:
-    key: Tgs.OpApi.$CI_PIPELINE_ID
-    untracked: true
+  extends: .build-code-template
 
 unit-test:
-  stage: test
-  script:
-    - dotnet test -c $BuildConfiguration -l:"junit;LogFilePath=../TestReports/{assembly}-TestReport.xml" --no-restore --no-build
-  needs:
-    - build-code
-  only:
-    - merge_requests
-    - main
-  cache:
-    key: Tgs.OpApi.$CI_PIPELINE_ID
-    untracked: true
-    policy: pull
-  artifacts:
-    when: always
-    reports:
-      junit: ./TestReports/*-TestReport.xml
+  extends: .unit-test-template
 
 push-docker-image:
-  stage: publish
-  needs:
-    - build-code
-    - unit-test
-  only:
-    - main
-  cache:
-    key: Tgs.OpApi.$CI_PIPELINE_ID
-    untracked: true
-    policy: pull
-  script:
-    - export Tag="$(date -d $CI_PIPELINE_CREATED_AT +%Y%m%d%H%M).$CI_PIPELINE_IID"
-    - dotnet build "OperatorApi/OperatorApi.csproj" -c $BuildConfiguration -t:ContainerBuild -p:DockerfileTag="$ImageName:$Tag" --no-restore
-    - docker push $ImageName:$Tag
+  extends: .push-docker-image-template
+  variables:
+    project: OperatorApi/OperatorApi.csproj
 
 push-k8s-template:
-  stage: publish
-  needs:
-    - unit-test
-  only:
-    - main
-  script:
-    - export Tag="$(date -d $CI_PIPELINE_CREATED_AT +%Y%m%d%H%M).$CI_PIPELINE_IID"
-    - mkdir -p artifacts/k8s
-    - cp -R deployment/k8s/$HelmTemplateFolderName artifacts/k8s/
-    - |
-      yq -i e '
-        .image.repository = strenv(ImageName) |
-        .image.tag = strenv(Tag)
-      ' artifacts/k8s/$HelmTemplateFolderName/values.yaml
-  artifacts:
-    name: HelmTemplate
-    untracked: false
-    expire_in: "180 days"
-    paths:
-      - artifacts/**/*
+  extends: .push-k8s-template
 
 deploy-dev:
+  extends: .deploy-template
   variables:
-    GIT_STRATEGY: none
     namespace: dev
+    kube_config: KubeConfig_Raypro_dev
   environment:
     name: dev
   stage: deploy-dev
@@ -91,43 +39,13 @@ deploy-dev:
       artifacts: true
   only:
     - main
-  before_script:
-    - export KUBECONFIG=$KubeConfig_Raypro_dev
-  script:
-    - export resources=$(kubectl get cm resources-setting -o jsonpath={.data.$TgsSettingKey})
-    - export dedicated=$(kubectl get cm tgs-settings -o jsonpath={.data.dedicated})
-    - export node_selector=$(kubectl get cm tgs-settings -o jsonpath={.data.node-selector})
-    - export autoscaling=$(kubectl get cm autoscaling-setting -o jsonpath={.data.$TgsSettingKey})
-    - |
-      cat << EOF | yq e -P | helm template artifacts/k8s/$HelmTemplateFolderName \
-        -n $namespace \
-        --name-template tgs \
-        -f - 
-      {
-        "nodeSelector": $node_selector,
-        "tolerations": [$dedicated],
-        "resources": $resources,
-        "autoscaling": $autoscaling
-      }
-      EOF
-    - |
-      cat << EOF | yq e -P | helm template artifacts/k8s/$HelmTemplateFolderName \
-        -n $namespace \
-        --name-template tgs \
-        -f - \
-        | kubectl -n $namespace apply -f -
-      {
-        "nodeSelector": $node_selector,
-        "tolerations": [$dedicated],
-        "resources": $resources,
-        "autoscaling": $autoscaling
-      }
-      EOF
+  when: always
 
 deploy-staging:
+  extends: .deploy-template
   variables:
-    GIT_STRATEGY: none
     namespace: staging
+    kube_config: KubeConfig_Raypro_staging
   environment:
     name: staging
   stage: deploy-staging
@@ -137,44 +55,12 @@ deploy-staging:
       artifacts: true
   only:
     - main
-  when: manual
-  before_script:
-    - export KUBECONFIG=$KubeConfig_Raypro_staging
-  script:
-    - export resources=$(kubectl get cm resources-setting -o jsonpath={.data.$TgsSettingKey})
-    - export dedicated=$(kubectl get cm tgs-settings -o jsonpath={.data.dedicated})
-    - export node_selector=$(kubectl get cm tgs-settings -o jsonpath={.data.node-selector})
-    - export autoscaling=$(kubectl get cm autoscaling-setting -o jsonpath={.data.$TgsSettingKey})
-    - |
-      cat << EOF | yq e -P | helm template artifacts/k8s/$HelmTemplateFolderName \
-        -n $namespace \
-        --name-template tgs \
-        -f - 
-      {
-        "nodeSelector": $node_selector,
-        "tolerations": [$dedicated],
-        "resources": $resources,
-        "autoscaling": $autoscaling
-      }
-      EOF
-    - |
-      cat << EOF | yq e -P | helm template artifacts/k8s/$HelmTemplateFolderName \
-        -n $namespace \
-        --name-template tgs \
-        -f - \
-        | kubectl -n $namespace apply -f -
-      {
-        "nodeSelector": $node_selector,
-        "tolerations": [$dedicated],
-        "resources": $resources,
-        "autoscaling": $autoscaling
-      }
-      EOF
 
 deploy-prod:
+  extends: .deploy-template
   variables:
-    GIT_STRATEGY: none
     namespace: prod
+    kube_config: KubeConfig_Raypro_prod
   environment:
     name: prod
   stage: deploy-prod
@@ -185,35 +71,3 @@ deploy-prod:
   only:
     - main
   when: manual
-  before_script:
-    - export KUBECONFIG=$KubeConfig_Raypro_prod
-  script:
-    - export resources=$(kubectl get cm resources-setting -o jsonpath={.data.$TgsSettingKey})
-    - export dedicated=$(kubectl get cm tgs-settings -o jsonpath={.data.dedicated})
-    - export node_selector=$(kubectl get cm tgs-settings -o jsonpath={.data.node-selector})
-    - export autoscaling=$(kubectl get cm autoscaling-setting -o jsonpath={.data.$TgsSettingKey})
-    - |
-      cat << EOF | yq e -P | helm template artifacts/k8s/$HelmTemplateFolderName \
-        -n $namespace \
-        --name-template tgs \
-        -f - 
-      {
-        "nodeSelector": $node_selector,
-        "tolerations": [$dedicated],
-        "resources": $resources,
-        "autoscaling": $autoscaling
-      }
-      EOF
-    - |
-      cat << EOF | yq e -P | helm template artifacts/k8s/$HelmTemplateFolderName \
-        -n $namespace \
-        --name-template tgs \
-        -f - \
-        | kubectl -n $namespace apply -f -
-      {
-        "nodeSelector": $node_selector,
-        "tolerations": [$dedicated],
-        "resources": $resources,
-        "autoscaling": $autoscaling
-      }
-      EOF

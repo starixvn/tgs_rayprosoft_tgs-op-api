@@ -44,8 +44,8 @@ public class GameProviderController : ControllerBase
 
 		foreach (var info in infos)
 		{
-			var lang = info.Localization.ContainsKey(cultureCode)
-				? info.Localization[cultureCode]
+			var lang = info.Localization.TryGetValue(cultureCode, out var value)
+				? value
 				: JsonDocument.Parse("{}");
 
 			yield return new GameProviderModel

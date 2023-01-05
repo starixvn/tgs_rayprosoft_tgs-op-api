@@ -5,11 +5,11 @@ using System.Text.RegularExpressions;
 
 namespace TGS.IdentityVerifiers;
 
-public class ChineseIdentity18Verifier : IIdentityVerifier
+public partial class ChineseIdentity18Verifier : IIdentityVerifier
 {
 	public bool Verify(string id)
 	{
-		var regex = new Regex(@"\d{17}\d|X");
+		var regex = CreateChineseIdentity17Regex();
 
 		if (!regex.IsMatch(id))
 			return false;
@@ -34,4 +34,7 @@ public class ChineseIdentity18Verifier : IIdentityVerifier
 
 		return proof < 10 ? proof == checkCode - '0' : checkCode == 'X';
 	}
+
+	[GeneratedRegex("\\d{17}\\d|X")]
+	private static partial Regex CreateChineseIdentity17Regex();
 }
