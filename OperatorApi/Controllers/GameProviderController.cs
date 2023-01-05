@@ -66,6 +66,22 @@ public class GameProviderController : ControllerBase
 		}
 	}
 
+	[HttpGet("maintain")]
+	public IAsyncEnumerable<GameProviderStatusModel> GetMaintainGameProvidersAsync(
+		[FromServices] IQueryService<GetNotActiveGameProvidersQuery, GameProviderStatus> queryService)
+	{
+		var brandId = HttpContext.Items.GetBrandId();
+
+		var query = new GetNotActiveGameProvidersQuery(brandId);
+
+		return queryService.QueryAsync(query, HttpContext.RequestAborted)
+			.Select(status => new GameProviderStatusModel
+			{
+				GpCode = status.GpCode,
+				Status = status.Status
+			});
+	}
+
 	private static string GetLocalization(JsonElement element, string propertyName, string defaultValue)
 	{
 		if (!element.TryGetProperty(propertyName, out var value))

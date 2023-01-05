@@ -222,6 +222,12 @@ builder.Services
 	.AddRouting(options => options.LowercaseUrls = true);
 
 builder.Services
+	.AddFluentValidationAutoValidation(c =>
+		c.DisableDataAnnotationsValidation = true)
+	.AddFluentValidationClientsideAdapters()
+	.AddValidatorsFromAssemblyContaining<Program>(lifetime: ServiceLifetime.Scoped);
+
+builder.Services
 	.AddControllers(options =>
 	{
 		options.AddBrandCertificateFilters();
@@ -232,11 +238,6 @@ builder.Services
 		_ = options.Filters.Add<ErrorMessageMapperFilter>();
 	})
 	.ConfigureApiBehaviorOptions(options => options.SuppressModelStateInvalidFilter = true)
-	.AddFluentValidation(c =>
-	{
-		_ = c.RegisterValidatorsFromAssemblyContaining<Program>(lifetime: ServiceLifetime.Scoped);
-		c.DisableDataAnnotationsValidation = true;
-	})
 	.AddJsonOptions(jsonOptions => jsonOptions
 		.JsonSerializerOptions.Converters.Add(new DateOnlyConverter()));
 
