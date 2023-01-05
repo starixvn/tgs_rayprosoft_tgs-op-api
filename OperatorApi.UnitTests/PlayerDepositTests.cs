@@ -73,19 +73,17 @@ public class PlayerDepositTests
 		Assert.AreEqual(expected, actual);
 	}
 
-
 	[Test]
 	public void Wanda_Pay_Real_Name_Chinese()
 	{
 		var strRealName = "王小明";
 
 		var flag = true;
-		var dRange = 0;
 		int dstringmax = Convert.ToInt32("9fff", 16);
 		int dstringmin = Convert.ToInt32("4e00", 16);
 		for (var i = 0; i < strRealName.Length; i++)
 		{
-			dRange = Convert.ToInt32(Convert.ToChar(strRealName.Substring(i, 1)));
+			var dRange = Convert.ToInt32(Convert.ToChar(strRealName.Substring(i, 1)));
 			if (dRange >= dstringmin && dRange < dstringmax)
 			{
 				flag = true;
@@ -96,6 +94,7 @@ public class PlayerDepositTests
 				break;
 			}
 		}
+
 		Assert.IsTrue(flag);
 	}
 
@@ -105,12 +104,11 @@ public class PlayerDepositTests
 		var strRealName = "王小明qoo";
 
 		var flag = true;
-		var dRange = 0;
 		int dstringmax = Convert.ToInt32("9fff", 16);
 		int dstringmin = Convert.ToInt32("4e00", 16);
 		for (var i = 0; i < strRealName.Length; i++)
 		{
-			dRange = Convert.ToInt32(Convert.ToChar(strRealName.Substring(i, 1)));
+			var dRange = Convert.ToInt32(Convert.ToChar(strRealName.Substring(i, 1)));
 			if (dRange >= dstringmin && dRange < dstringmax)
 			{
 				flag = true;
@@ -121,6 +119,7 @@ public class PlayerDepositTests
 				break;
 			}
 		}
+
 		Assert.IsFalse(flag);
 	}
 
@@ -130,12 +129,11 @@ public class PlayerDepositTests
 		var strRealName = "王小明123";
 
 		var flag = true;
-		var dRange = 0;
 		int dstringmax = Convert.ToInt32("9fff", 16);
 		int dstringmin = Convert.ToInt32("4e00", 16);
 		for (var i = 0; i < strRealName.Length; i++)
 		{
-			dRange = Convert.ToInt32(Convert.ToChar(strRealName.Substring(i, 1)));
+			var dRange = Convert.ToInt32(Convert.ToChar(strRealName.Substring(i, 1)));
 			if (dRange >= dstringmin && dRange < dstringmax)
 			{
 				flag = true;
@@ -146,6 +144,7 @@ public class PlayerDepositTests
 				break;
 			}
 		}
+
 		Assert.IsFalse(flag);
 	}
 }

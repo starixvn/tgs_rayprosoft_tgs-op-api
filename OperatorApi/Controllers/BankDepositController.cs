@@ -607,28 +607,6 @@ public class BankDepositController : ControllerBase
 		};
 	}
 
-	private static bool IsChinese(string strRealName)
-	{
-		var flag = true;
-		var dRange = 0;
-		int dstringmax = Convert.ToInt32("9fff", 16);
-		int dstringmin = Convert.ToInt32("4e00", 16);
-		for (var i = 0; i < strRealName.Length; i++)
-		{
-			dRange = Convert.ToInt32(Convert.ToChar(strRealName.Substring(i, 1)));
-			if (dRange >= dstringmin && dRange < dstringmax)
-			{
-				flag = true;
-			}
-			else
-			{
-				flag = false;
-				break;
-			}
-		}
-		return flag;
-	}
-
 	[HttpPost("zeronineninepay", Name = "SubmitZeroNineNinePayDepositRequest")]
 	[HttpPost("~/api/deposit/thirdparty/zeronineninepay", Name = "SubmitZeroNineNinePayThirdPartyDepositRequest")]
 	[EnableUserBlockedCheck]
@@ -703,5 +681,26 @@ public class BankDepositController : ControllerBase
 		{
 			throw new PaymentFailException(applyInfo.Response.Message);
 		}
+	}
+
+	private static bool IsChinese(string strRealName)
+	{
+		var flag = true;
+		int dstringmax = Convert.ToInt32("9fff", 16);
+		int dstringmin = Convert.ToInt32("4e00", 16);
+		for (var i = 0; i < strRealName.Length; i++)
+		{
+			var dRange = Convert.ToInt32(Convert.ToChar(strRealName.Substring(i, 1)));
+			if (dRange >= dstringmin && dRange < dstringmax)
+			{
+				flag = true;
+			}
+			else
+			{
+				flag = false;
+				break;
+			}
+		}
+		return flag;
 	}
 }
