@@ -44,8 +44,8 @@ public class GameProviderController : ControllerBase
 
 		foreach (var info in infos)
 		{
-			var lang = info.Localization.ContainsKey(cultureCode)
-				? info.Localization[cultureCode]
+			var lang = info.Localization.TryGetValue(cultureCode, out var value)
+				? value
 				: JsonDocument.Parse("{}");
 
 			yield return new GameProviderModel
@@ -64,6 +64,22 @@ public class GameProviderController : ControllerBase
 				Status = info.Status
 			};
 		}
+	}
+
+	[HttpGet("maintain")]
+	public IAsyncEnumerable<GameProviderStatusModel> GetMaintainGameProvidersAsync(
+		[FromServices] IQueryService<GetNotActiveGameProvidersQuery, GameProviderStatus> queryService)
+	{
+		var brandId = HttpContext.Items.GetBrandId();
+
+		var query = new GetNotActiveGameProvidersQuery(brandId);
+
+		return queryService.QueryAsync(query, HttpContext.RequestAborted)
+			.Select(status => new GameProviderStatusModel
+			{
+				GpCode = status.GpCode,
+				Status = status.Status
+			});
 	}
 
 	private static string GetLocalization(JsonElement element, string propertyName, string defaultValue)

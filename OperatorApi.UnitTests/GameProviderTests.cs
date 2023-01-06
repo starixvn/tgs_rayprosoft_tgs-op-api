@@ -483,4 +483,19 @@ public class GameProviderTests
 			Assert.True(exists);
 		}
 	}
+
+	[Test]
+	public async Task 取得GP即時的Status()
+	{
+		var fakeGameProviderRepository = Substitute.For<IGameProviderRepository>();
+
+		var sut = new GetNotActiveGameProvidersQueryService(fakeGameProviderRepository);
+
+		var query = new GetNotActiveGameProvidersQuery(Guid.NewGuid());
+
+		_ = await sut.QueryAsync(query).ToArrayAsync();
+
+		_ = fakeGameProviderRepository.Received(1)
+			.ListNotActiveSubGameProvidersAsync(Arg.Is(query.BrandId));
+	}
 }

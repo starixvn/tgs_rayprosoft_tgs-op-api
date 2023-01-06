@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net7.0</TargetFramework>
     <RootNamespace>TGS.Services.Operator</RootNamespace>
     <Nullable>enable</Nullable>
     <NeutralLanguage>en-US</NeutralLanguage>
@@ -12,11 +12,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Grpc.Tools" Version="2.50.0">
+    <PackageReference Include="Grpc.Tools" Version="2.51.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="17.4.27">
+    <PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="17.4.33">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
@@ -28,15 +28,15 @@
     <PackageReference Include="Tgs.BrandCertificateClient" Version="0.0.20" />
     <PackageReference Include="Tgs.CashService.Client" Version="0.1.5" />
     <PackageReference Include="TGS.Core.Infrastructures.Mail" Version="0.0.6" />
-    <PackageReference Include="Tgs.Core.Infrastructures.Security" Version="0.0.1" />
+    <PackageReference Include="Tgs.Core.Infrastructures.Security" Version="0.0.2" />
     <PackageReference Include="Tgs.DepositAccumulateRoulette.Client" Version="0.0.5" />
     <PackageReference Include="TGS.FileService.Client" Version="0.0.5" />
     <PackageReference Include="Tgs.GameProviders.Pluggable.Client" Version="0.0.29" />
     <PackageReference Include="Tgs.Payment.Client" Version="0.4.8" />
-    <PackageReference Include="Tgs.PaymentService.Client" Version="0.6.18" />
-    <PackageReference Include="Tgs.PlayerBucket.Client" Version="0.0.6" />
+    <PackageReference Include="Tgs.PaymentService.Client" Version="0.6.21" />
+    <PackageReference Include="Tgs.PlayerBucket.Client" Version="0.0.8" />
     <PackageReference Include="Tgs.PlayerService.Client" Version="0.0.27" />
-    <PackageReference Include="Tgs.Promotion.Client" Version="1.0.32" />  
+    <PackageReference Include="Tgs.Promotion.Client" Version="1.0.38" />  
     <PackageReference Include="Tgs.RouletteSignInClient" Version="0.0.3" />
     <PackageReference Include="TGS.ServiceUtility" Version="0.2.0" />
     <PackageReference Include="TGS.SmsServiceClient" Version="0.0.7" />

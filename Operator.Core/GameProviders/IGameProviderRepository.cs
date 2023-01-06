@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace TGS.Services.Operator.GameProviders;
@@ -7,6 +8,8 @@ namespace TGS.Services.Operator.GameProviders;
 public interface IGameProviderRepository
 {
 	ValueTask AddFavoriteGameAsync(Guid brandId, FavoriteGameInfo gameInfo);
+
+	IAsyncEnumerable<GameProviderStatus> ListNotActiveSubGameProvidersAsync(Guid brandId, CancellationToken cancellationToken = default);
 
 	IAsyncEnumerable<BrandGameInfo> QueryAllGamesAsync(Guid brandId);
 

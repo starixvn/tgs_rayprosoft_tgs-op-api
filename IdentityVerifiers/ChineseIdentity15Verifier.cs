@@ -4,11 +4,11 @@ using System.Text.RegularExpressions;
 
 namespace TGS.IdentityVerifiers;
 
-public class ChineseIdentity15Verifier : IIdentityVerifier
+public partial class ChineseIdentity15Verifier : IIdentityVerifier
 {
 	public bool Verify(string id)
 	{
-		var regex = new Regex(@"\d{15}");
+		var regex = CreateChineseIdentity15Regex();
 
 		if (!regex.IsMatch(id))
 			return false;
@@ -22,4 +22,7 @@ public class ChineseIdentity15Verifier : IIdentityVerifier
 			DateTimeStyles.None,
 			out _);
 	}
+
+	[GeneratedRegex("\\d{15}")]
+	private static partial Regex CreateChineseIdentity15Regex();
 }

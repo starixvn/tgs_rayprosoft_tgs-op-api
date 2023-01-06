@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
 	<PropertyGroup>
-		<TargetFramework>net6.0</TargetFramework>
+		<TargetFramework>net7.0</TargetFramework>
 		<UserSecretsId>e0868ee3-eaa7-4a0e-885a-9ccf907086e0</UserSecretsId>
 		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
 		<DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
@@ -43,20 +43,20 @@
 
   <ItemGroup>
     <PackageReference Include="FluentdForward.OpenTelemetry.MessagePack" Version="0.2.0" />
-    <PackageReference Include="FluentValidation.AspNetCore" Version="11.1.2" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="6.0.11" />
+    <PackageReference Include="FluentValidation.AspNetCore" Version="11.2.2" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.1" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.17.0" />
     <PackageReference Include="Microsoft.VisualStudio.SlowCheetah" Version="4.0.8">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="17.4.27">
+    <PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="17.4.33">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="OpenTelemetry" Version="1.3.1" />
+    <PackageReference Include="OpenTelemetry" Version="1.3.2" />
     <PackageReference Include="OpenTelemetry.Contrib.Instrumentation.EntityFrameworkCore" Version="1.0.0-beta2" />
-    <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.3.1" />
+    <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.3.2" />
     <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.0.0-rc9" />
     <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.0.0-rc9" />
     <PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.0.0-rc9" />
@@ -64,9 +64,9 @@
     <PackageReference Include="Scrutor" Version="4.2.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
     <PackageReference Include="Tgs.Interceptors" Version="0.2.1" />
-    <PackageReference Include="Tgs.MessageQueue.Nats" Version="2.1.6" />
+    <PackageReference Include="Tgs.MessageQueue.Nats" Version="2.1.7" />
     <PackageReference Include="Tgs.Payment.AlfaPay.Client" Version="0.0.7" />
-    <PackageReference Include="Tgs.Payment.Help2Pay.Client" Version="0.0.5" />
+    <PackageReference Include="Tgs.Payment.Help2Pay.Client" Version="0.0.6" />
     <PackageReference Include="Tgs.Payment.LeePay.Client" Version="0.0.11" />
     <PackageReference Include="Tgs.Payment.MalakiPay.Client" Version="0.0.5" />
     <PackageReference Include="Tgs.Payment.ManualDeposit" Version="0.1.12" />
@@ -77,8 +77,8 @@
     <PackageReference Include="Tgs.Payment.UmPay.Client" Version="0.0.1" />
     <PackageReference Include="Tgs.Payment.WandaPay.Client" Version="0.0.5" />
     <PackageReference Include="Tgs.Payment.ZeroNineNinePay.Client" Version="0.0.7" />
-    <PackageReference Include="Tgs.Report.Client" Version="0.0.45" />
-    <PackageReference Include="Tgs.WebApi.Toolkits" Version="0.0.13" />
+    <PackageReference Include="Tgs.Report.Client" Version="0.0.47" />
+    <PackageReference Include="Tgs.WebApi.Toolkits" Version="0.1.1" />
   </ItemGroup>
 
 	<ItemGroup>

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Tgs;
@@ -37,6 +38,37 @@ internal class GameProviderRepository : IGameProviderRepository
 			.ConfigureAwait(false);
 
 		_ = await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
+	}
+
+	public IAsyncEnumerable<GameProviderStatus> ListNotActiveSubGameProvidersAsync(Guid brandId, CancellationToken cancellationToken = default)
+	{
+		var status = new[]
+		{
+			Status.Active,
+			Status.Maintenance
+		};
+
+		var query = from brandGp in _tgsRepository.BrandGameProviders.AsQueryable()
+					from gp in _tgsRepository.GameProviders
+					from subGp in _tgsRepository.SubGameProviders
+					where brandGp.GameProviderId == gp.Id
+						&& brandGp.GameProviderId == subGp.GameProviderId
+						&& brandGp.BrandId == brandId
+						&& status.Contains(gp.Status)
+						&& status.Contains(brandGp.Status)
+					select new
+					{
+						SubGpCode = subGp.Code,
+						GpStatus = gp.Status,
+						BrandGpStatus = brandGp.Status
+					};
+
+		return query.ToAsyncEnumerable()
+			.Where(info => info.BrandGpStatus == Status.Maintenance
+				|| info.GpStatus == Status.Maintenance)
+			.Select(info => new GameProviderStatus(
+				info.SubGpCode,
+				Status.Maintenance));
 	}
 
 	public IAsyncEnumerable<BrandGameInfo> QueryAllGamesAsync(Guid brandId)

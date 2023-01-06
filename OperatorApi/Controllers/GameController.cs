@@ -113,8 +113,8 @@ public class GameController : ControllerBase
 				request.Types ?? Array.Empty<GameType>());
 
 			var games = from info in queryAllGameService.QueryAsync(query)
-						let lang = info.Localization.ContainsKey(cultureCode)
-							? info.Localization[cultureCode]
+						let lang = info.Localization.TryGetValue(cultureCode, out var value)
+							? value
 							: JsonDocument.Parse("{}")
 						orderby info.DisplayOrder, info.Code
 						select new GameModel
@@ -154,8 +154,8 @@ public class GameController : ControllerBase
 				request.Types ?? Array.Empty<GameType>());
 
 			var games = from info in getGamesQueryService.QueryAsync(query)
-						let lang = info.Localization.ContainsKey(cultureCode)
-							? info.Localization[cultureCode]
+						let lang = info.Localization.TryGetValue(cultureCode, out var value) 
+							? value 
 							: JsonDocument.Parse("{}")
 						orderby info.DisplayOrder, info.Code
 						select new GameModel
