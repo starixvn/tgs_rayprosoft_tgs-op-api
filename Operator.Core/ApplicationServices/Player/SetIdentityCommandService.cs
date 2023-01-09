@@ -19,13 +19,12 @@ internal class SetIdentityCommandService : ICommandService<SetIdentityCommand>
 	{
 		var updatedOn = DateTimeOffset.UtcNow;
 
-		await _playerOperations
-			.SetIdentityAsync(
-				command.PlayerCode,
-				command.RealName,
-				command.Identity,
-				false,
-				updatedOn)
+		await _playerOperations.SetIdentityAsync(
+			command.PlayerCode,
+			command.RealName,
+			command.Identity,
+			false,
+			updatedOn)
 			.ConfigureAwait(false);
 	}
 }

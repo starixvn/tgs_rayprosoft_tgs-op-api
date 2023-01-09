@@ -1,0 +1,15 @@
+{
+  "extends": "./node_modules/@tsconfig/recommended/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./",
+    "module": "CommonJS",
+    "moduleResolution": "node",
+    "target": "ES5"
+  },
+  "include": [
+    "src/**/*.ts"
+  ],
+  "exclude": [
+    "**/*.js"
+  ]
+}
