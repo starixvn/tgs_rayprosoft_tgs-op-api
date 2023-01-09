@@ -19,6 +19,10 @@ stages:
 
 build-code:
   extends: .build-code-template
+  script:
+    - npm ci --prefix op_client
+    - npm run build --prefix op_client
+    - dotnet build -c $BuildConfiguration
 
 unit-test:
   extends: .unit-test-template
