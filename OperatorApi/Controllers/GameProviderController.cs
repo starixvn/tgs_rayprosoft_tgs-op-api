@@ -66,7 +66,7 @@ public class GameProviderController : ControllerBase
 		}
 	}
 
-	[HttpGet("maintain")]
+	[HttpGet("maintain", Name = "GetMaintainGameProviders")]
 	public IAsyncEnumerable<GameProviderStatusModel> GetMaintainGameProvidersAsync(
 		[FromServices] IQueryService<GetNotActiveGameProvidersQuery, GameProviderStatus> queryService)
 	{

@@ -398,3 +398,5 @@ FodyWeavers.xsd
 *.sln.iml
 
 *.feature.cs
+
+op_client/**/*.js
