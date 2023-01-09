@@ -54,7 +54,7 @@ public class GameProviderTests
 			new GameProviderStatus("Game2", TGS.Core.Models.Enums.Status.Maintenance)
 		};
 
-		fakeGameProviderRepository.ListNotActiveSubGameProvidersAsync(
+		_ = fakeGameProviderRepository.ListNotActiveSubGameProvidersAsync(
 			Arg.Is(brandId),
 			Arg.Any<CancellationToken>())
 			.Returns(expectedSubGameProviders.ToAsyncEnumerable());
