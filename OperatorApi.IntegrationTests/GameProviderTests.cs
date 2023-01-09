@@ -31,7 +31,7 @@ public class GameProviderTests
 		var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
 		var fakeGameProviderRepository = Substitute.For<IGameProviderRepository>();
 
-		_ = fakeBrandCertClient.GetSystemValidateSecurityKeyAsync()
+		_ = fakeBrandCertClient.GetSystemValidateSecurityKeyAsync(Arg.Any<CancellationToken>())
 			.Returns(TestOperatorApplication.TestSecurityKey);
 
 		var brandId = Guid.NewGuid();
