@@ -98,7 +98,9 @@ internal class LoginCommandService : IGetService<LoginCommand, LoginInfo>
 	}
 
 	private async Task<string> GeneratePlayerJwtTokenAsync(
-		Guid brandId, PlayerTokenData playerTokenData, string site)
+		Guid brandId,
+		PlayerTokenData playerTokenData,
+		string site)
 	{
 		var identity = new ClaimsIdentity(
 			new[]

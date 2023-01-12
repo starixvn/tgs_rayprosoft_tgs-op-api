@@ -1,11 +1,15 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using ExpectedObjects;
 using Moq;
+using NSubstitute;
 using NUnit.Framework;
 using Tgs.CashService.Client;
-using TGS.Core.Models.Enums;
+using Tgs.PlayerService.Client;
 using TGS.Core.Models.Services.Caches;
 using TGS.Services.Operations;
 using TGS.Services.Operator;
@@ -38,8 +42,8 @@ public class WalletTests
 				DefaultWalletCurrencyCode = "CNY",
 				DefaultWalletId = Guid.NewGuid(),
 				ExternalCurrencyCode = "CNY",
-				Status = PlayerStatus.Enabled,
-				Type = PlayerType.RealPlayer
+				Status = Core.Models.Enums.PlayerStatus.Enabled,
+				Type = Core.Models.Enums.PlayerType.RealPlayer
 			}));
 		var expected = new BalanceInfo(10000M).ToExpectedObject();
 
@@ -52,5 +56,43 @@ public class WalletTests
 		var actual = await sut.GetAsync(new GetBalanceQuery(playerCode));
 
 		expected.ShouldMatch(actual);
+	}
+
+	[Test]
+	public async Task 取得玩家帳變紀錄()
+	{
+		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
+		var fakeCashServiceClient = Substitute.For<ICashServiceClient>();
+
+		var sut = new GetPlayerTransactionLogsQueryService(
+			fakePlayerServiceClient,
+			fakeCashServiceClient);
+
+		var query = new GetPlayerTransactionLogsQuery(
+			"test1",
+			DateTime.Now.AddDays(-1D),
+			DateTime.Now.AddDays(1D),
+			1,
+			10);
+
+		var walletId = Guid.NewGuid();
+
+		_ = fakePlayerServiceClient.GetPlayerPropertiesAsync(Arg.Is(query.PlayerCode))
+			.Returns(new Dictionary<string, string>
+			{
+				["DefaultWalletId"] = walletId.ToString()
+			}.ToImmutableDictionary());
+
+		var expectedPagingCondition = new PagingConditions(1, 10);
+
+		_ = await sut.GetAsync(query);
+
+		_ = fakeCashServiceClient.Received(1)
+			.QueryTransactionLogsAsync(
+				Arg.Is(walletId),
+				Arg.Is(query.From),
+				Arg.Is(query.To),
+				Arg.Is<IEnumerable<int>>(x => x.SequenceEqual(new[] { 6, 4100, 3800, 3850, 3860, 4 })),
+				Arg.Is(expectedPagingCondition));
 	}
 }

@@ -1,0 +1,7 @@
+{
+    "files.exclude": {
+        "op_client/index.js": true,
+        "op_client/models": true,
+        "op_client/services": true
+    }
+}
