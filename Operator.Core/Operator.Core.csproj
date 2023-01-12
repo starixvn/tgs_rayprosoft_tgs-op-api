@@ -25,13 +25,13 @@
     <PackageReference Include="Scrutor" Version="4.2.0" />
     <PackageReference Include="System.Linq.Async" Version="6.0.1" />
     <PackageReference Include="Tgs.BrandCertificateClient" Version="0.0.20" />
-    <PackageReference Include="Tgs.CashService.Client" Version="0.1.5" />
+    <PackageReference Include="Tgs.CashService.Client" Version="0.1.6" />
     <PackageReference Include="TGS.Core.Infrastructures.Mail" Version="0.0.6" />
     <PackageReference Include="Tgs.Core.Infrastructures.Security" Version="0.0.2" />
     <PackageReference Include="Tgs.DepositAccumulateRoulette.Client" Version="0.0.5" />
     <PackageReference Include="TGS.FileService.Client" Version="0.0.5" />
     <PackageReference Include="Tgs.GameProviders.Pluggable.Client" Version="0.0.29" />
-    <PackageReference Include="Tgs.Paging.AsyncEnumerable" Version="1.2.0" />
+    <PackageReference Include="Tgs.Paging.AsyncEnumerable" Version="1.2.1" />
     <PackageReference Include="Tgs.Payment.Client" Version="0.4.8" />
     <PackageReference Include="Tgs.PaymentService.Client" Version="0.6.21" />
     <PackageReference Include="Tgs.PlayerBucket.Client" Version="0.0.8" />

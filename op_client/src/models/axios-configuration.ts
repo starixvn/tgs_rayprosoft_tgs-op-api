@@ -1,6 +1,11 @@
 import axios from "axios";
 
-export default function axiosConfigFactory(name: string, isWindows: boolean, brandToken: string) {
+export default function axiosConfigFactory(
+    name: string,
+    isWindows: boolean,
+    brandToken: string,
+    loginToken: string | null | undefined = undefined) {
+
     if (isWindows)
         return axios.create({
             baseURL: "http://localhost",
@@ -8,7 +13,8 @@ export default function axiosConfigFactory(name: string, isWindows: boolean, bra
             headers: {
                 common: {
                     "Host": "localhost",
-                    "brand-token": brandToken
+                    "brand-token": brandToken,
+                    "token": loginToken
                 }
             },
             insecureHTTPParser: true
@@ -21,7 +27,8 @@ export default function axiosConfigFactory(name: string, isWindows: boolean, bra
                 common: {
                     "Host": "localhost",
                     "Accept-Encoding": ["gzip", "compress", "deflate"],
-                    "brand-token": brandToken
+                    "brand-token": brandToken,
+                    "token": loginToken
                 }
             }
         });
