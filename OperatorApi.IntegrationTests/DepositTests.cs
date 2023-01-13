@@ -1,26 +1,20 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
+﻿using System.Runtime.InteropServices;
+using Jering.Javascript.NodeJS;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
-using Tgs.Payment.Clients;
-using TGS.Services.Operator.ApplicationServices.Deposit;
-using Tgs.ServiceUtility;
-using Xunit.Abstractions;
-using TGS.Payment.ManualDeposit;
-using ExpectedObjects;
-using Jering.Javascript.NodeJS;
-using TGS.Apis.OperatorApi.Models;
-using Grpc.Core;
-using System.Runtime.InteropServices;
-using TGS.Apis.OperatorApi.Models.Messages;
 using Tgs.BrandCertificate;
 using Tgs.BrandCertificate.Clients;
-using Tgs.CashService.Client;
-using TGS.Core.DataServices.Tgs.Models;
+using Tgs.Payment.Clients;
 using Tgs.PlayerService.Client;
-using TGS.Services.Operator.ApplicationServices.Player;
+using Tgs.ServiceUtility;
+using TGS.Apis.OperatorApi.Models;
+using TGS.Payment.ManualDeposit;
 using TGS.Services.Operator;
+using TGS.Services.Operator.ApplicationServices.Deposit;
+using TGS.Services.Operator.ApplicationServices.Player;
+using Xunit.Abstractions;
 
 namespace OperatorApi.IntegrationTests;
 
