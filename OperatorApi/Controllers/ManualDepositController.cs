@@ -337,7 +337,7 @@ public class ManualDepositController : ControllerBase
 			.GetAsync(new(request.BrandPaymentId), HttpContext.RequestAborted)
 			.ConfigureAwait(false);
 
-		var brandPaymentBankInfo = JsonDocument.Parse(brandPayment.ExtendedData);
+		var brandPaymentBankInfo = JsonDocument.Parse(brandPayment.ExtendedData!);
 
 		var rate = brandPaymentBankInfo.RootElement.GetProperty("rate").GetDecimal();
 
@@ -354,8 +354,8 @@ public class ManualDepositController : ControllerBase
 				new ManualDepositUsdtApplyInfo
 				{
 					BankType = request.BankType,
-					Address = brandPaymentBankInfo.RootElement.GetProperty("address").GetString(),
-					QrCode = brandPaymentBankInfo.RootElement.GetProperty("qrCode").GetString(),
+					Address = brandPaymentBankInfo.RootElement.GetProperty("address").GetString()!,
+					QrCode = brandPaymentBankInfo.RootElement.GetPropertyValue("qrCode"),
 					Rate = rate,
 					SendAmount = request.Amount
 				}));
