@@ -21,6 +21,7 @@ using Tgs.Payment.TuPay;
 using Tgs.Payment.UmPay;
 using Tgs.Payment.ZeroNineNinePay;
 using Tgs.PlayerBucket.Clients.DependencyInjection;
+using Tgs.ServiceUtility;
 using TGS.Apis.OperatorApi;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
@@ -37,6 +38,7 @@ using TGS.Core.Infrastructures.WebApiServices;
 using TGS.Payment.ManualDeposit;
 using TGS.Services.Operations.Extensions;
 using TGS.Services.Operator;
+using TGS.Services.Operator.ApplicationServices.Game;
 using TGS.Services.Operator.MessageQueue;
 using TGS.Services.Operator.ValidateCode;
 
@@ -163,7 +165,7 @@ builder.Services
 
 builder.Services
 	.AddPlayerBucketClient(httpBuilder => { })
-	.AddOperatorApiCore()
+	.AddOperatorApiCore()	
 	.ConfigureOperatorOptions<IConfiguration>((options, config) => config
 		.GetSection("Operator").Bind(options))
 	.UseOperatorRepositories(sp
@@ -182,6 +184,7 @@ builder.Services
 			http.BaseAddress = config.GetValue<Uri>("Operator:PaymentServiceBaseUrl");
 		}))
 	.Services
+	.AddTransient<IGetService<GetSM01HtmlContentQuery, SM01HtmlContentInfo>, GetSM01HtmlContentQueryService>()
 	.AddSingleton<ManualDepositSerializer>()
 	.AddSingleton<PrimePaySerializer>()
 	.AddSingleton<LeePaySerializer>()
