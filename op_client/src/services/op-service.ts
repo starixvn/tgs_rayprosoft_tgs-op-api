@@ -22,7 +22,7 @@ export default class OperatorService {
             .then<PagingResponse<TransactionLog>>(res => res.data);
     }
 
-    public submitDepositUsdt(amount: number, paymentid: string, promotionid: string | null, banktype: string) : Promise<SuccessResponse<string>> {
+    public submitManualDepositUsdt(amount: number, paymentid: string, promotionid: string | null, banktype: string) : Promise<SuccessResponse<string>> {
         return this.http.put(
             "/api/deposit/manual/usdt",
             {   amount, paymentid, promotionid, banktype })

@@ -157,7 +157,7 @@ public class DepositTests
 
 				let svc = new BackOfficeService(instance);
 
-				return await svc.submitDepositUsdt(amount, paymentId, promotionId, bankType);
+				return await svc.submitManualDepositUsdt(amount, paymentId, promotionId, bankType);
 			};
 		""";
 
