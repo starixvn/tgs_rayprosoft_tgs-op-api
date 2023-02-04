@@ -1,9 +1,5 @@
 ﻿#nullable enable
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Tgs.DepositAccumulateRoulette.Clients;
 using Tgs.Promotion.Clients;
@@ -28,7 +24,7 @@ public class DepositAccumulateRouletteController : ControllerBase
 		Guid promotionId)
 	{
 		var playerTokenData = HttpContext.Items.GetPlayerTokenData();
-		var playerCode = playerTokenData.PlayerCode;
+		var playerCode = playerTokenData!.PlayerCode;
 
 		var rouletteRecords = rouletteClient.GetRouletteRecordsAsync(promotionId, playerCode, HttpContext.RequestAborted);
 
@@ -93,7 +89,7 @@ public class DepositAccumulateRouletteController : ControllerBase
 		Guid promotionId)
 	{
 		var playerTokenData = HttpContext.Items.GetPlayerTokenData();
-		var playerCode = playerTokenData.PlayerCode;
+		var playerCode = playerTokenData!.PlayerCode;
 
 		var command = new PlayDepositAccumulateRouletteCommand(promotionId, playerCode);
 

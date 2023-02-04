@@ -15,6 +15,7 @@ using Tgs.PlayerService.Client;
 using Tgs.ServiceUtility;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
+using Tgs.MessageQueue;
 using TGS.Services.Operator;
 using TGS.Services.Operator.ApplicationServices.Player;
 using BrandStatus = Tgs.BrandCertificate.BrandStatus;
@@ -370,6 +371,28 @@ internal class LoginTests
 				Arg.Any<string>(),
 				Arg.Is(command.IpAddress),
 				Arg.Is(command.HostName),
+				Arg.Any<CancellationToken>());
+	}
+
+	[Test]
+	public async Task 當玩家登入時發送登入Event()
+	{
+		var fakeMessageSender = Substitute.For<IMessageSender>();
+
+		var command = new PublishPlayerLoggedInEventCommand(
+			"player1",
+			Guid.NewGuid(),
+			DateTimeOffset.UtcNow);
+
+		var sut = new PublishPlayerLoggedInEventCommandService(fakeMessageSender);
+
+		await sut.ExecuteAsync(command);
+
+		_ = fakeMessageSender
+			.Received(1)
+			.PublishAsync(
+				Arg.Is("tgs.operator.player.logged_in"),
+				Arg.Any<ReadOnlyMemory<byte>>(),
 				Arg.Any<CancellationToken>());
 	}
 }

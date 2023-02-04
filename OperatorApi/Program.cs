@@ -27,6 +27,7 @@ using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Filters;
 using TGS.Apis.OperatorApi.Filters.Swaggers;
+using TGS.Apis.OperatorApi.Middlewares;
 using TGS.Apis.OperatorApi.Models;
 using TGS.Core.DataServices.Tgs.Extensions;
 using TGS.Core.Infrastructures.ApiClient;
@@ -344,6 +345,8 @@ app.UseBrandCertificate();
 app.UseRouting();
 app.UseCors();
 app.UseVerifyJwtTokenMiddlewares(Consts.DefaultBypassRouting);
+
+app.UseMiddleware<PublishPlayerLoggedInEventMiddleware>();
 
 app.MapControllers();
 
