@@ -1,4 +1,4 @@
-﻿#See https://aka.ms/containerfastmode to understand how Visual Studio uses this Dockerfile to build your images for faster debugging.
+#See https://aka.ms/containerfastmode to understand how Visual Studio uses this Dockerfile to build your images for faster debugging.
 
 FROM mcr.microsoft.com/dotnet/aspnet:7.0 AS base
 WORKDIR /app
@@ -12,6 +12,7 @@ COPY ["OperatorApi/OperatorApi.csproj", "OperatorApi/"]
 COPY ["IdentityVerifiers/IdentityVerifiers.csproj", "IdentityVerifiers/"]
 COPY ["Operator.Core/Operator.Core.csproj", "Operator.Core/"]
 COPY ["Operations/Operations.csproj", "Operations/"]
+COPY ["Operator.Client/Operator.Client.csproj", "Operator.Client/"]
 COPY ["Operator.Repositories/Operator.Repositories.csproj", "Operator.Repositories/"]
 RUN dotnet restore "OperatorApi/OperatorApi.csproj"
 COPY . .
