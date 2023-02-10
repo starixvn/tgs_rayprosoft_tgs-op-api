@@ -149,13 +149,13 @@ public class DepositTests
 		var isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "true" : "false";
 		var nodeModule = $$"""
 			const axiosConfigFactory = require('./models/axios-configuration.js').default;
-			const BackOfficeService = require('./services/op-service.js').default;
+			const OperatorService = require('./services/op-service.js').default;
 
 			module.exports = async (brandToken, loginToken, amount, paymentId, promotionId, bankType) =>
 			{
 				let instance = axiosConfigFactory("{{channelName}}", {{isWindows}}, brandToken, loginToken);
 
-				let svc = new BackOfficeService(instance);
+				let svc = new OperatorService(instance);
 
 				return await svc.submitManualDepositUsdt(amount, paymentId, promotionId, bankType);
 			};
@@ -292,13 +292,13 @@ public class DepositTests
 		var isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "true" : "false";
 		var nodeModule = $$"""
 			const axiosConfigFactory = require('./models/axios-configuration.js').default;
-			const BackOfficeService = require('./services/op-service.js').default;
+			const OperatorService = require('./services/op-service.js').default;
 
 			module.exports = async (brandToken, loginToken, amount, paymentId, promotionId, bankType, account, name, note, realname) =>
 			{
 				let instance = axiosConfigFactory("{{channelName}}", {{isWindows}}, brandToken, loginToken);
 
-				let svc = new BackOfficeService(instance);
+				let svc = new OperatorService(instance);
 
 				return await svc.submitDepositBankRequest(amount, paymentId, promotionId, bankType, account, name, note, realname);
 			};
@@ -435,13 +435,13 @@ public class DepositTests
 		var isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "true" : "false";
 		var nodeModule = $$"""
 			const axiosConfigFactory = require('./models/axios-configuration.js').default;
-			const BackOfficeService = require('./services/op-service.js').default;
+			const OperatorService = require('./services/op-service.js').default;
 
 			module.exports = async (brandToken, loginToken, amount, paymentId, promotionId, bankType, note, realname, phone) =>
 			{
 				let instance = axiosConfigFactory("{{channelName}}", {{isWindows}}, brandToken, loginToken);
 
-				let svc = new BackOfficeService(instance);
+				let svc = new OperatorService(instance);
 
 				return await svc.submitDepositEWalletRequest(amount, paymentId, promotionId, bankType, note, realname, phone);
 			};
@@ -577,13 +577,13 @@ public class DepositTests
 		var isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "true" : "false";
 		var nodeModule = $$"""
 			const axiosConfigFactory = require('./models/axios-configuration.js').default;
-			const BackOfficeService = require('./services/op-service.js').default;
+			const OperatorService = require('./services/op-service.js').default;
 
 			module.exports = async (brandToken, loginToken, amount, paymentId, promotionId, bankType, note, realname, phone) =>
 			{
 				let instance = axiosConfigFactory("{{channelName}}", {{isWindows}}, brandToken, loginToken);
 
-				let svc = new BackOfficeService(instance);
+				let svc = new OperatorService(instance);
 
 				return await svc.submitDepositPulsaRequest(amount, paymentId, promotionId, bankType, note, realname, phone);
 			};

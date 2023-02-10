@@ -173,13 +173,13 @@ public class TransactionLogTests
 
 		var nodeModule = $$"""
 			const axiosConfigFactory = require('./models/axios-configuration.js').default;
-			const BackOfficeService = require('./services/op-service.js').default;
+			const OperatorService = require('./services/op-service.js').default;
 
 			module.exports = async (brandToken, loginToken, from, to, page, rows) =>
 			{
 				let instance = axiosConfigFactory("{{channelName}}", {{isWindows}}, brandToken, loginToken);
 
-				let svc = new BackOfficeService(instance);
+				let svc = new OperatorService(instance);
 
 				return await svc.getPlayerTransactionLogs(from, to, page, rows);
 			};
