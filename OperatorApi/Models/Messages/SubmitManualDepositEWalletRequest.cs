@@ -23,4 +23,7 @@ public record SubmitManualDepositEWalletRequest
 
 	[JsonPropertyName("emoneyname")]
 	public string? EMoneyName { get; init; }
+
+	[JsonPropertyName("phone")]
+	public string? Phone { get; init; }
 }

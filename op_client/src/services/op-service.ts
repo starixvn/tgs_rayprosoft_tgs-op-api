@@ -28,4 +28,28 @@ export default class OperatorService {
             {   amount, paymentid, promotionid, banktype })
             .then<SuccessResponse<string>>(res => res.data);
     }
+
+    public submitDepositBankRequest(amount: number, paymentid: string, promotionid: string | null, banktype: string, account: string, name: string | null, note: string | null, realname: string | null ) : Promise<SuccessResponse<string>> {
+        return this.http.put(
+            "/api/deposit/manual/bank",
+            { amount, paymentid, promotionid, banktype, account, name, note, realname }
+        )
+        .then<SuccessResponse<string>>(res => res.data);
+    }
+
+    public submitDepositEWalletRequest(amount: number, paymentid: string, promotionid: string | null, banktype: string, note: string | null, emoneyname: string | null, phone: string | null) : Promise<string> {
+        return this.http.put(
+            "/api/deposit/manual/ewallet",
+            { amount, paymentid, promotionid, banktype, note, emoneyname, phone }
+        )
+        .then<string>(res => res.data);
+    }
+
+    public submitDepositPulsaRequest(amount: number, paymentid: string, promotionid: string | null, banktype: string, note: string | null, realname: string | null, phone: string | null) : Promise<string> {
+        return this.http.put(
+            "/api/deposit/manual/pulsa",
+            { amount, paymentid, promotionid, banktype, note, realname, phone }
+        )
+        .then<string>(res => res.data);
+    }
 }
