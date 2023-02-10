@@ -20,4 +20,10 @@ public record SubmitManualDepositPulsaRequest
 
 	[JsonPropertyName("note")]
 	public string? Note { get; init; }
+
+	[JsonPropertyName("realname")]
+	public string? RealName { get; init; }
+
+	[JsonPropertyName("phone")]
+	public string? Phone { get; init; }
 }

@@ -63,13 +63,13 @@ public class GameProviderTests
 
 		var nodeModule = $$"""
 			const axiosConfigFactory = require('./models/axios-configuration.js').default;
-			const BackOfficeService = require('./services/op-service.js').default;
+			const OperatorService = require('./services/op-service.js').default;
 
 			module.exports = async (brandToken) =>
 			{
 				let instance = axiosConfigFactory("{{channelName}}", {{isWindows}}, brandToken);
 
-				let svc = new BackOfficeService(instance);
+				let svc = new OperatorService(instance);
 
 				return await svc.getMaintainGameProviders();
 			};
