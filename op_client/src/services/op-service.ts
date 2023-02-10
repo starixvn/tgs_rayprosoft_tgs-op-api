@@ -37,19 +37,19 @@ export default class OperatorService {
         .then<SuccessResponse<string>>(res => res.data);
     }
 
-    public submitDepositEWalletRequest(amount: number, paymentid: string, promotionid: string | null, banktype: string, note: string | null, emoneyname: string | null, phone: string | null) : Promise<string> {
+    public submitDepositEWalletRequest(amount: number, paymentid: string, promotionid: string | null, banktype: string, note: string | null, emoneyname: string | null, phone: string | null) : Promise<SuccessResponse<string>> {
         return this.http.put(
             "/api/deposit/manual/ewallet",
             { amount, paymentid, promotionid, banktype, note, emoneyname, phone }
         )
-        .then<string>(res => res.data);
+        .then<SuccessResponse<string>>(res => res.data);
     }
 
-    public submitDepositPulsaRequest(amount: number, paymentid: string, promotionid: string | null, banktype: string, note: string | null, realname: string | null, phone: string | null) : Promise<string> {
+    public submitDepositPulsaRequest(amount: number, paymentid: string, promotionid: string | null, banktype: string, note: string | null, realname: string | null, phone: string | null) : Promise<SuccessResponse<string>> {
         return this.http.put(
             "/api/deposit/manual/pulsa",
             { amount, paymentid, promotionid, banktype, note, realname, phone }
         )
-        .then<string>(res => res.data);
+        .then<SuccessResponse<string>>(res => res.data);
     }
 }
