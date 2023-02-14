@@ -55,11 +55,10 @@ internal class LoginTests
 
 		var password = "Password";
 
-		var expected = new LoginInfo
-		{
-			PlayerToken = "player token",
-			LoginTime = loginRecordInfo.CreatedOn.ToUnixTimeMilliseconds()
-		};
+		var expected = new LoginInfo(
+			playerInfo.PlayerCode,
+			"player token",
+			loginRecordInfo.CreatedOn);
 
 		var command = new LoginCommand(
 			playerInfo.BrandId,
@@ -125,6 +124,8 @@ internal class LoginTests
 				Arg.Is(command.HostName),
 				Arg.Any<CancellationToken>());
 	}
+
+
 
 	[Test]
 	public async Task Decrypt_Player_Token_Should_Match_Input_Info()
@@ -381,7 +382,6 @@ internal class LoginTests
 
 		var command = new PublishPlayerLoggedInEventCommand(
 			"player1",
-			Guid.NewGuid(),
 			DateTimeOffset.UtcNow);
 
 		var sut = new PublishPlayerLoggedInEventCommandService(fakeMessageSender);

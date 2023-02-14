@@ -90,11 +90,10 @@ internal class LoginCommandService : IGetService<LoginCommand, LoginInfo>
 			.RecordLoginIpAsync(playerInfo.PlayerCode, command.IpAddress, command.HostName, cancellationToken)
 			.ConfigureAwait(false);
 
-		return new LoginInfo
-		{
-			PlayerToken = token,
-			LoginTime = record.CreatedOn.ToUnixTimeMilliseconds()
-		};
+		return new LoginInfo(
+			playerInfo.PlayerCode,
+			token,
+			record.CreatedOn);
 	}
 
 	private async Task<string> GeneratePlayerJwtTokenAsync(

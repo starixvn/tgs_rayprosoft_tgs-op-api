@@ -343,6 +343,7 @@ public class PlayerController : ControllerBase
 	[IgnoreUserBlacklistCheck]
 	public async Task<LoginResponse> LoginAsync(
 		[FromServices] IGetService<LoginCommand, LoginInfo> loginService,
+		[FromServices] ICommandService<PublishPlayerLoggedInEventCommand> publishEventCommandService,
 		[FromBody] LoginRequest request)
 	{
 		var brandId = HttpContext.GetBrandId()!.Value;
@@ -364,9 +365,14 @@ public class PlayerController : ControllerBase
 				.GetAsync(command)
 				.ConfigureAwait(false);
 
+			await publishEventCommandService
+				.ExecuteAsync(
+					new PublishPlayerLoggedInEventCommand(info.PlayerCode, info.LoginTime))
+				.ConfigureAwait(false);
+
 			return new LoginResponse
 			{
-				LoginTime = info.LoginTime,
+				LoginTime = info.LoginTime.ToUnixTimeMilliseconds(),
 				PlayerToken = info.PlayerToken
 			};
 		}
