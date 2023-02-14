@@ -26,7 +26,6 @@ internal class PublishPlayerLoggedInEventCommandService : ICommandService<Publis
 		var loggedInRequest = new LoggedInEvent
 		{
 			PlayerCode = command.PlayerCode,
-			BrandId = command.BrandId,
 			LoggedInTime = command.LoggedInTime.ToTimestamp()
 		};
 

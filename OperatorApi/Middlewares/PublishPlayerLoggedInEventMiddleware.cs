@@ -21,20 +21,17 @@ public class PublishPlayerLoggedInEventMiddleware
 		HttpContext context,
 		ICommandService<PublishPlayerLoggedInEventCommand> commandService)
 	{
+		await _next(context);
+
 		var playerTokenData = context.Items.GetPlayerTokenData();
 
 		if (playerTokenData is not null)
 		{
-			var brandId = context.GetBrandId();
-
 			var command = new PublishPlayerLoggedInEventCommand(
 				playerTokenData.PlayerCode,
-				brandId!.Value,
 				DateTimeOffset.UtcNow);
 
 			await commandService.ExecuteAsync(command);
 		}
-
-		await _next(context);
 	}
 }

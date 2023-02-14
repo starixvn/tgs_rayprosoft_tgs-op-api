@@ -4,10 +4,8 @@ option csharp_namespace = "Tgs.Operator.Client.Protos";
 package tgs.operator;
 
 import "google/protobuf/timestamp.proto";
-import "phoenix/protobuf/guid.proto";
 
 message LoggedInEvent {
 	string player_code = 1;
-	phoenix.protobuf.GuidValue brand_id = 2;
-	google.protobuf.Timestamp logged_in_time = 3;
+	google.protobuf.Timestamp logged_in_time = 2;
 }
