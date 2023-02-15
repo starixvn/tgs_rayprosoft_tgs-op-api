@@ -1,9 +1,8 @@
 ﻿#nullable enable
 
-using Microsoft.AspNetCore.Mvc;
+using Tgs.ServiceUtility;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Services.Operator.ApplicationServices.Player;
-using Tgs.ServiceUtility;
 
 namespace TGS.Apis.OperatorApi.Middlewares;
 

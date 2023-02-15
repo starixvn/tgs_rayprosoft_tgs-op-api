@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using ExpectedObjects;
+using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
 using NUnit.Framework;
 using Tgs.BrandCertificate.Clients;
@@ -374,15 +375,18 @@ internal class LoginTests
 	}
 
 	[Test]
-	public async Task 當玩家登入時發送登入Event()
+	public async Task 發送登入Event()
 	{
 		var fakeMessageSender = Substitute.For<IMessageSender>();
+		var fakeLogger = NullLogger<PublishPlayerLoggedInEventCommandService>.Instance;
 
 		var command = new PublishPlayerLoggedInEventCommand(
 			"player1",
 			DateTimeOffset.UtcNow);
 
-		var sut = new PublishPlayerLoggedInEventCommandService(fakeMessageSender);
+		var sut = new PublishPlayerLoggedInEventCommandService(
+			fakeMessageSender,
+			fakeLogger);
 
 		await sut.ExecuteAsync(command);
 
