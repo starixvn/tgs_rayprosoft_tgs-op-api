@@ -1,20 +1,25 @@
 ﻿using System.Runtime.InteropServices;
+using System.Security.Claims;
+using System.Text;
 using Jering.Javascript.NodeJS;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.JsonWebTokens;
 using NSubstitute;
 using Tgs.BrandCertificate.Clients;
 using Tgs.MessageQueue;
 using Tgs.PlayerService.Client;
 using Tgs.ServiceUtility;
 using TGS.Apis.OperatorApi.Models.Messages;
+using Tgs.Core.Infrastructures.Security;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Tokens;
 using TGS.Services.Operator;
 using TGS.Services.Operator.ApplicationServices.Player;
 using Xunit.Abstractions;
 using BrandStatus = Tgs.BrandCertificate.BrandStatus;
+using Google.Protobuf.WellKnownTypes;
 
 namespace OperatorApi.IntegrationTests;
 
@@ -47,9 +52,12 @@ public class PlayerTests
 		var brandId = Guid.NewGuid();
 		var brandCode = "Test";
 		var brandToken = TestOperatorApplication.MakeTestBrandToken(brandId, brandCode);
+		var secretKey = "N2KAnljo5zbLCZDSoUBFJ70ONsy";
 
-		_ = fakeBrandRepository.GetSecretKeyAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
-			.Returns("N2KAnljo5zbLCZDSoUBFJ70ONsy");
+		_ = fakeBrandRepository.GetSecretKeyAsync(
+				Arg.Is(brandId),
+				Arg.Any<CancellationToken>())
+			.Returns(secretKey);
 
 		using var web = TestOperatorApplication.Builder
 			.UseTestChannelServer(channelName)
@@ -72,10 +80,15 @@ public class PlayerTests
 		var password = "password";
 		var platformType = PlatformType.Desktop;
 
-		_ = fakeBrandServiceClient.GetBrandStatusAsync(Arg.Is(brandId))
-			.Returns((BrandStatus)BrandStatus.Active);
+		_ = fakeBrandServiceClient.GetBrandStatusAsync(
+				Arg.Is(brandId),
+				Arg.Any<CancellationToken>())
+			.Returns(BrandStatus.Active);
 
-		_ = fakePlayerServiceClient.GetPlayerInfoByUserNameAsync(Arg.Is(brandId), Arg.Is(userName))
+		_ = fakePlayerServiceClient.GetPlayerInfoByUserNameAsync(
+				Arg.Is(brandId), 
+				Arg.Is(userName),
+				Arg.Any<CancellationToken>())
 			.Returns(new Tgs.PlayerService.Client.PlayerInfo
 			{
 				BrandId = brandId,
@@ -83,23 +96,25 @@ public class PlayerTests
 				PlayerCode = playerCode
 			});
 
-		_ = fakePlayerPasswordValidateCommandService.GetAsync(
+		_ = fakePlayerPasswordValidateCommandService
+			.GetAsync(
 				Arg.Is<PlayerPasswordValidateCommand>(x =>
-					x.PlayerCode == playerCode && x.Password == password))
+					x.PlayerCode == playerCode && x.Password == password), 
+				Arg.Any<CancellationToken>())
 			.Returns(true);
 
 		var loginRecord = new LoginRecordInfo(
 			Guid.NewGuid(),
 			playerCode,
-			TGS.Core.Models.Enums.LoginStatus.Enabled,
-			TGS.Core.Models.Enums.PlatformType.Desktop,
-			DateTimeOffset.Now,
-			DateTimeOffset.Now.AddDays(1D));
+			LoginStatus.Enabled,
+			platformType,
+			DateTimeOffset.UtcNow,
+			DateTimeOffset.UtcNow.AddDays(1D));
 
 		_ = fakePlayerLoginRecordRepository.AddPlayerLoginRecordAsync(
 				Arg.Is(brandId),
 				Arg.Is(playerCode),
-				Arg.Is(TGS.Core.Models.Enums.PlatformType.Desktop),
+				Arg.Is(platformType),
 				Arg.Any<string>())
 			.Returns(loginRecord);
 
@@ -130,6 +145,12 @@ public class PlayerTests
 			};
 		""";
 
+		var expected = GeneratePlayerJwtToken(
+			playerCode,
+			loginRecord,
+			secretKey,
+			"operator-api");
+
 		// Act
 		var actual = await StaticNodeJSService.InvokeFromStringAsync<LoginResponse>(
 			nodeModule,
@@ -137,7 +158,7 @@ public class PlayerTests
 
 		// Assert
 		Assert.NotNull(actual);
-		Assert.NotNull(actual.PlayerToken);
+		Assert.Equal(expected, actual.PlayerToken);
 	}
 
 	[Fact]
@@ -162,9 +183,12 @@ public class PlayerTests
 		var brandId = Guid.NewGuid();
 		var brandCode = "Test";
 		var brandToken = TestOperatorApplication.MakeTestBrandToken(brandId, brandCode);
+		var secretKey = "N2KAnljo5zbLCZDSoUBFJ70ONsy";
 
-		_ = fakeBrandRepository.GetSecretKeyAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
-			.Returns("N2KAnljo5zbLCZDSoUBFJ70ONsy");
+		_ = fakeBrandRepository.GetSecretKeyAsync(
+				Arg.Is(brandId), 
+				Arg.Any<CancellationToken>())
+			.Returns(secretKey);
 
 		using var web = TestOperatorApplication.Builder
 			.UseTestChannelServer(channelName)
@@ -188,10 +212,15 @@ public class PlayerTests
 		var password = "password";
 		var platformType = PlatformType.Desktop;
 
-		_ = fakeBrandServiceClient.GetBrandStatusAsync(Arg.Is(brandId))
-			.Returns((BrandStatus)BrandStatus.Active);
+		_ = fakeBrandServiceClient.GetBrandStatusAsync(
+				Arg.Is(brandId),
+				Arg.Any<CancellationToken>())
+			.Returns(BrandStatus.Active);
 
-		_ = fakePlayerServiceClient.GetPlayerInfoByUserNameAsync(Arg.Is(brandId), Arg.Is(userName))
+		_ = fakePlayerServiceClient.GetPlayerInfoByUserNameAsync(
+				Arg.Is(brandId), 
+				Arg.Is(userName),
+				Arg.Any<CancellationToken>())
 			.Returns(new Tgs.PlayerService.Client.PlayerInfo
 			{
 				BrandId = brandId,
@@ -201,26 +230,28 @@ public class PlayerTests
 
 		_ = fakePlayerPasswordValidateCommandService.GetAsync(
 				Arg.Is<PlayerPasswordValidateCommand>(x =>
-					x.PlayerCode == playerCode && x.Password == password))
+					x.PlayerCode == playerCode && x.Password == password),
+				Arg.Any<CancellationToken>())
 			.Returns(true);
 
 		var loginRecord = new LoginRecordInfo(
 			Guid.NewGuid(),
 			playerCode,
-			TGS.Core.Models.Enums.LoginStatus.Enabled,
-			TGS.Core.Models.Enums.PlatformType.Desktop,
+			LoginStatus.Enabled,
+			PlatformType.Desktop,
 			DateTimeOffset.Now,
 			DateTimeOffset.Now.AddDays(1D));
 
 		_ = fakePlayerLoginRecordRepository.AddPlayerLoginRecordAsync(
 				Arg.Is(brandId),
 				Arg.Is(playerCode),
-				Arg.Is(TGS.Core.Models.Enums.PlatformType.Desktop),
+				Arg.Is(PlatformType.Desktop),
 				Arg.Any<string>())
 			.Returns(loginRecord);
 
 		_ = fakePlayerTokenParserCommandService.GetAsync(
-				Arg.Any<PlayerTokenParserCommand>())
+				Arg.Any<PlayerTokenParserCommand>(),
+				Arg.Any<CancellationToken>())
 			.Returns(new PlayerTokenData
 			{
 				PlayerCode = playerCode,
@@ -258,5 +289,30 @@ public class PlayerTests
 				Arg.Is("tgs.operator.player.logged_in"),
 				Arg.Any<ReadOnlyMemory<byte>>(),
 				Arg.Any<CancellationToken>());
+	}
+
+	private string GeneratePlayerJwtToken(
+		string playerCode,
+		LoginRecordInfo loginRecord,
+		string brandSecretKey,
+		string site)
+	{
+		var identity = new ClaimsIdentity(
+			new[]
+			{
+				new Claim(JwtRegisteredClaimNames.Sub, playerCode),
+				new Claim("login_id", loginRecord.Id.ToString()),
+				new Claim("platform_type", loginRecord.PlatformType.ToString())
+			});
+
+		var signature = Encoding.UTF8.GetBytes(brandSecretKey);
+
+		var tokenHandler = new JwtTokenHandler();
+
+		return tokenHandler.GenerateToken(
+			identity,
+			signature,
+			site,
+			loginRecord.ExpiredOn.DateTime);
 	}
 }
