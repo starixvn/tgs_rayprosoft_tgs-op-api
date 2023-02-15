@@ -11,6 +11,7 @@ using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models;
 using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Core.Models.Exceptions;
+using TGS.Core.Models.Tokens;
 using TGS.IdentityVerifiers;
 using TGS.Services.Operations;
 using TGS.Services.Operator;
@@ -18,7 +19,7 @@ using TGS.Services.Operator.ApplicationServices.Brand;
 using TGS.Services.Operator.ApplicationServices.Player;
 using TGS.Services.Operator.ApplicationServices.Withdraw;
 using TGS.Services.Operator.PlayerRegisterFlow;
-
+using ContextItems = TGS.Core.Models.Consts.ContextItems;
 using CoreExceptions = TGS.Core.Models.Exceptions;
 
 namespace TGS.Apis.OperatorApi.Controllers;
@@ -343,7 +344,7 @@ public class PlayerController : ControllerBase
 	[IgnoreUserBlacklistCheck]
 	public async Task<LoginResponse> LoginAsync(
 		[FromServices] IGetService<LoginCommand, LoginInfo> loginService,
-		[FromServices] ICommandService<PublishPlayerLoggedInEventCommand> publishEventCommandService,
+		[FromServices] IGetService<PlayerTokenParserCommand, PlayerTokenData> playerTokenParserCommandService,
 		[FromBody] LoginRequest request)
 	{
 		var brandId = HttpContext.GetBrandId()!.Value;
@@ -364,12 +365,14 @@ public class PlayerController : ControllerBase
 			var info = await loginService
 				.GetAsync(command)
 				.ConfigureAwait(false);
-
-			await publishEventCommandService
-				.ExecuteAsync(
-					new PublishPlayerLoggedInEventCommand(info.PlayerCode, info.LoginTime))
+			
+			var playerTokenData = await playerTokenParserCommandService
+				.GetAsync(new(info.PlayerToken), HttpContext.RequestAborted)
 				.ConfigureAwait(false);
 
+			if (playerTokenData is not null)
+				HttpContext.Items.Add(ContextItems.PlayerToken, playerTokenData);
+			
 			return new LoginResponse
 			{
 				LoginTime = info.LoginTime.ToUnixTimeMilliseconds(),

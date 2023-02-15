@@ -57,7 +57,6 @@ internal class LoginTests
 		var password = "Password";
 
 		var expected = new LoginInfo(
-			playerInfo.PlayerCode,
 			"player token",
 			loginRecordInfo.CreatedOn);
 

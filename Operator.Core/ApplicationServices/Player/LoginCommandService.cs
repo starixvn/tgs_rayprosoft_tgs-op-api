@@ -91,7 +91,6 @@ internal class LoginCommandService : IGetService<LoginCommand, LoginInfo>
 			.ConfigureAwait(false);
 
 		return new LoginInfo(
-			playerInfo.PlayerCode,
 			token,
 			record.CreatedOn);
 	}
