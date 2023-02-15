@@ -27,6 +27,27 @@ build-code:
 unit-test:
   extends: .unit-test-template
 
+push-nuget:
+  stage: publish
+  needs:
+    - build-code
+    - unit-test
+  only:
+    - main
+  cache:
+    key: $BuildCacheKey
+    untracked: true
+    policy: pull
+  script:
+    - dotnet pack -c $BuildConfiguration "Operator.Client/Operator.Client.csproj" --no-restore
+    - dotnet nuget push "Operator.Client/bin/$BuildConfiguration/*.nupkg" -s "raypro-baget" -k $NugetApiKey --skip-duplicate
+  artifacts:
+    name: Nuget
+    untracked: false
+    expire_in: "30 days"
+    paths:
+      - Operator.Client/bin/$BuildConfiguration/*.nupkg
+
 push-docker-image:
   extends: .push-docker-image-template
   variables:
