@@ -125,8 +125,6 @@ internal class LoginTests
 				Arg.Any<CancellationToken>());
 	}
 
-
-
 	[Test]
 	public async Task Decrypt_Player_Token_Should_Match_Input_Info()
 	{
