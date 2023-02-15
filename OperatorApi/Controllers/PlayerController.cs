@@ -360,7 +360,8 @@ public class PlayerController : ControllerBase
 				request.Password,
 				ipAddress.ToString(),
 				hostName,
-				request.PlatformType, Consts.Site);
+				request.PlatformType, 
+				Consts.Site);
 
 			var info = await loginService
 				.GetAsync(command)

@@ -52,4 +52,12 @@ export default class OperatorService {
         )
         .then<SuccessResponse<string>>(res => res.data);
     }
+	
+	public playerLogin(username: string, password: string, platformtype: number) : Promise<LoginResponse> {
+        return this.http.post(
+            "/api/player/login",
+            { username, password, platformtype }
+        )
+        .then<LoginResponse>(res => res.data);
+    }
 }
