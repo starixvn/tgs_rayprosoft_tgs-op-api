@@ -30,13 +30,13 @@
     <PackageReference Include="Tgs.Core.Infrastructures.Security" Version="0.0.2" />
     <PackageReference Include="Tgs.DepositAccumulateRoulette.Client" Version="0.0.5" />
     <PackageReference Include="TGS.FileService.Client" Version="0.0.5" />
-    <PackageReference Include="Tgs.GameProviders.Pluggable.Client" Version="0.0.29" />
+    <PackageReference Include="Tgs.GameProviders.Pluggable.Client" Version="0.0.30" />
     <PackageReference Include="Tgs.Paging.AsyncEnumerable" Version="1.2.1" />
     <PackageReference Include="Tgs.Payment.Client" Version="0.4.8" />
-    <PackageReference Include="Tgs.PaymentService.Client" Version="0.6.21" />
-    <PackageReference Include="Tgs.PlayerBucket.Client" Version="0.0.8" />
-    <PackageReference Include="Tgs.PlayerService.Client" Version="0.0.27" />
-    <PackageReference Include="Tgs.Promotion.Client" Version="1.0.38" />  
+    <PackageReference Include="Tgs.PaymentService.Client" Version="0.6.23" />
+    <PackageReference Include="Tgs.PlayerBucket.Client" Version="0.0.16" />
+    <PackageReference Include="Tgs.PlayerService.Client" Version="0.0.29" />
+    <PackageReference Include="Tgs.Promotion.Client" Version="1.0.41" />  
     <PackageReference Include="Tgs.RouletteSignInClient" Version="0.0.3" />
     <PackageReference Include="TGS.ServiceUtility" Version="0.2.0" />
     <PackageReference Include="TGS.SmsServiceClient" Version="0.0.7" />
