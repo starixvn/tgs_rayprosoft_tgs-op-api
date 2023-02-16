@@ -45,6 +45,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Operations\Operations.csproj" />
+    <ProjectReference Include="..\Operator.Client\Operator.Client.csproj" />
   </ItemGroup>
 
   <ItemGroup>

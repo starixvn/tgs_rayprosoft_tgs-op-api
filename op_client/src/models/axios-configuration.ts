@@ -13,6 +13,7 @@ export default function axiosConfigFactory(
             headers: {
                 common: {
                     "Host": "localhost",
+                    "X-Forwarded-For": "192.168.5.17",
                     "brand-token": brandToken,
                     "token": loginToken
                 }
@@ -26,6 +27,7 @@ export default function axiosConfigFactory(
             headers: {
                 common: {
                     "Host": "localhost",
+                    "X-Forwarded-For": "192.168.5.17",
                     "Accept-Encoding": ["gzip", "compress", "deflate"],
                     "brand-token": brandToken,
                     "token": loginToken

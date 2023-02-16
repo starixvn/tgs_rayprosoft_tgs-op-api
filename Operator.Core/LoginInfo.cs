@@ -1,8 +1,7 @@
-﻿namespace TGS.Services.Operator;
+﻿using System;
 
-public class LoginInfo
-{
-	public long LoginTime { get; set; }
+namespace TGS.Services.Operator;
 
-	public string PlayerToken { get; set; } = default!;
-}
+public record LoginInfo(
+	string PlayerToken,
+	DateTimeOffset LoginTime);

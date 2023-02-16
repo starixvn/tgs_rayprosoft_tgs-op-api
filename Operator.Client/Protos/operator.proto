@@ -1,0 +1,11 @@
+﻿syntax = "proto3";
+
+option csharp_namespace = "Tgs.Operator.Client.Protos";
+package tgs.operator;
+
+import "google/protobuf/timestamp.proto";
+
+message LoggedInEvent {
+	string player_code = 1;
+	google.protobuf.Timestamp logged_in_time = 2;
+}

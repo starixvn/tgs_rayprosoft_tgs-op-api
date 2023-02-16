@@ -8,7 +8,6 @@ using Tgs.Core.Infrastructures.Security;
 using Tgs.PlayerService.Client;
 using Tgs.ServiceUtility;
 using TGS.Apis.OperatorApi.Attributes;
-using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.Messages;
 using TGS.Core.Models.Tokens;
@@ -35,12 +34,11 @@ public sealed class VerifyPlayerTokenMiddleware
 
 	public async Task InvokeAsync(
 		HttpContext context,
-		ITokenProvider tokenProvider,
-		IHashProvider hashProvider,
 		IPlayerServiceClient playerServiceClient,
 		IBrandRepository brandRepository,
 		IJwtTokenHandler handler,
 		IGetService<GetPlayerMainDataQuery, PlayerInfo?> playerDataQueryService,
+		IGetService<PlayerTokenParserCommand, PlayerTokenData?> playerTokenParserCommandService,
 		ICommandService<ValidatePlayerLoginRecordCommand> loginRecordValidateService)
 	{
 		using var activity = _VerifyPlayerTokenMiddlewareSource.StartActivity(nameof(VerifyPlayerTokenMiddleware));
@@ -77,16 +75,13 @@ public sealed class VerifyPlayerTokenMiddleware
 			return;
 		}
 
-		var jwt = handler.ReadToken(token);
+		var playerTokenData = await playerTokenParserCommandService
+			.GetAsync(new(token))
+			.ConfigureAwait(false);
 
-		var claims = jwt.Claims.ToDictionary(c => c.Type, c => c.Value);
-
-		if (!(claims.TryGetValue("sub", out var playerCode) && !string.IsNullOrEmpty(playerCode))
-			|| !(claims.TryGetValue("login_id", out var loginId) && !string.IsNullOrEmpty(loginId))
-			|| !(claims.TryGetValue("platform_type", out var platform) && !string.IsNullOrEmpty(platform))
-			|| !(claims.TryGetValue("exp", out var expire) && !string.IsNullOrEmpty(expire)))
+		if (playerTokenData is null)
 		{
-			_logger.LogDebug("Missing required token properties in player token");
+			_logger.LogDebug("Cannot parse player token, maybe missing required token properties");
 
 			context.Response.StatusCode = StatusCodes.Status401Unauthorized;
 
@@ -99,21 +94,13 @@ public sealed class VerifyPlayerTokenMiddleware
 
 			return;
 		}
-
-		var playerTokenData = new PlayerTokenData
-		{
-			PlayerCode = playerCode,
-			LoginRecordId = Guid.Parse(loginId),
-			PlatformType = Enum.Parse<PlatformType>(platform),
-			ExpiredOn = new DateTimeOffset(EpochTime.DateTime(long.Parse(expire)))
-		};
-
+		
 		context.Items.Add(Core.Models.Consts.ContextItems.PlayerToken, playerTokenData);
 
 		try
 		{
 			await loginRecordValidateService.ExecuteAsync(
-				new ValidatePlayerLoginRecordCommand(playerTokenData.LoginRecordId, playerCode));
+				new ValidatePlayerLoginRecordCommand(playerTokenData.LoginRecordId, playerTokenData.PlayerCode));
 		}
 		catch (PlayerLoginExpiredException ex)
 		{
@@ -140,7 +127,7 @@ public sealed class VerifyPlayerTokenMiddleware
 		var brandId = context.GetBrandId();
 		var secretKey = await brandRepository.GetSecretKeyAsync(brandId!.Value);
 
-		var (isValid, claimsPrincipal, validatedToken) = handler.ValidateToken(
+		var (isValid, _, _) = handler.ValidateToken(
 			token,
 			new TokenValidationParameters
 			{
@@ -153,7 +140,7 @@ public sealed class VerifyPlayerTokenMiddleware
 				ClockSkew = TimeSpan.Zero
 			},
 			exception => _logger.LogDebug(exception, "Token validation failed"),
-			_ => _logger.LogDebug("{playerCode} jwt validate expired", playerCode));
+			_ => _logger.LogDebug("{playerCode} jwt validate expired", playerTokenData.PlayerCode));
 
 		if (isValid)
 			await _next(context);
@@ -166,7 +153,7 @@ public sealed class VerifyPlayerTokenMiddleware
 				Error = 102,
 				ErrorMessage = "InvalidOrExpiredPlayerToken",
 				ErrorMessageKey = "InvalidOrExpiredPlayerToken"
-			}).ConfigureAwait(false);
+			});
 		}
 	}
 }

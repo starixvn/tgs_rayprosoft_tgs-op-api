@@ -27,6 +27,7 @@ using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Filters;
 using TGS.Apis.OperatorApi.Filters.Swaggers;
+using TGS.Apis.OperatorApi.Middlewares;
 using TGS.Apis.OperatorApi.Models;
 using TGS.Core.DataServices.Tgs.Extensions;
 using TGS.Core.Infrastructures.ApiClient;
@@ -58,9 +59,9 @@ builder.Logging
 		options.ParseStateValues = true;
 		_ = options.AddFluentdForwardExporter(fluentOptions =>
 		{
-			var nodeIp = builder.Configuration.GetValue<string>("NODE_IP");
+			var nodeIp = builder.Configuration.GetValue<string>("NODE_IP")!;
 			fluentOptions.Host = nodeIp;
-			fluentOptions.Tag = builder.Configuration.GetValue<string>("OTEL_SERVICE_NAME");
+			fluentOptions.Tag = builder.Configuration.GetValue<string>("OTEL_SERVICE_NAME")!;
 			fluentOptions.UseMessagePack();
 		});
 	});
@@ -111,7 +112,7 @@ builder.Services
 	{
 		var config = sp.GetRequiredService<IConfiguration>();
 
-		options.BaseUrl = config.GetValue<Uri>("Report:Url");
+		options.BaseUrl = config.GetValue<Uri>("Report:Url")!;
 	})
 	.AddPromotionClientServices((options, sp) =>
 	{
@@ -124,31 +125,31 @@ builder.Services
 	{
 		var config = sp.GetRequiredService<IConfiguration>();
 
-		options.BrandCertificateBaseUrl = config.GetValue<Uri>("Operator:BrandCertificateBaseUrl");
+		options.BrandCertificateBaseUrl = config.GetValue<Uri>("Operator:BrandCertificateBaseUrl")!;
 	})
 	.AddBrandServiceClient((options, sp) =>
 	{
 		var config = sp.GetRequiredService<IConfiguration>();
 
-		options.BrandCertificateBaseUrl = config.GetValue<Uri>("Operator:BrandCertificateBaseUrl");
+		options.BrandCertificateBaseUrl = config.GetValue<Uri>("Operator:BrandCertificateBaseUrl")!;
 	})
 	.AddGameProvidersPluggableServerClient((options, sp) =>
 	{
 		var config = sp.GetRequiredService<IConfiguration>();
 
-		options.BaseUrl = config.GetValue<Uri>("Operator:GameProvidersPluggableBaseUrl");
+		options.BaseUrl = config.GetValue<Uri>("Operator:GameProvidersPluggableBaseUrl")!;
 	})
 	.AddPlayerServiceClient((options, sp) =>
 	{
 		var config = sp.GetRequiredService<IConfiguration>();
 
-		options.BaseUrl = config.GetValue<Uri>("Operator:PlayerServiceBaseUrl");
+		options.BaseUrl = config.GetValue<Uri>("Operator:PlayerServiceBaseUrl")!;
 	})
 	.AddDepositAccumulateRouletteClient((options, sp) =>
 	{
 		var config = sp.GetRequiredService<IConfiguration>();
 
-		options.BaseUrl = config.GetValue<Uri>("Operator:DepositAccumulateRouletteServiceBaseUrl");
+		options.BaseUrl = config.GetValue<Uri>("Operator:DepositAccumulateRouletteServiceBaseUrl")!;
 	});
 
 builder.Services
@@ -204,7 +205,7 @@ builder.Services
 		{
 			var config = sp.GetRequiredService<IConfiguration>();
 
-			options.Url = config.GetValue<string>("NatsSetting:Urls");
+			options.Url = config.GetValue<string>("NatsSetting:Urls")!;
 		})
 		.AddHandler(
 			ProcessorTypes.BrandFrontendInfoChangedEventHandlerType,
@@ -315,10 +316,10 @@ builder.Services
 builder.Services
 	.AddCors(options =>
 	{
-		var corsDomain = builder.Configuration.GetSection("CorsDomain").Get<CorsDomain>();
+		var corsDomain = builder.Configuration.GetSection("CorsDomain").Get<CorsDomain>()!;
 
 		options.AddDefaultPolicy(
-			builder => builder
+			policyBuilder => policyBuilder
 				.WithOrigins(corsDomain.Urls)
 				.AllowAnyHeader()
 				.AllowAnyMethod()
@@ -337,13 +338,15 @@ app.UseRequestLocalization(options =>
 
 	config.GetSection("RequestLocalization").Bind(options);
 
-	_ = options.SetDefaultCulture(config.GetValue<string>("RequestLocalization:DefaultRequestCulture"));
+	_ = options.SetDefaultCulture(config.GetValue<string>("RequestLocalization:DefaultRequestCulture")!);
 });
 
 app.UseBrandCertificate();
 app.UseRouting();
 app.UseCors();
 app.UseVerifyJwtTokenMiddlewares(Consts.DefaultBypassRouting);
+
+app.UseMiddleware<PublishPlayerLoggedInEventMiddleware>();
 
 app.MapControllers();
 

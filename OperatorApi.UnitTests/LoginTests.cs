@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using ExpectedObjects;
+using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
 using NUnit.Framework;
 using Tgs.BrandCertificate.Clients;
@@ -15,6 +16,7 @@ using Tgs.PlayerService.Client;
 using Tgs.ServiceUtility;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
+using Tgs.MessageQueue;
 using TGS.Services.Operator;
 using TGS.Services.Operator.ApplicationServices.Player;
 using BrandStatus = Tgs.BrandCertificate.BrandStatus;
@@ -54,11 +56,9 @@ internal class LoginTests
 
 		var password = "Password";
 
-		var expected = new LoginInfo
-		{
-			PlayerToken = "player token",
-			LoginTime = loginRecordInfo.CreatedOn.ToUnixTimeMilliseconds()
-		};
+		var expected = new LoginInfo(
+			"player token",
+			loginRecordInfo.CreatedOn);
 
 		var command = new LoginCommand(
 			playerInfo.BrandId,
@@ -370,6 +370,30 @@ internal class LoginTests
 				Arg.Any<string>(),
 				Arg.Is(command.IpAddress),
 				Arg.Is(command.HostName),
+				Arg.Any<CancellationToken>());
+	}
+
+	[Test]
+	public async Task 發送登入Event()
+	{
+		var fakeMessageSender = Substitute.For<IMessageSender>();
+		var fakeLogger = NullLogger<PublishPlayerLoggedInEventCommandService>.Instance;
+
+		var command = new PublishPlayerLoggedInEventCommand(
+			"player1",
+			DateTimeOffset.UtcNow);
+
+		var sut = new PublishPlayerLoggedInEventCommandService(
+			fakeMessageSender,
+			fakeLogger);
+
+		await sut.ExecuteAsync(command);
+
+		_ = fakeMessageSender
+			.Received(1)
+			.PublishAsync(
+				Arg.Is("tgs.operator.player.logged_in"),
+				Arg.Any<ReadOnlyMemory<byte>>(),
 				Arg.Any<CancellationToken>());
 	}
 }
