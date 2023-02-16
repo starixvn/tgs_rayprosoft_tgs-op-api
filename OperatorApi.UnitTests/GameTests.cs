@@ -820,7 +820,7 @@ public class GameTests
 
 		var playerCode = "4ucmqplxb029";
 
-		_ = fakeGameProvidersClient.GetGameSM01PlatformLoginInfoAsync(playerCode).Returns(ValueTask.FromResult(new SM01PlatformLoginResponse("merchantId", playerCode, 1670390195123, "46C9EA4F03900B74379A15A56ED14229")));
+		_ = fakeGameProvidersClient.GetGameSM01PlatformLoginInfoAsync(playerCode).Returns(ValueTask.FromResult(new SM01PlatformLoginResponse("https://cn.ucfclive.com", "merchantId", playerCode, 1670390195123, "46C9EA4F03900B74379A15A56ED14229")));
 
 		var actual = await sut.GetAsync(new GetSM01HtmlContentQuery(playerCode));
 
