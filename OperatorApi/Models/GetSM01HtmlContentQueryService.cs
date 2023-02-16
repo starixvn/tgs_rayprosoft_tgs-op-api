@@ -40,7 +40,7 @@ internal class GetSM01HtmlContentQueryService : IGetService<GetSM01HtmlContentQu
 				"</script>" +
 			"</head>" +
 			"<body>" +
-				"<form action=\"" + loginInfo.ApiUrl + "/platformLogin\" method=\"post\">" +
+				"<form action=\"" + loginInfo.ApiUrl + "/auth/platformLogin\" method=\"post\">" +
 					"<input type=\"text\" name=\"merchantId\" value=\"" + loginInfo.MerchantId + "\" style=\"display:none\" />" +
 					"<input type=\"text\" name=\"customerName\" value=\"" + loginInfo.CustomerName + "\" style=\"display:none\" />" +
 					"<input type=\"text\" name=\"timestamp\" value=\"" + loginInfo.Timestamp + "\" style=\"display:none\" />" +
