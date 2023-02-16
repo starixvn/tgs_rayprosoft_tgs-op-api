@@ -8,18 +8,17 @@ using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.JsonWebTokens;
 using NSubstitute;
 using Tgs.BrandCertificate.Clients;
+using Tgs.Core.Infrastructures.Security;
 using Tgs.MessageQueue;
 using Tgs.PlayerService.Client;
 using Tgs.ServiceUtility;
 using TGS.Apis.OperatorApi.Models.Messages;
-using Tgs.Core.Infrastructures.Security;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Tokens;
 using TGS.Services.Operator;
 using TGS.Services.Operator.ApplicationServices.Player;
 using Xunit.Abstractions;
 using BrandStatus = Tgs.BrandCertificate.BrandStatus;
-using Google.Protobuf.WellKnownTypes;
 
 namespace OperatorApi.IntegrationTests;
 
@@ -44,7 +43,6 @@ public class PlayerTests
 		var fakePlayerLoginRecordRepository = Substitute.For<IPlayerLoginRecordRepository>();
 		var fakeBrandRepository = Substitute.For<IBrandRepository>();
 		var fakeValidatePlayerLoginRecordCommandService = Substitute.For<ICommandService<ValidatePlayerLoginRecordCommand>>();
-		var fakePlayerTokenParserCommandService = Substitute.For<IGetService<PlayerTokenParserCommand, PlayerTokenData?>>();
 
 		_ = fakeBrandCertClient.GetSystemValidateSecurityKeyAsync(Arg.Any<CancellationToken>())
 			.Returns(TestOperatorApplication.TestSecurityKey);
@@ -69,8 +67,7 @@ public class PlayerTests
 				.AddSingleton(fakePlayerPasswordValidateCommandService)
 				.AddSingleton(fakePlayerLoginRecordRepository)
 				.AddSingleton(fakeBrandRepository)
-				.AddSingleton(fakeValidatePlayerLoginRecordCommandService)
-				.AddSingleton(fakePlayerTokenParserCommandService))
+				.AddSingleton(fakeValidatePlayerLoginRecordCommandService))
 			.Build();
 
 		await web.StartAsync();
@@ -86,7 +83,7 @@ public class PlayerTests
 			.Returns(BrandStatus.Active);
 
 		_ = fakePlayerServiceClient.GetPlayerInfoByUserNameAsync(
-				Arg.Is(brandId), 
+				Arg.Is(brandId),
 				Arg.Is(userName),
 				Arg.Any<CancellationToken>())
 			.Returns(new Tgs.PlayerService.Client.PlayerInfo
@@ -99,7 +96,7 @@ public class PlayerTests
 		_ = fakePlayerPasswordValidateCommandService
 			.GetAsync(
 				Arg.Is<PlayerPasswordValidateCommand>(x =>
-					x.PlayerCode == playerCode && x.Password == password), 
+					x.PlayerCode == playerCode && x.Password == password),
 				Arg.Any<CancellationToken>())
 			.Returns(true);
 
@@ -118,16 +115,6 @@ public class PlayerTests
 				Arg.Any<string>())
 			.Returns(loginRecord);
 
-		_ = fakePlayerTokenParserCommandService.GetAsync(
-				Arg.Any<PlayerTokenParserCommand>())
-			.Returns(new PlayerTokenData
-			{
-				PlayerCode = playerCode,
-				LoginRecordId = loginRecord.Id,
-				ExpiredOn = loginRecord.ExpiredOn,
-				PlatformType = platformType
-			});
-
 		await using var scope = web.Services.CreateAsyncScope();
 
 		var isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "true" : "false";
@@ -145,11 +132,23 @@ public class PlayerTests
 			};
 		""";
 
-		var expected = GeneratePlayerJwtToken(
-			playerCode,
-			loginRecord,
-			secretKey,
-			"operator-api");
+		var tokenHandler = scope.ServiceProvider.GetRequiredService<IJwtTokenHandler>();
+
+		var identity = new ClaimsIdentity(
+			new[]
+			{
+				new Claim(JwtRegisteredClaimNames.Sub, playerCode),
+				new Claim("login_id", loginRecord.Id.ToString()),
+				new Claim("platform_type", platformType.ToString())
+			});
+
+		var signature = Encoding.UTF8.GetBytes(secretKey);
+
+		var expected = tokenHandler.GenerateToken(
+			identity,
+			signature,
+			"operator-api",
+			loginRecord.ExpiredOn.DateTime);
 
 		// Act
 		var actual = await StaticNodeJSService.InvokeFromStringAsync<LoginResponse>(
@@ -173,8 +172,7 @@ public class PlayerTests
 		var fakePlayerLoginRecordRepository = Substitute.For<IPlayerLoginRecordRepository>();
 		var fakeBrandRepository = Substitute.For<IBrandRepository>();
 		var fakeValidatePlayerLoginRecordCommandService = Substitute.For<ICommandService<ValidatePlayerLoginRecordCommand>>();
-		var fakePlayerTokenParserCommandService = Substitute.For<IGetService<PlayerTokenParserCommand, PlayerTokenData?>>();
-
+	
 		var fakeMessageSender = Substitute.For<IMessageSender>();
 
 		_ = fakeBrandCertClient.GetSystemValidateSecurityKeyAsync(Arg.Any<CancellationToken>())
@@ -186,7 +184,7 @@ public class PlayerTests
 		var secretKey = "N2KAnljo5zbLCZDSoUBFJ70ONsy";
 
 		_ = fakeBrandRepository.GetSecretKeyAsync(
-				Arg.Is(brandId), 
+				Arg.Is(brandId),
 				Arg.Any<CancellationToken>())
 			.Returns(secretKey);
 
@@ -201,7 +199,6 @@ public class PlayerTests
 				.AddSingleton(fakePlayerLoginRecordRepository)
 				.AddSingleton(fakeBrandRepository)
 				.AddSingleton(fakeValidatePlayerLoginRecordCommandService)
-				.AddSingleton(fakePlayerTokenParserCommandService)
 				.AddSingleton(fakeMessageSender))
 			.Build();
 
@@ -218,7 +215,7 @@ public class PlayerTests
 			.Returns(BrandStatus.Active);
 
 		_ = fakePlayerServiceClient.GetPlayerInfoByUserNameAsync(
-				Arg.Is(brandId), 
+				Arg.Is(brandId),
 				Arg.Is(userName),
 				Arg.Any<CancellationToken>())
 			.Returns(new Tgs.PlayerService.Client.PlayerInfo
@@ -248,18 +245,7 @@ public class PlayerTests
 				Arg.Is(PlatformType.Desktop),
 				Arg.Any<string>())
 			.Returns(loginRecord);
-
-		_ = fakePlayerTokenParserCommandService.GetAsync(
-				Arg.Any<PlayerTokenParserCommand>(),
-				Arg.Any<CancellationToken>())
-			.Returns(new PlayerTokenData
-			{
-				PlayerCode = playerCode,
-				LoginRecordId = loginRecord.Id,
-				ExpiredOn = loginRecord.ExpiredOn,
-				PlatformType = platformType
-			});
-
+		
 		await using var scope = web.Services.CreateAsyncScope();
 
 		var isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "true" : "false";
@@ -289,30 +275,5 @@ public class PlayerTests
 				Arg.Is("tgs.operator.player.logged_in"),
 				Arg.Any<ReadOnlyMemory<byte>>(),
 				Arg.Any<CancellationToken>());
-	}
-
-	private string GeneratePlayerJwtToken(
-		string playerCode,
-		LoginRecordInfo loginRecord,
-		string brandSecretKey,
-		string site)
-	{
-		var identity = new ClaimsIdentity(
-			new[]
-			{
-				new Claim(JwtRegisteredClaimNames.Sub, playerCode),
-				new Claim("login_id", loginRecord.Id.ToString()),
-				new Claim("platform_type", loginRecord.PlatformType.ToString())
-			});
-
-		var signature = Encoding.UTF8.GetBytes(brandSecretKey);
-
-		var tokenHandler = new JwtTokenHandler();
-
-		return tokenHandler.GenerateToken(
-			identity,
-			signature,
-			site,
-			loginRecord.ExpiredOn.DateTime);
 	}
 }
