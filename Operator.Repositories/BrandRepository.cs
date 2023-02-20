@@ -88,4 +88,8 @@ internal class BrandRepository : IBrandRepository
 
 		return rows.ToAsyncEnumerable();
 	}
+
+	public async ValueTask<bool> CheckHaveAllAgentAsync(Guid brandId, CancellationToken cancellationToken = default)
+		=> await _tgsRepository.BrandAllAgents.AnyAsync(x => x.BrandId == brandId,
+			cancellationToken: cancellationToken);
 }
