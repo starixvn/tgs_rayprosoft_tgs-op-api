@@ -3,6 +3,7 @@ using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
 using Tgs.ServiceUtility;
 using TGS.Services.Operator.ApplicationServices.BrandAllAgent;
+using TGS.Apis.OperatorApi.Models.Messages;
 
 namespace TGS.Apis.OperatorApi.Controllers;
 
@@ -12,13 +13,18 @@ public class BrandAllAgentController : ControllerBase
 {
 	[HttpGet("check", Name = "GetBrandAllAgentSetting")]
 	[AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-	public ValueTask<bool> GetBrandAllAgentSettingAsync(
+	public async ValueTask<BrandAllAgentResponse> GetBrandAllAgentSettingAsync(
 		[FromServices] IGetService<GetBrandAllAgentQuery, bool> getService)
 	{
 		var brandId = HttpContext.Items.GetBrandId();
 
 		var query = new GetBrandAllAgentQuery(brandId);
 
-		return getService.GetAsync(query);
+		var response = await getService.GetAsync(query);
+
+		return new BrandAllAgentResponse
+		{
+			SwitchOn = response
+		};
 	}
 }
