@@ -43,4 +43,7 @@ internal class MemoryCachedBrandRepository : IBrandRepository
 
 	public IAsyncEnumerable<BannerInfo> QueryBrandBannersAsync(Guid brandId)
 		=> _brandRepository.QueryBrandBannersAsync(brandId);
+
+	public ValueTask<bool> CheckHaveAllAgentAsync(Guid brandId, CancellationToken cancellationToken = default)
+		=> _brandRepository.CheckHaveAllAgentAsync(brandId, cancellationToken);
 }
