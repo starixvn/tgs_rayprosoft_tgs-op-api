@@ -2,7 +2,7 @@
 
 namespace TGS.Apis.OperatorApi.Models.Messages;
 
-public record BrandAllAgentResponse
+public record BrandAllAgentSwitchOnResponse
 {
 	[JsonPropertyName("switchon")]
 	public bool SwitchOn { get; set; }

@@ -2,4 +2,4 @@
 
 namespace TGS.Services.Operator.ApplicationServices.BrandAllAgent;
 
-public record GetBrandAllAgentQuery(Guid BrandId);
+public record GetBrandAllAgentTurnoverConditionsQuery(Guid BrandId);
