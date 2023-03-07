@@ -92,4 +92,15 @@ internal class BrandRepository : IBrandRepository
 	public async ValueTask<bool> CheckHaveAllAgentAsync(Guid brandId, CancellationToken cancellationToken = default)
 		=> await _tgsRepository.BrandAllAgents.AnyAsync(x => x.BrandId == brandId,
 			cancellationToken: cancellationToken);
+
+	public IAsyncEnumerable<BrandAllAgentTurnover> GetBrandAllAgentTurnoverConditionsAsync(Guid brandId, CancellationToken cancellationToken = default) 
+		=> _tgsRepository.BrandAllAgentGameTypeConditions.Where(x => x.BrandId == brandId)
+			.Select(x => new BrandAllAgentTurnover
+			{
+				Rank = x.Rank,
+				AllAgentGameType = x.AllAgentGameType,
+				ActiveNumber = x.ActiveNumber,
+				Turnover = x.NetProfit,
+				RebatePercentage = x.RebatePercentage
+			}).ToAsyncEnumerable();
 }

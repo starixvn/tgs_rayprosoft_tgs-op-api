@@ -4,6 +4,7 @@ using TGS.Apis.OperatorApi.Extensions;
 using Tgs.ServiceUtility;
 using TGS.Services.Operator.ApplicationServices.BrandAllAgent;
 using TGS.Apis.OperatorApi.Models.Messages;
+using TGS.Services.Operator;
 
 namespace TGS.Apis.OperatorApi.Controllers;
 
@@ -11,20 +12,39 @@ namespace TGS.Apis.OperatorApi.Controllers;
 [ApiController]
 public class BrandAllAgentController : ControllerBase
 {
-	[HttpGet("check", Name = "GetBrandAllAgentSetting")]
+	[HttpGet("check", Name = "CheckBrandAllAgentSetting")]
 	[AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = true)]
-	public async ValueTask<BrandAllAgentResponse> GetBrandAllAgentSettingAsync(
-		[FromServices] IGetService<GetBrandAllAgentQuery, bool> getService)
+	public async ValueTask<BrandAllAgentSwitchOnResponse> CheckBrandAllAgentSettingAsync(
+		[FromServices] IGetService<GetBrandAllAgentSwitchOnQuery, bool> getService)
 	{
 		var brandId = HttpContext.Items.GetBrandId();
 
-		var query = new GetBrandAllAgentQuery(brandId);
+		var query = new GetBrandAllAgentSwitchOnQuery(brandId);
 
-		var response = await getService.GetAsync(query);
+		var switchOn = await getService.GetAsync(query);
 
-		return new BrandAllAgentResponse
+		return new BrandAllAgentSwitchOnResponse
 		{
-			SwitchOn = response
+			SwitchOn = switchOn
 		};
+	}
+
+	[HttpGet(Name = "GetBrandAllAgentTurnoverConditions")]
+	[AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+	public IAsyncEnumerable<BrandAllAgentTurnoverConditionsResponse> GetBrandAllAgentTurnoverConditionsAsync(
+		[FromServices] IQueryService<GetBrandAllAgentTurnoverConditionsQuery, BrandAllAgentTurnover> getService)
+	{
+		var brandId = HttpContext.Items.GetBrandId();
+
+		var query = new GetBrandAllAgentTurnoverConditionsQuery(brandId);
+
+		return getService.QueryAsync(query).Select(x => new BrandAllAgentTurnoverConditionsResponse
+		{
+			Rank = x.Rank,
+			AllAgentGameType = x.AllAgentGameType,
+			ActiveNumber = x.ActiveNumber,
+			Turnover = x.Turnover,
+			RebatePercentage = x.RebatePercentage
+		});
 	}
 }

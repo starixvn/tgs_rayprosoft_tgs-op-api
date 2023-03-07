@@ -46,4 +46,7 @@ internal class MemoryCachedBrandRepository : IBrandRepository
 
 	public ValueTask<bool> CheckHaveAllAgentAsync(Guid brandId, CancellationToken cancellationToken = default)
 		=> _brandRepository.CheckHaveAllAgentAsync(brandId, cancellationToken);
+
+	public IAsyncEnumerable<BrandAllAgentTurnover> GetBrandAllAgentTurnoverConditionsAsync(Guid brandId, CancellationToken cancellationToken = default) 
+		=> _brandRepository.GetBrandAllAgentTurnoverConditionsAsync(brandId, cancellationToken);
 }
