@@ -32,10 +32,8 @@ internal class CommitSetPlayerPhoneCommandService : ICommandService<CommitSetPla
 	{
 		var result = await _validateCodeOperator
 			.GetValidateCodeDataAsync<PhoneValidateData>(command.ValidateCode, command.SecurityKey)
-			.ConfigureAwait(false);
-
-		if (result == null)
-			throw new ValidateCodeNotVerifyException();
+			.ConfigureAwait(false) 
+			?? throw new ValidateCodeNotVerifyException();
 
 		var checkQuery = new CheckBrandPhoneCanUseQuery(
 			command.BrandId,

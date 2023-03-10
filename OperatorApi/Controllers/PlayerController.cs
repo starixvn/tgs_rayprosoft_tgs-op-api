@@ -273,10 +273,8 @@ public class PlayerController : ControllerBase
 
 		var player = await getPlayerMainDataQueryService
 			.GetAsync(new GetPlayerMainDataQuery(playerCode))
-			.ConfigureAwait(false);
-
-		if (player == null)
-			throw new CoreExceptions.PlayerNotFoundException(playerCode, "Player not found.");
+			.ConfigureAwait(false)
+			?? throw new CoreExceptions.PlayerNotFoundException(playerCode, "Player not found.");
 
 		var vipLevel = await getPlayerVipLevelQueryService
 			.GetAsync(new GetPlayerVipLevelQuery(player.VipLevelId))
@@ -360,20 +358,20 @@ public class PlayerController : ControllerBase
 				request.Password,
 				ipAddress.ToString(),
 				hostName,
-				request.PlatformType, 
+				request.PlatformType,
 				Consts.Site);
 
 			var info = await loginService
 				.GetAsync(command)
 				.ConfigureAwait(false);
-			
+
 			var playerTokenData = await playerTokenParserCommandService
 				.GetAsync(new(info.PlayerToken), HttpContext.RequestAborted)
 				.ConfigureAwait(false);
 
 			if (playerTokenData is not null)
 				HttpContext.Items.Add(ContextItems.PlayerToken, playerTokenData);
-			
+
 			return new LoginResponse
 			{
 				LoginTime = info.LoginTime.ToUnixTimeMilliseconds(),
@@ -445,10 +443,8 @@ public class PlayerController : ControllerBase
 
 		var brand = await getBrandService
 			.GetAsync(new BrandQuery(brandId), HttpContext.RequestAborted)
-			.ConfigureAwait(false);
-
-		if (brand == null)
-			throw new InvalidStatusException("Brand doesn't exist");
+			.ConfigureAwait(false)
+			?? throw new InvalidStatusException("Brand doesn't exist");
 
 		if (brand.Status == BrandStatus.Maintenance)
 			throw new BrandUnderMaintenanceException("Brand is put into maintenance");
@@ -493,10 +489,8 @@ public class PlayerController : ControllerBase
 
 		var brand = await getBrandService
 			.GetAsync(new BrandQuery(brandId), HttpContext.RequestAborted)
-			.ConfigureAwait(false);
-
-		if (brand == null)
-			throw new InvalidStatusException("Brand doesn't exist");
+			.ConfigureAwait(false)
+			?? throw new InvalidStatusException("Brand doesn't exist");
 
 		if (brand.Status == BrandStatus.Maintenance)
 			throw new BrandUnderMaintenanceException("Brand is put into maintenance");

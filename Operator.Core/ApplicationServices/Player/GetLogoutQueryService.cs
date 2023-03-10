@@ -21,12 +21,10 @@ internal class GetLogoutQueryService : IGetService<GetLogoutQuery, LogoutInfo>
 
 	public async ValueTask<LogoutInfo> GetAsync(GetLogoutQuery query, CancellationToken cancellationToken = default)
 	{
-		var player = await _playerServiceClient
+		_ = await _playerServiceClient
 			.GetPlayerInfoAsync(query.PlayerCode, cancellationToken)
-			.ConfigureAwait(false);
-
-		if (player == null)
-			throw new PlayerNotFoundException("");
+			.ConfigureAwait(false)
+			?? throw new PlayerNotFoundException("");
 
 		await _loginRecordRepository
 			.DeauthorizePlayerAsync(query.LoginRecordId)

@@ -33,10 +33,8 @@ internal class CreateDepositFormCommandService : IGetService<CreateDepositFormCo
 
 		var brandPayment = await _paymentServiceClient
 			.GetBrandPaymentByIdAsync(command.BrandPaymentId, cancellationToken)
-			.ConfigureAwait(false);
-
-		if (brandPayment is null)
-			throw new Exception("BrandPayment can't found.");
+			.ConfigureAwait(false)
+			?? throw new Exception("BrandPayment can't found.");
 
 		var payment = await _paymentServiceClient
 			.GetPaymentByIdAsync(brandPayment.PaymentId, cancellationToken)

@@ -33,10 +33,8 @@ public class CommitInitPlayerPhoneCommandService : ICommandService<CommitInitPla
 	{
 		var result = await _validateCodeOperator
 			.GetValidateCodeDataAsync<PhoneValidateData>(command.ValidateCode, command.SecurityKey)
-			.ConfigureAwait(false);
-
-		if (result == null)
-			throw new ValidateCodeNotVerifyException();
+			.ConfigureAwait(false) 
+			?? throw new ValidateCodeNotVerifyException();
 
 		var playerCode = result.PlayerCode;
 

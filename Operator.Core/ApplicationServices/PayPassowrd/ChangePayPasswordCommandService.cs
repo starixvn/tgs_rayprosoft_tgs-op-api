@@ -29,12 +29,10 @@ internal class ChangePayPasswordCommandService : ICommandService<ChangePayPasswo
 	public async ValueTask ExecuteAsync(
 		ChangePayPasswordCommand command, CancellationToken cancellationToken = default)
 	{
-		var result = await _validateCodeOperator
+		_ = await _validateCodeOperator
 			.GetValidateCodeDataAsync<ValidateCodeData>(command.ValidateCode, command.SecurityKey)
-			.ConfigureAwait(false);
-
-		if (result == null)
-			throw new ValidateCodeNotVerifyException();
+			.ConfigureAwait(false)
+			?? throw new ValidateCodeNotVerifyException();
 
 		var updatedOn = DateTimeOffset.UtcNow;
 

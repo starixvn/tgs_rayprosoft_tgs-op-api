@@ -18,12 +18,8 @@ internal class GetSM01HtmlContentQueryService : IGetService<GetSM01HtmlContentQu
 	{
 		var loginInfo = await _client
 			.GetGameSM01PlatformLoginInfoAsync(query.PlayerCode, cancellationToken)
-			.ConfigureAwait(false);
-
-		if (loginInfo == null)
-		{
-			throw new GameProviderUnderMaintenanceException();
-		}
+			.ConfigureAwait(false)
+			?? throw new GameProviderUnderMaintenanceException();
 
 		var html =
 			"<!DOCTYPE html>" +

@@ -23,24 +23,16 @@ internal class GameProviderStatusValidator : IGameProviderStatusValidator
 	public async ValueTask CheckGameProviderStatusAsync(PlayerTokenData playerTokenData, string gameProviderCode, Guid brandId)
 	{
 		var gameProviderId = await _gameProviderOperations.GetGameProviderIdByCodeAsync(gameProviderCode);
-		var gameProviderStatus = await _gameProviderOperations.GetGameProviderStatusAsync(gameProviderId);
+		var gameProviderStatus = await _gameProviderOperations.GetGameProviderStatusAsync(gameProviderId)
+			?? throw new InvalidStatusException("GameProvider doesn't exist");
 
-		if (gameProviderStatus == null)
-		{
-			throw new InvalidStatusException("GameProvider doesn't exist");
-		}
-
-		ValidateGameProviderStatus(gameProviderStatus.Value);
+		ValidateGameProviderStatus(gameProviderStatus);
 
 		var brandGameProviderStatus =
-			await _brandOperations.GetBrandGameProviderStatusAsync(brandId, gameProviderId);
+			await _brandOperations.GetBrandGameProviderStatusAsync(brandId, gameProviderId)
+			?? throw new InvalidStatusException("Brand doesn't have the configuration of GameProvider");
 
-		if (brandGameProviderStatus == null)
-		{
-			throw new InvalidStatusException("Brand doesn't have the configuration of GameProvider");
-		}
-
-		ValidateGameProviderStatus(brandGameProviderStatus.Value);
+		ValidateGameProviderStatus(brandGameProviderStatus);
 	}
 
 	private static void ValidateGameProviderStatus(Status gameProviderStatus)

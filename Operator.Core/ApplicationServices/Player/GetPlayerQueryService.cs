@@ -28,10 +28,8 @@ internal class GetPlayerQueryService : IGetService<GetPlayerQuery, PlayerInfo>
 	{
 		var player = await _playerServiceClient
 			.GetPlayerInfoAsync(query.PlayerCode, cancellationToken)
-			.ConfigureAwait(false);
-
-		if (player is null)
-			throw new PlayerNotFoundException("Player not found.");
+			.ConfigureAwait(false) 
+			?? throw new PlayerNotFoundException("Player not found.");
 
 		var playerProperties = await _playerServiceClient
 			.GetPlayerPropertiesAsync(query.PlayerCode, cancellationToken)

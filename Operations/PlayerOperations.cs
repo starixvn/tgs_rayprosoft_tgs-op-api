@@ -141,7 +141,7 @@ public sealed class PlayerOperations : IPlayerOperations
 			});
 
 		return values.All(a => !a.IsNull)
-			? (new()
+			? new()
 			{
 				PlayerCode = playerCode,
 				BrandId = Guid.Parse(values[0]),
@@ -153,7 +153,7 @@ public sealed class PlayerOperations : IPlayerOperations
 				BrandCode = values[6],
 				DefaultWalletCurrencyCode = values[7],
 				ExternalCurrencyCode = values[8]
-			})
+			}
 			: null;
 	}
 

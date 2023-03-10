@@ -33,12 +33,8 @@ public class GetBetConstructHtmlContentQueryService : IGetService<GetBetConstruc
 				query.IP,
 				null,
 				cancellationToken: cancellationToken)
-			.ConfigureAwait(false);
-
-		if (bcUri == null)
-		{
-			throw new GameProviderUnderMaintenanceException();
-		}
+			.ConfigureAwait(false)
+			?? throw new GameProviderUnderMaintenanceException();
 
 		var html =
 			"<!DOCTYPE html>" +

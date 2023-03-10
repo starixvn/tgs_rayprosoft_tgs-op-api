@@ -35,10 +35,8 @@ internal class CommitInitPlayerEmailCommandService : ICommandService<CommitInitP
 			.GetValidateCodeDataAsync<EmailValidateData>(
 				command.ValidateCode,
 				command.SecurityKey)
-			.ConfigureAwait(false);
-
-		if (result == null)
-			throw new ValidateCodeNotVerifyException();
+			.ConfigureAwait(false)
+			?? throw new ValidateCodeNotVerifyException();
 
 		var playerCode = result.PlayerCode;
 

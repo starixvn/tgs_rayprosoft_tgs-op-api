@@ -33,10 +33,8 @@ internal class CreateWithdrawFormCommandService : ICommandService<CreateWithdraw
 	{
 		var playerInfo = await _playerServiceClient
 			.GetPlayerInfoAsync(command.PlayerCode, cancellationToken)
-			.ConfigureAwait(false);
-
-		if (playerInfo is null)
-			throw new PlayerNotFoundException("Can't find player.");
+			.ConfigureAwait(false)
+			?? throw new PlayerNotFoundException("Can't find player.");
 
 		var bucketResult = await _playerBucketClient.ReadBucketsAsync(
 			command.PlayerCode,
