@@ -29,6 +29,7 @@ using TGS.Apis.OperatorApi.Filters;
 using TGS.Apis.OperatorApi.Filters.Swaggers;
 using TGS.Apis.OperatorApi.Middlewares;
 using TGS.Apis.OperatorApi.Models;
+using TGS.Apis.OperatorApi.SignalR;
 using TGS.Core.DataServices.Tgs.Extensions;
 using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.ErrorMappers;
@@ -166,7 +167,7 @@ builder.Services
 
 builder.Services
 	.AddPlayerBucketClient(httpBuilder => { })
-	.AddOperatorApiCore()	
+	.AddOperatorApiCore()
 	.ConfigureOperatorOptions<IConfiguration>((options, config) => config
 		.GetSection("Operator").Bind(options))
 	.UseOperatorRepositories(sp
@@ -232,6 +233,8 @@ builder.Services
 	.AddValidatorsFromAssemblyContaining<Program>(lifetime: ServiceLifetime.Scoped);
 
 builder.Services
+	.AddSignalR()
+	.Services
 	.AddControllers(options =>
 	{
 		options.AddBrandCertificateFilters();
@@ -349,6 +352,7 @@ app.UseVerifyJwtTokenMiddlewares(Consts.DefaultBypassRouting);
 app.UseMiddleware<PublishPlayerLoggedInEventMiddleware>();
 
 app.MapControllers();
+app.MapHub<NotifyHub>("api/notify");
 
 app.MapHealthChecks("/health");
 app.MapProfileViewer();
