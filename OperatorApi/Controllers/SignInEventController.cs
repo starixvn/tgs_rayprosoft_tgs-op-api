@@ -21,7 +21,7 @@ public class SignInEventController : ControllerBase
 		Guid promotionId)
 	{
 		var playerTokenData = HttpContext.Items.GetPlayerTokenData();
-		var playerCode = playerTokenData.PlayerCode;
+		var playerCode = playerTokenData!.PlayerCode;
 
 		var query = new GetSignInRouletteRecordQuery(playerCode, promotionId);
 
@@ -44,7 +44,7 @@ public class SignInEventController : ControllerBase
 		[FromServices] IGetService<SignInRouletteCommand, RouletteResult> signInService,
 		Guid promotionId)
 	{
-		var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+		var playerTokenData = HttpContext.Items.GetPlayerTokenData()!;
 		var playerCode = playerTokenData.PlayerCode;
 
 		var command = new SignInRouletteCommand(playerCode, promotionId);

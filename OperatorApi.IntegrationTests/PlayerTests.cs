@@ -1,11 +1,12 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.IdentityModel.Tokens.Jwt;
+using System.Runtime.InteropServices;
 using System.Security.Claims;
 using System.Text;
 using Jering.Javascript.NodeJS;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Microsoft.IdentityModel.JsonWebTokens;
+using Microsoft.IdentityModel.Tokens;
 using NSubstitute;
 using Tgs.BrandCertificate.Clients;
 using Tgs.Core.Infrastructures.Security;
@@ -14,7 +15,6 @@ using Tgs.PlayerService.Client;
 using Tgs.ServiceUtility;
 using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Core.Models.Enums;
-using TGS.Core.Models.Tokens;
 using TGS.Services.Operator;
 using TGS.Services.Operator.ApplicationServices.Player;
 using Xunit.Abstractions;
@@ -43,6 +43,7 @@ public class PlayerTests
 		var fakePlayerLoginRecordRepository = Substitute.For<IPlayerLoginRecordRepository>();
 		var fakeBrandRepository = Substitute.For<IBrandRepository>();
 		var fakeValidatePlayerLoginRecordCommandService = Substitute.For<ICommandService<ValidatePlayerLoginRecordCommand>>();
+		var fakeTokenHandler = Substitute.For<IJwtTokenHandler>();
 
 		_ = fakeBrandCertClient.GetSystemValidateSecurityKeyAsync(Arg.Any<CancellationToken>())
 			.Returns(TestOperatorApplication.TestSecurityKey);
@@ -67,7 +68,8 @@ public class PlayerTests
 				.AddSingleton(fakePlayerPasswordValidateCommandService)
 				.AddSingleton(fakePlayerLoginRecordRepository)
 				.AddSingleton(fakeBrandRepository)
-				.AddSingleton(fakeValidatePlayerLoginRecordCommandService))
+				.AddSingleton(fakeValidatePlayerLoginRecordCommandService)
+				.AddSingleton(fakeTokenHandler))
 			.Build();
 
 		await web.StartAsync();
@@ -109,13 +111,47 @@ public class PlayerTests
 			DateTimeOffset.UtcNow.AddDays(1D));
 
 		_ = fakePlayerLoginRecordRepository.AddPlayerLoginRecordAsync(
-				Arg.Is(brandId),
+		Arg.Is(brandId),
 				Arg.Is(playerCode),
 				Arg.Is(platformType),
 				Arg.Any<string>())
 			.Returns(loginRecord);
 
-		await using var scope = web.Services.CreateAsyncScope();
+		var identity = new ClaimsIdentity(
+			new[]
+			{
+				new Claim(Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.Sub, playerCode),
+				new Claim("login_id", loginRecord.Id.ToString()),
+				new Claim("platform_type", platformType.ToString())
+			});
+
+		var signature = Encoding.UTF8.GetBytes(secretKey);
+
+		var tokenHandler = new JwtSecurityTokenHandler();
+		var key = new SymmetricSecurityKey(signature);
+		var credential = new SigningCredentials(key, SecurityAlgorithms.HmacSha256Signature);
+
+		var descriptor = new SecurityTokenDescriptor
+		{
+			Subject = identity,
+			Issuer = "operator-api",
+			Expires = DateTime.UtcNow.AddDays(1D),
+			SigningCredentials = credential
+		};
+
+		var securityToken = tokenHandler.CreateToken(descriptor);
+
+		var expected = "testToken";
+
+		_ = fakeTokenHandler.GenerateToken(
+			Arg.Any<ClaimsIdentity>(),
+			Arg.Any<byte[]>(),
+			Arg.Is("operator-api"),
+			Arg.Any<DateTime?>())
+			.Returns(expected);
+
+		_ = fakeTokenHandler.ReadToken(Arg.Is(expected))
+			.Returns(securityToken);
 
 		var isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "true" : "false";
 		var nodeModule = $$"""
@@ -131,24 +167,6 @@ public class PlayerTests
 				return await svc.playerLogin(username, password, platformtype);
 			};
 		""";
-
-		var tokenHandler = scope.ServiceProvider.GetRequiredService<IJwtTokenHandler>();
-
-		var identity = new ClaimsIdentity(
-			new[]
-			{
-				new Claim(JwtRegisteredClaimNames.Sub, playerCode),
-				new Claim("login_id", loginRecord.Id.ToString()),
-				new Claim("platform_type", platformType.ToString())
-			});
-
-		var signature = Encoding.UTF8.GetBytes(secretKey);
-
-		var expected = tokenHandler.GenerateToken(
-			identity,
-			signature,
-			"operator-api",
-			loginRecord.ExpiredOn.DateTime);
 
 		// Act
 		var actual = await StaticNodeJSService.InvokeFromStringAsync<LoginResponse>(
@@ -172,7 +190,7 @@ public class PlayerTests
 		var fakePlayerLoginRecordRepository = Substitute.For<IPlayerLoginRecordRepository>();
 		var fakeBrandRepository = Substitute.For<IBrandRepository>();
 		var fakeValidatePlayerLoginRecordCommandService = Substitute.For<ICommandService<ValidatePlayerLoginRecordCommand>>();
-	
+
 		var fakeMessageSender = Substitute.For<IMessageSender>();
 
 		_ = fakeBrandCertClient.GetSystemValidateSecurityKeyAsync(Arg.Any<CancellationToken>())
@@ -245,7 +263,7 @@ public class PlayerTests
 				Arg.Is(PlatformType.Desktop),
 				Arg.Any<string>())
 			.Returns(loginRecord);
-		
+
 		await using var scope = web.Services.CreateAsyncScope();
 
 		var isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "true" : "false";

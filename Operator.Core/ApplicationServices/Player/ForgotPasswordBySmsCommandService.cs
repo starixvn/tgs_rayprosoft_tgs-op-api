@@ -41,10 +41,8 @@ internal class ForgotPasswordBySmsCommandService : IGetService<ForgotPasswordByS
 				command.AreaCode,
 				command.Phone,
 				cancellationToken)
-			.ConfigureAwait(false);
-
-		if (player is null)
-			throw new PlayerNotFoundException($"The phone ({command.Phone}) can't find the player info.");
+			.ConfigureAwait(false)
+			?? throw new PlayerNotFoundException($"The phone ({command.Phone}) can't find the player info.");
 
 		var saveResult = await Policy.HandleResult<(bool Result, string ValidateCode, string Token)>(data => !data.Result)
 			.RetryAsync(5)

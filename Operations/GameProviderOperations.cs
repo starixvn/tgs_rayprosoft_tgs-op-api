@@ -158,12 +158,10 @@ public sealed class GameProviderOperations : IGameProviderOperations
 		}
 
 		var r = await _gameProviderQueries
-			.GetCachedGameProviderConfigurationAsync(gameProviderConfigurationId);
-		if (r == null)
-		{
-			throw new InvalidOperationException(
-				$"GameProviderConfiguration doesn't exist with gameProviderId: {gameProviderId} and gameProviderConfigurationId: {gameProviderConfigurationId}");
-		}
+			.GetCachedGameProviderConfigurationAsync(gameProviderConfigurationId)
+			?? throw new InvalidOperationException(
+				$"GameProviderConfiguration doesn't exist with gameProviderId: " +
+					$"{gameProviderId} and gameProviderConfigurationId: {gameProviderConfigurationId}");
 
 		gpc = new()
 		{
@@ -370,7 +368,7 @@ public sealed class GameProviderOperations : IGameProviderOperations
 			});
 
 		return values.All(a => !a.IsNull)
-			? (new()
+			? new()
 			{
 				Id = Guid.Parse(values[0]),
 				Code = values[1],
@@ -383,7 +381,7 @@ public sealed class GameProviderOperations : IGameProviderOperations
 				SettleBetTimeout = (int)values[8],
 				AllowKickPlayer = (bool)values[9],
 				IsTransferWallet = (bool)values[10]
-			})
+			}
 			: null;
 	}
 

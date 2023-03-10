@@ -50,12 +50,8 @@ internal class LoginCommandService : IGetService<LoginCommand, LoginInfo>
 
 		var playerInfo = await _playerServiceClient
 			.GetPlayerInfoByUserNameAsync(command.BrandId, command.UserName, cancellationToken)
-			.ConfigureAwait(false);
-
-		if (playerInfo is null)
-		{
-			throw new PlayerNotFoundException("");
-		}
+			.ConfigureAwait(false)
+			?? throw new PlayerNotFoundException("");
 
 		var isValid = await _passwordValidateCommandService.GetAsync(
 			new PlayerPasswordValidateCommand(playerInfo.PlayerCode, command.Password),

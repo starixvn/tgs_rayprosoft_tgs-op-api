@@ -21,12 +21,7 @@ internal class GetBrandQueryService : IGetService<BrandQuery, BrandInfo>
 	{
 		var brandInfo = await _brandServiceClient
 			.GetBrandInfoAsync(query.BrandId, cancellationToken)
-			.ConfigureAwait(false);
-
-		if (brandInfo == null)
-		{
-			throw new BrandNotFoundException();
-		}
+			.ConfigureAwait(false) ?? throw new BrandNotFoundException();
 
 		var frontendInfo = await _brandServiceClient
 			.GetBrandFrontendInfoAsync(query.BrandId, cancellationToken)

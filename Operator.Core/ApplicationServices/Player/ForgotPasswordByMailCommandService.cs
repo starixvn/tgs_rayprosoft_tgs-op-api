@@ -30,10 +30,8 @@ internal class ForgotPasswordByMailCommandService : IGetService<ForgotPasswordBy
 		var player = _tgsRepository.Players.AsQueryable()
 			.Where(player => player.BrandId == command.BrandId
 				&& player.Email == command.Email)
-			.FirstOrDefault();
-
-		if (player == null)
-			throw new PlayerNotFoundException($"The email ({command.Email}) can't find the player info.");
+			.FirstOrDefault() 
+			?? throw new PlayerNotFoundException($"The email ({command.Email}) can't find the player info.");
 
 		var saveResult = await Policy.HandleResult<(bool Result, string ValidateCode, string Token)>(data => !data.Result)
 			.RetryAsync(5)

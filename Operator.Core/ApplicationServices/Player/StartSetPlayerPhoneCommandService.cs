@@ -40,10 +40,8 @@ internal class StartSetPlayerPhoneCommandService : IGetService<StartSetPlayerPho
 	{
 		var player = await _playerServiceClient
 			.GetPlayerInfoAsync(command.PlayerCode, cancellationToken)
-			.ConfigureAwait(false);
-
-		if (player is null)
-			throw new PlayerNotFoundException(command.PlayerCode);
+			.ConfigureAwait(false) 
+			?? throw new PlayerNotFoundException(command.PlayerCode);
 
 		var brand = await _brandServiceClient
 			.GetBrandInfoAsync(player.BrandId, cancellationToken)

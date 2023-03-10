@@ -142,13 +142,9 @@ public sealed class BrandOperations : IBrandOperations
 			return bgpc;
 		}
 
-		var r = await _brandQueries.GetCachedBrandGameProviderConfigurationAsync(brandId, gameProviderId);
-
-		if (r == null)
-		{
-			throw new InvalidOperationException(
+		var r = await _brandQueries.GetCachedBrandGameProviderConfigurationAsync(brandId, gameProviderId)
+			?? throw new InvalidOperationException(
 				$"BrandGameProviderConfiguration doesn't exist with brandId: {brandId} and gameProviderId: {gameProviderId}");
-		}
 
 		bgpc = new()
 		{
