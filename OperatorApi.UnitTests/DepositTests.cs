@@ -146,7 +146,7 @@ public class DepositTests
 				It.Is<DepositFormCreateInfo>(form => expected.Matches(form)),
 				It.IsAny<CancellationToken>()),
 			Times.Exactly(1));
-	}	
+	}
 
 	[Test]
 	public async Task Create_Crypto_Deposit_Form_Should_Success()
@@ -302,7 +302,7 @@ public class DepositTests
 
 		_ = fakeBrandServiceClient.GetBrandPaymentSettingsAsync(
 			Arg.Is(command.BrandId))
-			.Returns(new BrandPaymentSettings(true));
+			.Returns(new BrandPaymentSettings(true, false, 0M));
 
 		_ = Assert.ThrowsAsync<PreviousDepositStillProcessingException>(async () => await sut.GetAsync(command));
 	}

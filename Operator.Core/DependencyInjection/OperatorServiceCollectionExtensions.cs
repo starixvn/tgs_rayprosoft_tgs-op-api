@@ -6,6 +6,7 @@ using TGS.Core.Infrastructures.Mail;
 using TGS.Core.Infrastructures.WebApiServices;
 using TGS.Services.Operator;
 using TGS.Services.Operator.Configuration;
+using TGS.Services.Operator.Notify;
 using TGS.Services.Operator.PlayerRegisterFlow;
 using TGS.Services.Operator.ValidateCode;
 
@@ -31,6 +32,8 @@ public static class OperatorServiceCollectionExtensions
 			ServiceLifetime.Transient);
 
 		_ = services
+			.AddSingleton<NotifyEventSource>()
+			.AddTransient<INotifyEventPublisher>(sp => sp.GetRequiredService<NotifyEventSource>())
 			.AddOptions<OperatorOptions>()
 			.Services
 			.AddValidateCodeClient((options, sp) =>

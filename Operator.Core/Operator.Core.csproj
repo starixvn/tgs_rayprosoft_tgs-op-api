@@ -12,19 +12,20 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Grpc.Tools" Version="2.51.0">
+    <PackageReference Include="Grpc.Tools" Version="2.52.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="17.4.33">
+    <PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="17.5.22">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="PhoenixToolkits.Protobuf.ExtendTypes" Version="0.0.6" />
     <PackageReference Include="Polly" Version="7.2.3" />
-    <PackageReference Include="Scrutor" Version="4.2.0" />
+    <PackageReference Include="Scrutor" Version="4.2.1" />
     <PackageReference Include="System.Linq.Async" Version="6.0.1" />
-    <PackageReference Include="Tgs.BrandCertificateClient" Version="0.0.21" />
+    <PackageReference Include="System.Reactive" Version="5.0.0" />
+    <PackageReference Include="Tgs.BrandCertificateClient" Version="0.0.22" />
     <PackageReference Include="Tgs.CashService.Client" Version="0.1.6" />
     <PackageReference Include="TGS.Core.Infrastructures.Mail" Version="0.0.6" />
     <PackageReference Include="Tgs.Core.Infrastructures.Security" Version="0.0.2" />
