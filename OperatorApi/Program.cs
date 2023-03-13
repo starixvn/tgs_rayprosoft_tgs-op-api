@@ -270,17 +270,18 @@ builder.Services
 		conifg.GetSection("Opentelemetry:Tracing").Bind(options);
 	})
 	.Services
-	.AddOpenTelemetryTracing(
-		builder => builder
-			.SetResourceBuilder(ResourceBuilder.CreateDefault()
-				.AddEnvironmentVariableDetector())
-			.AddSource("Tgs.*")
-			.AddSource("TGS.*")
-			.AddAspNetCoreInstrumentation()
-			.AddHttpClientInstrumentation()
-			.AddEntityFrameworkCoreInstrumentation(options => options.SetDbStatementForText = true)
-			.AddProfileViewExporter()
-			.AddOtlpExporter())
+	.AddOpenTelemetry()
+	.WithTracing(builder => builder
+		.SetResourceBuilder(ResourceBuilder.CreateDefault()
+			.AddEnvironmentVariableDetector())
+		.AddSource("Tgs.*")
+		.AddSource("TGS.*")
+		.AddAspNetCoreInstrumentation()
+		.AddHttpClientInstrumentation()
+		.AddEntityFrameworkCoreInstrumentation(options => options.SetDbStatementForText = true)
+		.AddProfileViewExporter()
+		.AddOtlpExporter())
+	.Services
 	.Configure<AspNetCoreInstrumentationOptions>(options => options.Filter =
 		httpContext => !httpContext.Request.Path.HasValue
 			|| !httpContext.Request.Path.StartsWithSegments("/swagger")
