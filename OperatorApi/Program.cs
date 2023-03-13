@@ -8,6 +8,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using OpenTelemetry.Exporter;
 using OpenTelemetry.Instrumentation.AspNetCore;
+using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using Tgs.Payment.AlfaPay;
@@ -99,9 +100,62 @@ builder.Services
 	});
 
 builder.Services
-	.AddTgsRepository(builder.Configuration, "Tgs");
+	.AddHttpContextAccessor()
+	.AddRouting(options => options.LowercaseUrls = true)
+	.AddSignalR()
+	.Services
+	.AddControllers(options =>
+	{
+		options.AddBrandCertificateFilters();
+		_ = options.Filters.Add<CheckPlayerEnabledFilter>();
+		_ = options.Filters.Add<ValidateModelFilter>();
+		options.AddWebApiToolkitFilters();
+		_ = options.Filters.Add<TgsResponseWrapperAttribute>();
+		_ = options.Filters.Add<ErrorMessageMapperFilter>();
+	})
+	.ConfigureApiBehaviorOptions(options => options.SuppressModelStateInvalidFilter = true)
+	.AddJsonOptions(jsonOptions => jsonOptions
+		.JsonSerializerOptions.Converters.Add(new DateOnlyConverter()));
 
 builder.Services
+	.AddFluentValidationAutoValidation(c =>
+		c.DisableDataAnnotationsValidation = true)
+	.AddFluentValidationClientsideAdapters()
+	.AddValidatorsFromAssemblyContaining<Program>(lifetime: ServiceLifetime.Scoped);
+
+builder.Services
+	.AddOperatorApiCore()
+	.ConfigureOperatorOptions<IConfiguration>((options, config) => config
+		.GetSection("Operator").Bind(options))
+	.UseOperatorRepositories(sp
+		=> sp.GetRequiredService<IRedisConnectionFactory>().GetConnection().GetDatabase())
+	.ConfigureWallet((options, sp) =>
+	{
+		var operatorOptions = sp.GetRequiredService<IOptions<OperatorOptions>>().Value;
+
+		options.BaseUrl = operatorOptions.CashBaseUrl;
+	})
+	.AddPaymentServiceClient(httpClientBuilder => httpClientBuilder
+		.ConfigureHttpClient((sp, http) =>
+		{
+			var config = sp.GetRequiredService<IConfiguration>();
+
+			http.BaseAddress = config.GetValue<Uri>("Operator:PaymentServiceBaseUrl");
+		}))
+	.Services
+	.AddTransient<IGetService<GetSM01HtmlContentQuery, SM01HtmlContentInfo>, GetSM01HtmlContentQueryService>()
+	.AddSingleton<ManualDepositSerializer>()
+	.AddSingleton<PrimePaySerializer>()
+	.AddSingleton<LeePaySerializer>()
+	.AddSingleton<UmPaySerializer>()
+	.AddSingleton<MaticPaySerializer>()
+	.AddSingleton<Help2PaySerializer>()
+	.AddSingleton<SkyPaySerializer>()
+	.AddSingleton<ZeroNineNinePaySerializer>()
+	.AddSingleton<TuPaySerializer>()
+	.AddSingleton<MalakiPaySerializer>()
+	.AddSingleton<AlfaPaySerializer>()
+	.AddTgsRepository(builder.Configuration, "Tgs")
 	.AddMemoryCache()
 	.AddWebApiServices()
 	.AddTgsLog()
@@ -151,7 +205,20 @@ builder.Services
 		var config = sp.GetRequiredService<IConfiguration>();
 
 		options.BaseUrl = config.GetValue<Uri>("Operator:DepositAccumulateRouletteServiceBaseUrl")!;
-	});
+	})
+	.AddPlayerBucketClient(httpBuilder => { })
+	.AddIdentityVerifiers()
+	.AddHttpClient<IEmailClient, EmailClient>((sp, c) =>
+	{
+		var url = builder.Configuration.GetSection("Email:Url");
+		c.BaseAddress = new Uri(url.Value);
+	})
+	.Services
+	.AddOptions<ConstValidateCodeOptions>()
+	.Configure<IConfiguration>((options, config) => config
+		.GetSection("Operator").Bind(options))
+	.Services
+	.Decorate<IValidateCodeGenerator, ConstValidateCodeGenerator>();
 
 builder.Services
 	.AddRedis((options, sp) =>
@@ -164,40 +231,6 @@ builder.Services
 builder.Services
 	.AddErrorMapper()
 	.AddErrorMapper<OperatorApiErrorMapper>();
-
-builder.Services
-	.AddPlayerBucketClient(httpBuilder => { })
-	.AddOperatorApiCore()
-	.ConfigureOperatorOptions<IConfiguration>((options, config) => config
-		.GetSection("Operator").Bind(options))
-	.UseOperatorRepositories(sp
-		=> sp.GetRequiredService<IRedisConnectionFactory>().GetConnection().GetDatabase())
-	.ConfigureWallet((options, sp) =>
-	{
-		var operatorOptions = sp.GetRequiredService<IOptions<OperatorOptions>>().Value;
-
-		options.BaseUrl = operatorOptions.CashBaseUrl;
-	})
-	.AddPaymentServiceClient(httpClientBuilder => httpClientBuilder
-		.ConfigureHttpClient((sp, http) =>
-		{
-			var config = sp.GetRequiredService<IConfiguration>();
-
-			http.BaseAddress = config.GetValue<Uri>("Operator:PaymentServiceBaseUrl");
-		}))
-	.Services
-	.AddTransient<IGetService<GetSM01HtmlContentQuery, SM01HtmlContentInfo>, GetSM01HtmlContentQueryService>()
-	.AddSingleton<ManualDepositSerializer>()
-	.AddSingleton<PrimePaySerializer>()
-	.AddSingleton<LeePaySerializer>()
-	.AddSingleton<UmPaySerializer>()
-	.AddSingleton<MaticPaySerializer>()
-	.AddSingleton<Help2PaySerializer>()
-	.AddSingleton<SkyPaySerializer>()
-	.AddSingleton<ZeroNineNinePaySerializer>()
-	.AddSingleton<TuPaySerializer>()
-	.AddSingleton<MalakiPaySerializer>()
-	.AddSingleton<AlfaPaySerializer>();
 
 builder.Services
 	.AddMessageQueue()
@@ -213,63 +246,9 @@ builder.Services
 			"tgs.brand.frontendinfo.changed"))
 	.AddNatsGlobPatternExchange("*");
 
-builder.Services
-	.AddOptions<ConstValidateCodeOptions>()
-	.Configure<IConfiguration>((options, config) => config
-		.GetSection("Operator").Bind(options))
-	.Services
-	.Decorate<IValidateCodeGenerator, ConstValidateCodeGenerator>();
-
-builder.Services
-	.AddIdentityVerifiers();
-
-builder.Services
-	.AddRouting(options => options.LowercaseUrls = true);
-
-builder.Services
-	.AddFluentValidationAutoValidation(c =>
-		c.DisableDataAnnotationsValidation = true)
-	.AddFluentValidationClientsideAdapters()
-	.AddValidatorsFromAssemblyContaining<Program>(lifetime: ServiceLifetime.Scoped);
-
-builder.Services
-	.AddSignalR()
-	.Services
-	.AddControllers(options =>
-	{
-		options.AddBrandCertificateFilters();
-		_ = options.Filters.Add<CheckPlayerEnabledFilter>();
-		_ = options.Filters.Add<ValidateModelFilter>();
-		options.AddWebApiToolkitFilters();
-		_ = options.Filters.Add<TgsResponseWrapperAttribute>();
-		_ = options.Filters.Add<ErrorMessageMapperFilter>();
-	})
-	.ConfigureApiBehaviorOptions(options => options.SuppressModelStateInvalidFilter = true)
-	.AddJsonOptions(jsonOptions => jsonOptions
-		.JsonSerializerOptions.Converters.Add(new DateOnlyConverter()));
-
-builder.Services.AddHttpClient<IEmailClient, EmailClient>((sp, c) =>
-{
-	var url = builder.Configuration.GetSection("Email:Url");
-	c.BaseAddress = new Uri(url.Value);
-});
-
-builder.Services.AddHttpContextAccessor();
-
 builder.Services.AddHealthChecks();
 
 builder.Services
-	.AddOptions<OtlpExporterOptions>()
-	.Configure<IConfiguration>((options, conifg) =>
-	{
-		var nodeIp = conifg.GetValue<string>("NODE_IP");
-
-		if (!string.IsNullOrWhiteSpace(nodeIp))
-			options.Endpoint = new Uri($"http://{nodeIp}:4317");
-
-		conifg.GetSection("Opentelemetry:Tracing").Bind(options);
-	})
-	.Services
 	.AddOpenTelemetry()
 	.WithTracing(builder => builder
 		.SetResourceBuilder(ResourceBuilder.CreateDefault()
@@ -281,6 +260,12 @@ builder.Services
 		.AddEntityFrameworkCoreInstrumentation(options => options.SetDbStatementForText = true)
 		.AddProfileViewExporter()
 		.AddOtlpExporter())
+	.WithMetrics(meterBuiler => meterBuiler
+		.SetResourceBuilder(ResourceBuilder.CreateDefault()
+			.AddEnvironmentVariableDetector())
+			.AddRuntimeInstrumentation()
+			.AddAspNetCoreInstrumentation()
+			.AddOtlpExporter())
 	.Services
 	.Configure<AspNetCoreInstrumentationOptions>(options => options.Filter =
 		httpContext => !httpContext.Request.Path.HasValue
