@@ -282,7 +282,8 @@ builder.Services
 builder.Services
 	.AddSwaggerGen(c =>
 	{
-		c.SwaggerDoc("v1",
+		c.SwaggerDoc(
+			"v1",
 			new OpenApiInfo
 			{
 				Title = "TGS Operator API",
@@ -307,12 +308,11 @@ builder.Services
 	{
 		var corsDomain = builder.Configuration.GetSection("CorsDomain").Get<CorsDomain>()!;
 
-		options.AddDefaultPolicy(
-			policyBuilder => policyBuilder
-				.WithOrigins(corsDomain.Urls)
-				.AllowAnyHeader()
-				.AllowAnyMethod()
-				.SetIsOriginAllowed(_ => true));
+		options.AddDefaultPolicy(policyBuilder => policyBuilder
+			.WithOrigins(corsDomain.Urls)
+			.AllowAnyHeader()
+			.AllowAnyMethod()
+			.SetIsOriginAllowed(_ => true));
 	});
 
 var app = builder.Build();
