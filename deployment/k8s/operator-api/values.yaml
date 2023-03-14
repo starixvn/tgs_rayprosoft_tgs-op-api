@@ -11,8 +11,6 @@ image:
   tag: "dev"
 
 imagePullSecrets:
-  - name: registry-credentials
-  - name: secret-tgs-harbor
   - name: dockerhub
 nameOverride: "operator-api"
 fullnameOverride: "operator-api"
