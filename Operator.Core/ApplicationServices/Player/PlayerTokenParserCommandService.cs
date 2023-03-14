@@ -1,7 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Security.Claims;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Tgs.Core.Infrastructures.Security;
 using Tgs.ServiceUtility;
@@ -12,32 +17,55 @@ namespace TGS.Services.Operator.ApplicationServices.Player;
 
 internal class PlayerTokenParserCommandService : IGetService<PlayerTokenParserCommand, PlayerTokenData?>
 {
+	private readonly IBrandRepository _brandRepository;
+	private readonly ILogger<PlayerTokenParserCommandService> _logger;
 	private readonly IJwtTokenHandler _tokenHandler;
 
 	public PlayerTokenParserCommandService(
-		IJwtTokenHandler tokenHandler)
+		IJwtTokenHandler tokenHandler,
+		IBrandRepository brandRepository,
+		ILogger<PlayerTokenParserCommandService> logger)
 	{
 		_tokenHandler = tokenHandler ?? throw new ArgumentNullException(nameof(tokenHandler));
+		_brandRepository = brandRepository ?? throw new ArgumentNullException(nameof(brandRepository));
+		_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 	}
 
-	public ValueTask<PlayerTokenData?> GetAsync(
-		PlayerTokenParserCommand command, 
+	public async ValueTask<PlayerTokenData?> GetAsync(
+		PlayerTokenParserCommand command,
 		CancellationToken cancellationToken = default)
 	{
 		if (string.IsNullOrEmpty(command.PlayerToken))
-			return ValueTask.FromResult((PlayerTokenData?) null);
+			return null;
 
-		var jwtToken = _tokenHandler.ReadToken(command.PlayerToken);
+		var secretKey = await _brandRepository.GetSecretKeyAsync(
+			command.BrandId,
+			cancellationToken).ConfigureAwait(false);
 
-		var claims = jwtToken.Claims.ToDictionary(c => c.Type, c => c.Value);
+		var (isValid, principal, securityToken) = _tokenHandler.ValidateToken(
+			command.PlayerToken,
+			new TokenValidationParameters
+			{
+				ValidateIssuer = true,
+				ValidIssuer = "operator-api",
+				ValidateAudience = false,
+				ValidateIssuerSigningKey = true,
+				IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey!)),
+				ValidateLifetime = true,
+				ClockSkew = TimeSpan.Zero
+			},
+			exception => _logger.LogDebug(exception, "Token validation failed"),
+			_ => _logger.LogDebug("jwt validate expired"));
 
-		if (!(claims.TryGetValue("sub", out var playerCode) && !string.IsNullOrEmpty(playerCode))
-		    || !(claims.TryGetValue("login_id", out var loginId) && !string.IsNullOrEmpty(loginId))
-		    || !(claims.TryGetValue("platform_type", out var platform) && !string.IsNullOrEmpty(platform))
-		    || !(claims.TryGetValue("exp", out var expire) && !string.IsNullOrEmpty(expire)))
-		{
-			return ValueTask.FromResult((PlayerTokenData?)null);
-		}
+		if (!isValid)
+			return null;
+
+		var claims = principal!.Claims.ToDictionary(c => c.Type, c => c.Value);
+
+		var playerCode = claims[ClaimTypes.NameIdentifier];
+		var loginId = claims["login_id"];
+		var platform = claims["platform_type"];
+		var expire = claims["exp"];
 
 		var playerTokenData = new PlayerTokenData
 		{
@@ -47,6 +75,6 @@ internal class PlayerTokenParserCommandService : IGetService<PlayerTokenParserCo
 			ExpiredOn = new DateTimeOffset(EpochTime.DateTime(long.Parse(expire)))
 		};
 
-		return ValueTask.FromResult((PlayerTokenData?) playerTokenData);
+		return playerTokenData;
 	}
 }

@@ -87,10 +87,10 @@ public class DepositTests
 		_ = fakePlayerPasswordValidateCommandService.GetAsync(Arg.Any<PlayerPasswordValidateCommand>())
 			.Returns(true);
 		_ = fakePlayerLoginRecordRepository.AddPlayerLoginRecordAsync(
-				Arg.Is(brandId),
-				Arg.Is(playerCode),
-				Arg.Is(TGS.Core.Models.Enums.PlatformType.Desktop),
-				Arg.Is("127.0.0.1"))
+			Arg.Is(brandId),
+			Arg.Is(playerCode),
+			Arg.Is(TGS.Core.Models.Enums.PlatformType.Desktop),
+			Arg.Is("127.0.0.1"))
 			.Returns(new LoginRecordInfo(
 				Guid.NewGuid(),
 				playerCode,
@@ -124,18 +124,18 @@ public class DepositTests
 			ChannelName = "Usdt",
 			Enabled = true,
 			ExtendedData = """
-   {
-       "rate": 0.01,   
-       "address": "usdt_address"
-   }
-   """
+				{
+					"rate": 0.01,
+					"address": "usdt_address"
+				}
+				"""
 		};
 
 		_ = fakeGetBrandPaymentService.GetAsync(
 			Arg.Is<GetBrandPaymentQuery>(x => x.Id == brandPaymentId),
 			Arg.Any<CancellationToken>())
 			.Returns(brandPaymentInfo);
-		
+
 		var expected = Guid.NewGuid();
 
 		_ = fakeCreateDepositFormService.GetAsync(
@@ -267,11 +267,11 @@ public class DepositTests
 			ChannelName = "Usdt",
 			Enabled = true,
 			ExtendedData = """
-   {
-       "name": "testName",   
-       "bankAccount": "testBankAccount"
-   }
-   """
+				{
+					"name": "testName",   
+					"bankAccount": "testBankAccount"
+				}
+				"""
 		};
 
 		_ = fakeGetBrandPaymentService.GetAsync(
@@ -307,7 +307,7 @@ public class DepositTests
 		// Act
 		var actual = await StaticNodeJSService.InvokeFromStringAsync<SuccessResponse<string>>(
 			nodeModule,
-			args: new object?[] { brandToken, loginResult.PlayerToken, amount, brandPaymentId, null, "bank","testAccount","testBankName","testNote", null });
+			args: new object?[] { brandToken, loginResult.PlayerToken, amount, brandPaymentId, null, "bank", "testAccount", "testBankName", "testNote", null });
 
 		// Assert
 		Assert.Equal(expected, Guid.Parse(actual!.Data));
@@ -410,11 +410,11 @@ public class DepositTests
 			ChannelName = "Usdt",
 			Enabled = true,
 			ExtendedData = """
-   {
-       "phone": "0912345678",   
-       "eMoneyName": "testEMoneyName"
-   }
-   """
+				{
+					"phone": "0912345678",   
+					"eMoneyName": "testEMoneyName"
+				}
+				"""
 		};
 
 		_ = fakeGetBrandPaymentService.GetAsync(
@@ -553,10 +553,10 @@ public class DepositTests
 			ChannelName = "Usdt",
 			Enabled = true,
 			ExtendedData = """
-   {
-       "phone": "0912345678"       
-   }
-   """
+				{
+					"phone": "0912345678"       
+				}
+				"""
 		};
 
 		_ = fakeGetBrandPaymentService.GetAsync(

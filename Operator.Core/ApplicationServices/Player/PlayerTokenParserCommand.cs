@@ -1,4 +1,5 @@
-﻿namespace TGS.Services.Operator.ApplicationServices.Player;
+﻿using System;
 
-public record PlayerTokenParserCommand(
-	string PlayerToken);
+namespace TGS.Services.Operator.ApplicationServices.Player;
+
+public record PlayerTokenParserCommand(Guid BrandId, string PlayerToken);
