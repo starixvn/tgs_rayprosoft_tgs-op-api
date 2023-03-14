@@ -93,14 +93,38 @@ internal class BrandRepository : IBrandRepository
 		=> await _tgsRepository.BrandAllAgents.AnyAsync(x => x.BrandId == brandId,
 			cancellationToken: cancellationToken);
 
-	public IAsyncEnumerable<BrandAllAgentTurnover> GetBrandAllAgentTurnoverConditionsAsync(Guid brandId, CancellationToken cancellationToken = default) 
-		=> _tgsRepository.BrandAllAgentGameTypeConditions.Where(x => x.BrandId == brandId)
+	public IAsyncEnumerable<BrandAllAgentTurnover> GetBrandAllAgentTurnoverConditionsAsync(Guid brandId,
+		CancellationToken cancellationToken = default)
+		=> _tgsRepository.BrandAllAgents.Join(_tgsRepository.BrandAllAgentGameTypes, brand => brand.BrandId,
+				gameType => gameType.BrandId, (brand, gameType) => new
+				{
+					brand.BrandId,
+					gameType.AllAgentGameType,
+					gameType.Switch
+				})
+			.Join(_tgsRepository.BrandAllAgentGameTypeConditions, gameType => new
+			{
+				gameType.BrandId,
+				gameType.AllAgentGameType
+			}, condition => new
+			{
+				condition.BrandId,
+				condition.AllAgentGameType
+			}, (gameType, condition) => new
+			{
+				gameType.BrandId,
+				gameType.AllAgentGameType,
+				gameType.Switch,
+				condition
+			})
+			.Where(x => x.BrandId == brandId && x.Switch &&
+				x.condition.AllAgentRebateType == AllAgentRebateType.ValidBet)
 			.Select(x => new BrandAllAgentTurnover
 			{
-				Rank = x.Rank,
-				AllAgentGameType = x.AllAgentGameType,
-				ActiveNumber = x.ActiveNumber,
-				Turnover = x.NetProfit,
-				RebatePercentage = x.RebatePercentage
+				Rank = x.condition.Rank,
+				AllAgentGameType = x.condition.AllAgentGameType,
+				ActiveNumber = x.condition.ActiveNumber,
+				Turnover = x.condition.NetProfit,
+				RebatePercentage = x.condition.RebatePercentage
 			}).ToAsyncEnumerable();
 }
