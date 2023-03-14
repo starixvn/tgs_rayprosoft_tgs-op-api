@@ -70,8 +70,6 @@ spec:
                 secretKeyRef:
                   name: tgs-connections
                   key: nats
-            - name: DOTNET_DiagnosticPorts
-              value: /diag/port
           livenessProbe:
             httpGet:
               path: /health
@@ -91,10 +89,6 @@ spec:
               name: appsettings
               readOnly: true
               subPath: appsettings.json
-            - mountPath: /diag
-              name: diagvol
-            - mountPath: /dumps
-              name: dumpsvol
         - name: monitor
           image: otel/opentelemetry-collector:0.62.1
           imagePullPolicy: {{ .Values.image.pullPolicy }}
@@ -142,10 +136,6 @@ spec:
         - name: appsettings
           configMap:
             name: configmap-{{ include "operator-api.fullname" . }}
-        - name: diagvol
-          emptyDir: {}
-        - name: dumpsvol
-          emptyDir: {}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
