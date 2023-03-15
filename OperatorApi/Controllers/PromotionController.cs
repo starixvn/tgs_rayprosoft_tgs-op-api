@@ -138,7 +138,7 @@ public class PromotionController : ControllerBase
 	}
 
 	[HttpGet("roulette/count", Name = "ListRouletteCountItems")]
-	[AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = false)]
+	[AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
 	public async IAsyncEnumerable<RouletteCountItemViewModel> ListRouletteCountItemsAsync(
 		[FromServices] IMessageSender messageSender)
 	{
