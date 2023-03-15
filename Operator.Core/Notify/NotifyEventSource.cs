@@ -3,7 +3,7 @@ using System.Reactive.Subjects;
 
 namespace TGS.Services.Operator.Notify;
 
-internal class NotifyEventSource : IObservable<NotifyEvent>, IDisposable, INotifyEventPublisher
+internal class NotifyEventSource : IObservable<NotifyEvent>, INotifyEventPublisher, IDisposable
 {
 	private readonly Subject<NotifyEvent> _subject = new();
 	private bool _disposedValue;
