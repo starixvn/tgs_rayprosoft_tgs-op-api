@@ -1,9 +1,7 @@
 ﻿#nullable enable
 
 using System.Diagnostics;
-using System.Text;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
 using Tgs.Core.Infrastructures.Security;
 using Tgs.PlayerService.Client;
 using Tgs.ServiceUtility;
@@ -43,43 +41,41 @@ public sealed class VerifyPlayerTokenMiddleware
 	{
 		using var activity = _VerifyPlayerTokenMiddlewareSource.StartActivity(nameof(VerifyPlayerTokenMiddleware));
 
+		var brandId = context.GetBrandId();
+		var token = context.Request.Headers.TryGetValue("Token", out var value) ? value.FirstOrDefault() : null;
+
+		var playerTokenData = brandId is null || string.IsNullOrEmpty(token)
+			? null
+			: await playerTokenParserCommandService
+				.GetAsync(new(brandId.Value, token), context.RequestAborted)
+				.ConfigureAwait(false);
+
+		try
+		{
+			if (playerTokenData is not null)
+				await loginRecordValidateService.ExecuteAsync(
+					new ValidatePlayerLoginRecordCommand(playerTokenData!.LoginRecordId, playerTokenData.PlayerCode),
+					context.RequestAborted).ConfigureAwait(false);
+		}
+		catch (PlayerLoginExpiredException ex)
+		{
+			_logger.LogDebug(ex, "Player login expired.");
+
+			playerTokenData = null;
+		}
+
+		if (playerTokenData is not null)
+			context.Items.Add(Core.Models.Consts.ContextItems.PlayerToken, playerTokenData);
+
 		var attribute = context.GetEndpoint()?.Metadata?.GetMetadata<AuthorizePlayerTokenAttribute>();
 
 		if (attribute == null)
 		{
-			await _next(context);
+			await _next(context).ConfigureAwait(false);
 			return;
 		}
 
-		var token = context.Request.Headers.TryGetValue("Token", out var value) ? value.FirstOrDefault() : null;
-
-		if (string.IsNullOrEmpty(token))
-		{
-			if (!attribute.AllowNullOrEmpty)
-			{
-				_logger.LogDebug("Missing Player Token");
-
-				context.Response.StatusCode = StatusCodes.Status401Unauthorized;
-
-				await context.Response.WriteAsJsonAsync(new TgsResponse
-				{
-					Error = 102,
-					ErrorMessage = "InvalidOrExpiredPlayerToken",
-					ErrorMessageKey = "InvalidOrExpiredPlayerToken"
-				}).ConfigureAwait(false);
-
-				return;
-			}
-
-			await _next(context);
-			return;
-		}
-
-		var playerTokenData = await playerTokenParserCommandService
-			.GetAsync(new(token))
-			.ConfigureAwait(false);
-
-		if (playerTokenData is null)
+		if ((!attribute.AllowNullOrEmpty || attribute.NeedAuthorize) && playerTokenData is null)
 		{
 			_logger.LogDebug("Cannot parse player token, maybe missing required token properties");
 
@@ -94,66 +90,7 @@ public sealed class VerifyPlayerTokenMiddleware
 
 			return;
 		}
-		
-		context.Items.Add(Core.Models.Consts.ContextItems.PlayerToken, playerTokenData);
 
-		try
-		{
-			await loginRecordValidateService.ExecuteAsync(
-				new ValidatePlayerLoginRecordCommand(playerTokenData.LoginRecordId, playerTokenData.PlayerCode));
-		}
-		catch (PlayerLoginExpiredException ex)
-		{
-			_logger.LogDebug(ex, "Player login expired.");
-
-			context.Response.StatusCode = StatusCodes.Status401Unauthorized;
-
-			await context.Response.WriteAsJsonAsync(new TgsResponse
-			{
-				Error = 102,
-				ErrorMessage = "InvalidOrExpiredPlayerToken",
-				ErrorMessageKey = "InvalidOrExpiredPlayerToken"
-			}).ConfigureAwait(false);
-
-			return;
-		}
-
-		if (!attribute.NeedAuthorize)
-		{
-			await _next(context);
-			return;
-		}
-
-		var brandId = context.GetBrandId();
-		var secretKey = await brandRepository.GetSecretKeyAsync(brandId!.Value);
-
-		var (isValid, _, _) = handler.ValidateToken(
-			token,
-			new TokenValidationParameters
-			{
-				ValidateIssuer = true,
-				ValidIssuer = Consts.Site,
-				ValidateAudience = false,
-				ValidateIssuerSigningKey = true,
-				IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey!)),
-				ValidateLifetime = true,
-				ClockSkew = TimeSpan.Zero
-			},
-			exception => _logger.LogDebug(exception, "Token validation failed"),
-			_ => _logger.LogDebug("{playerCode} jwt validate expired", playerTokenData.PlayerCode));
-
-		if (isValid)
-			await _next(context);
-		else
-		{
-			context.Response.StatusCode = StatusCodes.Status401Unauthorized;
-
-			await context.Response.WriteAsJsonAsync(new TgsResponse
-			{
-				Error = 102,
-				ErrorMessage = "InvalidOrExpiredPlayerToken",
-				ErrorMessageKey = "InvalidOrExpiredPlayerToken"
-			});
-		}
+		await _next(context);
 	}
 }

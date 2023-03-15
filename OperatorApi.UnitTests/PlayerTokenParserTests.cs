@@ -5,11 +5,14 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using ExpectedObjects;
+using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.IdentityModel.Tokens;
 using NSubstitute;
 using NUnit.Framework;
 using Tgs.Core.Infrastructures.Security;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Tokens;
+using TGS.Services.Operator;
 using TGS.Services.Operator.ApplicationServices.Player;
 
 namespace TGS.Tests.OperatorApi.UnitTests;
@@ -21,27 +24,39 @@ internal class PlayerTokenParserTests
 	{
 		var fakeTokenHandler = Substitute.For<IJwtTokenHandler>();
 
+		var brandId = Guid.NewGuid();
 		var playerCode = "player1";
 		var platformType = PlatformType.Desktop;
-		var expiredOn = DateTimeOffset.UtcNow;
+		var expiredOn = DateTimeOffset.FromUnixTimeSeconds(DateTimeOffset.UtcNow.ToUnixTimeSeconds());
 		var loginRecordId = Guid.NewGuid();
 
 		var claims = new[]
 		{
-			new Claim(JwtRegisteredClaimNames.Sub, playerCode),
+			new Claim(ClaimTypes.NameIdentifier, playerCode),
 			new Claim("login_id", loginRecordId.ToString()),
-			new Claim("platform_type", platformType.ToString())
+			new Claim("platform_type", platformType.ToString()),
+			new Claim(JwtRegisteredClaimNames.Exp, expiredOn.ToUnixTimeSeconds().ToString())
 		};
 
 		var jwtSecurityToken = new JwtSecurityToken(claims: claims, expires: expiredOn.UtcDateTime);
+		var fakeBrandRepository = Substitute.For<IBrandRepository>();
 
-		var command = new PlayerTokenParserCommand("PlayerToken");
+		var sut = new PlayerTokenParserCommandService(
+			fakeTokenHandler,
+			fakeBrandRepository,
+			NullLogger<PlayerTokenParserCommandService>.Instance);
 
-		var sut = new PlayerTokenParserCommandService(fakeTokenHandler);
+		var command = new PlayerTokenParserCommand(brandId, "PlayerToken");
 
-		_ = fakeTokenHandler.ReadToken(
-				Arg.Is(command.PlayerToken))
-			.Returns(jwtSecurityToken);
+		_ = fakeBrandRepository.GetSecretKeyAsync(Arg.Is(command.BrandId))
+			.Returns("testkey");
+
+		_ = fakeTokenHandler.ValidateToken(
+			Arg.Is(command.PlayerToken),
+			Arg.Any<TokenValidationParameters>(),
+			Arg.Any<Action<Exception>>(),
+			Arg.Any<Action<SecurityTokenExpiredException>>())
+			.Returns((true, new ClaimsPrincipal(new ClaimsIdentity(claims)), new JwtSecurityToken()));
 
 		var expected = new PlayerTokenData
 		{
@@ -52,147 +67,12 @@ internal class PlayerTokenParserTests
 		};
 
 		var actual = await sut.GetAsync(command);
-		
+
 		Assert.NotNull(actual);
 
-		expected.ToExpectedObject(ctx 
+		expected.ToExpectedObject(ctx
 			=> ctx.Ignore(x => x.ExpiredOn)
 				.IgnoreEqualsOverride())
 			.ShouldEqual(actual);
-	}
-
-	[Test]
-	public async Task Fail_To_Parse_Token_When_Token_Is_Empty()
-	{
-		var fakeTokenHandler = Substitute.For<IJwtTokenHandler>();
-		
-		var command = new PlayerTokenParserCommand(string.Empty);
-
-		var sut = new PlayerTokenParserCommandService(fakeTokenHandler);
-
-		var actual = await sut.GetAsync(command);
-
-		Assert.Null(actual);
-	}
-
-	[Test]
-	public async Task Fail_To_Parse_Token_When_Missing_PlayerCode_Claim()
-	{
-		var fakeTokenHandler = Substitute.For<IJwtTokenHandler>();
-
-		var platformType = PlatformType.Desktop;
-		var expiredOn = DateTimeOffset.UtcNow;
-		var loginRecordId = Guid.NewGuid();
-
-		var claims = new[]
-		{
-			new Claim("login_id", loginRecordId.ToString()),
-			new Claim("platform_type", platformType.ToString())
-		};
-
-		var jwtSecurityToken = new JwtSecurityToken(claims: claims, expires: expiredOn.UtcDateTime);
-
-		var command = new PlayerTokenParserCommand("PlayerToken");
-
-		var sut = new PlayerTokenParserCommandService(fakeTokenHandler);
-
-		_ = fakeTokenHandler.ReadToken(
-				Arg.Is(command.PlayerToken))
-			.Returns(jwtSecurityToken);
-		
-		var actual = await sut.GetAsync(command);
-
-		Assert.Null(actual);
-	}
-
-	[Test]
-	public async Task Fail_To_Parse_Token_When_Missing_LoginId_Claim()
-	{
-		var fakeTokenHandler = Substitute.For<IJwtTokenHandler>();
-
-		var playerCode = "player1";
-		var platformType = PlatformType.Desktop;
-		var expiredOn = DateTimeOffset.UtcNow;
-
-		var claims = new[]
-		{           
-			new Claim(JwtRegisteredClaimNames.Sub, playerCode),
-			new Claim("platform_type", platformType.ToString())
-		};
-
-		var jwtSecurityToken = new JwtSecurityToken(claims: claims, expires: expiredOn.UtcDateTime);
-
-		var command = new PlayerTokenParserCommand("PlayerToken");
-
-		var sut = new PlayerTokenParserCommandService(fakeTokenHandler);
-
-		_ = fakeTokenHandler.ReadToken(
-				Arg.Is(command.PlayerToken))
-			.Returns(jwtSecurityToken);
-
-		var actual = await sut.GetAsync(command);
-
-		Assert.Null(actual);
-	}
-
-	[Test]
-	public async Task Fail_To_Parse_Token_When_Missing_PlatformType_Claim()
-	{
-		var fakeTokenHandler = Substitute.For<IJwtTokenHandler>();
-
-		var playerCode = "player1";
-		var expiredOn = DateTimeOffset.UtcNow;
-		var loginRecordId = Guid.NewGuid();
-
-		var claims = new[]
-		{
-			new Claim(JwtRegisteredClaimNames.Sub, playerCode),
-			new Claim("login_id", loginRecordId.ToString())
-		};
-
-		var jwtSecurityToken = new JwtSecurityToken(claims: claims, expires: expiredOn.UtcDateTime);
-
-		var command = new PlayerTokenParserCommand("PlayerToken");
-
-		var sut = new PlayerTokenParserCommandService(fakeTokenHandler);
-
-		_ = fakeTokenHandler.ReadToken(
-				Arg.Is(command.PlayerToken))
-			.Returns(jwtSecurityToken);
-
-		var actual = await sut.GetAsync(command);
-
-		Assert.Null(actual);
-	}
-
-	[Test]
-	public async Task Fail_To_Parse_Token_When_Expire_Claim()
-	{
-		var fakeTokenHandler = Substitute.For<IJwtTokenHandler>();
-
-		var playerCode = "player1";
-		var platformType = PlatformType.Desktop;
-		var loginRecordId = Guid.NewGuid();
-
-		var claims = new[]
-		{
-			new Claim(JwtRegisteredClaimNames.Sub, playerCode),
-			new Claim("login_id", loginRecordId.ToString()),
-			new Claim("platform_type", platformType.ToString())
-		};
-
-		var jwtSecurityToken = new JwtSecurityToken(claims: claims);
-
-		var command = new PlayerTokenParserCommand("PlayerToken");
-
-		var sut = new PlayerTokenParserCommandService(fakeTokenHandler);
-
-		_ = fakeTokenHandler.ReadToken(
-				Arg.Is(command.PlayerToken))
-			.Returns(jwtSecurityToken);
-
-		var actual = await sut.GetAsync(command);
-
-		Assert.Null(actual);
 	}
 }

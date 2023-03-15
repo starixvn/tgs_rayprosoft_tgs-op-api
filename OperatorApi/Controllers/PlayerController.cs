@@ -366,7 +366,7 @@ public class PlayerController : ControllerBase
 				.ConfigureAwait(false);
 
 			var playerTokenData = await playerTokenParserCommandService
-				.GetAsync(new(info.PlayerToken), HttpContext.RequestAborted)
+				.GetAsync(new(brandId, info.PlayerToken), HttpContext.RequestAborted)
 				.ConfigureAwait(false);
 
 			if (playerTokenData is not null)
