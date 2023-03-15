@@ -74,7 +74,7 @@ public class GameController : ControllerBase
 	/// get game list of specific game provider
 	/// </summary>
 	[HttpGet("list")]
-	[AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = true)]
+	[AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = false)]
 	public async IAsyncEnumerable<GameModel> GetGamesAsync(
 		[FromServices] IBrandLanguageCodeMapper brandLanguageCodeMapper,
 		[FromServices] IQueryService<GetGamesQuery, GameInfo> getGamesQueryService,

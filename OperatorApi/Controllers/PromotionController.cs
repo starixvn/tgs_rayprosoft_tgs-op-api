@@ -31,7 +31,7 @@ public class PromotionController : ControllerBase
 	[HttpGet("{language}", Name = "GetPromotions")]
 	[Description("Get promotions")]
 	[Consumes(MediaTypeNames.Application.Json)]
-	[AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = true)]
+	[AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = false)]
 	[Obsolete("預計淘汰")]
 	public async ValueTask<PagingResponse<PromotionResponse>> GetPromotionsAsync(string language,
 		[FromQuery] PagingRequest request)
@@ -101,7 +101,7 @@ public class PromotionController : ControllerBase
 	}
 
 	[HttpGet(Name = "ListPromotions")]
-	[AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = true)]
+	[AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = false)]
 	public IAsyncEnumerable<PromotionViewModel> ListPromotionsAsync(
 		[FromServices] IPromotionServiceClient promotionServiceClient,
 		[FromServices] IOptions<JsonOptions> jsonOptionsAccessor)
@@ -138,7 +138,7 @@ public class PromotionController : ControllerBase
 	}
 
 	[HttpGet("roulette/count", Name = "ListRouletteCountItems")]
-	[AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = true)]
+	[AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = false)]
 	public async IAsyncEnumerable<RouletteCountItemViewModel> ListRouletteCountItemsAsync(
 		[FromServices] IMessageSender messageSender)
 	{

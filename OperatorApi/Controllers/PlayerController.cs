@@ -478,7 +478,7 @@ public class PlayerController : ControllerBase
 
 	[HttpPost("register", Name = "RegisterPlayerFlow")]
 	[IgnoreUserBlacklistCheck]
-	[AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = true)]
+	[AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = false)]
 	public async Task<PlayerRegisterFlowResponseViewModel> RegisterPlayerAsync(
 		[FromServices] IGetService<BrandQuery, BrandInfo> getBrandService,
 		[FromServices] IGetService<ExecutePlayerRegisterFlowCommand, RegisterFlowProcessResult> executeFlowService,
