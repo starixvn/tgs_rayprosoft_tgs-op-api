@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
-using OpenTelemetry.Exporter;
 using OpenTelemetry.Instrumentation.AspNetCore;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
@@ -243,7 +242,13 @@ builder.Services
 		})
 		.AddHandler(
 			ProcessorTypes.BrandFrontendInfoChangedEventHandlerType,
-			"tgs.brand.frontendinfo.changed"))
+			"tgs.brand.frontendinfo.changed")
+		.AddHandler(
+			ProcessorTypes.DepositFormStatusChangedHandlerType,
+			"tgs.payment.deposit.status_ex")
+		.AddHandler(
+			ProcessorTypes.WithdrawFormStatusChangedEventHandlerType,
+			"tgs.payment.withdraw.status_ex"))
 	.AddNatsGlobPatternExchange("*");
 
 builder.Services.AddHealthChecks();
