@@ -20,7 +20,7 @@ public class GameProviderController : ControllerBase
 	/// Get game provider list
 	/// </summary>
 	[HttpGet("list")]
-	[AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = true)]
+	[AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = false)]
 	public async IAsyncEnumerable<GameProviderModel> GetGameProvidersAsync(
 		[FromServices] IQueryService<GetGameProvidersQuery, GameProviderInfo> getGameProviderQueryService,
 		[FromQuery] GetGameProvidersRequest request)

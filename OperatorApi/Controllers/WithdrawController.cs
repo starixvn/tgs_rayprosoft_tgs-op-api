@@ -179,7 +179,7 @@ public class WithdrawController : ControllerBase
 	}
 
 	[HttpGet("status")]
-	[AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = true)]
+	[AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = false)]
 	public Task<Dictionary<int, string>> GetWithdrawFormStatusAsync()
 	{
 		var dict = Enum.GetValues(typeof(FlowState))

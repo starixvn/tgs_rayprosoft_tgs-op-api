@@ -17,7 +17,7 @@ namespace TGS.Apis.OperatorApi.Controllers;
 public class CryptoDepositController : ControllerBase
 {
 	[HttpGet("leepay/exchangerate/{brandPaymentId}")]
-	[AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = true)]
+	[AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = false)]
 	public async Task<GetLeePayExchangeRateResponse> GetExchangeRateAsync(
 		[FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
 		[FromServices] IGetService<GetLeePayExchangeRateQuery, string> getLeePayExchangeRateService,
@@ -56,7 +56,7 @@ public class CryptoDepositController : ControllerBase
 	}
 
 	[HttpGet("umpay/exchangerate/{brandPaymentId}")]
-	[AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = true)]
+	[AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = false)]
 	public async Task<GetUmPayExchangeRateResponse> GetUmPayExchangeRateAsync(
 		[FromServices] IGetService<GetUmPayExchangeRateQuery, string> getUmPayExchangeRateService,
 		[FromServices] UmPaySerializer serializer)

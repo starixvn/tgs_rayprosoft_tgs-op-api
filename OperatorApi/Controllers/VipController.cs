@@ -16,7 +16,7 @@ namespace TGS.Apis.OperatorApi.Controllers;
 public class VipController : ControllerBase
 {
 	[HttpGet(Name = "GetVipLevelList")]
-	[AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = true)]
+	[AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = false)]
 	public async Task<PagingResponse<VipLevelModel>> GetVipLevelListAsync(
 		[FromQuery] PagingRequest pagingRequest,
 		[FromServices] IQueryService<GetVipLevelListQuery, VipRecord> getVipLevelsService,

@@ -13,7 +13,7 @@ namespace TGS.Apis.OperatorApi.Controllers;
 public class BrandAllAgentController : ControllerBase
 {
 	[HttpGet("check", Name = "CheckBrandAllAgentSetting")]
-	[AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = true)]
+	[AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = false)]
 	public async ValueTask<BrandAllAgentSwitchOnResponse> CheckBrandAllAgentSettingAsync(
 		[FromServices] IGetService<GetBrandAllAgentSwitchOnQuery, bool> getService)
 	{

@@ -170,7 +170,7 @@ public class DepositController : ControllerBase
 	}
 
 	[HttpGet("status")]
-	[AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = true)]
+	[AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = false)]
 	public Task<Dictionary<int, string>> GetDepositFormStatusAsync()
 	{
 		var dict = Enum.GetValues(typeof(FlowState))
