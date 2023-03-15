@@ -11,12 +11,12 @@ public record NotifyEvent
 
 	public JsonDocument Body { get; private set; }
 
-	public NotifyEvent(IEnumerable<KeyValuePair<string, string>> tags, string body)
+	public NotifyEvent(IEnumerable<KeyValuePair<string, string>> tags, JsonDocument body)
 	{
 		foreach (var tag in tags)
 			_tags.Add(tag.Key, tag.Value);
 
-		Body = JsonDocument.Parse(body);
+		Body = body;
 	}
 
 	public string? this[string name] => GetTagValues(name)?[^1];

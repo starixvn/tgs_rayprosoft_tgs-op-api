@@ -5,6 +5,7 @@
     <RootNamespace>TGS.Services.Operator</RootNamespace>
     <Nullable>enable</Nullable>
     <NeutralLanguage>en-US</NeutralLanguage>
+    <SqlQueryToolsConnectionString />
   </PropertyGroup>
 
   <ItemGroup>
