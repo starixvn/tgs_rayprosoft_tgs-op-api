@@ -11,9 +11,18 @@ namespace TGS.Apis.OperatorApi.SignalR;
 
 public class NotifyHub : Hub
 {
+	private readonly ILogger<NotifyHub> _logger;
+
+	public NotifyHub(ILogger<NotifyHub> logger)
+	{
+		_logger = logger ?? throw new ArgumentNullException(nameof(logger));
+	}
 	public override async Task OnConnectedAsync()
 	{
 		var httpContext = Context.GetHttpContext();
+
+		if (httpContext is null)
+			_logger.LogDebug("HttpContext is null");
 
 		var brandId = httpContext?.GetBrandId();
 		var playerTokenData = httpContext?.Items.GetPlayerTokenData();
