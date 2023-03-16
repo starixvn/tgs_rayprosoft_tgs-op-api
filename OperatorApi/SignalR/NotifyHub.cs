@@ -19,10 +19,16 @@ public class NotifyHub : Hub
 		var playerTokenData = httpContext?.Items.GetPlayerTokenData();
 
 		if (playerTokenData is null)
+		{
 			await Clients.Caller.SendAsync("notify", new
 			{
 				Type = "InvalidPlayer"
 			}).ConfigureAwait(false);
+
+			Context.Abort();
+
+			return;
+		}
 
 		var claims = new List<Claim>
 		{
