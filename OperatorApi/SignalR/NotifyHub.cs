@@ -21,14 +21,13 @@ public class NotifyHub : Hub
 	{
 		var httpContext = Context.GetHttpContext();
 
-		if (httpContext is null)
-			_logger.LogDebug("HttpContext is null");
-
 		var brandId = httpContext?.GetBrandId();
 		var playerTokenData = httpContext?.Items.GetPlayerTokenData();
 
 		if (playerTokenData is null)
 		{
+			_logger.LogDebug(httpContext?.Request.Headers["Token"]?? "Null");
+
 			await Clients.Caller.SendAsync("notify", new
 			{
 				Type = "InvalidPlayer"
