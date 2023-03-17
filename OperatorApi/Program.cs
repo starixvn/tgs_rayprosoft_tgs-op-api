@@ -2,6 +2,7 @@
 using System.Reflection;
 using FluentValidation;
 using FluentValidation.AspNetCore;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
@@ -99,6 +100,9 @@ builder.Services
 	});
 
 builder.Services
+	.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+	.AddCookie()
+	.Services
 	.AddHttpContextAccessor()
 	.AddRouting(options => options.LowercaseUrls = true)
 	.AddSignalR()
@@ -336,6 +340,7 @@ app.UseRequestLocalization(options =>
 });
 
 app.UseBrandCertificate();
+app.UseAuthentication();
 app.UseRouting();
 app.UseCors();
 app.UseVerifyJwtTokenMiddlewares(Consts.DefaultBypassRouting);
