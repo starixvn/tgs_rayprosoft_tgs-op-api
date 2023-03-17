@@ -11,12 +11,6 @@ namespace TGS.Apis.OperatorApi.SignalR;
 
 public class NotifyHub : Hub
 {
-	private readonly ILogger<NotifyHub> _logger;
-
-	public NotifyHub(ILogger<NotifyHub> logger)
-	{
-		_logger = logger ?? throw new ArgumentNullException(nameof(logger));
-	}
 	public override async Task OnConnectedAsync()
 	{
 		var httpContext = Context.GetHttpContext();
@@ -26,8 +20,6 @@ public class NotifyHub : Hub
 
 		if (playerTokenData is null)
 		{
-			_logger.LogDebug(httpContext?.Request.Headers["Token"]?? "Null");
-
 			await Clients.Caller.SendAsync("notify", new
 			{
 				Type = "InvalidPlayer"
@@ -52,9 +44,7 @@ public class NotifyHub : Hub
 
 		var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
 
-		await httpContext!.SignInAsync(
-			new ClaimsPrincipal(claimsIdentity),
-			authProperties).ConfigureAwait(false);
+		httpContext!.User = new ClaimsPrincipal(claimsIdentity);
 
 		await base.OnConnectedAsync().ConfigureAwait(false);
 	}

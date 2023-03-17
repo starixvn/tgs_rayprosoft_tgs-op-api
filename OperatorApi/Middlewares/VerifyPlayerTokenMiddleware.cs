@@ -42,7 +42,11 @@ public sealed class VerifyPlayerTokenMiddleware
 		using var activity = _VerifyPlayerTokenMiddlewareSource.StartActivity(nameof(VerifyPlayerTokenMiddleware));
 
 		var brandId = context.GetBrandId();
-		var token = context.Request.Headers.TryGetValue("Token", out var value) ? value.FirstOrDefault() : null;
+		var token = context.Request.Path == "/api/notify"
+			? context.Request.Query.TryGetValue("access_token", out var queryValue) ? queryValue.FirstOrDefault() : null
+			: context.Request.Headers.TryGetValue("Token", out var value) ? value.FirstOrDefault() : null;
+
+		_logger.LogDebug("Token is {token}", token);
 
 		var playerTokenData = brandId is null || string.IsNullOrEmpty(token)
 			? null

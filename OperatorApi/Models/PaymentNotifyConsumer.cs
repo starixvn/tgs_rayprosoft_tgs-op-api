@@ -36,31 +36,27 @@ public class PaymentNotifyConsumer : BackgroundService
 				.Select(evt => (
 					Payload: evt.Body.Deserialize<DepositNotifyBody>(_serializerOptions)!,
 					Users: evt.GetTagValues("UserId")))
-				.Select(tup => Observable.FromAsync(async () =>
-				{
-					await _hubContext.Clients.Users(tup.Users).SendAsync(
+				.Select(tup => Observable.FromAsync(async () => await _hubContext.Clients
+					.Users(tup.Users).SendAsync(
 						"notify",
 						new
 						{
 							Type = "DepositNotify",
 							tup.Payload
-						}, stoppingToken).ConfigureAwait(false);
-				}))
+						}, stoppingToken).ConfigureAwait(false)))
 				.Merge(),
 			_eventObservable
 				.Where(evt => evt.Match("Feature", "WithdrawNotify"))
 				.Select(evt => (
 					Payload: evt.Body.Deserialize<WithdrawNotifyBody>(_serializerOptions)!,
 					Users: evt.GetTagValues("UserId")))
-				.Select(tup => Observable.FromAsync(async () =>
-				{
-					await _hubContext.Clients.Users(tup.Users).SendAsync(
+				.Select(tup => Observable.FromAsync(async () => await _hubContext.Clients
+					.Users(tup.Users).SendAsync(
 						"notify",
 						new
 						{
 							Type = "WithdrawNotify",
 							tup.Payload
-						}, stoppingToken).ConfigureAwait(false);
-				}))
+						}, stoppingToken).ConfigureAwait(false)))
 				.Merge()).ToTask(stoppingToken);
 }
