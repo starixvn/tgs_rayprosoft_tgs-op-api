@@ -48,7 +48,8 @@ public class PublishLoggedInEventTest
 				PlayerCode = playerCode
 			});
 
-		var actionContext = new ActionContext(fakeHttpContext,
+		var actionContext = new ActionContext(
+			fakeHttpContext,
 			new RouteData(),
 			new ActionDescriptor(),
 			new ModelStateDictionary());
@@ -56,7 +57,8 @@ public class PublishLoggedInEventTest
 		var filters = Array.Empty<IFilterMetadata>();
 		var controller = new object();
 
-		var actionExecutingContext = new ActionExecutingContext(actionContext,
+		var actionExecutingContext = new ActionExecutingContext(
+			actionContext,
 			filters,
 			new Dictionary<string, object?>(),
 			controller);
@@ -66,8 +68,7 @@ public class PublishLoggedInEventTest
 
 		await sut.OnActionExecutionAsync(actionExecutingContext, actionExecutionDelegate);
 
-		_ = fakePublishEventCommandService
-			.Received(1)
+		_ = fakePublishEventCommandService.Received(1)
 			.ExecuteAsync(
 				Arg.Is<PublishPlayerLoggedInEventCommand>(x => x.PlayerCode == playerCode),
 				Arg.Any<CancellationToken>());
@@ -89,7 +90,8 @@ public class PublishLoggedInEventTest
 			RequestServices = serviceProvider
 		};
 
-		var actionContext = new ActionContext(fakeHttpContext,
+		var actionContext = new ActionContext(
+			fakeHttpContext,
 			new RouteData(),
 			new ActionDescriptor(),
 			new ModelStateDictionary());
@@ -97,7 +99,8 @@ public class PublishLoggedInEventTest
 		var filters = Array.Empty<IFilterMetadata>();
 		var controller = new object();
 
-		var actionExecutingContext = new ActionExecutingContext(actionContext,
+		var actionExecutingContext = new ActionExecutingContext(
+			actionContext,
 			filters,
 			new Dictionary<string, object?>(),
 			controller);
@@ -107,8 +110,7 @@ public class PublishLoggedInEventTest
 
 		await sut.OnActionExecutionAsync(actionExecutingContext, actionExecutionDelegate);
 
-		_ = fakePublishEventCommandService
-			.DidNotReceive()
+		_ = fakePublishEventCommandService.DidNotReceive()
 			.ExecuteAsync(
 				Arg.Any<PublishPlayerLoggedInEventCommand>(),
 				Arg.Any<CancellationToken>());
