@@ -114,6 +114,7 @@ builder.Services
 		_ = options.Filters.Add<ValidateModelFilter>();
 		options.AddWebApiToolkitFilters();
 		_ = options.Filters.Add<TgsResponseWrapperAttribute>();
+		_ = options.Filters.Add<PublishPlayerLoggedInEventFilter>();
 		_ = options.Filters.Add<ErrorMessageMapperFilter>();
 	})
 	.ConfigureApiBehaviorOptions(options => options.SuppressModelStateInvalidFilter = true)
@@ -344,8 +345,6 @@ app.UseAuthentication();
 app.UseRouting();
 app.UseCors();
 app.UseVerifyJwtTokenMiddlewares(Consts.DefaultBypassRouting);
-
-app.UseMiddleware<PublishPlayerLoggedInEventMiddleware>();
 
 app.MapControllers();
 app.MapHub<NotifyHub>("api/notify");
