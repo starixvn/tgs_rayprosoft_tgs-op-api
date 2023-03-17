@@ -17,14 +17,15 @@ public class PublishPlayerLoggedInEventFilter : IAsyncActionFilter
 
 		if (playerTokenData is not null)
 		{
-			var commandService = executedContext.HttpContext.RequestServices
+			var httpContext = executedContext.HttpContext;
+			var commandService = httpContext.RequestServices
 				.GetRequiredService<ICommandService<PublishPlayerLoggedInEventCommand>>();
 
 			var command = new PublishPlayerLoggedInEventCommand(
 				playerTokenData.PlayerCode,
 				DateTimeOffset.UtcNow);
 
-			await commandService.ExecuteAsync(command).ConfigureAwait(false);
+			await commandService.ExecuteAsync(command, httpContext.RequestAborted).ConfigureAwait(false);
 		}
 	}
 }
