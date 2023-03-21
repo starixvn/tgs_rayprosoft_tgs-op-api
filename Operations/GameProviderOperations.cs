@@ -253,9 +253,12 @@ public sealed class GameProviderOperations : IGameProviderOperations
 				return dict.Keys.ToArray();
 			});
 
-	Task<Status?> IGameProviderOperations.GetGameProviderStatusAsync(Guid gameProviderId) =>
-			GetCachedGameProviderValueAsync(gameProviderId, CachedGameProviderFields.Status,
-			v => (Status)(int)v, gp => gp?.Status);
+	Task<Status?> IGameProviderOperations.GetGameProviderStatusAsync(Guid gameProviderId)
+		=> GetCachedGameProviderValueAsync(
+			gameProviderId,
+			CachedGameProviderFields.Status,
+			v => (Status)(int)v,
+			gp => gp?.Status);
 
 	Task<bool> IGameProviderOperations.GetGameProviderSupportTestPlayerAsync(Guid gameProviderId) =>
 		GetCachedGameProviderValueAsync(gameProviderId, CachedGameProviderFields.SupportTestPlayer,
@@ -359,11 +362,16 @@ public sealed class GameProviderOperations : IGameProviderOperations
 		var values = await _cacheManager.SafeGetHashSetAsync(RedisCacheType.GameProvider, gameProviderId,
 			new RedisValue[]
 			{
-				CachedGameProviderFields.GameProviderId, CachedGameProviderFields.GameProviderCode,
-				CachedGameProviderFields.GameProviderName, CachedGameProviderFields.Status,
-				CachedGameProviderFields.Description, CachedGameProviderFields.AutoCloseRound,
-				CachedGameProviderFields.SupportTestPlayer, CachedGameProviderFields.PlaceBetTimeout,
-				CachedGameProviderFields.SettleBetTimeout, CachedGameProviderFields.AllowKickPlayer,
+				CachedGameProviderFields.GameProviderId,
+				CachedGameProviderFields.GameProviderCode,
+				CachedGameProviderFields.GameProviderName,
+				CachedGameProviderFields.Status,
+				CachedGameProviderFields.Description,
+				CachedGameProviderFields.AutoCloseRound,
+				CachedGameProviderFields.SupportTestPlayer,
+				CachedGameProviderFields.PlaceBetTimeout,
+				CachedGameProviderFields.SettleBetTimeout,
+				CachedGameProviderFields.AllowKickPlayer,
 				CachedGameProviderFields.IsTransferWallet
 			});
 

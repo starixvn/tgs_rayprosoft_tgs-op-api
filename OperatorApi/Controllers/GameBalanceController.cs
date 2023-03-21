@@ -83,13 +83,18 @@ public class GameBalanceController : ControllerBase
 		var playerTokenData = HttpContext.Items.GetPlayerTokenData();
 		var brandId = HttpContext.Items.GetBrandId();
 
-		await gameStatusValidator.CheckGameProviderStatusAsync(playerTokenData, gpCode, brandId);
-
-		var query = new GetGameBalanceQuery(playerTokenData.PlayerCode, gpCode);
-
 		try
 		{
-			var balance = await getGameBalanceService.GetAsync(query).ConfigureAwait(false);
+			await gameStatusValidator.CheckGameProviderStatusAsync(
+				playerTokenData,
+				gpCode,
+				brandId).ConfigureAwait(false);
+
+			var query = new GetGameBalanceQuery(playerTokenData.PlayerCode, gpCode);
+
+			var balance = await getGameBalanceService.GetAsync(
+				query,
+				HttpContext.RequestAborted).ConfigureAwait(false);
 
 			return new GetGameBalanceResponse
 			{
