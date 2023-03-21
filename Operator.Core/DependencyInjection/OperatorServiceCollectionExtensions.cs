@@ -33,8 +33,8 @@ public static class OperatorServiceCollectionExtensions
 
 		_ = services
 			.AddSingleton<NotifyEventSource>()
-			.AddTransient<INotifyEventPublisher>(sp => sp.GetRequiredService<NotifyEventSource>())
-			.AddTransient<IObservable<NotifyEvent>>(sp => sp.GetRequiredService<NotifyEventSource>())
+			.AddSingleton<INotifyEventPublisher>(sp => sp.GetRequiredService<NotifyEventSource>())
+			.AddSingleton<IObservable<NotifyEvent>>(sp => sp.GetRequiredService<NotifyEventSource>())
 			.AddOptions<OperatorOptions>()
 			.Services
 			.AddValidateCodeClient((options, sp) =>

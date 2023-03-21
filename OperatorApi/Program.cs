@@ -1,5 +1,6 @@
 ﻿using System.Net;
 using System.Reflection;
+using FluentdForward.OpenTelemetry.MessagePack;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -28,7 +29,6 @@ using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Filters;
 using TGS.Apis.OperatorApi.Filters.Swaggers;
-using TGS.Apis.OperatorApi.Middlewares;
 using TGS.Apis.OperatorApi.Models;
 using TGS.Apis.OperatorApi.SignalR;
 using TGS.Core.DataServices.Tgs.Extensions;
@@ -64,7 +64,9 @@ builder.Logging
 			var nodeIp = builder.Configuration.GetValue<string>("NODE_IP")!;
 			fluentOptions.Host = nodeIp;
 			fluentOptions.Tag = builder.Configuration.GetValue<string>("OTEL_SERVICE_NAME")!;
-			fluentOptions.UseMessagePack();
+			fluentOptions.UseMessagePack(LogRecordFormatterResolver.GetResolverInstanceWithExtendInfo(
+				"MachineName",
+				() => Environment.MachineName));
 		});
 	});
 
@@ -222,7 +224,8 @@ builder.Services
 	.Configure<IConfiguration>((options, config) => config
 		.GetSection("Operator").Bind(options))
 	.Services
-	.Decorate<IValidateCodeGenerator, ConstValidateCodeGenerator>();
+	.Decorate<IValidateCodeGenerator, ConstValidateCodeGenerator>()
+	.AddHostedService<PaymentNotifyConsumer>();
 
 builder.Services
 	.AddRedis((options, sp) =>
