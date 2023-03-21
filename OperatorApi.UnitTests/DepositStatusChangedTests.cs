@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Google.Protobuf;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using NSubstitute;
 using NUnit.Framework;
@@ -24,7 +25,8 @@ public class DepositStatusChangedTests
 		var sut = new DepositFormStatusChangedHandler(
 			fakePaymentServiceClient,
 			fakeNotifyEventPublisher,
-			jsonOptionsAccessor);
+			jsonOptionsAccessor,
+			NullLogger<DepositFormStatusChangedHandler>.Instance);
 
 		var eventData = new FormEventEx
 		{
@@ -62,7 +64,8 @@ public class DepositStatusChangedTests
 		var sut = new DepositFormStatusChangedHandler(
 			fakePaymentServiceClient,
 			fakeNotifyEventPublisher,
-			jsonOptionsAccessor);
+			jsonOptionsAccessor,
+			NullLogger<DepositFormStatusChangedHandler>.Instance);
 
 		var eventData = new FormEventEx
 		{

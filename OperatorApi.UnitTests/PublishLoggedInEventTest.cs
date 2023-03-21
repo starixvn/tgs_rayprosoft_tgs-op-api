@@ -33,7 +33,7 @@ public class PublishLoggedInEventTest
 		var playerCode = "playerCode";
 
 		var serviceCollection = new ServiceCollection();
-		serviceCollection.AddSingleton(fakePublishEventCommandService);
+		_ = serviceCollection.AddSingleton(fakePublishEventCommandService);
 		var serviceProvider = serviceCollection.BuildServiceProvider();
 
 		var fakeHttpContext = new DefaultHttpContext
@@ -63,7 +63,7 @@ public class PublishLoggedInEventTest
 			new Dictionary<string, object?>(),
 			controller);
 
-		ActionExecutionDelegate actionExecutionDelegate = () =>
+		Task<ActionExecutedContext> actionExecutionDelegate() =>
 			Task.FromResult(new ActionExecutedContext(actionContext, filters, controller));
 
 		await sut.OnActionExecutionAsync(actionExecutingContext, actionExecutionDelegate);
@@ -82,7 +82,7 @@ public class PublishLoggedInEventTest
 		var sut = new PublishPlayerLoggedInEventFilter();
 
 		var serviceCollection = new ServiceCollection();
-		serviceCollection.AddSingleton(fakePublishEventCommandService);
+		_ = serviceCollection.AddSingleton(fakePublishEventCommandService);
 		var serviceProvider = serviceCollection.BuildServiceProvider();
 
 		var fakeHttpContext = new DefaultHttpContext
@@ -105,7 +105,7 @@ public class PublishLoggedInEventTest
 			new Dictionary<string, object?>(),
 			controller);
 
-		ActionExecutionDelegate actionExecutionDelegate = () =>
+		Task<ActionExecutedContext> actionExecutionDelegate() =>
 			Task.FromResult(new ActionExecutedContext(actionContext, filters, controller));
 
 		await sut.OnActionExecutionAsync(actionExecutingContext, actionExecutionDelegate);

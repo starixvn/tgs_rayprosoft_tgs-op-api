@@ -1,6 +1,8 @@
 ﻿#nullable enable
 
 using System.Diagnostics;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using Tgs.Core.Infrastructures.Security;
 using Tgs.PlayerService.Client;
@@ -69,7 +71,20 @@ public sealed class VerifyPlayerTokenMiddleware
 		}
 
 		if (playerTokenData is not null)
+		{
 			context.Items.Add(Core.Models.Consts.ContextItems.PlayerToken, playerTokenData);
+
+			var claims = new List<Claim>
+			{
+				new("brand_id", brandId!.Value.ToString()),
+				new (ClaimTypes.Name, playerTokenData!.PlayerCode),
+				new (ClaimTypes.NameIdentifier, playerTokenData!.PlayerCode)
+			};
+
+			var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+
+			context.User = new ClaimsPrincipal(claimsIdentity);
+		}
 
 		var attribute = context.GetEndpoint()?.Metadata?.GetMetadata<AuthorizePlayerTokenAttribute>();
 

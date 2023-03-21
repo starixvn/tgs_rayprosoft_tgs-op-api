@@ -1,8 +1,5 @@
 ﻿#nullable enable
 
-using System.Security.Claims;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using TGS.Apis.OperatorApi.Extensions;
@@ -11,6 +8,13 @@ namespace TGS.Apis.OperatorApi.SignalR;
 
 public class NotifyHub : Hub
 {
+	private readonly ILogger<NotifyHub> _logger;
+
+	public NotifyHub(ILogger<NotifyHub> logger)
+	{
+		_logger = logger ?? throw new ArgumentNullException(nameof(logger));
+	}
+
 	public override async Task OnConnectedAsync()
 	{
 		var httpContext = Context.GetHttpContext();
@@ -30,21 +34,15 @@ public class NotifyHub : Hub
 			return;
 		}
 
-		var claims = new List<Claim>
-		{
-			new("brand_id", brandId!.Value.ToString()),
-			new (ClaimTypes.NameIdentifier, playerTokenData!.PlayerCode)
-		};
+		_logger.LogDebug(
+			"Brand Id: {brandId}, PlayerCode: {playerCode}",
+			brandId!.Value,
+			playerTokenData!.PlayerCode);
 
-		var authProperties = new AuthenticationProperties
-		{
-			ExpiresUtc = DateTimeOffset.UtcNow.AddMinutes(5D),
-			IsPersistent = true
-		};
-
-		var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-
-		httpContext!.User = new ClaimsPrincipal(claimsIdentity);
+		_logger.LogDebug(
+			"UserName: {name}, IsAuthenticated: {isAuthenticated}",
+			httpContext!.User.Identity!.Name,
+			httpContext!.User.Identity.IsAuthenticated);
 
 		await base.OnConnectedAsync().ConfigureAwait(false);
 	}

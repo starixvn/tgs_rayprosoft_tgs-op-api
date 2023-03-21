@@ -4,6 +4,7 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Tgs.MessageQueue;
 using Tgs.Payment.Clients;
@@ -14,6 +15,7 @@ namespace TGS.Services.Operator.MessageQueue;
 
 internal class DepositFormStatusChangedHandler : IMessageHandler
 {
+	private readonly ILogger<DepositFormStatusChangedHandler> _logger;
 	private readonly INotifyEventPublisher _notifyEventPublisher;
 	private readonly IPaymentServiceClient _paymentServiceClient;
 	private readonly JsonSerializerOptions _serializerOptions;
@@ -21,13 +23,14 @@ internal class DepositFormStatusChangedHandler : IMessageHandler
 	public DepositFormStatusChangedHandler(
 		IPaymentServiceClient paymentServiceClient,
 		INotifyEventPublisher notifyEventPublisher,
-		IOptions<JsonOptions> jsonOptionsAccessor)
+		IOptions<JsonOptions> jsonOptionsAccessor,
+		ILogger<DepositFormStatusChangedHandler> logger)
 	{
 		if (jsonOptionsAccessor is null)
 			throw new ArgumentNullException(nameof(jsonOptionsAccessor));
 		_paymentServiceClient = paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
 		_notifyEventPublisher = notifyEventPublisher ?? throw new ArgumentNullException(nameof(notifyEventPublisher));
-
+		_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 		_serializerOptions = jsonOptionsAccessor.Value.JsonSerializerOptions;
 	}
 
@@ -43,9 +46,13 @@ internal class DepositFormStatusChangedHandler : IMessageHandler
 		if (depositForm is null)
 			return;
 
+		_logger.LogDebug("Deposit form changed: {formId} {previous} -> {current}", formEvent.FormId.ToGuid(), previousStatus, depositForm.Status);
+
 		if (previousStatus is PaymentFlowState.WaitApprove
 			&& depositForm.Status is PaymentFlowState.Approved or PaymentFlowState.Reject)
 		{
+			_logger.LogDebug("Send deposit notify");
+
 			var tags = new Dictionary<string, string>
 			{
 				["BrandId"] = depositForm.BrandId.ToString(),
@@ -63,6 +70,8 @@ internal class DepositFormStatusChangedHandler : IMessageHandler
 			_notifyEventPublisher.PublishEvent(new NotifyEvent(
 				tags,
 				JsonSerializer.SerializeToDocument(notifyBody, _serializerOptions)));
+
+			_logger.LogDebug("Send deposit notify end");
 		}
 	}
 }
