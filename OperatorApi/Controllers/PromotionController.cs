@@ -109,8 +109,10 @@ public class PromotionController : ControllerBase
 		return (playerTokenData is null
 			? promotionServiceClient
 				.ListPromotionsAsync(brandId, HttpContext.RequestAborted)
+				.Where(promotion => promotion.PromotionType is not "OfflineDepositReward" or "OfflineLoginReward")
 			: promotionServiceClient
 				.ListPromotionsAsync(brandId, playerTokenData.PlayerCode, HttpContext.RequestAborted))
+				.Where(promotion => promotion.PromotionType is not "OfflineDepositReward" or "OfflineLoginReward")
 				.Select(promotion => new PromotionViewModel
 				{
 					Id = promotion.Id,
