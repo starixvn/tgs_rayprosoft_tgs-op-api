@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
 using NUnit.Framework;
 using Tgs.ServiceUtility;
@@ -28,7 +29,7 @@ public class PublishLoggedInEventTest
 	{
 		var fakePublishEventCommandService = Substitute.For<ICommandService<PublishPlayerLoggedInEventCommand>>();
 
-		var sut = new PublishPlayerLoggedInEventFilter();
+		var sut = new PublishPlayerLoggedInEventFilter(NullLogger<PublishPlayerLoggedInEventFilter>.Instance);
 
 		var playerCode = "playerCode";
 
@@ -79,7 +80,7 @@ public class PublishLoggedInEventTest
 	{
 		var fakePublishEventCommandService = Substitute.For<ICommandService<PublishPlayerLoggedInEventCommand>>();
 
-		var sut = new PublishPlayerLoggedInEventFilter();
+		var sut = new PublishPlayerLoggedInEventFilter(NullLogger<PublishPlayerLoggedInEventFilter>.Instance);
 
 		var serviceCollection = new ServiceCollection();
 		_ = serviceCollection.AddSingleton(fakePublishEventCommandService);

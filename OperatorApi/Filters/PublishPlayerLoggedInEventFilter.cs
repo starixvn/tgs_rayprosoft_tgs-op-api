@@ -9,6 +9,13 @@ namespace TGS.Apis.OperatorApi.Filters;
 
 public class PublishPlayerLoggedInEventFilter : IAsyncActionFilter
 {
+	private readonly ILogger<PublishPlayerLoggedInEventFilter> _logger;
+
+	public PublishPlayerLoggedInEventFilter(ILogger<PublishPlayerLoggedInEventFilter> logger)
+	{
+		_logger = logger ?? throw new ArgumentNullException(nameof(logger));
+	}
+
 	public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
 	{
 		var executedContext = await next().ConfigureAwait(false);
@@ -25,7 +32,16 @@ public class PublishPlayerLoggedInEventFilter : IAsyncActionFilter
 				playerTokenData.PlayerCode,
 				DateTimeOffset.UtcNow);
 
-			await commandService.ExecuteAsync(command, httpContext.RequestAborted).ConfigureAwait(false);
+			try
+			{
+				await commandService.ExecuteAsync(
+					command,
+					httpContext.RequestAborted).ConfigureAwait(false);
+			}
+			catch (OperationCanceledException)
+			{
+				_logger.LogInformation("Request canceled.");
+			}
 		}
 	}
 }
