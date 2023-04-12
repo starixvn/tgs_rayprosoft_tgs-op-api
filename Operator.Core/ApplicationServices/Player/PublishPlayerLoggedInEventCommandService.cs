@@ -38,12 +38,11 @@ internal class PublishPlayerLoggedInEventCommandService : ICommandService<Publis
 			await _messageSender.PublishAsync(
 				"tgs.operator.player.logged_in",
 				loggedInRequest.ToByteArray(),
-				cancellationToken)
-				.ConfigureAwait(false);
+				cancellationToken).ConfigureAwait(false);
 		}
-		catch (Exception ex)
+		catch (Exception ex) when (ex is not OperationCanceledException)
 		{
-			_logger.LogWarning(ex, "fail to send logged-in event of player '{playerCode}'", command.PlayerCode);
+			_logger.LogWarning(ex, "Failed to send logged-in event of player '{playerCode}'", command.PlayerCode);
 		}
 	}
 }
