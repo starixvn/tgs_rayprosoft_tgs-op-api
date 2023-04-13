@@ -370,7 +370,7 @@ public class PlayerController : ControllerBase
 				.ConfigureAwait(false);
 
 			if (playerTokenData is not null)
-				HttpContext.Items.Add(ContextItems.PlayerToken, playerTokenData);
+				HttpContext.Items[ContextItems.PlayerToken] = playerTokenData;
 
 			return new LoginResponse
 			{
