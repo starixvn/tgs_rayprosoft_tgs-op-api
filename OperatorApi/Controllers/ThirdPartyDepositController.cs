@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using Tgs.Payment.AlfaPay;
 using Tgs.Payment.Clients;
 using Tgs.Payment.MalakiPay;
+using Tgs.Payment.PhpGoPay.Client;
+using Tgs.PlayerService.Client;
 using Tgs.ServiceUtility;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
@@ -132,6 +134,82 @@ public class ThirdPartyDepositController : ControllerBase
 		var updateThirdPartyOrderNoCommand = new SubmitDepositFormThirdPartyOrderNoCommand(
 			createdFormId,
 			applyInfo.Response.TradeNo);
+
+		await updateDepositFormService
+			.ExecuteAsync(updateThirdPartyOrderNoCommand, HttpContext.RequestAborted)
+			.ConfigureAwait(false);
+
+		return new DepositFormCreatedResponse
+		{
+			FormId = createdFormId,
+			PaymentUrl = applyInfo.Response.RedirectUrl.ToString()
+		};
+	}
+
+	[HttpPost("phpgopay", Name = "SubmitPhpGoPay3rdDepositRequest")]
+	[EnableUserBlockedCheck]
+	[AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+	public async Task<DepositFormCreatedResponse> SubmitPhpGoPayDepositRequestAsync(
+		[FromServices] IGetService<CreateDepositFormCommand, Guid> createDepositFormService,
+		[FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
+		[FromServices] IGetService<GetDepositFormQuery, DepositFormInfo> getDepositFormService,
+		[FromServices] ICommandService<SubmitDepositFormThirdPartyOrderNoCommand> updateDepositFormService,
+		[FromServices] IPlayerServiceClient playerServiceClient,
+		[FromBody] SubmitDepositRequest request)
+	{
+		var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+		var brandId = HttpContext.Items.GetBrandId();
+
+		var brandPayment = await getBrandPaymentService
+			.GetAsync(new GetBrandPaymentQuery(request.BrandPaymentId))
+			.ConfigureAwait(false);
+
+		var brandPaymentInfo = JsonDocument.Parse(brandPayment.ExtendedData);
+
+		var player = await playerServiceClient
+			.GetPlayerInfoAsync(playerTokenData.PlayerCode, HttpContext.RequestAborted)
+			.ConfigureAwait(false);
+
+		var playerProperties = await playerServiceClient
+			.GetPlayerPropertiesAsync(playerTokenData.PlayerCode, HttpContext.RequestAborted)
+			.ConfigureAwait(false);
+
+		var command = new CreateDepositFormCommand(
+			playerTokenData.PlayerCode,
+			brandId,
+			request.BrandPaymentId,
+			request.Amount,
+			"tgs.payment.phpgopay.deposit",
+			request.PromotionId,
+			formId => JsonSerializer.Serialize(
+				new PhpGoPayDepositSettings(
+					brandPaymentInfo.RootElement.GetProperty("merchant").GetString(),
+					brandPaymentInfo.RootElement.GetProperty("key").GetString(),
+					PhpGoPaymentType.Parse(
+						brandPaymentInfo.RootElement.GetProperty("payment_type").GetString()),
+					PhpGoBankCode.Parse(
+						brandPaymentInfo.RootElement.GetProperty("bank_code").GetString()),
+					new Uri("http://localhost"),
+					formId)));
+
+		var createdFormId = await createDepositFormService
+			.GetAsync(command, HttpContext.RequestAborted)
+			.ConfigureAwait(false);
+
+		var getDepositFormQuery = new GetDepositFormQuery(
+			playerTokenData.PlayerCode,
+			createdFormId,
+			brandId);
+
+		var formData = await getDepositFormService
+			.GetAsync(getDepositFormQuery, HttpContext.RequestAborted)
+			.ConfigureAwait(false);
+
+		var applyInfo = JsonSerializer.Deserialize<PhpGoPayDepositApplyInfo>(formData.ApplyInfo!);
+
+		var updateThirdPartyOrderNoCommand = new SubmitDepositFormThirdPartyOrderNoCommand(
+			createdFormId,
+			applyInfo.Response.FormId.ToString());
 
 		await updateDepositFormService
 			.ExecuteAsync(updateThirdPartyOrderNoCommand, HttpContext.RequestAborted)

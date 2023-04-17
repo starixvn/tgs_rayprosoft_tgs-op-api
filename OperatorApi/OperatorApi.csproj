@@ -42,9 +42,9 @@
 
 	<ItemGroup>
 		<PackageReference Include="FluentdForward.OpenTelemetry.MessagePack" Version="0.2.0" />
-		<PackageReference Include="FluentValidation.AspNetCore" Version="11.2.2" />
-		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.3" />
-		<PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.17.0" />
+		<PackageReference Include="FluentValidation.AspNetCore" Version="11.3.0" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.5" />
+		<PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.18.1" />
 		<PackageReference Include="Microsoft.VisualStudio.SlowCheetah" Version="4.0.30">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -61,7 +61,7 @@
 		<PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.0.0-rc9" />
 		<PackageReference Include="OpenTelemetry.Instrumentation.Runtime" Version="1.0.0" />
 		<PackageReference Include="ProfileViewer.OpenTelemetry.Exporter" Version="0.2.1" />
-		<PackageReference Include="Scrutor" Version="4.2.1" />
+		<PackageReference Include="Scrutor" Version="4.2.2" />
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
 		<PackageReference Include="Tgs.Interceptors" Version="0.2.1" />
 		<PackageReference Include="Tgs.MessageQueue.Nats" Version="2.3.0" />
@@ -71,14 +71,15 @@
 		<PackageReference Include="Tgs.Payment.MalakiPay.Client" Version="0.0.5" />
 		<PackageReference Include="Tgs.Payment.ManualDeposit" Version="0.1.13" />
 		<PackageReference Include="Tgs.Payment.MaticPay.Client" Version="0.0.6" />
+		<PackageReference Include="Tgs.Payment.PhpGoPay.Client" Version="0.0.3" />
 		<PackageReference Include="Tgs.Payment.PrimePay.Client" Version="0.0.6" />
 		<PackageReference Include="Tgs.Payment.SkyPay.Client" Version="0.0.6" />
 		<PackageReference Include="Tgs.Payment.TuPay.Client" Version="0.0.5" />
 		<PackageReference Include="Tgs.Payment.UmPay.Client" Version="0.0.1" />
 		<PackageReference Include="Tgs.Payment.WandaPay.Client" Version="0.0.5" />
 		<PackageReference Include="Tgs.Payment.ZeroNineNinePay.Client" Version="0.0.7" />
-		<PackageReference Include="Tgs.Report.Client" Version="0.0.47" />
-		<PackageReference Include="Tgs.WebApi.Toolkits" Version="0.1.1" />
+		<PackageReference Include="Tgs.Report.Client" Version="0.0.48" />
+		<PackageReference Include="Tgs.WebApi.Toolkits" Version="0.2.0" />
 	</ItemGroup>
 
 	<ItemGroup>
