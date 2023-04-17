@@ -205,7 +205,7 @@ public class ThirdPartyDepositController : ControllerBase
 			.GetAsync(getDepositFormQuery, HttpContext.RequestAborted)
 			.ConfigureAwait(false);
 
-		var applyInfo = JsonSerializer.Deserialize<PhpGoPayDepositApplyInfo>(formData.ApplyInfo!);
+		var applyInfo = JsonSerializer.Deserialize<PhpGoPayDepositApplyInfo>(formData.ApplyInfo!, PhpGoPayUtility.SerializerOptions);
 
 		var updateThirdPartyOrderNoCommand = new SubmitDepositFormThirdPartyOrderNoCommand(
 			createdFormId,
