@@ -232,7 +232,7 @@ public class BankDepositController : ControllerBase
 		}
 	}
 
-	[HttpPost("phpgopay", Name = "SubmitPhpGoPayDepositRequest")]
+	[HttpPost("phpgopay", Name = "SubmitPhpGoPayBankDepositRequest")]
 	[EnableUserBlockedCheck]
 	[AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
 	public async Task<DepositFormCreatedResponse> SubmitPhpGoPayDepositRequestAsync(

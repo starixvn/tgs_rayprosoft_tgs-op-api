@@ -146,7 +146,7 @@ public class ThirdPartyDepositController : ControllerBase
 		};
 	}
 
-	[HttpPost("phpgopay", Name = "SubmitPhpGoPayDepositRequest")]
+	[HttpPost("phpgopay", Name = "SubmitPhpGoPay3rdDepositRequest")]
 	[EnableUserBlockedCheck]
 	[AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
 	public async Task<DepositFormCreatedResponse> SubmitPhpGoPayDepositRequestAsync(
