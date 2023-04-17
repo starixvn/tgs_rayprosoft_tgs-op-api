@@ -272,9 +272,9 @@ public class BankDepositController : ControllerBase
 					brandPaymentInfo.RootElement.GetProperty("merchant").GetString(),
 					brandPaymentInfo.RootElement.GetProperty("key").GetString(),
 					PhpGoPaymentType.Parse(
-						brandPaymentInfo.RootElement.GetProperty("payment_type").GetString()),
+						brandPaymentInfo.RootElement.GetProperty("paymentType").GetString()),
 					PhpGoBankCode.Parse(
-						brandPaymentInfo.RootElement.GetProperty("bank_code").GetString()),
+						brandPaymentInfo.RootElement.GetProperty("bankCode").GetString()),
 					new Uri("http://localhost"),
 					formId)));
 
