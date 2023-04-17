@@ -300,9 +300,9 @@ public class DepositTests
 
 				let svc = new OperatorService(instance);
 
-				return await svc.submitDepositBankRequest(amount, paymentId, promotionId, bankType, account, name, note, realname);
+				return await svc.submitManualDepositBankRequest(amount, paymentId, promotionId, bankType, account, name, note, realname);
 			};
-		""";
+			""";
 
 		// Act
 		var actual = await StaticNodeJSService.InvokeFromStringAsync<SuccessResponse<string>>(
@@ -443,7 +443,7 @@ public class DepositTests
 
 				let svc = new OperatorService(instance);
 
-				return await svc.submitDepositEWalletRequest(amount, paymentId, promotionId, bankType, note, realname, phone);
+				return await svc.submitManualDepositEWalletRequest(amount, paymentId, promotionId, bankType, note, realname, phone);
 			};
 		""";
 
@@ -585,7 +585,7 @@ public class DepositTests
 
 				let svc = new OperatorService(instance);
 
-				return await svc.submitDepositPulsaRequest(amount, paymentId, promotionId, bankType, note, realname, phone);
+				return await svc.submitManualDepositPulsaRequest(amount, paymentId, promotionId, bankType, note, realname, phone);
 			};
 		""";
 
