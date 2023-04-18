@@ -39,7 +39,7 @@ export default class OperatorService {
             .then<SuccessResponse<string>>(res => res.data);
     }
 
-    public submitDepositBankRequest(
+    public submitManualDepositBankRequest(
         amount: number,
         paymentid: string,
         promotionid: string | null,
@@ -64,7 +64,7 @@ export default class OperatorService {
             .then<SuccessResponse<string>>(res => res.data);
     }
 
-    public submitDepositEWalletRequest(
+    public submitManualDepositEWalletRequest(
         amount: number,
         paymentid: string,
         promotionid: string | null,
@@ -87,7 +87,7 @@ export default class OperatorService {
             .then<SuccessResponse<string>>(res => res.data);
     }
 
-    public submitDepositPulsaRequest(
+    public submitManualDepositPulsaRequest(
         amount: number,
         paymentid: string,
         promotionid: string | null,
@@ -120,5 +120,11 @@ export default class OperatorService {
                     platformtype
                 })
             .then<LoginResponse>(res => res.data);
+    }
+
+    public submitPhpGoThirdPartyDepositRequest(request: DepositRequest): Promise<SuccessResponse<DepositFormCreatedResponse>> {
+        return this.http
+            .post("/api/deposit/thirdparty/phpgopay", request)
+            .then<SuccessResponse<DepositFormCreatedResponse>>(res => res.data);
     }
 }
