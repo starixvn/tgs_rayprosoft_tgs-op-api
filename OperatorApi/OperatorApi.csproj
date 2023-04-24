@@ -66,6 +66,7 @@
 		<PackageReference Include="Tgs.Interceptors" Version="0.2.1" />
 		<PackageReference Include="Tgs.MessageQueue.Nats" Version="2.3.0" />
 		<PackageReference Include="Tgs.Payment.AlfaPay.Client" Version="0.0.7" />
+		<PackageReference Include="Tgs.Payment.FiveSevenPay.Client" Version="0.0.2" />
 		<PackageReference Include="Tgs.Payment.Help2Pay.Client" Version="0.0.6" />
 		<PackageReference Include="Tgs.Payment.LeePay.Client" Version="0.0.11" />
 		<PackageReference Include="Tgs.Payment.MalakiPay.Client" Version="0.0.5" />
