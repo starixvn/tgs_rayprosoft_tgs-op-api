@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Tgs.Payment.AlfaPay;
 using Tgs.Payment.Clients;
+using Tgs.Payment.FiveSevenPay.Client;
 using Tgs.Payment.MalakiPay;
 using Tgs.Payment.PhpGoPay.Client;
 using Tgs.PlayerService.Client;
@@ -9,7 +10,6 @@ using Tgs.ServiceUtility;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models.Messages;
-using Tgs.Payment.FiveSevenPay.Client;
 using TGS.Services.Operator.ApplicationServices.Deposit;
 
 namespace TGS.Apis.OperatorApi.Controllers;
@@ -255,8 +255,9 @@ public class ThirdPartyDepositController : ControllerBase
 					brandPaymentInfo.RootElement.GetProperty("privateKey").GetString(),
 					brandPaymentInfo.RootElement.GetProperty("publicKey").GetString(),
 					brandPaymentInfo.RootElement.GetProperty("currency").GetString(),
-					FiveSevenPayType.Parse(brandPaymentInfo.RootElement.GetProperty("payType").GetString()), 
-					formId), FiveSevenPayUtility.SerializerOptions));
+					FiveSevenPayType.Parse(brandPaymentInfo.RootElement.GetProperty("payType").GetString()),
+					formId), 
+				FiveSevenPayUtility.SerializerOptions));
 
 		var createdFormId = await createDepositFormService
 			.GetAsync(command, HttpContext.RequestAborted)
@@ -289,5 +290,4 @@ public class ThirdPartyDepositController : ControllerBase
 			PaymentUrl = applyInfo.Response.RedirectUrl.ToString()
 		};
 	}
-
 }
