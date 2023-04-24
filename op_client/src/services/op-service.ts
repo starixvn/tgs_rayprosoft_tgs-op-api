@@ -127,4 +127,10 @@ export default class OperatorService {
             .post("/api/deposit/thirdparty/phpgopay", request)
             .then<SuccessResponse<DepositFormCreatedResponse>>(res => res.data);
     }
+
+    public submitFiveSevenThirdPartyDepositRequest(request: DepositRequest): Promise<SuccessResponse<DepositFormCreatedResponse>> {
+        return this.http
+            .post("/api/deposit/thirdparty/fivesevenpay", request)
+            .then<SuccessResponse<DepositFormCreatedResponse>>(res => res.data);
+    }
 }
