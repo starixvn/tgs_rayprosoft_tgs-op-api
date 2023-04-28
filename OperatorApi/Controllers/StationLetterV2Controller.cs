@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿#nullable enable
+
+using Microsoft.AspNetCore.Mvc;
 using Tgs.ServiceUtility;
 using Tgs.StationLetterService.Client;
 using TGS.Apis.OperatorApi.Attributes;
@@ -12,6 +14,38 @@ namespace TGS.Apis.OperatorApi.Controllers;
 [ApiController]
 public class StationLetterV2Controller : ControllerBase
 {
+	[HttpGet("{letterId}", Name = "GetPlayerStationLetterContent")]
+	[AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+	public async Task<StationLetterViewModel?> GetLetterAsync(
+		[FromServices] IGetService<GetStationLetterQuery, StationLetter?> getLetterService,
+		Guid letterId)
+	{
+		var playerTokenData = HttpContext.Items.GetPlayerTokenData()!;
+
+		var query = new GetStationLetterQuery(letterId);
+
+		return await getLetterService.GetAsync(query, HttpContext.RequestAborted)
+			.AsTask()
+			.ToAsyncEnumerable()
+			.Where(letter => letter is not null)
+			.Where(letter => letter!.Receiver == playerTokenData.PlayerCode)
+			.Select(letter => letter!)
+			.Select(letter => new StationLetterViewModel
+			{
+				Id = letter.Id,
+				Receiver = letter.Receiver,
+				SentOn = letter.SentOn,
+				Content = letter.Content,
+				HaveRead = letter.HaveRead,
+				Replied = letter.Replied,
+				Sender = letter.Sender,
+				Subject = letter.Subject,
+				Quotation = letter.Quotation
+			})
+			.FirstOrDefaultAsync(HttpContext.RequestAborted)
+			.ConfigureAwait(false);
+	}
+
 	[HttpGet(Name = "GetPlayerStationLetters")]
 	[AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
 	public async Task<PagingResponse<StationLetterListItemViewModel>> GetLettersAsync(
@@ -19,7 +53,7 @@ public class StationLetterV2Controller : ControllerBase
 		[FromQuery(Name = "page")] int page = 1,
 		[FromQuery(Name = "rows")] int rows = 10)
 	{
-		var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+		var playerTokenData = HttpContext.Items.GetPlayerTokenData()!;
 
 		var query = new GetStationLettersV2Query(playerTokenData.PlayerCode);
 

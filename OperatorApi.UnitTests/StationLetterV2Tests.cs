@@ -20,4 +20,19 @@ public class StationLetterV2Tests
 		_ = fakeStationLetterClient.Received(1)
 			.ListStationLettersAsync(Arg.Is(query.PlayerCode));
 	}
+
+	[Test]
+	public async Task 取得站內信內容()
+	{
+		var fakeStationLetterClient = Substitute.For<IStationLetterClient>();
+
+		var sut = new GetStationLetterQueryService(fakeStationLetterClient);
+
+		var query = new GetStationLetterQuery(Guid.NewGuid());
+
+		_ = await sut.GetAsync(query);
+
+		_ = fakeStationLetterClient.Received(1)
+			.GetStationLetterAsync(Arg.Is(query.LetterId));
+	}
 }

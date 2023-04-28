@@ -146,4 +146,10 @@ export default class OperatorService {
                 })
             .then(res => res.data);
     }
+
+    public getPlayerStationLetterContent(letterId: string): Promise<SuccessResponse<StationLetter | null>> {
+        return this.http
+            .get(`/api/station-letter/${letterId}`)
+            .then(res => res.data);
+    }
 }
