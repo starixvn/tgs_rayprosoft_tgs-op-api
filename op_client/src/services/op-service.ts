@@ -133,4 +133,17 @@ export default class OperatorService {
             .post("/api/deposit/thirdparty/fivesevenpay", request)
             .then<SuccessResponse<DepositFormCreatedResponse>>(res => res.data);
     }
+
+    public getPlayerStationLetters(page: number, rows: number): Promise<SuccessResponse<PagingResponse<StationLetterListItem>>> {
+        return this.http
+            .get(
+                '/api/station-letter',
+                {
+                    params: {
+                        page,
+                        rows
+                    }
+                })
+            .then(res => res.data);
+    }
 }

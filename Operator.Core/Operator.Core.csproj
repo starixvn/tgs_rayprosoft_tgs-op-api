@@ -42,6 +42,7 @@
     <PackageReference Include="Tgs.RouletteSignInClient" Version="0.0.3" />
     <PackageReference Include="TGS.ServiceUtility" Version="0.2.0" />
     <PackageReference Include="TGS.SmsServiceClient" Version="0.0.7" />
+    <PackageReference Include="Tgs.StationLetter.Client" Version="0.0.4" />
     <PackageReference Include="Tgs.ValidateCode.Client" Version="1.0.1" />
   </ItemGroup>
 
