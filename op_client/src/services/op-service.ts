@@ -152,4 +152,10 @@ export default class OperatorService {
             .get(`/api/station-letter/${letterId}`)
             .then(res => res.data);
     }
+
+    public sendStationLetterToCustomService(request: SendStationLetterRequest): Promise<void> {
+        return this.http
+            .put('/api/station-letter', request)
+            .then(res => res.data);
+    }
 }

@@ -35,4 +35,27 @@ public class StationLetterV2Tests
 		_ = fakeStationLetterClient.Received(1)
 			.GetStationLetterAsync(Arg.Is(query.LetterId));
 	}
+
+	[Test]
+	public async Task 發送信件()
+	{
+		var fakeStationLetterClient = Substitute.For<IStationLetterClient>();
+
+		var sut = new SendStationLetterCommandService(fakeStationLetterClient);
+
+		var command = new SendStationLetterCommand(
+			"test1",
+			new[] { "receiver1" },
+			"abc",
+			"asdfgh");
+
+		await sut.ExecuteAsync(command);
+
+		_ = fakeStationLetterClient.Received(1)
+			.SendStationLetterAsync(Arg.Is(new StationLetterRequest(
+				command.PlayerCode,
+				command.Receivers,
+				command.Subject,
+				command.Content)));
+	}
 }

@@ -1,11 +1,13 @@
 ﻿#nullable enable
 
 using Microsoft.AspNetCore.Mvc;
+using Tgs.BrandCertificate.Clients;
 using Tgs.ServiceUtility;
 using Tgs.StationLetterService.Client;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models.Messages;
+using TGS.Services.Operator.ApplicationServices.Brand;
 using TGS.Services.Operator.ApplicationServices.StationLetters;
 
 namespace TGS.Apis.OperatorApi.Controllers;
@@ -73,5 +75,30 @@ public class StationLetterV2Controller : ControllerBase
 			TotalCount = result.Length,
 			Items = result.Chunk(rows).Skip(page - 1).FirstOrDefault(),
 		};
+	}
+
+	[HttpPut(Name = "SendStationLetterToCustomService")]
+	[AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+	public async Task SendLetterAsync(
+		[FromServices] IGetService<BrandQuery, Services.Operator.BrandInfo> getBrandService,
+		[FromServices] ICommandService<SendStationLetterCommand> sendLetterService,
+		CreateStationLetterViewModel viewModel)
+	{
+		var playerTokenData = HttpContext.Items.GetPlayerTokenData()!;
+		var brandId = HttpContext.GetBrandId()!.Value;
+
+		var brandInfo = await getBrandService.GetAsync(
+			new(brandId),
+			HttpContext.RequestAborted).ConfigureAwait(false);
+
+		var command = new SendStationLetterCommand(
+			playerTokenData.PlayerCode,
+			new[] { brandInfo.Code },
+			viewModel.Subject,
+			viewModel.Content);
+
+		await sendLetterService.ExecuteAsync(
+			command,
+			HttpContext.RequestAborted).ConfigureAwait(false);
 	}
 }
