@@ -19,7 +19,8 @@ data:
         "CashBaseUrl": "http://cashservice-api",
         "GameProvidersPluggableBaseUrl": "http://game-pluggable-service",
         "PlayerServiceBaseUrl": "http://player-api",
-        "DepositAccumulateRouletteServiceBaseUrl": "http://tgs-deposit-accumulate-roulette"
+        "DepositAccumulateRouletteServiceBaseUrl": "http://tgs-deposit-accumulate-roulette",
+        "StationLetterBaseUrl": "http://tgs-station-letter"
       },
       "ConnectionStrings": {
         "Tgs": "{{ .Values.connectionStrings.tgs }}",
