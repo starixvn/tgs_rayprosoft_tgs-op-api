@@ -139,4 +139,10 @@ export default class OperatorService {
             .post("/api/deposit/thirdparty/metapay", request)
             .then<SuccessResponse<DepositFormCreatedResponse>>(res => res.data);
     }
+
+    public submitMetaBankDepositRequest(request: DepositRequest): Promise<SuccessResponse<DepositFormCreatedResponse>> {
+        return this.http
+            .post("/api/deposit/bank/metapay", request)
+            .then<SuccessResponse<DepositFormCreatedResponse>>(res => res.data);
+    }
 }

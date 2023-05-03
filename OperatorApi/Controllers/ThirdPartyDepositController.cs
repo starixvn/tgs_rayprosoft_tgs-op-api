@@ -216,7 +216,7 @@ public class ThirdPartyDepositController : ControllerBase
 		};
 	}
 
-	[HttpPost("metapay", Name = "SubmitMetaPayDepositRequest")]
+	[HttpPost("metapay", Name = "SubmitMetaPayThirdPartyDepositRequest")]
 	[EnableUserBlockedCheck]
 	[AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
 	public async Task<DepositFormCreatedResponse> SubmitMetaPayDepositRequestAsync(
