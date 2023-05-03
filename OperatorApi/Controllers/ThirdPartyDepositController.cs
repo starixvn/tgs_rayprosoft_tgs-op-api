@@ -4,6 +4,7 @@ using Tgs.Payment.AlfaPay;
 using Tgs.Payment.Clients;
 using Tgs.Payment.FiveSevenPay.Client;
 using Tgs.Payment.MalakiPay;
+using Tgs.Payment.MetaPay.Client;
 using Tgs.Payment.PhpGoPay.Client;
 using Tgs.PlayerService.Client;
 using Tgs.ServiceUtility;
@@ -82,6 +83,74 @@ public class ThirdPartyDepositController : ControllerBase
 		};
 	}
 
+	[HttpPost("fivesevenpay", Name = "SubmitFiveSevenPayDepositRequest")]
+	[EnableUserBlockedCheck]
+	[AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+	public async Task<DepositFormCreatedResponse> SubmitFiveSevenPayDepositRequestAsync(
+		[FromServices] IGetService<CreateDepositFormCommand, Guid> createDepositFormService,
+		[FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
+		[FromServices] IGetService<GetDepositFormQuery, DepositFormInfo> getDepositFormService,
+		[FromServices] ICommandService<SubmitDepositFormThirdPartyOrderNoCommand> updateDepositFormService,
+		[FromBody] SubmitDepositRequest request)
+	{
+		var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+		var brandId = HttpContext.Items.GetBrandId();
+
+		var brandPayment = await getBrandPaymentService
+			.GetAsync(new GetBrandPaymentQuery(request.BrandPaymentId), HttpContext.RequestAborted)
+			.ConfigureAwait(false);
+
+		var brandPaymentInfo = JsonDocument.Parse(brandPayment.ExtendedData!);
+
+		var command = new CreateDepositFormCommand(
+			playerTokenData.PlayerCode,
+			brandId,
+			request.BrandPaymentId,
+			request.Amount,
+			"tgs.payment.fivesevenpay.deposit",
+			request.PromotionId,
+			formId => JsonSerializer.Serialize(
+				new FiveSevenPayDepositSettings(
+					brandPaymentInfo.RootElement.GetProperty("merchantKey").GetString(),
+					brandPaymentInfo.RootElement.GetProperty("privateKey").GetString(),
+					brandPaymentInfo.RootElement.GetProperty("publicKey").GetString(),
+					brandPaymentInfo.RootElement.GetProperty("currency").GetString(),
+					FiveSevenPayType.Parse(brandPaymentInfo.RootElement.GetProperty("payType").GetString()),
+					formId),
+				FiveSevenPayUtility.SerializerOptions));
+
+		var createdFormId = await createDepositFormService
+			.GetAsync(command, HttpContext.RequestAborted)
+			.ConfigureAwait(false);
+
+		var getDepositFormQuery = new GetDepositFormQuery(
+			playerTokenData.PlayerCode,
+			createdFormId,
+			brandId);
+
+		var formData = await getDepositFormService
+			.GetAsync(getDepositFormQuery, HttpContext.RequestAborted)
+			.ConfigureAwait(false);
+
+		var applyInfo = JsonSerializer.Deserialize<FiveSevenPayDepositApplyInfo>(
+			formData.ApplyInfo!,
+			FiveSevenPayUtility.SerializerOptions);
+
+		var updateThirdPartyOrderNoCommand = new SubmitDepositFormThirdPartyOrderNoCommand(
+			createdFormId,
+			applyInfo.Response.FormId.ToString());
+
+		await updateDepositFormService
+			.ExecuteAsync(updateThirdPartyOrderNoCommand, HttpContext.RequestAborted)
+			.ConfigureAwait(false);
+
+		return new DepositFormCreatedResponse
+		{
+			FormId = createdFormId,
+			PaymentUrl = applyInfo.Response.RedirectUrl.ToString()
+		};
+	}
+
 	[HttpPost("malakipay", Name = "SubmitMalakiPayDepositRequest")]
 	[HttpPost("~/api/deposit/bank/malakipay", Name = "SubmitMalakiPayBankDepositRequest")]
 	[EnableUserBlockedCheck]
@@ -135,6 +204,76 @@ public class ThirdPartyDepositController : ControllerBase
 		var updateThirdPartyOrderNoCommand = new SubmitDepositFormThirdPartyOrderNoCommand(
 			createdFormId,
 			applyInfo.Response.TradeNo);
+
+		await updateDepositFormService
+			.ExecuteAsync(updateThirdPartyOrderNoCommand, HttpContext.RequestAborted)
+			.ConfigureAwait(false);
+
+		return new DepositFormCreatedResponse
+		{
+			FormId = createdFormId,
+			PaymentUrl = applyInfo.Response.RedirectUrl.ToString()
+		};
+	}
+
+	[HttpPost("metapay", Name = "SubmitMetaPayDepositRequest")]
+	[EnableUserBlockedCheck]
+	[AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+	public async Task<DepositFormCreatedResponse> SubmitMetaPayDepositRequestAsync(
+		[FromServices] IGetService<CreateDepositFormCommand, Guid> createDepositFormService,
+		[FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
+		[FromServices] IGetService<GetDepositFormQuery, DepositFormInfo> getDepositFormService,
+		[FromServices] ICommandService<SubmitDepositFormThirdPartyOrderNoCommand> updateDepositFormService,
+		[FromBody] SubmitDepositRequest request)
+	{
+		var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+		var brandId = HttpContext.Items.GetBrandId();
+
+		var brandPayment = await getBrandPaymentService
+			.GetAsync(new GetBrandPaymentQuery(request.BrandPaymentId), HttpContext.RequestAborted)
+			.ConfigureAwait(false);
+
+		var brandPaymentInfo = JsonDocument.Parse(brandPayment.ExtendedData!);
+
+		var command = new CreateDepositFormCommand(
+			playerTokenData.PlayerCode,
+			brandId,
+			request.BrandPaymentId,
+			request.Amount,
+			"tgs.payment.metapay.deposit",
+			request.PromotionId,
+			formId => JsonSerializer.Serialize(
+				new MetaPayDepositSettings(
+					brandPaymentInfo.RootElement.GetProperty("appId").GetString(),
+					brandPaymentInfo.RootElement.GetProperty("privateKey").GetString(),
+					brandPaymentInfo.RootElement.GetProperty("publicKey").GetString(),
+					MetaPayDepositType.Parse(brandPaymentInfo.RootElement.GetProperty("payType").GetString()),
+					new Uri("http://localhost"),
+					formId,
+					Phone: "",
+					RealName: ""),
+				MetaPayUtility.SerializerOptions));
+
+		var createdFormId = await createDepositFormService
+			.GetAsync(command, HttpContext.RequestAborted)
+			.ConfigureAwait(false);
+
+		var getDepositFormQuery = new GetDepositFormQuery(
+			playerTokenData.PlayerCode,
+			createdFormId,
+			brandId);
+
+		var formData = await getDepositFormService
+			.GetAsync(getDepositFormQuery, HttpContext.RequestAborted)
+			.ConfigureAwait(false);
+
+		var applyInfo = JsonSerializer.Deserialize<MetaPayDepositApplyInfo>(
+			formData.ApplyInfo!,
+			MetaPayUtility.SerializerOptions);
+
+		var updateThirdPartyOrderNoCommand = new SubmitDepositFormThirdPartyOrderNoCommand(
+			createdFormId,
+			applyInfo.Response.FormId.ToString());
 
 		await updateDepositFormService
 			.ExecuteAsync(updateThirdPartyOrderNoCommand, HttpContext.RequestAborted)
@@ -207,74 +346,6 @@ public class ThirdPartyDepositController : ControllerBase
 			.ConfigureAwait(false);
 
 		var applyInfo = JsonSerializer.Deserialize<PhpGoPayDepositApplyInfo>(formData.ApplyInfo!, PhpGoPayUtility.SerializerOptions);
-
-		var updateThirdPartyOrderNoCommand = new SubmitDepositFormThirdPartyOrderNoCommand(
-			createdFormId,
-			applyInfo.Response.FormId.ToString());
-
-		await updateDepositFormService
-			.ExecuteAsync(updateThirdPartyOrderNoCommand, HttpContext.RequestAborted)
-			.ConfigureAwait(false);
-
-		return new DepositFormCreatedResponse
-		{
-			FormId = createdFormId,
-			PaymentUrl = applyInfo.Response.RedirectUrl.ToString()
-		};
-	}
-
-	[HttpPost("fivesevenpay", Name = "SubmitFiveSevenPayDepositRequest")]
-	[EnableUserBlockedCheck]
-	[AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-	public async Task<DepositFormCreatedResponse> SubmitFiveSevenPayDepositRequestAsync(
-		[FromServices] IGetService<CreateDepositFormCommand, Guid> createDepositFormService,
-		[FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
-		[FromServices] IGetService<GetDepositFormQuery, DepositFormInfo> getDepositFormService,
-		[FromServices] ICommandService<SubmitDepositFormThirdPartyOrderNoCommand> updateDepositFormService,
-		[FromBody] SubmitDepositRequest request)
-	{
-		var playerTokenData = HttpContext.Items.GetPlayerTokenData();
-		var brandId = HttpContext.Items.GetBrandId();
-
-		var brandPayment = await getBrandPaymentService
-			.GetAsync(new GetBrandPaymentQuery(request.BrandPaymentId), HttpContext.RequestAborted)
-			.ConfigureAwait(false);
-
-		var brandPaymentInfo = JsonDocument.Parse(brandPayment.ExtendedData!);
-
-		var command = new CreateDepositFormCommand(
-			playerTokenData.PlayerCode,
-			brandId,
-			request.BrandPaymentId,
-			request.Amount,
-			"tgs.payment.fivesevenpay.deposit",
-			request.PromotionId,
-			formId => JsonSerializer.Serialize(
-				new FiveSevenPayDepositSettings(
-					brandPaymentInfo.RootElement.GetProperty("merchantKey").GetString(),
-					brandPaymentInfo.RootElement.GetProperty("privateKey").GetString(),
-					brandPaymentInfo.RootElement.GetProperty("publicKey").GetString(),
-					brandPaymentInfo.RootElement.GetProperty("currency").GetString(),
-					FiveSevenPayType.Parse(brandPaymentInfo.RootElement.GetProperty("payType").GetString()),
-					formId), 
-				FiveSevenPayUtility.SerializerOptions));
-
-		var createdFormId = await createDepositFormService
-			.GetAsync(command, HttpContext.RequestAborted)
-			.ConfigureAwait(false);
-
-		var getDepositFormQuery = new GetDepositFormQuery(
-			playerTokenData.PlayerCode,
-			createdFormId,
-			brandId);
-
-		var formData = await getDepositFormService
-			.GetAsync(getDepositFormQuery, HttpContext.RequestAborted)
-			.ConfigureAwait(false);
-
-		var applyInfo = JsonSerializer.Deserialize<FiveSevenPayDepositApplyInfo>(
-			formData.ApplyInfo!, 
-			FiveSevenPayUtility.SerializerOptions);
 
 		var updateThirdPartyOrderNoCommand = new SubmitDepositFormThirdPartyOrderNoCommand(
 			createdFormId,
