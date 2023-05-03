@@ -233,7 +233,7 @@ public class ThirdPartyDepositController : ControllerBase
 			.GetAsync(new GetBrandPaymentQuery(request.BrandPaymentId), HttpContext.RequestAborted)
 			.ConfigureAwait(false);
 
-		var brandPaymentInfo = JsonDocument.Parse(brandPayment.ExtendedData!);
+		var brandPaymentInfo = JsonDocument.Parse(brandPayment.ExtendedData!);		
 
 		var command = new CreateDepositFormCommand(
 			playerTokenData.PlayerCode,
