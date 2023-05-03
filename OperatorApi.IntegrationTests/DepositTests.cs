@@ -586,8 +586,8 @@ public class DepositTests
 				""),
 			new MetaPayDepositResponse(
 				100M,
-				null,
 				Guid.NewGuid(),
+				ThirdPartyOrderNo: "130d36a1176d42638948161df47f160f",
 				new Uri("http://localhost/test")));
 
 		_ = fakePaymentServiceClient.GetDepositFormAsync(
@@ -784,9 +784,9 @@ public class DepositTests
 				"",
 				""),
 			new MetaPayDepositResponse(
-				100M,
-				null,
+				100M,				
 				Guid.NewGuid(),
+				ThirdPartyOrderNo: "130d36a1176d42638948161df47f160f",
 				new Uri("http://localhost/test")));
 
 		_ = fakePaymentServiceClient.GetDepositFormAsync(
