@@ -1,7 +1,6 @@
 ﻿#nullable enable
 
 using Microsoft.AspNetCore.Mvc;
-using Tgs.BrandCertificate.Clients;
 using Tgs.ServiceUtility;
 using Tgs.StationLetterService.Client;
 using TGS.Apis.OperatorApi.Attributes;
@@ -75,6 +74,23 @@ public class StationLetterV2Controller : ControllerBase
 			TotalCount = result.Length,
 			Items = result.Chunk(rows).Skip(page - 1).FirstOrDefault(),
 		};
+	}
+
+	[HttpPut("{letterId}:reply", Name = "ReplyStationLetter")]
+	[AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+	public ValueTask ReplyLetterAsync(
+		[FromServices] ICommandService<ReplyLetterCommand> replyLetterService,
+		Guid letterId,
+		[FromBody] ReplyStationLetterViewModel viewModel)
+	{
+		var playerTokenData = HttpContext.Items.GetPlayerTokenData()!;
+
+		var command = new ReplyLetterCommand(
+			playerTokenData.PlayerCode,
+			letterId,
+			viewModel.Content);
+
+		return replyLetterService.ExecuteAsync(command, HttpContext.RequestAborted);
 	}
 
 	[HttpPut(Name = "SendStationLetterToCustomService")]

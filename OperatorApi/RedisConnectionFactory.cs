@@ -38,8 +38,6 @@ internal class RedisConnectionFactory : IRedisConnectionFactory, IDisposable
 				_connectionMultiplexer?.Dispose();
 			}
 
-			// TODO: free unmanaged resources (unmanaged objects) and override finalizer
-			// TODO: set large fields to null
 			_disposedValue = true;
 		}
 	}

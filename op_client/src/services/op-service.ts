@@ -158,4 +158,10 @@ export default class OperatorService {
             .put('/api/station-letter', request)
             .then(res => res.data);
     }
+
+    public replyStationLetter(letterId: string, request: ReplyStationLetterRequest): Promise<void> {
+        return this.http
+            .put(`/api/station-letter/${letterId}:reply`, request)
+            .then(res => res.data);
+    }
 }

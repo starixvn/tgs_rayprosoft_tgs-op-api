@@ -1,0 +1,3 @@
+interface ReplyStationLetterRequest {
+    content: string;
+}

@@ -7,6 +7,39 @@ namespace TGS.Tests.OperatorApi.UnitTests;
 public class StationLetterV2Tests
 {
 	[Test]
+	public async Task 回覆信件()
+	{
+		var fakeStationLetterClient = Substitute.For<IStationLetterClient>();
+
+		var sut = new ReplyLetterCommandService(fakeStationLetterClient);
+
+		var command = new ReplyLetterCommand("test1", Guid.NewGuid(), "content");
+
+		_ = fakeStationLetterClient.GetStationLetterAsync(Arg.Is(command.LetterId))
+			.Returns(new StationLetter(
+				command.LetterId,
+				"test2",
+				command.PlayerCode,
+				"tttt",
+				null,
+				"cccccc",
+				null,
+				DateTime.UtcNow,
+				false,
+				false));
+
+		await sut.ExecuteAsync(command);
+
+		_ = fakeStationLetterClient.Received(1)
+			.ReplyStationLetterAsync(
+				Arg.Is(command.LetterId),
+				Arg.Is(new ReplyStationLetterRequest(
+					command.PlayerCode,
+					"test2",
+					command.Content)));
+	}
+
+	[Test]
 	public async Task 取得玩家站內信列表()
 	{
 		var fakeStationLetterClient = Substitute.For<IStationLetterClient>();
