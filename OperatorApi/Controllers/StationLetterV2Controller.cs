@@ -117,4 +117,17 @@ public class StationLetterV2Controller : ControllerBase
 			command,
 			HttpContext.RequestAborted).ConfigureAwait(false);
 	}
+
+	[HttpPatch("{letterId}:read", Name = "SetStationLetterHaveRead")]
+	[AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+	public ValueTask SetLetterHaveReadAsync(
+		[FromServices] ICommandService<SetHaveReadV2Command> setReadService,
+		Guid letterId)
+	{
+		var playerTokenData = HttpContext.Items.GetPlayerTokenData()!;
+
+		var command = new SetHaveReadV2Command(playerTokenData.PlayerCode, letterId);
+
+		return setReadService.ExecuteAsync(command, HttpContext.RequestAborted);
+	}
 }

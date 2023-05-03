@@ -70,6 +70,34 @@ public class StationLetterV2Tests
 	}
 
 	[Test]
+	public async Task 設定信件已讀()
+	{
+		var fakeStationLetterClient = Substitute.For<IStationLetterClient>();
+
+		var sut = new SetHaveReadV2CommandService(fakeStationLetterClient);
+
+		var command = new SetHaveReadV2Command("test1", Guid.NewGuid());
+
+		_ = fakeStationLetterClient.GetStationLetterAsync(Arg.Is(command.LetterId))
+			.Returns(new StationLetter(
+				command.LetterId,
+				"test2",
+				command.PlayerCode,
+				"ttt",
+				null,
+				"ccccc",
+				null,
+				DateTime.UtcNow,
+				false,
+				false));
+
+		await sut.ExecuteAsync(command);
+
+		_ = fakeStationLetterClient.Received(1)
+			.MarkStationLetterHaveReadAsync(Arg.Is(command.LetterId));
+	}
+
+	[Test]
 	public async Task 發送信件()
 	{
 		var fakeStationLetterClient = Substitute.For<IStationLetterClient>();

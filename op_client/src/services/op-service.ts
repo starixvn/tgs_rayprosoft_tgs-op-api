@@ -164,4 +164,10 @@ export default class OperatorService {
             .put(`/api/station-letter/${letterId}:reply`, request)
             .then(res => res.data);
     }
+
+    public setStationLetterHaveRead(letterId: string): Promise<void> {
+        return this.http
+            .patch(`/api/station-letter/${letterId}:read`)
+            .then(res => res.data);
+    }
 }
