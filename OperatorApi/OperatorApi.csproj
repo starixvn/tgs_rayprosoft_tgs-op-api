@@ -72,7 +72,7 @@
 		<PackageReference Include="Tgs.Payment.MalakiPay.Client" Version="0.0.5" />
 		<PackageReference Include="Tgs.Payment.ManualDeposit" Version="0.1.13" />
 		<PackageReference Include="Tgs.Payment.MaticPay.Client" Version="0.0.6" />
-		<PackageReference Include="Tgs.Payment.MetaPay.Client" Version="0.0.5" />
+		<PackageReference Include="Tgs.Payment.MetaPay.Client" Version="0.0.6" />
 		<PackageReference Include="Tgs.Payment.PhpGoPay.Client" Version="0.0.4" />
 		<PackageReference Include="Tgs.Payment.PrimePay.Client" Version="0.0.6" />
 		<PackageReference Include="Tgs.Payment.SkyPay.Client" Version="0.0.6" />
