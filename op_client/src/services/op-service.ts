@@ -183,4 +183,10 @@ export default class OperatorService {
                 })
             .then(res => res.data);
     }
+
+    public getDeliveryLetterContent(deliveryId: string): Promise<SuccessResponse<DeliveryLetter>> {
+        return this.http
+            .get(`/api/delivery-box/${deliveryId}`)
+            .then(res => res.data);
+    }
 }

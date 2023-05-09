@@ -4,6 +4,7 @@ using FluentdForward.OpenTelemetry.MessagePack;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.HttpLogging;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
@@ -263,7 +264,12 @@ builder.Services
 			"tgs.payment.withdraw.status_ex"))
 	.AddNatsGlobPatternExchange("*");
 
-builder.Services.AddHealthChecks();
+builder.Services
+	.AddHttpLogging(logging =>
+	{
+		logging.LoggingFields = HttpLoggingFields.All;
+	})
+	.AddHealthChecks();
 
 builder.Services
 	.AddOpenTelemetry()
@@ -334,6 +340,7 @@ builder.Services
 
 var app = builder.Build();
 
+app.UseHttpLogging();
 app.UseForwardedHeaders();
 app.UseRequestLocalization(options =>
 {
