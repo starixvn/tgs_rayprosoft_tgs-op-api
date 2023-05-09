@@ -55,6 +55,21 @@ public class StationLetterV2Tests
 	}
 
 	[Test]
+	public async Task 取得玩家寄件備份列表()
+	{
+		var fakeStationLetterClient = Substitute.For<IStationLetterClient>();
+
+		var sut = new GetDeliveryLettersQueryService(fakeStationLetterClient);
+
+		var query = new GetDeliveryLettersQuery("test1");
+
+		_ = await sut.QueryAsync(query).ToArrayAsync();
+
+		_ = fakeStationLetterClient.Received(1)
+			.ListDeliverLettersAsync(Arg.Is(query.PlayerCode));
+	}
+
+	[Test]
 	public async Task 取得站內信內容()
 	{
 		var fakeStationLetterClient = Substitute.For<IStationLetterClient>();

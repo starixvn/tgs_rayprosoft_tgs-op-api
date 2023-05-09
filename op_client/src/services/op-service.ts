@@ -170,4 +170,17 @@ export default class OperatorService {
             .patch(`/api/station-letter/${letterId}:read`)
             .then(res => res.data);
     }
+
+    public getPlayerDeliverLetters(page: number, rows: number): Promise<SuccessResponse<PagingResponse<DeliveryLetterListItem>>> {
+        return this.http
+            .get(
+                '/api/delivery-box',
+                {
+                    params: {
+                        page,
+                        rows
+                    }
+                })
+            .then(res => res.data);
+    }
 }
