@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Tgs.Payment.Clients;
 using Tgs.Payment.Help2Pay;
 using Tgs.Payment.MaticPay;
+using Tgs.Payment.MetaPay.Client;
 using Tgs.Payment.PhpGoPay.Client;
 using Tgs.Payment.PrimePay;
 using Tgs.Payment.SkyPay;
@@ -684,6 +685,75 @@ public class BankDepositController : ControllerBase
 		}
 	}
 
+	[HttpPost("metapay", Name = "SubmitMetaPayBankDepositRequest")]
+	[EnableUserBlockedCheck]
+	[AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+	public async Task<DepositFormCreatedResponse> SubmitMetaPayDepositRequestAsync(
+		[FromServices] IGetService<CreateDepositFormCommand, Guid> createDepositFormService,
+		[FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,		
+		[FromServices] IGetService<GetDepositFormQuery, DepositFormInfo> getDepositFormService,
+		[FromServices] ICommandService<SubmitDepositFormThirdPartyOrderNoCommand> updateDepositFormService,
+		[FromBody] SubmitDepositRequest request)
+	{
+		var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+		var brandId = HttpContext.Items.GetBrandId();
+
+		var brandPayment = await getBrandPaymentService
+			.GetAsync(new GetBrandPaymentQuery(request.BrandPaymentId))
+			.ConfigureAwait(false);
+
+		var brandPaymentInfo = JsonDocument.Parse(brandPayment.ExtendedData);
+
+		var command = new CreateDepositFormCommand(
+			playerTokenData.PlayerCode,
+			brandId,
+			request.BrandPaymentId,
+			request.Amount,
+			"tgs.payment.metapay.deposit",
+			request.PromotionId,
+			formId => JsonSerializer.Serialize(
+				new MetaPayDepositSettings(
+					brandPaymentInfo.RootElement.GetProperty("appId").GetString(),
+					brandPaymentInfo.RootElement.GetProperty("privateKey").GetString(),
+					brandPaymentInfo.RootElement.GetProperty("publicKey").GetString(),
+					MetaPayDepositType.Parse(brandPaymentInfo.RootElement.GetProperty("payType").GetString()),
+					new Uri("http://localhost"),
+					formId,
+					Phone: "",
+					RealName: ""),
+				MetaPayUtility.SerializerOptions));
+
+		var createdFormId = await createDepositFormService
+			.GetAsync(command, HttpContext.RequestAborted)
+			.ConfigureAwait(false);
+
+		var getDepositFormQuery = new GetDepositFormQuery(
+			playerTokenData.PlayerCode,
+			createdFormId,
+			brandId);
+
+		var formData = await getDepositFormService
+			.GetAsync(getDepositFormQuery)
+			.ConfigureAwait(false);
+
+		var applyInfo = JsonSerializer.Deserialize<MetaPayDepositApplyInfo>(
+			formData.ApplyInfo!,
+			MetaPayUtility.SerializerOptions);
+
+		var updateThirdPartyOrderNoCommand = new SubmitDepositFormThirdPartyOrderNoCommand(
+			createdFormId,
+			applyInfo.Response.ThirdPartyOrderNo);
+
+		await updateDepositFormService
+			.ExecuteAsync(updateThirdPartyOrderNoCommand)
+			.ConfigureAwait(false);
+
+		return new DepositFormCreatedResponse
+		{
+			FormId = createdFormId,
+			PaymentUrl = applyInfo.Response.RedirectUrl.ToString()
+		};
+	}
 	private static bool IsChinese(string strRealName)
 	{
 		var flag = true;

@@ -1,4 +1,4 @@
-import { AxiosInstance } from 'axios';
+﻿import { AxiosInstance } from 'axios';
 
 export default class OperatorService {
     constructor(private http: AxiosInstance) { }
@@ -188,5 +188,18 @@ export default class OperatorService {
         return this.http
             .get(`/api/delivery-box/${deliveryId}`)
             .then(res => res.data);
+    }
+}
+
+    public submitMetaThirdPartyDepositRequest(request: DepositRequest): Promise<SuccessResponse<DepositFormCreatedResponse>> {
+        return this.http
+            .post("/api/deposit/thirdparty/metapay", request)
+            .then<SuccessResponse<DepositFormCreatedResponse>>(res => res.data);
+    }
+
+    public submitMetaBankDepositRequest(request: DepositRequest): Promise<SuccessResponse<DepositFormCreatedResponse>> {
+        return this.http
+            .post("/api/deposit/bank/metapay", request)
+            .then<SuccessResponse<DepositFormCreatedResponse>>(res => res.data);
     }
 }
