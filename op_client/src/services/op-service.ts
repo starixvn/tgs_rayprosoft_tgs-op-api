@@ -189,7 +189,6 @@ export default class OperatorService {
             .get(`/api/delivery-box/${deliveryId}`)
             .then(res => res.data);
     }
-}
 
     public submitMetaThirdPartyDepositRequest(request: DepositRequest): Promise<SuccessResponse<DepositFormCreatedResponse>> {
         return this.http
