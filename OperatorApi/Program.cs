@@ -4,6 +4,7 @@ using FluentdForward.OpenTelemetry.MessagePack;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.HttpLogging;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
@@ -24,6 +25,7 @@ using Tgs.Payment.UmPay;
 using Tgs.Payment.ZeroNineNinePay;
 using Tgs.PlayerBucket.Clients.DependencyInjection;
 using Tgs.ServiceUtility;
+using Tgs.StationLetterService.Client.DependencyInjection;
 using TGS.Apis.OperatorApi;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
@@ -213,6 +215,9 @@ builder.Services
 		options.BaseUrl = config.GetValue<Uri>("Operator:DepositAccumulateRouletteServiceBaseUrl")!;
 	})
 	.AddPlayerBucketClient(httpBuilder => { })
+	.AddStationLetterClient(httpBuilder => httpBuilder
+		.ConfigureHttpClient(httpClient => httpClient.BaseAddress =
+			builder.Configuration.GetValue<Uri>("Operator:StationLetterBaseUrl")))
 	.AddIdentityVerifiers()
 	.AddHttpClient<IEmailClient, EmailClient>((sp, c) =>
 	{
@@ -259,7 +264,12 @@ builder.Services
 			"tgs.payment.withdraw.status_ex"))
 	.AddNatsGlobPatternExchange("*");
 
-builder.Services.AddHealthChecks();
+builder.Services
+	.AddHttpLogging(logging =>
+	{
+		logging.LoggingFields = HttpLoggingFields.All;
+	})
+	.AddHealthChecks();
 
 builder.Services
 	.AddOpenTelemetry()
@@ -330,6 +340,7 @@ builder.Services
 
 var app = builder.Build();
 
+app.UseHttpLogging();
 app.UseForwardedHeaders();
 app.UseRequestLocalization(options =>
 {

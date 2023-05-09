@@ -1,4 +1,4 @@
-import { AxiosInstance } from 'axios';
+﻿import { AxiosInstance } from 'axios';
 
 export default class OperatorService {
     constructor(private http: AxiosInstance) { }
@@ -132,6 +132,62 @@ export default class OperatorService {
         return this.http
             .post("/api/deposit/thirdparty/fivesevenpay", request)
             .then<SuccessResponse<DepositFormCreatedResponse>>(res => res.data);
+    }
+
+    public getPlayerStationLetters(page: number, rows: number): Promise<SuccessResponse<PagingResponse<StationLetterListItem>>> {
+        return this.http
+            .get(
+                '/api/station-letter',
+                {
+                    params: {
+                        page,
+                        rows
+                    }
+                })
+            .then(res => res.data);
+    }
+
+    public getPlayerStationLetterContent(letterId: string): Promise<SuccessResponse<StationLetter | null>> {
+        return this.http
+            .get(`/api/station-letter/${letterId}`)
+            .then(res => res.data);
+    }
+
+    public sendStationLetterToCustomService(request: SendStationLetterRequest): Promise<void> {
+        return this.http
+            .put('/api/station-letter', request)
+            .then(res => res.data);
+    }
+
+    public replyStationLetter(letterId: string, request: ReplyStationLetterRequest): Promise<void> {
+        return this.http
+            .put(`/api/station-letter/${letterId}:reply`, request)
+            .then(res => res.data);
+    }
+
+    public setStationLetterHaveRead(letterId: string): Promise<void> {
+        return this.http
+            .patch(`/api/station-letter/${letterId}:read`)
+            .then(res => res.data);
+    }
+
+    public getPlayerDeliverLetters(page: number, rows: number): Promise<SuccessResponse<PagingResponse<DeliveryLetterListItem>>> {
+        return this.http
+            .get(
+                '/api/delivery-box',
+                {
+                    params: {
+                        page,
+                        rows
+                    }
+                })
+            .then(res => res.data);
+    }
+
+    public getDeliveryLetterContent(deliveryId: string): Promise<SuccessResponse<DeliveryLetter>> {
+        return this.http
+            .get(`/api/delivery-box/${deliveryId}`)
+            .then(res => res.data);
     }
 
     public submitMetaThirdPartyDepositRequest(request: DepositRequest): Promise<SuccessResponse<DepositFormCreatedResponse>> {

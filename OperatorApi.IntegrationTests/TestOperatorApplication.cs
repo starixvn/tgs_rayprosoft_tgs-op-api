@@ -27,27 +27,29 @@ internal static class TestOperatorApplication
 	public static readonly RsaSecurityKey TestSecurityKey = new(RSA.Create());
 	private static readonly JwtSecurityTokenHandler _JwtSecurityTokenHandler = new();
 
-	public static IHostBuilder Builder => new FixToolApplication()
-		.Builder
-		.ConfigureLogging((_, logging) => logging.ClearProviders())
-			.ConfigureServices(services => services
-				.AddFakeNatsMessageQueue()
-				.AddSingleton(Substitute.For<IRedisConnectionFactory>())
-				.AddSingleton<IConfigureOptions<OtlpExporterOptions>>(
-				  sp => new ConfigureNamedOptions<OtlpExporterOptions>(
-					  Options.DefaultName,
-					  exporterOptions => exporterOptions.TimeoutMilliseconds = 0))
-				.Replace(ServiceDescriptor.Singleton(sp =>
-				{
-					var dbContextOptionsBuilder = new DbContextOptionsBuilder<TgsRepository>();
-					_ = dbContextOptionsBuilder
-						.UseInMemoryDatabase(Guid.NewGuid().ToString())
-						.ConfigureWarnings(x => x.Ignore(
-							InMemoryEventId.TransactionIgnoredWarning));
+	public static IHostBuilder Builder => new FixToolApplication().Builder
+		.ConfigureLogging((ctx, logging) =>
+		{
+			_ = logging.ClearProviders();
+			_ = logging.AddFilter("Microsoft.AspNetCore.HttpLogging", LogLevel.Information);
+		})
+		.ConfigureServices(services => services
+			.AddFakeNatsMessageQueue()
+			.AddSingleton(Substitute.For<IRedisConnectionFactory>())
+			.AddSingleton<IConfigureOptions<OtlpExporterOptions>>(
+				sp => new ConfigureNamedOptions<OtlpExporterOptions>(
+					Options.DefaultName,
+					exporterOptions => exporterOptions.TimeoutMilliseconds = 0))
+			.Replace(ServiceDescriptor.Singleton(sp =>
+			{
+				var dbContextOptionsBuilder = new DbContextOptionsBuilder<TgsRepository>();
+				_ = dbContextOptionsBuilder
+					.UseInMemoryDatabase(Guid.NewGuid().ToString())
+					.ConfigureWarnings(x => x.Ignore(
+						InMemoryEventId.TransactionIgnoredWarning));
 
-					return new TgsRepository(dbContextOptionsBuilder.Options);
-				}))
-);
+				return new TgsRepository(dbContextOptionsBuilder.Options);
+			})));
 
 	public static string MakeTestBrandToken(Guid brandId, string brandCode)
 	{
