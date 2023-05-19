@@ -265,10 +265,7 @@ builder.Services
 	.AddNatsGlobPatternExchange("*");
 
 builder.Services
-	.AddHttpLogging(logging =>
-	{
-		logging.LoggingFields = HttpLoggingFields.All;
-	})
+	.AddHttpLogging(logging => logging.LoggingFields = HttpLoggingFields.All)
 	.AddHealthChecks();
 
 builder.Services
