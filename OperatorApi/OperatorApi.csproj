@@ -41,7 +41,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="FluentdForward.OpenTelemetry.MessagePack" Version="0.2.0" />
+		<PackageReference Include="FluentdForward.OpenTelemetry.MessagePack" Version="0.3.0" />
 		<PackageReference Include="FluentValidation.AspNetCore" Version="11.3.0" />
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.5" />
 		<PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.18.1" />
@@ -49,7 +49,7 @@
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
-		<PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="17.5.22">
+		<PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="17.6.40">
 		  <PrivateAssets>all</PrivateAssets>
 		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
@@ -72,7 +72,7 @@
 		<PackageReference Include="Tgs.Payment.MalakiPay.Client" Version="0.0.5" />
 		<PackageReference Include="Tgs.Payment.ManualDeposit" Version="0.1.13" />
 		<PackageReference Include="Tgs.Payment.MaticPay.Client" Version="0.0.6" />
-		<PackageReference Include="Tgs.Payment.MetaPay.Client" Version="0.0.6" />
+		<PackageReference Include="Tgs.Payment.MetaPay.Client" Version="0.0.8" />
 		<PackageReference Include="Tgs.Payment.PhpGoPay.Client" Version="0.0.4" />
 		<PackageReference Include="Tgs.Payment.PrimePay.Client" Version="0.0.6" />
 		<PackageReference Include="Tgs.Payment.SkyPay.Client" Version="0.0.6" />
@@ -80,7 +80,7 @@
 		<PackageReference Include="Tgs.Payment.UmPay.Client" Version="0.0.1" />
 		<PackageReference Include="Tgs.Payment.WandaPay.Client" Version="0.0.5" />
 		<PackageReference Include="Tgs.Payment.ZeroNineNinePay.Client" Version="0.0.7" />
-		<PackageReference Include="Tgs.Report.Client" Version="0.0.48" />
+		<PackageReference Include="Tgs.Report.Client" Version="0.0.57" />
 		<PackageReference Include="Tgs.WebApi.Toolkits" Version="0.2.0" />
 	</ItemGroup>
 
