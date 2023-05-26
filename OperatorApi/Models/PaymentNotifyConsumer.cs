@@ -1,4 +1,5 @@
-﻿using System.Reactive.Linq;
+﻿using System.Reactive;
+using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
@@ -14,18 +15,20 @@ public class PaymentNotifyConsumer : BackgroundService
 {
 	private readonly IObservable<NotifyEvent> _eventObservable;
 	private readonly IHubContext<NotifyHub> _hubContext;
+	private readonly ILogger<PaymentNotifyConsumer> _logger;
 	private readonly JsonSerializerOptions _serializerOptions;
 
 	public PaymentNotifyConsumer(
 		IObservable<NotifyEvent> eventObservable,
 		IHubContext<NotifyHub> hubContext,
-		IOptions<JsonOptions> jsonOptionsAccessor)
+		IOptions<JsonOptions> jsonOptionsAccessor,
+		ILogger<PaymentNotifyConsumer> logger)
 	{
 		if (jsonOptionsAccessor is null)
 			throw new ArgumentNullException(nameof(jsonOptionsAccessor));
 		_eventObservable = eventObservable ?? throw new ArgumentNullException(nameof(eventObservable));
 		_hubContext = hubContext ?? throw new ArgumentNullException(nameof(hubContext));
-
+		_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 		_serializerOptions = jsonOptionsAccessor.Value.JsonSerializerOptions;
 	}
 
@@ -43,7 +46,13 @@ public class PaymentNotifyConsumer : BackgroundService
 						{
 							Type = "DepositNotify",
 							tup.Payload
-						}, stoppingToken).ConfigureAwait(false)))
+						}, stoppingToken).ConfigureAwait(false))
+					.Catch((Exception ex) =>
+					{
+						_logger.LogError(ex, "Handle deposit notify occur error.");
+
+						return Observable.Empty<Unit>();
+					}))
 				.Merge(),
 			_eventObservable
 				.Where(evt => evt.Match("Feature", "WithdrawNotify"))
@@ -57,6 +66,12 @@ public class PaymentNotifyConsumer : BackgroundService
 						{
 							Type = "WithdrawNotify",
 							tup.Payload
-						}, stoppingToken).ConfigureAwait(false)))
+						}, stoppingToken).ConfigureAwait(false))
+					.Catch((Exception ex) =>
+					{
+						_logger.LogError(ex, "Handle withdraw notify occur error.");
+
+						return Observable.Empty<Unit>();
+					}))
 				.Merge()).ToTask(stoppingToken);
 }

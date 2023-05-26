@@ -2,6 +2,7 @@
 
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
+using Tgs.Notification.Client;
 using TGS.Apis.OperatorApi.Extensions;
 
 namespace TGS.Apis.OperatorApi.SignalR;
@@ -9,10 +10,35 @@ namespace TGS.Apis.OperatorApi.SignalR;
 public class NotifyHub : Hub
 {
 	private readonly ILogger<NotifyHub> _logger;
+	private readonly INotificationClient _notificationClient;
 
-	public NotifyHub(ILogger<NotifyHub> logger)
+	public NotifyHub(INotificationClient notificationClient, ILogger<NotifyHub> logger)
 	{
+		_notificationClient = notificationClient ?? throw new ArgumentNullException(nameof(notificationClient));
 		_logger = logger ?? throw new ArgumentNullException(nameof(logger));
+	}
+
+	public async ValueTask AcceptedNotificationAsync(Guid id)
+	{
+		var httpContext = Context.GetHttpContext();
+		var playerTokenData = httpContext?.Items.GetPlayerTokenData();
+
+		if (playerTokenData is null)
+		{
+			await Clients.Caller.SendAsync("notify", new
+			{
+				Type = "InvalidPlayer"
+			}).ConfigureAwait(false);
+
+			Context.Abort();
+
+			return;
+		}
+
+		await _notificationClient.AcceptedNotificationAsync(
+			playerTokenData.PlayerCode,
+			id,
+			Context.ConnectionAborted).ConfigureAwait(false);
 	}
 
 	public override async Task OnConnectedAsync()

@@ -261,7 +261,10 @@ builder.Services
 			"tgs.payment.deposit.status_ex")
 		.AddHandler(
 			ProcessorTypes.WithdrawFormStatusChangedEventHandlerType,
-			"tgs.payment.withdraw.status_ex"))
+			"tgs.payment.withdraw.status_ex")
+		.AddHandler(
+			ProcessorTypes.NotificationHandlerType,
+			"tgs.notify.broadcast"))
 	.AddNatsGlobPatternExchange("*");
 
 builder.Services
