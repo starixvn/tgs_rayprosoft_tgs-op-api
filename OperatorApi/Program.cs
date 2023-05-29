@@ -230,7 +230,8 @@ builder.Services
 		.GetSection("Operator").Bind(options))
 	.Services
 	.Decorate<IValidateCodeGenerator, ConstValidateCodeGenerator>()
-	.AddHostedService<PaymentNotifyConsumer>();
+	.AddHostedService<PaymentNotifyConsumer>()
+	.AddHostedService<PushNotifyfConsumer>();
 
 builder.Services
 	.AddRedis((options, sp) =>
