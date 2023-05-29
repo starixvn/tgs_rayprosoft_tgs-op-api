@@ -32,7 +32,9 @@ internal class NotificationHandler : IMessageHandler
 
 		_notifyEventPublisher.PublishEvent(new NotifyEvent(
 			tags,
-			JsonDocument.Parse(request.Payload)));
+			string.IsNullOrEmpty(request.Payload)
+				? JsonDocument.Parse("{}")
+				: JsonDocument.Parse(request.Payload)));
 
 		return ValueTask.CompletedTask;
 	}
