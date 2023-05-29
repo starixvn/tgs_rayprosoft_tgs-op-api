@@ -231,7 +231,8 @@ builder.Services
 	.Services
 	.Decorate<IValidateCodeGenerator, ConstValidateCodeGenerator>()
 	.AddHostedService<PaymentNotifyConsumer>()
-	.AddHostedService<PushNotifyfConsumer>();
+	.AddHostedService<PushNotifyfConsumer>()
+	.AddNotificationClient();
 
 builder.Services
 	.AddRedis((options, sp) =>
