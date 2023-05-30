@@ -71,5 +71,9 @@ public class NotifyHub : Hub
 			httpContext!.User.Identity.IsAuthenticated);
 
 		await base.OnConnectedAsync().ConfigureAwait(false);
+
+		await _notificationClient.ResendNotificationsAsync(
+			playerTokenData.PlayerCode,
+			Context.ConnectionAborted).ConfigureAwait(false);
 	}
 }
