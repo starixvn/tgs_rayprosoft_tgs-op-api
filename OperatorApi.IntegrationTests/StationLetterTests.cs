@@ -111,6 +111,13 @@ public class StationLetterTests
 				TGS.Core.Models.Enums.PlatformType.Desktop,
 				DateTimeOffset.Now,
 				DateTimeOffset.Now.AddDays(1D)));
+		_ = fakePlayerServiceClient.GetPlayerInfoAsync(Arg.Is(playerCode), Arg.Any<CancellationToken>())
+			.Returns(new Tgs.PlayerService.Client.PlayerInfo
+			{
+				BrandId = brandId,
+				UserName = userName,
+				PlayerCode = playerCode
+			});
 
 		await using var scope = web.Services.CreateAsyncScope();
 
@@ -172,7 +179,7 @@ public class StationLetterTests
 		_ = fakeStationLetterClient.Received(1)
 			.ReplyStationLetterAsync(
 				Arg.Is(letterId),
-				Arg.Is(new ReplyStationLetterRequest(playerCode, "test2", request.Content)),
+				Arg.Is(new ReplyStationLetterRequest(playerCode, "test2", request.Content, userName)),
 				Arg.Any<CancellationToken>());
 	}
 
@@ -572,7 +579,8 @@ public class StationLetterTests
 			"ttt",
 			"test123456",
 			null,
-			DateTime.UtcNow);
+			DateTime.UtcNow,
+			"player1");
 
 		_ = fakeStationLetterClient.GetDeliveryLetterAsync(
 			Arg.Is(deliveryId),
@@ -716,7 +724,8 @@ public class StationLetterTests
 			"ttt",
 			"test123456",
 			null,
-			DateTime.UtcNow);
+			DateTime.UtcNow,
+			 "player1");
 
 		_ = fakeStationLetterClient.ListDeliverLettersAsync(Arg.Is(playerCode), Arg.Any<CancellationToken>())
 			.Returns(new[] { letter }.ToAsyncEnumerable());
@@ -969,6 +978,13 @@ public class StationLetterTests
 				TGS.Core.Models.Enums.PlatformType.Desktop,
 				DateTimeOffset.Now,
 				DateTimeOffset.Now.AddDays(1D)));
+		_ = fakePlayerServiceClient.GetPlayerInfoAsync(Arg.Is(playerCode), Arg.Any<CancellationToken>())
+			.Returns(new Tgs.PlayerService.Client.PlayerInfo
+			{
+				BrandId = brandId,
+				UserName = userName,
+				PlayerCode = playerCode
+			});
 
 		await using var scope = web.Services.CreateAsyncScope();
 
@@ -1031,7 +1047,8 @@ public class StationLetterTests
 			playerCode,
 			new[] { brandCode },
 			request.Subject,
-			request.Content).ToExpectedObject(ctx =>
+			request.Content,
+			userName).ToExpectedObject(ctx =>
 			{
 				_ = ctx.IgnoreEqualsOverride();
 				_ = ctx.ArrayMemberShouldEqual(o => o.Receivers);

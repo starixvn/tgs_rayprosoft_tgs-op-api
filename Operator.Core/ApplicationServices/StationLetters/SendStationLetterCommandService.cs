@@ -21,7 +21,8 @@ internal class SendStationLetterCommandService : ICommandService<SendStationLett
 			command.PlayerCode,
 			command.Receivers,
 			command.Subject,
-			command.Content);
+			command.Content,
+			command.Operator);
 
 		return _stationLetterClient.SendStationLetterAsync(request, cancellationToken);
 	}
