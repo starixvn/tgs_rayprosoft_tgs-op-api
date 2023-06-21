@@ -13,7 +13,7 @@ public class StationLetterV2Tests
 
 		var sut = new ReplyLetterCommandService(fakeStationLetterClient);
 
-		var command = new ReplyLetterCommand("test1", Guid.NewGuid(), "content");
+		var command = new ReplyLetterCommand("test1", Guid.NewGuid(), "content", "player1");
 
 		_ = fakeStationLetterClient.GetStationLetterAsync(Arg.Is(command.LetterId))
 			.Returns(new StationLetter(
@@ -36,7 +36,8 @@ public class StationLetterV2Tests
 				Arg.Is(new ReplyStationLetterRequest(
 					command.PlayerCode,
 					"test2",
-					command.Content)));
+					command.Content,
+					command.Operator)));
 	}
 
 	[Test]
@@ -138,7 +139,8 @@ public class StationLetterV2Tests
 			"test1",
 			new[] { "receiver1" },
 			"abc",
-			"asdfgh");
+			"asdfgh",
+			  "player1");
 
 		await sut.ExecuteAsync(command);
 
@@ -147,6 +149,7 @@ public class StationLetterV2Tests
 				command.PlayerCode,
 				command.Receivers,
 				command.Subject,
-				command.Content)));
+				command.Content,
+				command.Operator)));
 	}
 }

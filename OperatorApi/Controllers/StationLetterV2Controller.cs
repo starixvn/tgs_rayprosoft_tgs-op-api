@@ -1,12 +1,14 @@
 ﻿#nullable enable
 
 using Microsoft.AspNetCore.Mvc;
+using Tgs.PlayerService.Client;
 using Tgs.ServiceUtility;
 using Tgs.StationLetterService.Client;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Services.Operator.ApplicationServices.Brand;
+using TGS.Services.Operator.ApplicationServices.Player;
 using TGS.Services.Operator.ApplicationServices.StationLetters;
 
 namespace TGS.Apis.OperatorApi.Controllers;
@@ -78,25 +80,37 @@ public class StationLetterV2Controller : ControllerBase
 
 	[HttpPut("{letterId}:reply", Name = "ReplyStationLetter")]
 	[AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-	public ValueTask ReplyLetterAsync(
+	public async ValueTask ReplyLetterAsync(
 		[FromServices] ICommandService<ReplyLetterCommand> replyLetterService,
+		[FromServices] IGetService<GetPlayerMainDataQuery, PlayerInfo?> getPlayerInfoService,
 		Guid letterId,
 		[FromBody] ReplyStationLetterViewModel viewModel)
 	{
 		var playerTokenData = HttpContext.Items.GetPlayerTokenData()!;
 
+		var playerInfo = await getPlayerInfoService.GetAsync(
+			  new(playerTokenData.PlayerCode),
+			  HttpContext.RequestAborted).ConfigureAwait(false);
+
+		if (playerInfo is null)
+			return;
+
 		var command = new ReplyLetterCommand(
 			playerTokenData.PlayerCode,
 			letterId,
-			viewModel.Content);
+			viewModel.Content,
+			playerInfo.UserName);
 
-		return replyLetterService.ExecuteAsync(command, HttpContext.RequestAborted);
+		await replyLetterService.ExecuteAsync(
+			command,
+			HttpContext.RequestAborted).ConfigureAwait(false);
 	}
 
 	[HttpPut(Name = "SendStationLetterToCustomService")]
 	[AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
 	public async Task SendLetterAsync(
 		[FromServices] IGetService<BrandQuery, Services.Operator.BrandInfo> getBrandService,
+		[FromServices] IGetService<GetPlayerMainDataQuery, PlayerInfo?> getPlayerInfoService,
 		[FromServices] ICommandService<SendStationLetterCommand> sendLetterService,
 		CreateStationLetterViewModel viewModel)
 	{
@@ -107,11 +121,19 @@ public class StationLetterV2Controller : ControllerBase
 			new(brandId),
 			HttpContext.RequestAborted).ConfigureAwait(false);
 
+		var playerInfo = await getPlayerInfoService.GetAsync(
+			new(playerTokenData.PlayerCode),
+			HttpContext.RequestAborted).ConfigureAwait(false);
+
+		if (playerInfo is null)
+			return;
+
 		var command = new SendStationLetterCommand(
 			playerTokenData.PlayerCode,
 			new[] { brandInfo.Code },
 			viewModel.Subject,
-			viewModel.Content);
+			viewModel.Content,
+			playerInfo.UserName);
 
 		await sendLetterService.ExecuteAsync(
 			command,

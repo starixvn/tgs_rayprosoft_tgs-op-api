@@ -27,7 +27,8 @@ internal class ReplyLetterCommandService : ICommandService<ReplyLetterCommand>
 		var request = new ReplyStationLetterRequest(
 			command.PlayerCode,
 			letter.Sender,
-			command.Content);
+			command.Content,
+			command.Operator);
 
 		await _stationLetterClient.ReplyStationLetterAsync(
 			command.LetterId,
