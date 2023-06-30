@@ -213,4 +213,25 @@ export default class OperatorService {
             .post("/api/deposit/thirdparty/gcpay", request)
             .then<SuccessResponse<DepositFormCreatedResponse>>(res => res.data);
     }
+
+    public submitManualDepositCoinsphRequest(
+        amount: number,
+        paymentid: string,
+        promotionid: string | null,
+        banktype: string,        
+        name: string | null,
+        phone: string | null): Promise<SuccessResponse<string>> {
+        return this.http
+            .put(
+                "/api/deposit/manual/coinsph",
+                {
+                    amount,
+                    paymentid,
+                    promotionid,
+                    banktype,                    
+                    name,
+                    phone
+                })
+            .then<SuccessResponse<string>>(res => res.data);
+    }
 }
