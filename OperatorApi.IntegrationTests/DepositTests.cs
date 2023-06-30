@@ -1892,7 +1892,8 @@ public class DepositTests
 			ExtendedData = """
 				{
 					"phone": "0912345678",
-					"name": "testName"
+					"name": "testName",
+					"qrCode": "testQrCode"
 				}
 				"""
 		};
@@ -1917,20 +1918,20 @@ public class DepositTests
 			const axiosConfigFactory = require('./models/axios-configuration.js').default;
 			const OperatorService = require('./services/op-service.js').default;
 
-			module.exports = async (brandToken, loginToken, amount, paymentId, promotionId, bankType, realname, phone) =>
+			module.exports = async (brandToken, loginToken, amount, paymentId, promotionId, bankType, realname, phone, address) =>
 			{
 				let instance = axiosConfigFactory("{{channelName}}", {{isWindows}}, brandToken, loginToken);
 
 				let svc = new OperatorService(instance);
 
-				return await svc.submitManualDepositCoinsphRequest(amount, paymentId, promotionId, bankType, realname, phone);
+				return await svc.submitManualDepositCoinsphRequest(amount, paymentId, promotionId, bankType, realname, phone, address);
 			};
 		""";
 
 		// Act
 		var actual = await StaticNodeJSService.InvokeFromStringAsync<SuccessResponse<string>>(
 			nodeModule,
-			args: new object?[] { brandToken, loginResult.PlayerToken, amount, brandPaymentId, null, "coinsph", "testRealName", "0912345678" });
+			args: new object?[] { brandToken, loginResult.PlayerToken, amount, brandPaymentId, null, "coinsph", "testRealName", "0912345678","T1123456789101112" });
 
 		// Assert
 		Assert.Equal(expected, Guid.Parse(actual!.Data));

@@ -387,8 +387,7 @@ public class ManualDepositController : ControllerBase
 
 		var brandPaymentBankInfo = JsonDocument.Parse(brandPayment.ExtendedData);
 
-		var qrCode = JsonElementExtenstion.GetPropertyValue(brandPaymentBankInfo.RootElement, "qrCode");
-		var address = JsonElementExtenstion.GetPropertyValue(brandPaymentBankInfo.RootElement, "address");
+		var qrCode = JsonElementExtenstion.GetPropertyValue(brandPaymentBankInfo.RootElement, "qrCode");		
 
 		var command = new CreateDepositFormCommand(
 			playerTokenData.PlayerCode,
@@ -403,7 +402,7 @@ public class ManualDepositController : ControllerBase
 					Name = brandPaymentBankInfo.RootElement.GetProperty("name").GetString(),
 					Phone = brandPaymentBankInfo.RootElement.GetProperty("phone").GetString(),
 					QrCode = qrCode,
-					Address = address,
+					Address = request.Address,
 					SendName = request.Name,
 					SendPhone = request.Phone,
 					BankType = request.BankType

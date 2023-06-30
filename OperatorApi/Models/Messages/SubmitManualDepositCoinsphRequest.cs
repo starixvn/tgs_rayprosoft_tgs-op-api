@@ -23,4 +23,7 @@ public record SubmitManualDepositCoinsphRequest
 
 	[JsonPropertyName("phone")]
 	public string? Phone { get; init; }
+
+	[JsonPropertyName("address")]
+	public string? Address { get; init; }
 }
