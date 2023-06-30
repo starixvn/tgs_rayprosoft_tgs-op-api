@@ -369,6 +369,51 @@ public class ManualDepositController : ControllerBase
 			.ConfigureAwait(false);
 	}
 
+	[HttpPut("coinsph", Name = "SubmitDepositCoinsphRequest")]
+	[EnableUserBlockedCheck]
+	[AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+	public async ValueTask<Guid> SubmitDepositCoinsphRequestAsync(
+	   [FromServices] IGetService<CreateDepositFormCommand, Guid> createDepositFormService,
+	   [FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
+	   [FromServices] ManualDepositSerializer serializer,
+	   [FromBody] SubmitManualDepositCoinsphRequest request)
+	{
+		var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+		var brandId = HttpContext.Items.GetBrandId();
+
+		var brandPayment = await getBrandPaymentService
+			.GetAsync(new(request.BrandPaymentId), HttpContext.RequestAborted)
+			.ConfigureAwait(false);
+
+		var brandPaymentBankInfo = JsonDocument.Parse(brandPayment.ExtendedData);
+
+		var qrCode = JsonElementExtenstion.GetPropertyValue(brandPaymentBankInfo.RootElement, "qrCode");
+		var address = JsonElementExtenstion.GetPropertyValue(brandPaymentBankInfo.RootElement, "address");
+
+		var command = new CreateDepositFormCommand(
+			playerTokenData.PlayerCode,
+			brandId,
+			request.BrandPaymentId,
+			request.Amount,
+			"tgs.payment.manual.deposit",
+			request.PromotionId,
+			_ => serializer.Serialize(
+				new ManualDepositCoinsphApplyInfo
+				{
+					Name = brandPaymentBankInfo.RootElement.GetProperty("name").GetString(),
+					Phone = brandPaymentBankInfo.RootElement.GetProperty("phone").GetString(),
+					QrCode = qrCode,
+					Address = address,
+					SendName = request.Name,
+					SendPhone = request.Phone,
+					BankType = request.BankType
+				}));
+
+		return await createDepositFormService
+			.GetAsync(command, HttpContext.RequestAborted)
+			.ConfigureAwait(false);
+	}
+
 	private static ManualDepositApplyInfo GetApplyInfo(ManualDepositSerializer serializer, string bankType, string applyInfo)
 	{
 		return bankType switch
