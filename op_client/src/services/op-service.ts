@@ -220,7 +220,8 @@ export default class OperatorService {
         promotionid: string | null,
         banktype: string,        
         name: string | null,
-        phone: string | null): Promise<SuccessResponse<string>> {
+        phone: string | null,
+        address: string | null): Promise<SuccessResponse<string>> {
         return this.http
             .put(
                 "/api/deposit/manual/coinsph",
@@ -230,7 +231,8 @@ export default class OperatorService {
                     promotionid,
                     banktype,                    
                     name,
-                    phone
+                    phone,
+                    address
                 })
             .then<SuccessResponse<string>>(res => res.data);
     }

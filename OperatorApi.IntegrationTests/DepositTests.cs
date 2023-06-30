@@ -1892,7 +1892,8 @@ public class DepositTests
 			ExtendedData = """
 				{
 					"phone": "0912345678",
-					"name": "testName"
+					"name": "testName",
+					"qrCode": "testQrCode"
 				}
 				"""
 		};
@@ -1917,13 +1918,13 @@ public class DepositTests
 			const axiosConfigFactory = require('./models/axios-configuration.js').default;
 			const OperatorService = require('./services/op-service.js').default;
 
-			module.exports = async (brandToken, loginToken, amount, paymentId, promotionId, bankType, realname, phone) =>
+			module.exports = async (brandToken, loginToken, amount, paymentId, promotionId, bankType, realname, phone, address) =>
 			{
 				let instance = axiosConfigFactory("{{channelName}}", {{isWindows}}, brandToken, loginToken);
 
 				let svc = new OperatorService(instance);
 
-				return await svc.submitManualDepositCoinsphRequest(amount, paymentId, promotionId, bankType, realname, phone);
+				return await svc.submitManualDepositCoinsphRequest(amount, paymentId, promotionId, bankType, realname, phone, address);
 			};
 		""";
 
