@@ -236,4 +236,10 @@ export default class OperatorService {
                 })
             .then<SuccessResponse<string>>(res => res.data);
     }
+
+    public submitWinThirdPartyDepositRequest(request: DepositRequest): Promise<SuccessResponse<DepositFormCreatedResponse>> {
+        return this.http
+            .post("/api/deposit/thirdparty/winpay", request)
+            .then(res => res.data);
+    }
 }
