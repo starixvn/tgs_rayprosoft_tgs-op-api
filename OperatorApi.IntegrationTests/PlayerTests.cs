@@ -1,4 +1,5 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
+using System.Net.Http.Headers;
 using System.Runtime.InteropServices;
 using System.Security.Claims;
 using System.Text;
@@ -10,11 +11,13 @@ using Microsoft.IdentityModel.Tokens;
 using NSubstitute;
 using Tgs.BrandCertificate.Clients;
 using Tgs.Core.Infrastructures.Security;
+using Tgs.FileService.Clients;
 using Tgs.MessageQueue;
 using Tgs.PlayerService.Client;
 using Tgs.ServiceUtility;
 using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Core.Models.Enums;
+using TGS.Services.Operations;
 using TGS.Services.Operator;
 using TGS.Services.Operator.ApplicationServices.Player;
 using Xunit.Abstractions;
@@ -29,6 +32,159 @@ public class PlayerTests
 	public PlayerTests(ITestOutputHelper testOutputHelper)
 	{
 		_testOutputHelper = testOutputHelper ?? throw new ArgumentNullException(nameof(testOutputHelper));
+	}
+
+	[Fact]
+	public async Task 玩家身分審核上傳()
+	{
+		var channelName = Guid.NewGuid().ToString();
+
+		var fakeBrandCertClient = Substitute.For<IBrandCertificateClient>();
+		var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
+		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
+		var fakePlayerPasswordValidateCommandService = Substitute.For<IGetService<PlayerPasswordValidateCommand, bool>>();
+		var fakePlayerLoginRecordRepository = Substitute.For<IPlayerLoginRecordRepository>();
+		var fakeBrandRepository = Substitute.For<IBrandRepository>();
+		var fakeValidatePlayerLoginRecordCommandService = Substitute.For<ICommandService<ValidatePlayerLoginRecordCommand>>();
+		var fakeFileServiceClient = Substitute.For<IFileServiceClient>();
+		var fakePlayerOperations = Substitute.For<IPlayerOperations>();
+
+		_ = fakeBrandCertClient.GetSystemValidateSecurityKeyAsync(Arg.Any<CancellationToken>())
+			.Returns(TestOperatorApplication.TestSecurityKey);
+
+		var brandId = Guid.NewGuid();
+		var brandCode = "Test";
+		var brandToken = TestOperatorApplication.MakeTestBrandToken(brandId, brandCode);
+		var secretKey = "N2KAnljo5zbLCZDSoUBFJ70ONsy";
+
+		_ = fakeBrandRepository.GetSecretKeyAsync(
+				Arg.Is(brandId),
+				Arg.Any<CancellationToken>())
+			.Returns(secretKey);
+
+		using var web = TestOperatorApplication.Builder
+			.UseTestChannelServer(channelName)
+			.ConfigureLogging(logging => logging.AddXUnit(_testOutputHelper))
+			.ConfigureServices(services => services
+				.AddSingleton(fakeBrandCertClient)
+				.AddSingleton(fakeBrandServiceClient)
+				.AddSingleton(fakePlayerServiceClient)
+				.AddSingleton(fakePlayerPasswordValidateCommandService)
+				.AddSingleton(fakePlayerLoginRecordRepository)
+				.AddSingleton(fakeBrandRepository)
+				.AddSingleton(fakeValidatePlayerLoginRecordCommandService)
+				.AddSingleton(fakeFileServiceClient)
+				.AddSingleton(fakePlayerOperations))
+			.Build();
+
+		await web.StartAsync();
+
+		var playerCode = "test1";
+		var userName = "test01";
+
+		_ = fakeBrandServiceClient.GetBrandStatusAsync(
+				Arg.Is(brandId),
+				Arg.Any<CancellationToken>())
+			.Returns(BrandStatus.Active);
+
+		_ = fakePlayerServiceClient.GetPlayerInfoByUserNameAsync(
+				Arg.Is(brandId),
+				Arg.Is(userName),
+				Arg.Any<CancellationToken>())
+			.Returns(new Tgs.PlayerService.Client.PlayerInfo
+			{
+				BrandId = brandId,
+				UserName = userName,
+				PlayerCode = playerCode
+			});
+
+		_ = fakePlayerPasswordValidateCommandService.GetAsync(
+			Arg.Any<PlayerPasswordValidateCommand>(),
+			Arg.Any<CancellationToken>())
+			.Returns(true);
+
+		_ = fakePlayerLoginRecordRepository.AddPlayerLoginRecordAsync(
+				Arg.Is(brandId),
+				Arg.Is(playerCode),
+				Arg.Is(PlatformType.Desktop),
+				Arg.Any<string>())
+			.Returns(new LoginRecordInfo(
+			Guid.NewGuid(),
+			playerCode,
+			LoginStatus.Enabled,
+			PlatformType.Desktop,
+			DateTimeOffset.Now,
+			DateTimeOffset.Now.AddDays(1D)));
+
+		_ = fakePlayerServiceClient.GetPlayerInfoAsync(Arg.Is(playerCode), Arg.Any<CancellationToken>())
+			.Returns(new Tgs.PlayerService.Client.PlayerInfo
+			{
+				BrandId = brandId,
+				UserName = userName,
+				PlayerCode = playerCode
+			});
+
+		await using var scope = web.Services.CreateAsyncScope();
+
+		var loginService = scope.ServiceProvider.GetRequiredService<IGetService<LoginCommand, LoginInfo>>();
+
+		var loginCommand = new LoginCommand(
+			brandId,
+			userName,
+			"test123",
+			"127.0.0.1",
+			"localhost",
+			TGS.Core.Models.Enums.PlatformType.Desktop,
+			"operator-api");
+
+		var loginResult = await loginService.GetAsync(loginCommand);
+
+		var filePath = Path.Combine(Directory.GetCurrentDirectory(), "Assets/test.jpg");
+
+		_ = fakeFileServiceClient
+			.UploadFileAsync(Arg.Any<string>(), Arg.Any<MediaTypeHeaderValue>(), Arg.Any<Stream>())
+			.Returns(new FileView()
+			{
+				Id = "fileId"
+			});
+
+		_ = fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId), Arg.Any<CancellationToken>())
+			.Returns(new Tgs.BrandCertificate.Clients.BrandInfo
+			{
+				Id = brandId,
+				PlayerIdentityEnabled = true,
+			});
+
+		var request = new CreateIdentityAuthenticationFormRequest
+		{
+			Identity = "newIdentity",
+			RealName = "newRealName"
+		};
+
+		var isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "true" : "false";
+		var nodeModule = $$"""
+			const axiosConfigFactory = require('./models/axios-configuration.js').default;
+			const OperatorService = require('./services/op-service.js').default;
+
+			module.exports = async (brandToken, loginToken, request, filePath) =>
+			{
+				let instance = axiosConfigFactory("{{channelName}}", {{isWindows}}, brandToken, loginToken);
+
+				let svc = new OperatorService(instance);
+
+				return await svc.createIdentityAuthenticationForm(request,filePath);
+			};
+		""";
+
+		// Act
+		var actual = await StaticNodeJSService.InvokeFromStringAsync<string>(
+			nodeModule,
+			args: new object?[] { brandToken, loginResult.PlayerToken, request, filePath });
+
+		// Assert
+		_ = fakePlayerOperations
+			.Received(1)
+			.SetIdentityAsync(Arg.Is(playerCode), Arg.Any<string>(), Arg.Any<string>(), Arg.Is(false), Arg.Any<DateTimeOffset>());
 	}
 
 	[Fact]
