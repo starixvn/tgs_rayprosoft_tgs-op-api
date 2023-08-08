@@ -177,7 +177,7 @@ public class PlayerController : ControllerBase
 		[FromServices] IGetService<UploadIdentityCommand, string> uploadIdentityCommandService,
 		[FromServices] ICommandService<CreateIdentityAuthenticationFormCommand> commandService,
 		[FromServices] ICommandService<SetIdentityCommand> setIdentityService,
-		[FromForm] CreateIdentityAuthenticationFormRequest request,
+		[FromForm(Name = "request")] CreateIdentityAuthenticationFormRequest request,
 		[FromForm(Name = "file")] IFormFile identityFile)
 	{
 		var playerTokenData = HttpContext.Items.GetPlayerTokenData();
