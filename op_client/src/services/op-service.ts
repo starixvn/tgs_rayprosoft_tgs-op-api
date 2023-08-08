@@ -256,10 +256,7 @@ export default class OperatorService {
         let formData = new FormData();
         formData.append(
             "request", 
-            JSON.stringify({
-                realname: request.realName,
-                id: request.identity,
-            }),
+            JSON.stringify(request),
             {
                 "contentType": "application/json"
             });

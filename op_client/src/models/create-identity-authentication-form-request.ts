@@ -1,4 +1,4 @@
 interface CreateIdentityAuthenticationFormRequest{    
-    identity: string;
-    realName: string;
+    id: string;
+    realname: string;
 }

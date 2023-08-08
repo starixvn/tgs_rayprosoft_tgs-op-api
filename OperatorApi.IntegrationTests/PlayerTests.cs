@@ -155,10 +155,10 @@ public class PlayerTests
 				PlayerIdentityEnabled = true,
 			});
 
-		var request = new CreateIdentityAuthenticationFormRequest
+		var request = new 
 		{
-			Identity = "newIdentity",
-			RealName = "newRealName"
+			Id = "newIdentity",
+			Realname = "newRealName"
 		};
 
 		var isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "true" : "false";
