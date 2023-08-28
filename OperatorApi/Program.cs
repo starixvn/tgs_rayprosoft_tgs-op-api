@@ -23,7 +23,6 @@ using Tgs.Payment.SkyPay;
 using Tgs.Payment.TuPay;
 using Tgs.Payment.UmPay;
 using Tgs.Payment.ZeroNineNinePay;
-using Tgs.PlayerBucket.Clients.DependencyInjection;
 using Tgs.ServiceUtility;
 using Tgs.StationLetterService.Client.DependencyInjection;
 using TGS.Apis.OperatorApi;
