@@ -214,6 +214,7 @@ builder.Services
 		options.BaseUrl = config.GetValue<Uri>("Operator:DepositAccumulateRouletteServiceBaseUrl")!;
 	})
 	.AddPlayerBucketClient(httpBuilder => { })
+	.AddPlayerBucketTypeClient()
 	.AddStationLetterClient(httpBuilder => httpBuilder
 		.ConfigureHttpClient(httpClient => httpClient.BaseAddress =
 			builder.Configuration.GetValue<Uri>("Operator:StationLetterBaseUrl")))
