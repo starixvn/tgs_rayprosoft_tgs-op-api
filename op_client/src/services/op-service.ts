@@ -1,4 +1,7 @@
 ﻿import { AxiosInstance } from 'axios';
+import fs from 'fs';
+import FormData from 'form-data';
+import path from 'path';
 
 export default class OperatorService {
     constructor(private http: AxiosInstance) { }
@@ -212,6 +215,61 @@ export default class OperatorService {
         return this.http
             .post("/api/deposit/thirdparty/gcpay", request)
             .then<SuccessResponse<DepositFormCreatedResponse>>(res => res.data);
+    }
+
+    public submitManualDepositCoinsphRequest(
+        amount: number,
+        paymentid: string,
+        promotionid: string | null,
+        banktype: string,        
+        name: string | null,
+        phone: string | null,
+        address: string | null): Promise<SuccessResponse<string>> {
+        return this.http
+            .put(
+                "/api/deposit/manual/coinsph",
+                {
+                    amount,
+                    paymentid,
+                    promotionid,
+                    banktype,                    
+                    name,
+                    phone,
+                    address
+                })
+            .then<SuccessResponse<string>>(res => res.data);
+    }
+
+    public submitWinThirdPartyDepositRequest(request: DepositRequest): Promise<SuccessResponse<DepositFormCreatedResponse>> {
+        return this.http
+            .post("/api/deposit/thirdparty/winpay", request)
+            .then(res => res.data);
+    }
+
+    public async createIdentityAuthenticationForm(
+        request: CreateIdentityAuthenticationFormRequest, 
+        filePath: string): Promise<void>{
+
+        let fileName = path.basename(filePath);
+        let stream = fs.readFileSync(filePath);           
+          
+        let formData = new FormData();
+        formData.append(
+            "request", 
+            JSON.stringify(request),
+            {
+                "contentType": "application/json"
+            });
+
+        formData.append("file",stream, { filename: fileName});
+        
+        await this.http
+            .post('/api/player/identity/upload', formData,{
+                headers:{
+                    ...formData.getHeaders(),
+                    'Content-Length': formData.getLengthSync()
+                }
+            });            
     }
 
     public getWithdrawRequireBucketAmount(): Promise<number> {

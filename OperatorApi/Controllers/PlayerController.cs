@@ -20,6 +20,7 @@ using TGS.Services.Operator.ApplicationServices.Player;
 using TGS.Services.Operator.ApplicationServices.Withdraw;
 using TGS.Services.Operator.PlayerRegisterFlow;
 using ContextItems = TGS.Core.Models.Consts.ContextItems;
+
 using CoreExceptions = TGS.Core.Models.Exceptions;
 
 namespace TGS.Apis.OperatorApi.Controllers;
@@ -175,6 +176,8 @@ public class PlayerController : ControllerBase
 	public async ValueTask CreateIdentityAuthenticationFormAsync(
 		[FromServices] IGetService<UploadIdentityCommand, string> uploadIdentityCommandService,
 		[FromServices] ICommandService<CreateIdentityAuthenticationFormCommand> commandService,
+		[FromServices] ICommandService<SetIdentityCommand> setIdentityService,
+		[FromForm(Name = "request")] CreateIdentityAuthenticationFormRequest request,
 		[FromForm(Name = "file")] IFormFile identityFile)
 	{
 		var playerTokenData = HttpContext.Items.GetPlayerTokenData();
@@ -184,7 +187,7 @@ public class PlayerController : ControllerBase
 		await using var fileStream = identityFile.OpenReadStream();
 
 		var fileId = await uploadIdentityCommandService
-			.GetAsync(new UploadIdentityCommand(contentType, fileStream))
+			.GetAsync(new UploadIdentityCommand(contentType, fileStream), HttpContext.RequestAborted)
 			.ConfigureAwait(false);
 
 		var command = new CreateIdentityAuthenticationFormCommand(
@@ -193,7 +196,17 @@ public class PlayerController : ControllerBase
 			fileId);
 
 		await commandService
-			.ExecuteAsync(command)
+			.ExecuteAsync(command, HttpContext.RequestAborted)
+			.ConfigureAwait(false);
+
+		var setIdentityCommand = new SetIdentityCommand(
+			playerTokenData.PlayerCode,
+			request.RealName,
+			request.Identity,
+			brandId);
+
+		await setIdentityService
+			.ExecuteAsync(setIdentityCommand, HttpContext.RequestAborted)
 			.ConfigureAwait(false);
 	}
 
