@@ -213,4 +213,10 @@ export default class OperatorService {
             .post("/api/deposit/thirdparty/gcpay", request)
             .then<SuccessResponse<DepositFormCreatedResponse>>(res => res.data);
     }
+
+    public getWithdrawRequireBucketAmount(): Promise<number> {
+        return this.http
+            .get("/api/withdraw/player/amount")
+            .then(res => res.data);
+    }
 }
