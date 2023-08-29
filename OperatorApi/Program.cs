@@ -23,7 +23,6 @@ using Tgs.Payment.SkyPay;
 using Tgs.Payment.TuPay;
 using Tgs.Payment.UmPay;
 using Tgs.Payment.ZeroNineNinePay;
-using Tgs.PlayerBucket.Clients.DependencyInjection;
 using Tgs.ServiceUtility;
 using Tgs.StationLetterService.Client.DependencyInjection;
 using TGS.Apis.OperatorApi;
@@ -215,6 +214,7 @@ builder.Services
 		options.BaseUrl = config.GetValue<Uri>("Operator:DepositAccumulateRouletteServiceBaseUrl")!;
 	})
 	.AddPlayerBucketClient(httpBuilder => { })
+	.AddPlayerBucketTypeClient()
 	.AddStationLetterClient(httpBuilder => httpBuilder
 		.ConfigureHttpClient(httpClient => httpClient.BaseAddress =
 			builder.Configuration.GetValue<Uri>("Operator:StationLetterBaseUrl")))

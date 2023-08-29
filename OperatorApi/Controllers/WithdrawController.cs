@@ -83,9 +83,9 @@ public class WithdrawController : ControllerBase
 
 		var query = new BrandPaymentsQuery(brandId, playerTokenData.PlayerCode);
 
-        var brandPayments = await brandPaymentsQueryService.QueryAsync(query)
-            .ToArrayAsync()
-            .ConfigureAwait(false);
+		var brandPayments = await brandPaymentsQueryService.QueryAsync(query)
+			.ToArrayAsync()
+			.ConfigureAwait(false);
 
 		foreach (var bp in brandPayments)
 		{
@@ -194,9 +194,10 @@ public class WithdrawController : ControllerBase
 	public async Task<decimal> GetWithdrawRequireAmountAsync(
 		[FromServices] IGetService<GetRequireBucketAmountQuery, decimal> getService)
 	{
+		var brandId = HttpContext.GetBrandId()!.Value;
 		var playerTokenData = HttpContext.Items.GetPlayerTokenData();
 
-		var query = new GetRequireBucketAmountQuery(playerTokenData.PlayerCode);
+		var query = new GetRequireBucketAmountQuery(brandId, playerTokenData.PlayerCode);
 		var wageringRequirement = await getService.GetAsync(query).ConfigureAwait(false);
 
 		return wageringRequirement;

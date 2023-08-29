@@ -271,4 +271,10 @@ export default class OperatorService {
                 }
             });            
     }
+
+    public getWithdrawRequireBucketAmount(): Promise<number> {
+        return this.http
+            .get("/api/withdraw/player/amount")
+            .then(res => res.data);
+    }
 }
