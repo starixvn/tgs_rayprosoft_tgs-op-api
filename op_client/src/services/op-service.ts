@@ -283,4 +283,10 @@ export default class OperatorService {
             .get("/api/player/bucket/amount")
             .then(res => res.data);
     }
+
+    public getAllTypeBucketAmounts(): Promise<Iterable<TypeBucketResult>> {
+        return this.http
+            .get("/api/player/bucket/type/amount")
+            .then(res => res.data);
+    }
 }
