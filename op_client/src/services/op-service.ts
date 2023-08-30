@@ -1,6 +1,6 @@
 ﻿import { AxiosInstance } from 'axios';
-import fs from 'fs';
 import FormData from 'form-data';
+import fs from 'fs';
 import path from 'path';
 
 export default class OperatorService {
@@ -221,7 +221,7 @@ export default class OperatorService {
         amount: number,
         paymentid: string,
         promotionid: string | null,
-        banktype: string,        
+        banktype: string,
         name: string | null,
         phone: string | null,
         address: string | null): Promise<SuccessResponse<string>> {
@@ -232,7 +232,7 @@ export default class OperatorService {
                     amount,
                     paymentid,
                     promotionid,
-                    banktype,                    
+                    banktype,
                     name,
                     phone,
                     address
@@ -247,34 +247,46 @@ export default class OperatorService {
     }
 
     public async createIdentityAuthenticationForm(
-        request: CreateIdentityAuthenticationFormRequest, 
-        filePath: string): Promise<void>{
+        request: CreateIdentityAuthenticationFormRequest,
+        filePath: string): Promise<void> {
 
         let fileName = path.basename(filePath);
-        let stream = fs.readFileSync(filePath);           
-          
+        let stream = fs.readFileSync(filePath);
+
         let formData = new FormData();
         formData.append(
-            "request", 
+            "request",
             JSON.stringify(request),
             {
                 "contentType": "application/json"
             });
 
-        formData.append("file",stream, { filename: fileName});
-        
+        formData.append("file", stream, { filename: fileName });
+
         await this.http
-            .post('/api/player/identity/upload', formData,{
-                headers:{
+            .post('/api/player/identity/upload', formData, {
+                headers: {
                     ...formData.getHeaders(),
                     'Content-Length': formData.getLengthSync()
                 }
-            });            
+            });
+    }
+
+    public getWithdrawRequireBucketAmountOld(): Promise<number> {
+        return this.http
+            .get("/api/withdraw/player/amount")
+            .then(res => res.data);
     }
 
     public getWithdrawRequireBucketAmount(): Promise<number> {
         return this.http
-            .get("/api/withdraw/player/amount")
+            .get("/api/player/bucket/amount")
+            .then(res => res.data);
+    }
+
+    public getAllTypeBucketAmounts(): Promise<Iterable<TypeBucketResult>> {
+        return this.http
+            .get("/api/player/bucket/type/amount")
             .then(res => res.data);
     }
 }

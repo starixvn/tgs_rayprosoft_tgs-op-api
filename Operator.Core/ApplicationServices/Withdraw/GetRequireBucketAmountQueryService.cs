@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -9,7 +10,9 @@ using Tgs.ServiceUtility;
 
 namespace TGS.Services.Operator.ApplicationServices.Withdraw;
 
-internal class GetRequireBucketAmountQueryService : IGetService<GetRequireBucketAmountQuery, decimal>
+internal class GetRequireBucketAmountQueryService
+	: IGetService<GetRequireBucketAmountQuery, decimal>
+	, IQueryService<GetRequireBucketAmountQuery, TypeBucketResult>
 {
 	private readonly IPlayerBucketClient _playerBucketClient;
 	private readonly IPlayerBucketForTypesClient _playerBucketForTypesClient;
@@ -20,18 +23,18 @@ internal class GetRequireBucketAmountQueryService : IGetService<GetRequireBucket
 		_playerBucketForTypesClient = playerBucketForTypesClient ?? throw new ArgumentNullException(nameof(playerBucketForTypesClient));
 	}
 
-	public async ValueTask<decimal> GetAsync(GetRequireBucketAmountQuery query, CancellationToken cancellationToken = default)
-	{
-		var bucketTypes = await _playerBucketClient
-			.GetBrandBucketTypesAsync(query.BrandId, cancellationToken)
-			.ToArrayAsync(cancellationToken)
-			.ConfigureAwait(false);
-
-		return await _playerBucketForTypesClient
-			.ReadBucketsForBucketTypesAsync(query.PlayerCode, bucketTypes, cancellationToken)
+	public ValueTask<decimal> GetAsync(GetRequireBucketAmountQuery query, CancellationToken cancellationToken = default)
+		=> QueryAsync(query, cancellationToken)
 			.Select(result => result.Result.Amount)
 			.DefaultIfEmpty()
-			.MaxAsync(cancellationToken)
-			.ConfigureAwait(false);
-	}
+			.MaxAsync(cancellationToken);
+
+	public IAsyncEnumerable<TypeBucketResult> QueryAsync(GetRequireBucketAmountQuery query, CancellationToken cancellationToken = default)
+		=> _playerBucketClient
+			.GetBrandBucketTypesAsync(query.BrandId, cancellationToken)
+			.ToArrayAsync(cancellationToken)
+			.AsTask()
+			.ToAsyncEnumerable()
+			.SelectMany(types => _playerBucketForTypesClient
+				.ReadBucketsForBucketTypesAsync(query.PlayerCode, types, cancellationToken));
 }

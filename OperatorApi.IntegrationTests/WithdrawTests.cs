@@ -136,7 +136,7 @@ public class WithdrawTests
 
 				let svc = new OperatorService(instance);
 
-				return await svc.getWithdrawRequireBucketAmount();
+				return await svc.getWithdrawRequireBucketAmountOld();
 			};
 			""";
 
