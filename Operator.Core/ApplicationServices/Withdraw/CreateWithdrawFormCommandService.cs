@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Tgs.CashService.Client;
 using Tgs.Payment.Clients;
 using Tgs.PlayerService.Client;
 using Tgs.Service.PlayerBuckets;
