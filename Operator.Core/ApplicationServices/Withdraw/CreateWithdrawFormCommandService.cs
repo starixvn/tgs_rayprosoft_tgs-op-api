@@ -12,17 +12,14 @@ namespace TGS.Services.Operator.ApplicationServices.Withdraw;
 internal class CreateWithdrawFormCommandService : ICommandService<CreateWithdrawFormCommand>
 {
 	private readonly IPaymentServiceClient _paymentServiceClient;
-	private readonly IPlayerBucketClient _playerBucketClient;
 	private readonly IPlayerServiceClient _playerServiceClient;
 
 	public CreateWithdrawFormCommandService(
 		IPaymentServiceClient paymentServiceClient,
-		IPlayerServiceClient playerServiceClient,
-		IPlayerBucketClient playerBucketClient)
+		IPlayerServiceClient playerServiceClient)
 	{
 		_paymentServiceClient = paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
 		_playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
-		_playerBucketClient = playerBucketClient ?? throw new ArgumentNullException(nameof(playerBucketClient));
 	}
 
 	public async ValueTask ExecuteAsync(CreateWithdrawFormCommand command, CancellationToken cancellationToken = default)
@@ -31,13 +28,6 @@ internal class CreateWithdrawFormCommandService : ICommandService<CreateWithdraw
 			.GetPlayerInfoAsync(command.PlayerCode, cancellationToken)
 			.ConfigureAwait(false)
 			?? throw new PlayerNotFoundException("Can't find player.");
-
-		var bucketResult = await _playerBucketClient.ReadBucketsAsync(
-			command.PlayerCode,
-			cancellationToken).ConfigureAwait(false);
-
-		if (bucketResult.Amount > 0M)
-			throw new InsufficientBucketException();
 
 		var createFormId = await _paymentServiceClient
 			.CreateWithdrawFormAsync(new WithdrawFormCreateInfo
