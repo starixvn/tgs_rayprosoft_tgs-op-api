@@ -10,7 +10,6 @@ using TGS.Core.Models.Messages;
 using TGS.Services.Operator;
 using TGS.Services.Operator.ApplicationServices.BrandPayments;
 using TGS.Services.Operator.ApplicationServices.Withdraw;
-using TGS.Services.Operator.BrandPayment;
 
 namespace TGS.Apis.OperatorApi.Controllers;
 
