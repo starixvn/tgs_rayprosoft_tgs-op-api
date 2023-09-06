@@ -289,4 +289,10 @@ export default class OperatorService {
             .get("/api/player/bucket/type/amount")
             .then(res => res.data);
     }
+
+    public createWithdraw(request: CreateWithdrawRequest): Promise<string> {
+        return this.http
+            .post("/api/withdraw", request)
+            .then(res => res.data);
+    }
 }
