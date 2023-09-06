@@ -36,7 +36,7 @@
     <PackageReference Include="Tgs.Notification.Client" Version="0.0.2" />
     <PackageReference Include="Tgs.Paging.AsyncEnumerable" Version="1.2.1" />
     <PackageReference Include="Tgs.Payment.Client" Version="0.4.8" />
-    <PackageReference Include="Tgs.PaymentService.Client" Version="0.6.29" />
+    <PackageReference Include="Tgs.PaymentService.Client" Version="0.6.31" />
     <PackageReference Include="Tgs.PlayerBucket.Client" Version="0.1.1" />
     <PackageReference Include="Tgs.PlayerBucketType.Client" Version="0.0.9" />
     <PackageReference Include="Tgs.PlayerService.Client" Version="0.0.36" />

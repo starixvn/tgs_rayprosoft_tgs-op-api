@@ -3,7 +3,6 @@ using System.Text.Json;
 using ExpectedObjects;
 using NSubstitute;
 using Tgs.BrandCertificate.Clients;
-using Tgs.CashService.Client;
 using Tgs.Core.Infrastructures.Security;
 using Tgs.Payment.Clients;
 using Tgs.PlayerService.Client;
@@ -11,7 +10,6 @@ using Tgs.Service.PlayerBuckets;
 using TGS.Services.Operations.Queries;
 using TGS.Services.Operator;
 using TGS.Services.Operator.ApplicationServices.Withdraw;
-using TGS.Services.Operator.BrandPayment;
 
 namespace TGS.Tests.OperatorApi.UnitTests;
 
@@ -114,12 +112,10 @@ public class WithdrawTests
 	{
 		var fakePaymentServiceClient = Substitute.For<IPaymentServiceClient>();
 		var fakePlayerService = Substitute.For<IPlayerServiceClient>();
-		var fakePlayerBucketClient = Substitute.For<IPlayerBucketClient>();
 
 		var sut = new CreateWithdrawFormCommandService(
 			fakePaymentServiceClient,
-			fakePlayerService,
-			fakePlayerBucketClient);
+			fakePlayerService);
 
 		var command = new CreateWithdrawFormCommand(
 			"ThisIsPlayerCode",
@@ -132,63 +128,14 @@ public class WithdrawTests
 	}
 
 	[Test]
-	public void Player_Bucket_Not_Full_Withdraw_Will_Throw_Exception()
-	{
-		var fakePaymentServiceClient = Substitute.For<IPaymentServiceClient>();
-		var fakePlayerService = Substitute.For<IPlayerServiceClient>();
-		var fakePlayerBucketClient = Substitute.For<IPlayerBucketClient>();
-
-		var sut = new CreateWithdrawFormCommandService(
-			fakePaymentServiceClient,
-			fakePlayerService,
-			fakePlayerBucketClient);
-
-		var command = new CreateWithdrawFormCommand(
-			"ThisIsPlayerCode",
-			Guid.NewGuid(),
-			Guid.NewGuid(),
-			1000M,
-			"ThisIsPlayerNote");
-
-		_ = fakePlayerService
-			.GetPlayerInfoAsync(Arg.Is(command.PlayerCode))
-			.Returns(new Tgs.PlayerService.Client.PlayerInfo
-			{
-				PlayerCode = command.PlayerCode,
-				BrandId = command.BrandId,
-				IdentityAuthentication = false,
-				IsSetPayPassword = false,
-				PhoneAuthentication = false,
-				UserName = "Tester",
-				VipLevelId = null
-			});
-
-		_ = fakePlayerBucketClient.ReadBucketsAsync(Arg.Is(command.PlayerCode))
-			.Returns(new ReadBucketResult(100M, Guid.NewGuid()));
-
-		var fakeBankInfo = new PlayerBankInfo
-		{
-			BankType = "Bank",
-			BrandId = command.BrandId,
-			Id = command.BankInfoId,
-			PaymentChannelId = Guid.NewGuid(),
-			Detail = JsonDocument.Parse("{}")
-		};
-
-		_ = Assert.ThrowsAsync<InsufficientBucketException>(async () => await sut.ExecuteAsync(command));
-	}
-
-	[Test]
 	public async Task Player_Can_Create_Withdraw_Form()
 	{
 		var fakePaymentServiceClient = Substitute.For<IPaymentServiceClient>();
 		var fakePlayerService = Substitute.For<IPlayerServiceClient>();
-		var fakePlayerBucketClient = Substitute.For<IPlayerBucketClient>();
 
 		var sut = new CreateWithdrawFormCommandService(
 			fakePaymentServiceClient,
-			fakePlayerService,
-			fakePlayerBucketClient);
+			fakePlayerService);
 
 		var command = new CreateWithdrawFormCommand(
 			"ThisIsPlayerCode",
@@ -218,9 +165,6 @@ public class WithdrawTests
 			{
 				["DefaultWalletId"] = walletId.ToString()
 			}.ToImmutableDictionary());
-
-		_ = fakePlayerBucketClient.ReadBucketsAsync(Arg.Is(command.PlayerCode))
-			.Returns(new ReadBucketResult(0M, null));
 
 		var fakeBankInfo = new PlayerBankInfo
 		{
