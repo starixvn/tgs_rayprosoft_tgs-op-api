@@ -5,14 +5,14 @@ using TGS.Apis.OperatorApi.Attributes;
 
 namespace TGS.Apis.OperatorApi.Models.Messages;
 
-//[ModelBinder(typeof(JsonWithFilesFormDataModelBinder),Name = "request")]
+[ModelBinder(typeof(JsonWithFilesFormDataModelBinder), Name = "request")]
 public record CreateIdentityAuthenticationFormRequest
 {
-	[Required]	
+	[Required]
 	[JsonPropertyName("realname")]
 	public string RealName { get; init; }
 
-	[Required]	
+	[Required]
 	[JsonPropertyName("id")]
 	public string Identity { get; init; }
 }
