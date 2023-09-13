@@ -16,9 +16,9 @@ using Tgs.PlayerService.Client;
 using Tgs.ServiceUtility;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
-using Tgs.MessageQueue;
 using TGS.Services.Operator;
 using TGS.Services.Operator.ApplicationServices.Player;
+using Valhalla.MessageQueue;
 using BrandStatus = Tgs.BrandCertificate.BrandStatus;
 
 using Client = Tgs.PlayerService.Client;

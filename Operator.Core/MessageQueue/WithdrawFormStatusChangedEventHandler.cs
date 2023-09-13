@@ -5,10 +5,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using Tgs.MessageQueue;
 using Tgs.Payment.Clients;
 using Tgs.Payment.Protos;
 using TGS.Services.Operator.Notify;
+using Valhalla.MessageQueue;
 
 namespace TGS.Services.Operator.MessageQueue;
 

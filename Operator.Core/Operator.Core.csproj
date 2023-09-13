@@ -13,7 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Grpc.Tools" Version="2.57.0">
+    <PackageReference Include="Grpc.Tools" Version="2.58.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
@@ -21,6 +21,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="PhoenixToolkits.MessageQueue" Version="1.0.3" />
     <PackageReference Include="PhoenixToolkits.Protobuf.ExtendTypes" Version="0.0.6" />
     <PackageReference Include="Polly" Version="7.2.4" />
     <PackageReference Include="Scrutor" Version="4.2.2" />
@@ -35,11 +36,11 @@
     <PackageReference Include="Tgs.GameProviders.Pluggable.Client" Version="0.0.33" />
     <PackageReference Include="Tgs.Notification.Client" Version="0.0.2" />
     <PackageReference Include="Tgs.Paging.AsyncEnumerable" Version="1.2.1" />
-    <PackageReference Include="Tgs.Payment.Client" Version="0.4.8" />
-    <PackageReference Include="Tgs.PaymentService.Client" Version="0.6.31" />
+    <PackageReference Include="Tgs.Payment.Client" Version="0.5.0" />
+    <PackageReference Include="Tgs.PaymentService.Client" Version="0.7.1" />
     <PackageReference Include="Tgs.PlayerBucket.Client" Version="0.1.1" />
     <PackageReference Include="Tgs.PlayerBucketType.Client" Version="0.0.9" />
-    <PackageReference Include="Tgs.PlayerService.Client" Version="0.0.36" />
+    <PackageReference Include="Tgs.PlayerService.Client" Version="0.0.37" />
     <PackageReference Include="Tgs.Promotion.Client" Version="1.0.42" />  
     <PackageReference Include="Tgs.RouletteSignInClient" Version="0.0.3" />
     <PackageReference Include="TGS.ServiceUtility" Version="0.2.0" />

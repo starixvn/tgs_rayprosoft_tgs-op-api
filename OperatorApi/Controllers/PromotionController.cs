@@ -4,12 +4,12 @@ using System.Text.Json;
 using Google.Protobuf;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using Tgs.MessageQueue;
 using Tgs.Promotion.Clients;
 using Tgs.Promotion.Clients.Protos;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models.Messages;
+using Valhalla.MessageQueue;
 
 namespace TGS.Apis.OperatorApi.Controllers;
 

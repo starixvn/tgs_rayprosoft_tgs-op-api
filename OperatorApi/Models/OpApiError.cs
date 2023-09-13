@@ -23,6 +23,7 @@ public enum OpApiError
 	PhoneNumberRequired = 212,
 	GameBalanceFailed = 213,
 	RegisterUndone = 214,
+	WithdrawLimitExceed = 215,
 	InvalidGameAction = 301,
 	TransactionIdNotFound = 302,
 	DuplicateTransaction = 303,

@@ -4,9 +4,9 @@ using System.Threading.Tasks;
 using Google.Protobuf;
 using Google.Protobuf.WellKnownTypes;
 using Microsoft.Extensions.Logging;
-using Tgs.MessageQueue;
 using Tgs.Operator.Client.Protos;
 using Tgs.ServiceUtility;
+using Valhalla.MessageQueue;
 
 namespace TGS.Services.Operator.ApplicationServices.Player;
 

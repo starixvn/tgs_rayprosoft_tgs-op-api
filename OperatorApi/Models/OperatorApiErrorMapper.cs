@@ -54,7 +54,8 @@ public class OperatorApiErrorMapper : IErrorMapper
 			[OpApiError.ZeroNineNinePayDepositNeedRealName] = "ZeroNineNinePayDepositNeedRealName",
 			[OpApiError.PreviousDepositStillProcessing] = "PreviousDepositStillProcessing",
 			[OpApiError.BankInfoDuplicate] = "BankInfoDuplicate",
-			[OpApiError.WandaPayDepositNeedRealName] = "WandaPayDepositNeedChineseRealName"
+			[OpApiError.WandaPayDepositNeedRealName] = "WandaPayDepositNeedChineseRealName",
+			[OpApiError.WithdrawLimitExceed] = "WithdrawLimitExceed"
 		};
 
 	private static readonly IReadOnlyDictionary<OpApiError, int> _HttpCodeByException =
@@ -98,7 +99,8 @@ public class OperatorApiErrorMapper : IErrorMapper
 			[OpApiError.ZeroNineNinePayDepositNeedRealName] = StatusCodes.Status400BadRequest,
 			[OpApiError.PreviousDepositStillProcessing] = StatusCodes.Status400BadRequest,
 			[OpApiError.BankInfoDuplicate] = StatusCodes.Status409Conflict,
-			[OpApiError.WandaPayDepositNeedRealName] = StatusCodes.Status400BadRequest
+			[OpApiError.WandaPayDepositNeedRealName] = StatusCodes.Status400BadRequest,
+			[OpApiError.WithdrawLimitExceed] = StatusCodes.Status400BadRequest
 		};
 
 	private static readonly IReadOnlyDictionary<Type, OpApiError> _OpApiErrorByException =
@@ -143,7 +145,8 @@ public class OperatorApiErrorMapper : IErrorMapper
 			[typeof(ZeroNineNinePayDepositNeedRealNameException)] = OpApiError.ZeroNineNinePayDepositNeedRealName,
 			[typeof(PreviousDepositStillProcessingException)] = OpApiError.PreviousDepositStillProcessing,
 			[typeof(PlayerBankInfoDuplicateException)] = OpApiError.BankInfoDuplicate,
-			[typeof(WandaPayNeedChineseRealNameException)] = OpApiError.WandaPayDepositNeedRealName
+			[typeof(WandaPayNeedChineseRealNameException)] = OpApiError.WandaPayDepositNeedRealName,
+			[typeof(WithdrawLimitExceedException)] = OpApiError.WithdrawLimitExceed
 		};
 
 	public bool CanProcess(Exception exception)
