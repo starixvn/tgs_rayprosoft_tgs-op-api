@@ -60,11 +60,12 @@
 		<PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.0.0-rc9" />
 		<PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.0.0-rc9" />
 		<PackageReference Include="OpenTelemetry.Instrumentation.Runtime" Version="1.5.0" />
+		<PackageReference Include="PhoenixToolkits.MessageQueue.Nats" Version="1.0.3" />
 		<PackageReference Include="ProfileViewer.OpenTelemetry.Exporter" Version="0.2.1" />
 		<PackageReference Include="Scrutor" Version="4.2.2" />
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
 		<PackageReference Include="Tgs.Interceptors" Version="0.2.1" />
-		<PackageReference Include="Tgs.MessageQueue.Nats" Version="2.3.1" />
+		<PackageReference Include="Tgs.MessageQueue.Compatible" Version="0.0.2" />
 		<PackageReference Include="Tgs.Notification.Client" Version="0.0.2" />
 		<PackageReference Include="Tgs.Payment.AlfaPay.Client" Version="0.0.7" />
 		<PackageReference Include="Tgs.Payment.FiveSevenPay.Client" Version="0.0.3" />

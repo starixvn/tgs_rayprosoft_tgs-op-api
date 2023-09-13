@@ -12,7 +12,6 @@ using NSubstitute;
 using Tgs.BrandCertificate.Clients;
 using Tgs.Core.Infrastructures.Security;
 using Tgs.FileService.Clients;
-using Tgs.MessageQueue;
 using Tgs.PlayerService.Client;
 using Tgs.ServiceUtility;
 using TGS.Apis.OperatorApi.Models.Messages;
@@ -20,6 +19,7 @@ using TGS.Core.Models.Enums;
 using TGS.Services.Operations;
 using TGS.Services.Operator;
 using TGS.Services.Operator.ApplicationServices.Player;
+using Valhalla.MessageQueue;
 using Xunit.Abstractions;
 using BrandStatus = Tgs.BrandCertificate.BrandStatus;
 

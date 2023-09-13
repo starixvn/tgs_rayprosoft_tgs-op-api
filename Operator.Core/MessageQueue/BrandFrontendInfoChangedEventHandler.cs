@@ -2,8 +2,8 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Tgs.BrandCertificateService.Protos;
-using Tgs.MessageQueue;
 using TGS.Services.Operator.PlayerRegisterFlow;
+using Valhalla.MessageQueue;
 
 namespace TGS.Services.Operator.MessageQueue;
 

@@ -249,7 +249,7 @@ builder.Services
 	.AddErrorMapper<OperatorApiErrorMapper>();
 
 builder.Services
-	.AddMessageQueue()
+	.AddPhoenixToolkitsMessageQueue()
 	.AddNatsMessageQueue(natsConfig => natsConfig
 		.ConfigQueueOptions((options, sp) =>
 		{

@@ -36,6 +36,9 @@
     <PackageReference Include="PhoenixToolkits.ExpectedObjects.Extend" Version="0.0.4" />
     <PackageReference Include="PhoenixToolkits.HttpOverStream.NamedPipe" Version="0.0.1" />
     <PackageReference Include="PhoenixToolkits.HttpOverStream.Server.AspnetCore" Version="0.0.1" />
+    <PackageReference Include="Tgs.MessageQueue.Nats" Version="2.3.1">
+      <Aliases>Tgs</Aliases>
+    </PackageReference>
     <PackageReference Include="xunit" Version="2.5.0" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.5.0">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

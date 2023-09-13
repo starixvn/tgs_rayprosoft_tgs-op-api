@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using Tgs.MessageQueue;
 using Tgs.Notification.Protos;
 using TGS.Services.Operator.Notify;
+using Valhalla.MessageQueue;
 
 namespace TGS.Services.Operator.MessageQueue;
 

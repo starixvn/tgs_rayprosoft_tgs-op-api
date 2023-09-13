@@ -21,6 +21,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="PhoenixToolkits.MessageQueue" Version="1.0.3" />
     <PackageReference Include="PhoenixToolkits.Protobuf.ExtendTypes" Version="0.0.6" />
     <PackageReference Include="Polly" Version="7.2.4" />
     <PackageReference Include="Scrutor" Version="4.2.2" />
