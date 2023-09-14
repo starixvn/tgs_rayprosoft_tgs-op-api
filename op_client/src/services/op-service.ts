@@ -295,4 +295,10 @@ export default class OperatorService {
             .post("/api/withdraw", request)
             .then(res => res.data);
     }
+
+    public submitMalakiV2ThirdPartyDepositRequest(request: DepositRequest): Promise<SuccessResponse<DepositFormCreatedResponse>> {
+        return this.http
+            .post("/api/deposit/thirdparty/malakipay-v2", request)
+            .then(res => res.data);
+    }
 }
