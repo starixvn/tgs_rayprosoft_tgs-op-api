@@ -22,7 +22,7 @@
 
   <ItemGroup>
     <PackageReference Include="ExpectedObjects" Version="3.5.4" />
-    <PackageReference Include="Jering.Javascript.NodeJS" Version="6.3.1" />
+    <PackageReference Include="Jering.Javascript.NodeJS" Version="7.0.0" />
     <PackageReference Include="JunitXml.TestLogger" Version="3.0.134" />
     <PackageReference Include="MartinCostello.Logging.XUnit" Version="0.3.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="7.0.11" />
@@ -39,8 +39,8 @@
     <PackageReference Include="Tgs.MessageQueue.Nats" Version="2.3.1">
       <Aliases>Tgs</Aliases>
     </PackageReference>
-    <PackageReference Include="xunit" Version="2.5.0" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="2.5.0">
+    <PackageReference Include="xunit" Version="2.5.1" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.5.1">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
