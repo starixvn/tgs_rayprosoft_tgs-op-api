@@ -24,6 +24,7 @@ public enum OpApiError
 	GameBalanceFailed = 213,
 	RegisterUndone = 214,
 	WithdrawLimitExceed = 215,
+	BankInfoCountLimitExceed = 216,
 	InvalidGameAction = 301,
 	TransactionIdNotFound = 302,
 	DuplicateTransaction = 303,
