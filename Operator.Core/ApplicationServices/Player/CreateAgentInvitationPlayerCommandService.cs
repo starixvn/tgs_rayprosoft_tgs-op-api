@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Tgs.BrandCertificate.Clients;
 using Tgs.PlayerService.Client;
 using Tgs.ServiceUtility;
+using Tgs.VipLevelService.Clients;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
 using TGS.Services.Operations;
@@ -12,25 +13,24 @@ using PlayerType = Tgs.PlayerService.Client.PlayerType;
 
 namespace TGS.Services.Operator.ApplicationServices.Player;
 
-internal class
-	CreateAgentInvitationPlayerCommandService : IGetService<CreatePlayerWithAgentInvitationCodeCommand,
-		CreatePlayerInfo>
+internal class CreateAgentInvitationPlayerCommandService
+	: IGetService<CreatePlayerWithAgentInvitationCodeCommand, CreatePlayerInfo>
 {
 	private readonly IAgentRepository _agentRepository;
-	private readonly IBrandOperations _brandOperations;
 	private readonly IBrandServiceClient _brandServiceClient;
+	private readonly IVipLevelServiceClient _vipLevelServiceClient;
 	private readonly IPlayerServiceClient _playerServiceClient;
 
 	public CreateAgentInvitationPlayerCommandService(
-		IBrandOperations brandOperations,
 		IAgentRepository agentRepository,
 		IPlayerServiceClient playerServiceClient,
-		IBrandServiceClient brandServiceClient)
+		IBrandServiceClient brandServiceClient,
+		IVipLevelServiceClient vipLevelServiceClient)
 	{
-		_brandOperations = brandOperations ?? throw new ArgumentNullException(nameof(brandOperations));
 		_agentRepository = agentRepository ?? throw new ArgumentNullException(nameof(agentRepository));
 		_playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
 		_brandServiceClient = brandServiceClient ?? throw new ArgumentNullException(nameof(brandServiceClient));
+		_vipLevelServiceClient = vipLevelServiceClient ?? throw new ArgumentNullException(nameof(vipLevelServiceClient));
 	}
 
 	public async ValueTask<CreatePlayerInfo> GetAsync(
@@ -48,19 +48,23 @@ internal class
 			.GetBrandInfoAsync(command.BrandId, cancellationToken)
 			.ConfigureAwait(false) ?? throw new BrandNotFoundException();
 
-		var betLimitId = await _brandOperations
-			.GetBrandDefaultBetLimitAsync(command.BrandId, command.CurrencyCode)
+		var betLimitId = await _brandServiceClient
+			.GetBrandBetLimitIdAsync(command.BrandId, cancellationToken)
 			.ConfigureAwait(false);
 
-		var vipInfo = await _brandServiceClient
-			.GetVipLevelInfosAsync(command.BrandId, cancellationToken)
+		if (!betLimitId.HasValue)
+			throw new InvalidOperationException(
+				$"Brand with id '{command.BrandId}' doesn't have default bet limit.");
+
+		var vipInfo = await _vipLevelServiceClient
+			.GetBrandAllVipLevelsAsync(command.BrandId, cancellationToken)
 			.FirstOrDefaultAsync(x => x.Level == 1, cancellationToken)
 			.ConfigureAwait(false);
 
 		var resultPlayerCode = await CreatePlayerByAgentAsync(
 			command,
 			command.CurrencyCode,
-			betLimitId,
+			betLimitId.Value,
 			vipInfo!.Id).ConfigureAwait(false);
 
 		return new CreatePlayerInfo(resultPlayerCode, true);

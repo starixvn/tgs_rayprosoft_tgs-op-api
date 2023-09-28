@@ -51,10 +51,6 @@ ValidatorOptions.Global.LanguageManager.Enabled = false;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Configuration
-	.AddJsonFile("/config/appsettings.json", true)
-	.AddEnvironmentVariables();
-
 builder.Logging
 	.AddOpenTelemetry(options =>
 	{
@@ -221,6 +217,9 @@ builder.Services
 		.ConfigureHttpClient(httpClient => httpClient.BaseAddress =
 			builder.Configuration.GetValue<Uri>("Operator:StationLetterBaseUrl")))
 	.AddIdentityVerifiers()
+	.AddVipLevelServiceClient(httpBuilder => httpBuilder
+		.ConfigureHttpClient(httpClient => httpClient.BaseAddress =
+			builder.Configuration.GetValue<Uri>("Operator:VipLevelServiceBaseUrl")!))
 	.AddHttpClient<IEmailClient, EmailClient>((sp, c) =>
 	{
 		var url = builder.Configuration.GetSection("Email:Url");
