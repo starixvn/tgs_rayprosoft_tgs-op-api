@@ -74,12 +74,14 @@ export default class OperatorService {
             .then(res => res.data);
     }
 
-    public getPlayerStationLetters(page: number, rows: number): Promise<SuccessResponse<PagingResponse<StationLetterListItem>>> {
+    public getPlayerStationLetters(onlyUnread: boolean, page: number, rows: number)
+        : Promise<SuccessResponse<PagingResponse<StationLetterListItem>>> {
         return this.http
             .get(
                 '/api/station-letter',
                 {
                     params: {
+                        unread: onlyUnread ? true : undefined,
                         page,
                         rows
                     }
