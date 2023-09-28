@@ -114,7 +114,7 @@ public class StationLetterV2Controller : ControllerBase
 			HttpContext.RequestAborted).ConfigureAwait(false);
 	}
 
-	[HttpPut(Name = "SendStationLetterToCustomService")]
+	[HttpPut(Name = "SendStationLetterToCustomerService")]
 	[AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
 	public async Task SendLetterAsync(
 		[FromServices] IGetService<BrandQuery, Services.Operator.BrandInfo> getBrandService,
