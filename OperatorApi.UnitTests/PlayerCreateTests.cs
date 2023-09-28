@@ -1,19 +1,15 @@
 ﻿#nullable enable
 
-using System;
-using System.Linq;
-using System.Threading.Tasks;
 using FluentValidation.TestHelper;
 using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
-using NUnit.Framework;
+using Tgs.BrandCertificate.Clients;
+using Tgs.PlayerService.Client;
+using Tgs.VipLevelService.Clients;
 using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Apis.OperatorApi.Validators;
-using Tgs.BrandCertificate.Clients;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
-using Tgs.PlayerService.Client;
-using TGS.Services.Operations;
 using TGS.Services.Operator;
 using TGS.Services.Operator.ApplicationServices.Player;
 using TGS.Services.Operator.PlayerRegisterFlow;
@@ -57,13 +53,27 @@ public class PlayerCreateTests
 	[Test]
 	public void Register_Player_With_Agent_InvitationCode_Not_Found_Should_Throw_Error()
 	{
+		var fakeAgentRepository = Substitute.For<IAgentRepository>();
+		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
+		var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
+		var fakeVipLevelServiceClient = Substitute.For<IVipLevelServiceClient>();
+
+		var sut = new CreateAgentInvitationPlayerCommandService(
+			fakeAgentRepository,
+			fakePlayerServiceClient,
+			fakeBrandServiceClient,
+			fakeVipLevelServiceClient);
+
 		var brandId = Guid.NewGuid();
 		var invitationCode = "6rd4mq";
 
-		var fakeAgentRepository = Substitute.For<IAgentRepository>();
-		var fakeBrandOperations = Substitute.For<IBrandOperations>();
-		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
-		var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
+		var query = new CreatePlayerWithAgentInvitationCodeCommand(
+			brandId,
+			"username",
+			"password",
+			"CNY",
+			invitationCode,
+			false);
 
 		_ = fakeAgentRepository
 			.GetAgentInfoByInvitationCodeAsync(
@@ -81,24 +91,33 @@ public class PlayerCreateTests
 
 		var vipLevelInfos = new[]
 		{
-			new VipLevelInfo(Guid.NewGuid(), 1)
+			new Tgs.VipLevelService.Clients.VipLevelInfo(
+				Guid.NewGuid(),
+				1,
+				brandId,
+				0M,
+				0M,
+				0M,
+				0M,
+				false,
+				0M,
+				0M,
+				0M,
+				0M,
+				0M,
+				0M,
+				0M,
+				0M,
+				0M,
+				0,
+				0M)
 		};
 
-		_ = fakeBrandServiceClient.GetVipLevelInfosAsync(Arg.Is(brandId)).Returns(vipLevelInfos.ToAsyncEnumerable());
+		_ = fakeVipLevelServiceClient.GetBrandAllVipLevelsAsync(Arg.Is(brandId))
+			.Returns(vipLevelInfos.ToAsyncEnumerable());
 
-		var sut = new CreateAgentInvitationPlayerCommandService(
-			fakeBrandOperations,
-			fakeAgentRepository,
-			fakePlayerServiceClient,
-			fakeBrandServiceClient);
-
-		var query = new CreatePlayerWithAgentInvitationCodeCommand(
-			brandId,
-			"username",
-			"password",
-			"CNY",
-			invitationCode,
-			false);
+		_ = fakeBrandServiceClient.GetBrandBetLimitIdAsync(Arg.Is(brandId))
+			.Returns(100);
 
 		// act
 		_ = Assert.ThrowsAsync<InvalidInvitationCodeException>(
@@ -109,14 +128,28 @@ public class PlayerCreateTests
 	public async Task Register_Player_With_Existent_InvitationCode()
 	{
 		// arrange
+		var fakeAgentRepository = Substitute.For<IAgentRepository>();
+		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
+		var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
+		var fakeVipServiceClient = Substitute.For<IVipLevelServiceClient>();
+
+		var sut = new CreateAgentInvitationPlayerCommandService(
+			fakeAgentRepository,
+			fakePlayerServiceClient,
+			fakeBrandServiceClient,
+			fakeVipServiceClient);
+
 		var brandId = Guid.NewGuid();
 		var invitationCode = "6rd4mq";
 		var agentId = Guid.NewGuid();
 
-		var fakeAgentRepository = Substitute.For<IAgentRepository>();
-		var fakeBrandOperations = Substitute.For<IBrandOperations>();
-		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
-		var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
+		var command = new CreatePlayerWithAgentInvitationCodeCommand(
+			brandId,
+			"username",
+			"password",
+			"CNY",
+			invitationCode,
+			false);
 
 		_ = fakeAgentRepository
 			.GetAgentInfoByInvitationCodeAsync(
@@ -140,24 +173,33 @@ public class PlayerCreateTests
 
 		var vipLevelInfos = new[]
 		{
-			new VipLevelInfo(Guid.NewGuid(), 1)
+			new Tgs.VipLevelService.Clients.VipLevelInfo(
+				Guid.NewGuid(),
+				1,
+				brandId,
+				0M,
+				0M,
+				0M,
+				0M,
+				false,
+				0M,
+				0M,
+				0M,
+				0M,
+				0M,
+				0M,
+				0M,
+				0M,
+				0M,
+				0,
+				0M)
 		};
 
-		_ = fakeBrandServiceClient.GetVipLevelInfosAsync(Arg.Is(brandId)).Returns(vipLevelInfos.ToAsyncEnumerable());
+		_ = fakeVipServiceClient.GetBrandAllVipLevelsAsync(Arg.Is(brandId))
+			.Returns(vipLevelInfos.ToAsyncEnumerable());
 
-		var sut = new CreateAgentInvitationPlayerCommandService(
-			fakeBrandOperations,
-			fakeAgentRepository,
-			fakePlayerServiceClient,
-			fakeBrandServiceClient);
-
-		var command = new CreatePlayerWithAgentInvitationCodeCommand(
-			brandId,
-			"username",
-			"password",
-			"CNY",
-			invitationCode,
-			false);
+		_ = fakeBrandServiceClient.GetBrandBetLimitIdAsync(Arg.Is(brandId))
+			.Returns(100);
 
 		// act
 		var actual = await sut.GetAsync(command);
@@ -174,12 +216,25 @@ public class PlayerCreateTests
 	[Test]
 	public async Task Register_Player_With_Existent_Upper_PlayerCode()
 	{
+		var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
+		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
+		var fakeVipLevelClient = Substitute.For<IVipLevelServiceClient>();
+
+		var sut = new CreatePlayerInvitationPlayerCommandService(
+			fakePlayerServiceClient,
+			fakeBrandServiceClient,
+			fakeVipLevelClient);
+
 		var brandId = Guid.NewGuid();
 		var upperPlayerCode = "upper";
 
-		var fakeBrandOperations = Substitute.For<IBrandOperations>();
-		var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
-		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
+		var command = new CreatePlayerWithPlayerInvitationCommand(
+			brandId,
+			"username",
+			"password",
+			"CNY",
+			upperPlayerCode,
+			false);
 
 		_ = fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId))
 			.Returns(ValueTask.FromResult<BrandInfo?>(
@@ -199,23 +254,33 @@ public class PlayerCreateTests
 
 		var vipLevelInfos = new[]
 		{
-			new VipLevelInfo(Guid.NewGuid(), 1)
+			new Tgs.VipLevelService.Clients.VipLevelInfo(
+				Guid.NewGuid(),
+				1,
+				brandId,
+				0M,
+				0M,
+				0M,
+				0M,
+				false,
+				0M,
+				0M,
+				0M,
+				0M,
+				0M,
+				0M,
+				0M,
+				0M,
+				0M,
+				0,
+				0M)
 		};
 
-		_ = fakeBrandServiceClient.GetVipLevelInfosAsync(Arg.Is(brandId)).Returns(vipLevelInfos.ToAsyncEnumerable());
+		_ = fakeVipLevelClient.GetBrandAllVipLevelsAsync(Arg.Is(brandId))
+			.Returns(vipLevelInfos.ToAsyncEnumerable());
 
-		var sut = new CreatePlayerInvitationPlayerCommandService(
-			fakeBrandOperations,
-			fakePlayerServiceClient,
-			fakeBrandServiceClient);
-
-		var command = new CreatePlayerWithPlayerInvitationCommand(
-			brandId,
-			"username",
-			"password",
-			"CNY",
-			upperPlayerCode,
-			false);
+		_ = fakeBrandServiceClient.GetBrandBetLimitIdAsync(Arg.Is(brandId))
+			.Returns(100);
 
 		var actual = await sut.GetAsync(command);
 
@@ -232,12 +297,24 @@ public class PlayerCreateTests
 	public async Task Register_Player_With_No_InvitationCode()
 	{
 		// arrange
-		var brandId = Guid.NewGuid();
-
-		var fakeBrandOperations = Substitute.For<IBrandOperations>();
-
 		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
 		var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
+		var fakeVipServiceClient = Substitute.For<IVipLevelServiceClient>();
+
+		var sut = new CreatePlayerCommandService(
+			fakePlayerServiceClient,
+			fakeBrandServiceClient,
+			fakeVipServiceClient);
+
+		var brandId = Guid.NewGuid();
+		var password = "password";
+
+		var command = new CreatePlayerCommand(
+			brandId,
+			"username",
+			password,
+			"CNY",
+			false);
 
 		_ = fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId))
 			.Returns(ValueTask.FromResult<BrandInfo?>(
@@ -250,24 +327,33 @@ public class PlayerCreateTests
 
 		var vipLevelInfos = new[]
 		{
-			new VipLevelInfo(Guid.NewGuid(), 1)
+			new Tgs.VipLevelService.Clients.VipLevelInfo(
+				Guid.NewGuid(),
+				1,
+				brandId,
+				0M,
+				0M,
+				0M,
+				0M,
+				false,
+				0M,
+				0M,
+				0M,
+				0M,
+				0M,
+				0M,
+				0M,
+				0M,
+				0M,
+				0,
+				0M)
 		};
 
-		_ = fakeBrandServiceClient.GetVipLevelInfosAsync(Arg.Is(brandId)).Returns(vipLevelInfos.ToAsyncEnumerable());
+		_ = fakeVipServiceClient.GetBrandAllVipLevelsAsync(Arg.Is(brandId))
+			.Returns(vipLevelInfos.ToAsyncEnumerable());
 
-		var sut = new CreatePlayerCommandService(
-			fakeBrandOperations,
-			fakePlayerServiceClient,
-			fakeBrandServiceClient);
-
-		var password = "password";
-
-		var command = new CreatePlayerCommand(
-			brandId,
-			"username",
-			password,
-			"CNY",
-			false);
+		_ = fakeBrandServiceClient.GetBrandBetLimitIdAsync(Arg.Is(brandId))
+			.Returns(100);
 
 		// act
 		var actual = await sut.GetAsync(command);
@@ -284,34 +370,18 @@ public class PlayerCreateTests
 	public void Register_Player_With_Non_Existent_InvitationCode()
 	{
 		// arrange
-		var brandId = Guid.NewGuid();
-
-		var fakeBrandOperations = Substitute.For<IBrandOperations>();
 		var fakeAgentRepository = Substitute.For<IAgentRepository>();
 		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
 		var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
-
-		_ = fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId))
-			.Returns(new BrandInfo
-			{
-				Id = brandId,
-				Code = "code",
-				Currency = "CNY"
-			});
-
-		var vipLevelInfos = new[]
-		{
-			new VipLevelInfo(Guid.NewGuid(), 1)
-		};
-
-		_ = fakeBrandServiceClient.GetVipLevelInfosAsync(Arg.Is(brandId)).Returns(vipLevelInfos.ToAsyncEnumerable());
+		var fakeVipServiceClient = Substitute.For<IVipLevelServiceClient>();
 
 		var sut = new CreateAgentInvitationPlayerCommandService(
-			fakeBrandOperations,
 			fakeAgentRepository,
 			fakePlayerServiceClient,
-			fakeBrandServiceClient);
+			fakeBrandServiceClient,
+			fakeVipServiceClient);
 
+		var brandId = Guid.NewGuid();
 		var password = "password";
 		var invitationCode = "NonExistentCode";
 
@@ -323,18 +393,69 @@ public class PlayerCreateTests
 			invitationCode,
 			false);
 
+		_ = fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId))
+			.Returns(new BrandInfo
+			{
+				Id = brandId,
+				Code = "code",
+				Currency = "CNY"
+			});
+
+		var vipLevelInfos = new[]
+		{
+			new Tgs.VipLevelService.Clients.VipLevelInfo(
+				Guid.NewGuid(),
+				1,
+				brandId,
+				0M,
+				0M,
+				0M,
+				0M,
+				false,
+				0M,
+				0M,
+				0M,
+				0M,
+				0M,
+				0M,
+				0M,
+				0M,
+				0M,
+				0,
+				0M)
+		};
+
+		_ = fakeVipServiceClient.GetBrandAllVipLevelsAsync(Arg.Is(brandId))
+			.Returns(vipLevelInfos.ToAsyncEnumerable());
+
+		_ = fakeBrandServiceClient.GetBrandBetLimitIdAsync(Arg.Is(brandId))
+			.Returns(100);
+
 		_ = Assert.ThrowsAsync<InvalidInvitationCodeException>(async () => await sut.GetAsync(query));
 	}
 
 	[Test]
 	public void Register_Player_With_Non_Existent_Upper_PlayerCode()
 	{
+		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
+		var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
+		var fakeVipServiceClient = Substitute.For<IVipLevelServiceClient>();
+
+		var sut = new CreatePlayerInvitationPlayerCommandService(
+			fakePlayerServiceClient,
+			fakeBrandServiceClient,
+			fakeVipServiceClient);
+
 		var brandId = Guid.NewGuid();
 		var upperPlayerCode = "upper";
 
-		var fakeBrandOperations = Substitute.For<IBrandOperations>();
-		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
-		var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
+		var command = new CreatePlayerWithPlayerInvitationCommand(
+			brandId,
+			"username",
+			"password",
+			"CNY",
+			upperPlayerCode,
+			false);
 
 		_ = fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId))
 			  .Returns(new BrandInfo
@@ -346,23 +467,33 @@ public class PlayerCreateTests
 
 		var vipLevelInfos = new[]
 		{
-			new VipLevelInfo(Guid.NewGuid(), 1)
+			new Tgs.VipLevelService.Clients.VipLevelInfo(
+				Guid.NewGuid(),
+				1,
+				brandId,
+				0M,
+				0M,
+				0M,
+				0M,
+				false,
+				0M,
+				0M,
+				0M,
+				0M,
+				0M,
+				0M,
+				0M,
+				0M,
+				0M,
+				0,
+				0M)
 		};
 
-		_ = fakeBrandServiceClient.GetVipLevelInfosAsync(Arg.Is(brandId)).Returns(vipLevelInfos.ToAsyncEnumerable());
+		_ = fakeVipServiceClient.GetBrandAllVipLevelsAsync(Arg.Is(brandId))
+			.Returns(vipLevelInfos.ToAsyncEnumerable());
 
-		var sut = new CreatePlayerInvitationPlayerCommandService(
-			fakeBrandOperations,
-			fakePlayerServiceClient,
-			fakeBrandServiceClient);
-
-		var command = new CreatePlayerWithPlayerInvitationCommand(
-			brandId,
-			"username",
-			"password",
-			"CNY",
-			upperPlayerCode,
-			false);
+		_ = fakeBrandServiceClient.GetBrandBetLimitIdAsync(Arg.Is(brandId))
+			.Returns(100);
 
 		_ = Assert.ThrowsAsync<InvalidInvitationCodeException>(async () => await sut.GetAsync(command));
 	}
@@ -370,12 +501,25 @@ public class PlayerCreateTests
 	[Test]
 	public void Register_Player_With_Other_Brand_Upper_PlayerCode_Should_Throw_Error()
 	{
+		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
+		var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
+		var fakeVipServiceClient = Substitute.For<IVipLevelServiceClient>();
+
+		var sut = new CreatePlayerInvitationPlayerCommandService(
+			fakePlayerServiceClient,
+			fakeBrandServiceClient,
+			fakeVipServiceClient);
+
 		var brandId = Guid.NewGuid();
 		var upperPlayerCode = "upper";
 
-		var fakeBrandOperations = Substitute.For<IBrandOperations>();
-		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
-		var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
+		var query = new CreatePlayerWithPlayerInvitationCommand(
+			brandId,
+			"username",
+			"password",
+			"CNY",
+			upperPlayerCode,
+			false);
 
 		_ = fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId))
 			.Returns(ValueTask.FromResult<BrandInfo?>(
@@ -393,25 +537,35 @@ public class PlayerCreateTests
 				BrandId = Guid.NewGuid()
 			});
 
+		_ = fakeBrandServiceClient.GetBrandBetLimitIdAsync(Arg.Is(brandId))
+			.Returns(100);
+
 		var vipLevelInfos = new[]
 		{
-			new VipLevelInfo(Guid.NewGuid(), 1)
+			new Tgs.VipLevelService.Clients.VipLevelInfo(
+				Guid.NewGuid(),
+				1,
+				brandId,
+				0M,
+				0M,
+				0M,
+				0M,
+				false,
+				0M,
+				0M,
+				0M,
+				0M,
+				0M,
+				0M,
+				0M,
+				0M,
+				0M,
+				0,
+				0M)
 		};
 
-		_ = fakeBrandServiceClient.GetVipLevelInfosAsync(Arg.Is(brandId)).Returns(vipLevelInfos.ToAsyncEnumerable());
-
-		var sut = new CreatePlayerInvitationPlayerCommandService(
-			fakeBrandOperations,
-			fakePlayerServiceClient,
-			fakeBrandServiceClient);
-
-		var query = new CreatePlayerWithPlayerInvitationCommand(
-			brandId,
-			"username",
-			"password",
-			"CNY",
-			upperPlayerCode,
-			false);
+		_ = fakeVipServiceClient.GetBrandAllVipLevelsAsync(Arg.Is(brandId))
+			.Returns(vipLevelInfos.ToAsyncEnumerable());
 
 		// act
 		_ = Assert.ThrowsAsync<InvalidInvitationCodeException>(

@@ -3,10 +3,13 @@ using System.Net.Http.Headers;
 using System.Runtime.InteropServices;
 using System.Security.Claims;
 using System.Text;
+using System.Text.Json;
 using Jering.Javascript.NodeJS;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using NSubstitute;
 using Tgs.BrandCertificate.Clients;
@@ -14,11 +17,14 @@ using Tgs.Core.Infrastructures.Security;
 using Tgs.FileService.Clients;
 using Tgs.PlayerService.Client;
 using Tgs.ServiceUtility;
+using Tgs.VipLevelService.Clients;
+using TGS.Apis.OperatorApi.Models;
 using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Core.Models.Enums;
 using TGS.Services.Operations;
 using TGS.Services.Operator;
 using TGS.Services.Operator.ApplicationServices.Player;
+using TGS.Services.Operator.PlayerRegisterFlow;
 using Valhalla.MessageQueue;
 using Xunit.Abstractions;
 using BrandStatus = Tgs.BrandCertificate.BrandStatus;
@@ -155,7 +161,7 @@ public class PlayerTests
 				PlayerIdentityEnabled = true,
 			});
 
-		var request = new 
+		var request = new
 		{
 			Id = "newIdentity",
 			Realname = "newRealName"
@@ -449,5 +455,127 @@ public class PlayerTests
 				Arg.Is("tgs.operator.player.logged_in"),
 				Arg.Any<ReadOnlyMemory<byte>>(),
 				Arg.Any<CancellationToken>());
+	}
+
+	[Fact]
+	public async Task 註冊玩家()
+	{
+		var channelName = Guid.NewGuid().ToString();
+
+		var fakeBrandCertClient = Substitute.For<IBrandCertificateClient>();
+		var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
+		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
+		var fakeBrandRepository = Substitute.For<IBrandRepository>();
+		var fakeVipServiceClient = Substitute.For<IVipLevelServiceClient>();
+
+		_ = fakeBrandCertClient.GetSystemValidateSecurityKeyAsync(Arg.Any<CancellationToken>())
+			.Returns(TestOperatorApplication.TestSecurityKey);
+
+		var brandId = Guid.NewGuid();
+		var brandCode = "Test";
+		var brandToken = TestOperatorApplication.MakeTestBrandToken(brandId, brandCode);
+		var secretKey = "N2KAnljo5zbLCZDSoUBFJ70ONsy";
+
+		_ = fakeBrandRepository.GetSecretKeyAsync(
+				Arg.Is(brandId),
+				Arg.Any<CancellationToken>())
+			.Returns(secretKey);
+
+		using var web = TestOperatorApplication.Builder
+			.UseTestChannelServer(channelName)
+			.ConfigureLogging(logging => logging.AddXUnit(_testOutputHelper))
+			.ConfigureServices(services => services
+				.AddSingleton(fakeBrandCertClient)
+				.AddSingleton(fakeBrandServiceClient)
+				.AddSingleton(fakePlayerServiceClient)
+				.AddSingleton(fakeBrandRepository)
+				.AddSingleton(fakeVipServiceClient))
+			.Build();
+
+		await web.StartAsync();
+
+		var stepName = "CreatePlayer";
+		var userNamePasswordInput = new CreatePlayerRegisterFlowStep.CreatePlayerInputData
+		{
+			UserName = "test1",
+			Password = "password"
+		};
+
+		var request = new PlayerRegisterFlowViewModel
+		{
+			Type = stepName,
+			Input = JsonSerializer.SerializeToDocument(userNamePasswordInput)
+		};
+
+		_ = fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId), Arg.Any<CancellationToken>())
+			.Returns(new Tgs.BrandCertificate.Clients.BrandInfo
+			{
+				Id = brandId,
+				Code = brandCode,
+				Currency = "CNY",
+				BankInfoRegisterFlowEnabled = false
+			});
+
+		_ = fakeBrandServiceClient.GetBrandFrontendInfoAsync(Arg.Is(brandId), Arg.Any<CancellationToken>())
+			.Returns(new BrandFrontendInfo(
+				null,
+				null,
+				null,
+				null));
+
+		_ = fakeBrandServiceClient.GetBrandBetLimitIdAsync(Arg.Is(brandId), Arg.Any<CancellationToken>())
+			.Returns(100);
+
+		_ = fakeVipServiceClient.GetBrandAllVipLevelsAsync(Arg.Is(brandId), Arg.Any<CancellationToken>())
+			.Returns(new[]
+			{
+				new Tgs.VipLevelService.Clients.VipLevelInfo(
+					Guid.NewGuid(),
+					1,
+					brandId,
+					0M,
+					0M,
+					0M,
+					0M,
+					false,
+					0M,
+					0M,
+					0M,
+					0M,
+					0M,
+					0M,
+					0M,
+					0M,
+					0M,
+					0,
+					0M)
+			}.ToAsyncEnumerable());
+
+		var isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "true" : "false";
+		var nodeModule = $$"""
+			const axiosConfigFactory = require('./models/axios-configuration.js').default;
+			const OperatorService = require('./services/op-service.js').default;
+
+			module.exports = async (brandToken, stepRequest) =>
+			{
+				let instance = axiosConfigFactory("{{channelName}}", {{isWindows}}, brandToken);
+
+				let svc = new OperatorService(instance);
+
+				return await svc.registerPlayer(stepRequest);
+			};
+		""";
+
+		// Act
+		var response = await StaticNodeJSService.InvokeFromStringAsync<string>(
+			nodeModule,
+			args: new object?[] { brandToken, request });
+
+		var actual = JsonSerializer.Deserialize<SuccessResponse<PlayerRegisterFlowResponseViewModel>>(
+			response!,
+			web.Services.GetRequiredService<IOptions<JsonOptions>>().Value.JsonSerializerOptions);
+
+		// Assert
+		Assert.True(actual?.Data.IsCompleted);
 	}
 }

@@ -6,9 +6,84 @@ import path from 'path';
 export default class OperatorService {
     constructor(private http: AxiosInstance) { }
 
+    public async createIdentityAuthenticationForm(
+        request: CreateIdentityAuthenticationFormRequest,
+        filePath: string): Promise<void> {
+        let fileName = path.basename(filePath);
+        let stream = fs.readFileSync(filePath);
+
+        let formData = new FormData();
+        formData.append(
+            "request",
+            JSON.stringify(request),
+            {
+                "contentType": "application/json"
+            });
+
+        formData.append("file", stream, { filename: fileName });
+
+        await this.http
+            .post('/api/player/identity/upload', formData, {
+                headers: {
+                    ...formData.getHeaders(),
+                    'Content-Length': formData.getLengthSync()
+                }
+            });
+    }
+
+    public createWithdraw(request: CreateWithdrawRequest): Promise<string> {
+        return this.http
+            .post("/api/withdraw", request)
+            .then(res => res.data);
+    }
+
+    public getAllTypeBucketAmounts(): Promise<Iterable<TypeBucketResult>> {
+        return this.http
+            .get("/api/player/bucket/type/amount")
+            .then(res => res.data);
+    }
+
+    public getDeliveryLetterContent(deliveryId: string): Promise<SuccessResponse<DeliveryLetter>> {
+        return this.http
+            .get(`/api/delivery-box/${deliveryId}`)
+            .then(res => res.data);
+    }
+
     public getMaintainGameProviders(): Promise<SuccessResponse<GameProviderStatus[]>> {
         return this.http
             .get("/api/gameprovider/maintain")
+            .then(res => res.data);
+    }
+
+    public getPlayerDeliverLetters(page: number, rows: number): Promise<SuccessResponse<PagingResponse<DeliveryLetterListItem>>> {
+        return this.http
+            .get(
+                '/api/delivery-box',
+                {
+                    params: {
+                        page,
+                        rows
+                    }
+                })
+            .then(res => res.data);
+    }
+
+    public getPlayerStationLetterContent(letterId: string): Promise<SuccessResponse<StationLetter | null>> {
+        return this.http
+            .get(`/api/station-letter/${letterId}`)
+            .then(res => res.data);
+    }
+
+    public getPlayerStationLetters(page: number, rows: number): Promise<SuccessResponse<PagingResponse<StationLetterListItem>>> {
+        return this.http
+            .get(
+                '/api/station-letter',
+                {
+                    params: {
+                        page,
+                        rows
+                    }
+                })
             .then(res => res.data);
     }
 
@@ -26,20 +101,76 @@ export default class OperatorService {
             .then<PagingResponse<TransactionLog>>(res => res.data);
     }
 
-    public submitManualDepositUsdt(
-        amount: number,
-        paymentid: string,
-        promotionid: string | null,
-        banktype: string): Promise<SuccessResponse<string>> {
-        return this.http.put(
-            "/api/deposit/manual/usdt",
-            {
-                amount,
-                paymentid,
-                promotionid,
-                banktype
-            })
-            .then<SuccessResponse<string>>(res => res.data);
+    public getWithdrawRequireBucketAmount(): Promise<number> {
+        return this.http
+            .get("/api/player/bucket/amount")
+            .then(res => res.data);
+    }
+
+    public getWithdrawRequireBucketAmountOld(): Promise<number> {
+        return this.http
+            .get("/api/withdraw/player/amount")
+            .then(res => res.data);
+    }
+
+    public playerLogin(username: string, password: string, platformtype: number): Promise<LoginResponse> {
+        return this.http
+            .post(
+                "/api/player/login",
+                {
+                    username,
+                    password,
+                    platformtype
+                })
+            .then<LoginResponse>(res => res.data);
+    }
+
+    public registerPlayer<TInput>(stepData: PlayerRegisterStep<TInput>): Promise<SuccessResponse<PlayerRegisterStepResponse>> {
+        return this.http
+            .post("/api/player/register", stepData)
+            .then(res => res.data);
+    }
+
+    public replyStationLetter(letterId: string, request: ReplyStationLetterRequest): Promise<void> {
+        return this.http
+            .put(`/api/station-letter/${letterId}:reply`, request)
+            .then(res => res.data);
+    }
+
+    public sendStationLetterToCustomService(request: SendStationLetterRequest): Promise<void> {
+        return this.http
+            .put('/api/station-letter', request)
+            .then(res => res.data);
+    }
+
+    public setStationLetterHaveRead(letterId: string): Promise<void> {
+        return this.http
+            .patch(`/api/station-letter/${letterId}:read`)
+            .then(res => res.data);
+    }
+
+    public submitFiveSevenThirdPartyDepositRequest(request: DepositRequest): Promise<SuccessResponse<DepositFormCreatedResponse>> {
+        return this.http
+            .post("/api/deposit/thirdparty/fivesevenpay", request)
+            .then<SuccessResponse<DepositFormCreatedResponse>>(res => res.data);
+    }
+
+    public submitFiveSevenThirdPartyDepositV2Request(request: DepositRequest): Promise<SuccessResponse<DepositFormCreatedResponse>> {
+        return this.http
+            .post("/api/deposit/thirdparty/fivesevenpay-v2", request)
+            .then(res => res.data);
+    }
+
+    public submitGCThirdPartyDepositRequest(request: DepositRequest): Promise<SuccessResponse<DepositFormCreatedResponse>> {
+        return this.http
+            .post("/api/deposit/thirdparty/gcpay", request)
+            .then<SuccessResponse<DepositFormCreatedResponse>>(res => res.data);
+    }
+
+    public submitMalakiV2ThirdPartyDepositRequest(request: DepositRequest): Promise<SuccessResponse<DepositFormCreatedResponse>> {
+        return this.http
+            .post("/api/deposit/thirdparty/malakipay-v2", request)
+            .then(res => res.data);
     }
 
     public submitManualDepositBankRequest(
@@ -63,6 +194,29 @@ export default class OperatorService {
                     name,
                     note,
                     realname
+                })
+            .then<SuccessResponse<string>>(res => res.data);
+    }
+
+    public submitManualDepositCoinsphRequest(
+        amount: number,
+        paymentid: string,
+        promotionid: string | null,
+        banktype: string,
+        name: string | null,
+        phone: string | null,
+        address: string | null): Promise<SuccessResponse<string>> {
+        return this.http
+            .put(
+                "/api/deposit/manual/coinsph",
+                {
+                    amount,
+                    paymentid,
+                    promotionid,
+                    banktype,
+                    name,
+                    phone,
+                    address
                 })
             .then<SuccessResponse<string>>(res => res.data);
     }
@@ -113,96 +267,20 @@ export default class OperatorService {
             .then<SuccessResponse<string>>(res => res.data);
     }
 
-    public playerLogin(username: string, password: string, platformtype: number): Promise<LoginResponse> {
-        return this.http
-            .post(
-                "/api/player/login",
-                {
-                    username,
-                    password,
-                    platformtype
-                })
-            .then<LoginResponse>(res => res.data);
-    }
-
-    public submitPhpGoThirdPartyDepositRequest(request: DepositRequest): Promise<SuccessResponse<DepositFormCreatedResponse>> {
-        return this.http
-            .post("/api/deposit/thirdparty/phpgopay", request)
-            .then<SuccessResponse<DepositFormCreatedResponse>>(res => res.data);
-    }
-
-    public submitFiveSevenThirdPartyDepositRequest(request: DepositRequest): Promise<SuccessResponse<DepositFormCreatedResponse>> {
-        return this.http
-            .post("/api/deposit/thirdparty/fivesevenpay", request)
-            .then<SuccessResponse<DepositFormCreatedResponse>>(res => res.data);
-    }
-
-    public submitFiveSevenThirdPartyDepositV2Request(request: DepositRequest): Promise<SuccessResponse<DepositFormCreatedResponse>> {
-        return this.http
-            .post("/api/deposit/thirdparty/fivesevenpay-v2", request)
-            .then(res => res.data);
-    }
-
-    public getPlayerStationLetters(page: number, rows: number): Promise<SuccessResponse<PagingResponse<StationLetterListItem>>> {
-        return this.http
-            .get(
-                '/api/station-letter',
-                {
-                    params: {
-                        page,
-                        rows
-                    }
-                })
-            .then(res => res.data);
-    }
-
-    public getPlayerStationLetterContent(letterId: string): Promise<SuccessResponse<StationLetter | null>> {
-        return this.http
-            .get(`/api/station-letter/${letterId}`)
-            .then(res => res.data);
-    }
-
-    public sendStationLetterToCustomService(request: SendStationLetterRequest): Promise<void> {
-        return this.http
-            .put('/api/station-letter', request)
-            .then(res => res.data);
-    }
-
-    public replyStationLetter(letterId: string, request: ReplyStationLetterRequest): Promise<void> {
-        return this.http
-            .put(`/api/station-letter/${letterId}:reply`, request)
-            .then(res => res.data);
-    }
-
-    public setStationLetterHaveRead(letterId: string): Promise<void> {
-        return this.http
-            .patch(`/api/station-letter/${letterId}:read`)
-            .then(res => res.data);
-    }
-
-    public getPlayerDeliverLetters(page: number, rows: number): Promise<SuccessResponse<PagingResponse<DeliveryLetterListItem>>> {
-        return this.http
-            .get(
-                '/api/delivery-box',
-                {
-                    params: {
-                        page,
-                        rows
-                    }
-                })
-            .then(res => res.data);
-    }
-
-    public getDeliveryLetterContent(deliveryId: string): Promise<SuccessResponse<DeliveryLetter>> {
-        return this.http
-            .get(`/api/delivery-box/${deliveryId}`)
-            .then(res => res.data);
-    }
-
-    public submitMetaThirdPartyDepositRequest(request: DepositRequest): Promise<SuccessResponse<DepositFormCreatedResponse>> {
-        return this.http
-            .post("/api/deposit/thirdparty/metapay", request)
-            .then<SuccessResponse<DepositFormCreatedResponse>>(res => res.data);
+    public submitManualDepositUsdt(
+        amount: number,
+        paymentid: string,
+        promotionid: string | null,
+        banktype: string): Promise<SuccessResponse<string>> {
+        return this.http.put(
+            "/api/deposit/manual/usdt",
+            {
+                amount,
+                paymentid,
+                promotionid,
+                banktype
+            })
+            .then<SuccessResponse<string>>(res => res.data);
     }
 
     public submitMetaBankDepositRequest(request: DepositRequest): Promise<SuccessResponse<DepositFormCreatedResponse>> {
@@ -211,94 +289,21 @@ export default class OperatorService {
             .then<SuccessResponse<DepositFormCreatedResponse>>(res => res.data);
     }
 
-    public submitGCThirdPartyDepositRequest(request: DepositRequest): Promise<SuccessResponse<DepositFormCreatedResponse>> {
+    public submitMetaThirdPartyDepositRequest(request: DepositRequest): Promise<SuccessResponse<DepositFormCreatedResponse>> {
         return this.http
-            .post("/api/deposit/thirdparty/gcpay", request)
+            .post("/api/deposit/thirdparty/metapay", request)
             .then<SuccessResponse<DepositFormCreatedResponse>>(res => res.data);
     }
 
-    public submitManualDepositCoinsphRequest(
-        amount: number,
-        paymentid: string,
-        promotionid: string | null,
-        banktype: string,
-        name: string | null,
-        phone: string | null,
-        address: string | null): Promise<SuccessResponse<string>> {
+    public submitPhpGoThirdPartyDepositRequest(request: DepositRequest): Promise<SuccessResponse<DepositFormCreatedResponse>> {
         return this.http
-            .put(
-                "/api/deposit/manual/coinsph",
-                {
-                    amount,
-                    paymentid,
-                    promotionid,
-                    banktype,
-                    name,
-                    phone,
-                    address
-                })
-            .then<SuccessResponse<string>>(res => res.data);
+            .post("/api/deposit/thirdparty/phpgopay", request)
+            .then<SuccessResponse<DepositFormCreatedResponse>>(res => res.data);
     }
 
     public submitWinThirdPartyDepositRequest(request: DepositRequest): Promise<SuccessResponse<DepositFormCreatedResponse>> {
         return this.http
             .post("/api/deposit/thirdparty/winpay", request)
-            .then(res => res.data);
-    }
-
-    public async createIdentityAuthenticationForm(
-        request: CreateIdentityAuthenticationFormRequest,
-        filePath: string): Promise<void> {
-
-        let fileName = path.basename(filePath);
-        let stream = fs.readFileSync(filePath);
-
-        let formData = new FormData();
-        formData.append(
-            "request",
-            JSON.stringify(request),
-            {
-                "contentType": "application/json"
-            });
-
-        formData.append("file", stream, { filename: fileName });
-
-        await this.http
-            .post('/api/player/identity/upload', formData, {
-                headers: {
-                    ...formData.getHeaders(),
-                    'Content-Length': formData.getLengthSync()
-                }
-            });
-    }
-
-    public getWithdrawRequireBucketAmountOld(): Promise<number> {
-        return this.http
-            .get("/api/withdraw/player/amount")
-            .then(res => res.data);
-    }
-
-    public getWithdrawRequireBucketAmount(): Promise<number> {
-        return this.http
-            .get("/api/player/bucket/amount")
-            .then(res => res.data);
-    }
-
-    public getAllTypeBucketAmounts(): Promise<Iterable<TypeBucketResult>> {
-        return this.http
-            .get("/api/player/bucket/type/amount")
-            .then(res => res.data);
-    }
-
-    public createWithdraw(request: CreateWithdrawRequest): Promise<string> {
-        return this.http
-            .post("/api/withdraw", request)
-            .then(res => res.data);
-    }
-
-    public submitMalakiV2ThirdPartyDepositRequest(request: DepositRequest): Promise<SuccessResponse<DepositFormCreatedResponse>> {
-        return this.http
-            .post("/api/deposit/thirdparty/malakipay-v2", request)
             .then(res => res.data);
     }
 }

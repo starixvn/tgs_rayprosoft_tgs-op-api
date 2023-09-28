@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Tgs.BrandCertificate.Clients;
 using Tgs.PlayerService.Client;
 using Tgs.ServiceUtility;
+using Tgs.VipLevelService.Clients;
 using TGS.Core.Models.Exceptions;
 using TGS.Services.Operations;
 
@@ -12,52 +13,18 @@ namespace TGS.Services.Operator.ApplicationServices.Player;
 
 internal class CreatePlayerInvitationPlayerCommandService : IGetService<CreatePlayerWithPlayerInvitationCommand, CreatePlayerInfo>
 {
-	private readonly IBrandOperations _brandOperations;
 	private readonly IBrandServiceClient _brandServiceClient;
 	private readonly IPlayerServiceClient _playerServiceClient;
+	private readonly IVipLevelServiceClient _vipLevelServiceClient;
 
 	public CreatePlayerInvitationPlayerCommandService(
-		IBrandOperations brandOperations,
 		IPlayerServiceClient playerServiceClient,
-		IBrandServiceClient brandServiceClient)
+		IBrandServiceClient brandServiceClient,
+		IVipLevelServiceClient vipLevelServiceClient)
 	{
-		_brandOperations = brandOperations ?? throw new ArgumentNullException(nameof(brandOperations));
 		_playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
 		_brandServiceClient = brandServiceClient ?? throw new ArgumentNullException(nameof(brandServiceClient));
-	}
-
-	public async ValueTask<CreatePlayerInfo> GetAsync(
-		CreatePlayerWithPlayerInvitationCommand command,
-		CancellationToken cancellationToken = default)
-	{
-		var player = await _playerServiceClient
-			.GetPlayerInfoByUserNameAsync(command.BrandId, command.UserName, cancellationToken)
-			.ConfigureAwait(false);
-
-		if (player != null)
-			return new CreatePlayerInfo(player.PlayerCode, false);
-
-		_ = await _brandServiceClient
-			.GetBrandInfoAsync(command.BrandId, cancellationToken)
-			.ConfigureAwait(false) ?? throw new BrandNotFoundException();
-
-		var betLimitId = await _brandOperations
-			.GetBrandDefaultBetLimitAsync(command.BrandId, command.CurrencyCode)
-			.ConfigureAwait(false);
-
-		var vipInfo = await _brandServiceClient
-			.GetVipLevelInfosAsync(command.BrandId, cancellationToken)
-			.FirstOrDefaultAsync(x => x.Level == 1, cancellationToken)
-			.ConfigureAwait(false);
-
-		var resultPlayerCode = await CreatePlayerByUpperPlayerAsync(
-			command,
-			command.CurrencyCode,
-			betLimitId,
-			vipInfo!.Id,
-			cancellationToken).ConfigureAwait(false);
-
-		return new CreatePlayerInfo(resultPlayerCode, true);
+		_vipLevelServiceClient = vipLevelServiceClient ?? throw new ArgumentNullException(nameof(vipLevelServiceClient));
 	}
 
 	private async Task<string> CreatePlayerByUpperPlayerAsync(
@@ -99,5 +66,43 @@ internal class CreatePlayerInvitationPlayerCommandService : IGetService<CreatePl
 				command.UserName), cancellationToken);
 
 		return result;
+	}
+
+	public async ValueTask<CreatePlayerInfo> GetAsync(
+		CreatePlayerWithPlayerInvitationCommand command,
+		CancellationToken cancellationToken = default)
+	{
+		var player = await _playerServiceClient
+			.GetPlayerInfoByUserNameAsync(command.BrandId, command.UserName, cancellationToken)
+			.ConfigureAwait(false);
+
+		if (player != null)
+			return new CreatePlayerInfo(player.PlayerCode, false);
+
+		_ = await _brandServiceClient
+			.GetBrandInfoAsync(command.BrandId, cancellationToken)
+			.ConfigureAwait(false) ?? throw new BrandNotFoundException();
+
+		var betLimitId = await _brandServiceClient
+			.GetBrandBetLimitIdAsync(command.BrandId, cancellationToken)
+			.ConfigureAwait(false);
+
+		if (!betLimitId.HasValue)
+			throw new InvalidOperationException(
+				$"Brand with id '{command.BrandId}' doesn't have default bet limit.");
+
+		var vipInfo = await _vipLevelServiceClient
+			.GetBrandAllVipLevelsAsync(command.BrandId, cancellationToken)
+			.FirstOrDefaultAsync(x => x.Level == 1, cancellationToken)
+			.ConfigureAwait(false);
+
+		var resultPlayerCode = await CreatePlayerByUpperPlayerAsync(
+			command,
+			command.CurrencyCode,
+			betLimitId.Value,
+			vipInfo!.Id,
+			cancellationToken).ConfigureAwait(false);
+
+		return new CreatePlayerInfo(resultPlayerCode, true);
 	}
 }

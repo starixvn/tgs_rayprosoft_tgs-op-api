@@ -5,7 +5,6 @@ using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.Interfaces;
 using TGS.Services.Operator;
 using TGS.Services.Operator.ApplicationServices.Player;
-using TGS.Services.Operator.BrandPayment;
 using TGS.Services.Operator.ValidateCode;
 using PlayerNotFoundException = TGS.Core.Models.Exceptions.PlayerNotFoundException;
 
@@ -151,9 +150,6 @@ public class OperatorApiErrorMapper : IErrorMapper
 			[typeof(WithdrawLimitExceedException)] = OpApiError.WithdrawLimitExceed,
 			[typeof(PlayerBankInfoCountReachedLimitException)] = OpApiError.BankInfoCountLimitExceed
 		};
-
-	public bool CanProcess(Exception exception)
-		=> true;
 
 	public int GetApiErrorByException(Exception exception)
 	{

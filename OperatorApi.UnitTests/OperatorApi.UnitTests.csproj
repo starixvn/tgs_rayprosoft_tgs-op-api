@@ -5,6 +5,7 @@
 		<IsPackable>false</IsPackable>
 		<RootNamespace>TGS.Tests.OperatorApi.UnitTests</RootNamespace>
 		<ImplicitUsings>enable</ImplicitUsings>
+		<SqlQueryToolsConnectionString />
 	</PropertyGroup>
 
 	<ItemGroup>

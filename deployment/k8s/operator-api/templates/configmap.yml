@@ -21,7 +21,8 @@ data:
         "PlayerServiceBaseUrl": "http://player-api",
         "DepositAccumulateRouletteServiceBaseUrl": "http://tgs-deposit-accumulate-roulette",
         "StationLetterBaseUrl": "http://tgs-station-letter",
-        "PlayerBucketBaseUrl": "http://tgs-playerbucket-service"
+        "PlayerBucketBaseUrl": "http://tgs-playerbucket-service",
+        "VipLevelServiceBaseUrl": "http://tgs-viplevel"
       },
       "ConnectionStrings": {
         "Tgs": "{{ .Values.connectionStrings.tgs }}",

@@ -16,6 +16,7 @@ public interface IBrandOperations
 {
 	Task<string> GetBrandCodeByIdAsync(Guid brandId);
 
+	[Obsolete("淘汰")]
 	Task<int> GetBrandDefaultBetLimitAsync(Guid brandId, string currencyCode);
 
 	Task<CachedBrandGame> GetBrandGameAsync(Guid brandId, Guid gameProviderId, int gameId);
