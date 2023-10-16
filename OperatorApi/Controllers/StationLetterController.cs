@@ -16,7 +16,7 @@ namespace TGS.Apis.OperatorApi.Controllers;
 public class StationLetterController : ControllerBase
 {
 	/// <summary>
-	///     Gets the station letters.
+	/// Gets the station letters.
 	/// </summary>
 	/// <param name="getStationLetterService">The list station letter service.</param>
 	/// <param name="countStationLetterService">The count station letter service.</param>

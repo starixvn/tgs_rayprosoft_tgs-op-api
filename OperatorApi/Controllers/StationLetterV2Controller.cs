@@ -53,6 +53,7 @@ public class StationLetterV2Controller : ControllerBase
 	[AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
 	public async Task<PagingResponse<StationLetterListItemViewModel>> GetLettersAsync(
 		[FromServices] IQueryService<GetStationLettersV2Query, StationLetter> queryService,
+		[FromQuery(Name = "unread")] bool onlyUnread = false,
 		[FromQuery(Name = "page")] int page = 1,
 		[FromQuery(Name = "rows")] int rows = 10)
 	{
@@ -60,13 +61,20 @@ public class StationLetterV2Controller : ControllerBase
 
 		var query = new GetStationLettersV2Query(playerTokenData.PlayerCode);
 
-		var result = await queryService.QueryAsync(query, HttpContext.RequestAborted)
+		var letters = queryService.QueryAsync(query, HttpContext.RequestAborted);
+
+		if (onlyUnread)
+			letters = letters.Where(l => l.HaveRead == false);
+
+		var result = await letters
 			.Select(letter => new StationLetterListItemViewModel
 			{
 				Id = letter.Id,
 				Sender = letter.Sender,
 				Subject = letter.Subject,
-				SentOn = letter.SentOn
+				SentOn = letter.SentOn,
+				HaveRead = letter.HaveRead,
+				Replied = letter.Replied
 			})
 			.ToArrayAsync(HttpContext.RequestAborted)
 			.ConfigureAwait(false);
@@ -106,7 +114,7 @@ public class StationLetterV2Controller : ControllerBase
 			HttpContext.RequestAborted).ConfigureAwait(false);
 	}
 
-	[HttpPut(Name = "SendStationLetterToCustomService")]
+	[HttpPut(Name = "SendStationLetterToCustomerService")]
 	[AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
 	public async Task SendLetterAsync(
 		[FromServices] IGetService<BrandQuery, Services.Operator.BrandInfo> getBrandService,
