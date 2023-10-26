@@ -1,1 +1,3 @@
-﻿[assembly: TestFramework("OperatorApi.IntegrationTests.XunitExtensions.XunitTestFrameworkWithAssemblyFixture", "OperatorApi.IntegrationTests")]
+﻿using PhoenixToolkits.Xunit.AssemblyFixture;
+
+[assembly: AssemblyFixtureTestFramework]
