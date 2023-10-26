@@ -49,15 +49,14 @@ internal class SetEmailDontCareDuplicateRegisterFlowStep : IRegisterFlowStep
 		if (string.IsNullOrWhiteSpace(locationInfo.PlayerCode))
 			return new RegisterFlowProcessResult(false, null, null);
 
-		await _playerServiceClient
-			 .SetPlayerPropertiesAsync(
-				 locationInfo.PlayerCode,
-				 new Dictionary<PlayerPropertyName, string?>
-				 {
-					 [PlayerPropertyName.Email] = request.Email
-				 }.ToImmutableDictionary(),
-				 cancellationToken)
-			 .ConfigureAwait(false);
+		await _playerServiceClient.SetPlayerPropertiesAsync(
+			locationInfo.PlayerCode,
+			new Dictionary<PlayerPropertyName, string?>
+			{
+				[PlayerPropertyName.Email] = request.Email
+			}.ToImmutableDictionary(),
+			null,
+			cancellationToken).ConfigureAwait(false);
 
 		await _cacheManager
 			.ClearCacheAsync(RedisCacheType.Player, locationInfo.PlayerCode)

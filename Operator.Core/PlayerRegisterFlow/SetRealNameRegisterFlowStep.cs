@@ -51,6 +51,7 @@ internal class SetRealNameRegisterFlowStep : IRegisterFlowStep
 			{
 				[PlayerPropertyName.RealName] = request.RealName
 			}.ToImmutableDictionary(),
+			null,
 			cancellationToken).ConfigureAwait(false);
 
 		return new RegisterFlowProcessResult(

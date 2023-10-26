@@ -24,6 +24,10 @@ internal class SetViberCommandService : ICommandService<SetViberCommand>
 			[PlayerPropertyName.Viber] = command.ViberId
 		}.ToImmutableDictionary();
 
-		return _client.SetPlayerPropertiesAsync(command.PlayerCode, properties, cancellationToken);
+		return _client.SetPlayerPropertiesAsync(
+			command.PlayerCode,
+			properties,
+			null,
+			cancellationToken);
 	}
 }

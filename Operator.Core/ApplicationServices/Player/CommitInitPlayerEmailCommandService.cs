@@ -56,6 +56,7 @@ internal class CommitInitPlayerEmailCommandService : ICommandService<CommitInitP
 				{
 					[PlayerPropertyName.Email] = result.Email
 				}.ToImmutableDictionary(),
+				null,
 				cancellationToken)
 			.ConfigureAwait(false);
 

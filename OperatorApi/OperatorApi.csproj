@@ -44,7 +44,7 @@
 	<ItemGroup>
 		<PackageReference Include="FluentdForward.OpenTelemetry.MessagePack" Version="0.3.1" />
 		<PackageReference Include="FluentValidation.AspNetCore" Version="11.3.0" />
-		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.12" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.13" />
 		<PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.19.5" />
 		<PackageReference Include="Microsoft.VisualStudio.SlowCheetah" Version="4.0.50">
 			<PrivateAssets>all</PrivateAssets>
@@ -84,7 +84,7 @@
 		<PackageReference Include="Tgs.Payment.UmPay.Client" Version="0.0.1" />
 		<PackageReference Include="Tgs.Payment.WandaPay.Client" Version="0.0.5" />
 		<PackageReference Include="Tgs.Payment.ZeroNineNinePay.Client" Version="0.0.7" />
-		<PackageReference Include="Tgs.Report.Client" Version="0.0.61" />
+		<PackageReference Include="Tgs.Report.Client" Version="0.0.65" />
 		<PackageReference Include="Tgs.WebApi.Toolkits" Version="0.3.0" />
 	</ItemGroup>
 

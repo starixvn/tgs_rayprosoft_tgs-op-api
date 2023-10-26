@@ -40,7 +40,7 @@
     <PackageReference Include="Tgs.PaymentService.Client" Version="0.7.4" />
     <PackageReference Include="Tgs.PlayerBucket.Client" Version="0.1.1" />
     <PackageReference Include="Tgs.PlayerBucketType.Client" Version="0.0.9" />
-    <PackageReference Include="Tgs.PlayerService.Client" Version="0.0.37" />
+    <PackageReference Include="Tgs.PlayerService.Client" Version="0.0.45" />
     <PackageReference Include="Tgs.Promotion.Client" Version="1.0.44" />  
     <PackageReference Include="Tgs.RouletteSignInClient" Version="0.0.3" />
     <PackageReference Include="TGS.ServiceUtility" Version="0.2.0" />

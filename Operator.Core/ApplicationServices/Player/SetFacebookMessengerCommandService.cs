@@ -27,6 +27,7 @@ internal class SetFacebookMessengerCommandService : ICommandService<SetFacebookM
 		return _client.SetPlayerPropertiesAsync(
 			command.PlayerCode,
 			properties.ToImmutableDictionary(),
+			null,
 			cancellationToken);
 	}
 }

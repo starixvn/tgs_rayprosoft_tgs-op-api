@@ -53,6 +53,7 @@ internal class SetPhoneDontCareDuplicateRegisterFlowStep : IRegisterFlowStep
 				[PlayerPropertyName.Phone] = request.Phone,
 				[PlayerPropertyName.PhoneAuthentication] = true.ToString()
 			}.ToImmutableDictionary(),
+			null,
 			cancellationToken).ConfigureAwait(false);
 
 		var player = await _playerServiceClient

@@ -27,6 +27,7 @@ internal class SetBirthdateCommandService : ICommandService<SetBirthdateCommand>
 		return _playerServiceClient.SetPlayerPropertiesAsync(
 			command.PlayerCode,
 			properties,
+			null,
 			cancellationToken);
 	}
 }
