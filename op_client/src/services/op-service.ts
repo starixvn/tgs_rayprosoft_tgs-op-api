@@ -308,4 +308,16 @@ export default class OperatorService {
             .post("/api/deposit/thirdparty/winpay", request)
             .then(res => res.data);
     }
+
+    public listArticles(take: number | undefined = undefined): Promise<SuccessResponse<ArticleFormListItem>> {
+        return this.http
+            .get(
+                '/api/article',
+                {
+                    params: {
+                        take
+                    }
+                })
+            .then(res => res.data);
+    }
 }
