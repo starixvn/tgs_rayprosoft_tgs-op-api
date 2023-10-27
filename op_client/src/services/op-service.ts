@@ -43,6 +43,12 @@ export default class OperatorService {
             .then(res => res.data);
     }
 
+    public getArticle(id: string): Promise<SuccessResponse<Article>> {
+        return this.http
+            .get(`/api/article/${id}`)
+            .then(res => res.data);
+    }
+
     public getDeliveryLetterContent(deliveryId: string): Promise<SuccessResponse<DeliveryLetter>> {
         return this.http
             .get(`/api/delivery-box/${deliveryId}`)
@@ -112,6 +118,18 @@ export default class OperatorService {
     public getWithdrawRequireBucketAmountOld(): Promise<number> {
         return this.http
             .get("/api/withdraw/player/amount")
+            .then(res => res.data);
+    }
+
+    public listArticles(take: number | undefined = undefined): Promise<SuccessResponse<ArticleFormListItem>> {
+        return this.http
+            .get(
+                '/api/article',
+                {
+                    params: {
+                        take
+                    }
+                })
             .then(res => res.data);
     }
 

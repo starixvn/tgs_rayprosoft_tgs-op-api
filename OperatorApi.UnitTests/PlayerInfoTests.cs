@@ -235,6 +235,7 @@ public class PlayerInfoTests
 					x => x.Count == 1
 						&& x.ContainsKey(PlayerPropertyName.FacebookMessenger)
 						&& x[PlayerPropertyName.FacebookMessenger] == command.FacebookMessengerId),
+				It.Is<string>(x => x == null),
 				It.IsAny<CancellationToken>()),
 			Times.Exactly(1));
 	}
@@ -265,6 +266,7 @@ public class PlayerInfoTests
 					x => x.Count == 1
 						&& x.ContainsKey(PlayerPropertyName.Line)
 						&& x[PlayerPropertyName.Line] == command.LineId),
+				It.Is<string>(x => x == null),
 				It.IsAny<CancellationToken>()),
 			Times.Exactly(1));
 	}
@@ -354,6 +356,7 @@ public class PlayerInfoTests
 					x => x.Count == 1
 						&& x.ContainsKey(PlayerPropertyName.Viber)
 						&& x[PlayerPropertyName.Viber] == command.ViberId),
+				It.Is<string>(x => x == null),
 				It.IsAny<CancellationToken>()),
 			Times.Exactly(1));
 	}

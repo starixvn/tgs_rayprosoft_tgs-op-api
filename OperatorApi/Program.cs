@@ -216,6 +216,9 @@ builder.Services
 	.AddStationLetterClient(httpBuilder => httpBuilder
 		.ConfigureHttpClient(httpClient => httpClient.BaseAddress =
 			builder.Configuration.GetValue<Uri>("Operator:StationLetterBaseUrl")))
+	.AddArticleManagementClient(httpBuilder => httpBuilder
+		.ConfigureHttpClient(httpClient => httpClient.BaseAddress =
+			builder.Configuration.GetValue<Uri>("Operator:ArticleManagementBaseUrl")!))
 	.AddIdentityVerifiers()
 	.AddVipLevelServiceClient(httpBuilder => httpBuilder
 		.ConfigureHttpClient(httpClient => httpClient.BaseAddress =

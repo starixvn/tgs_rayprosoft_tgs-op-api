@@ -24,6 +24,10 @@ internal class SetTelegramCommandService : ICommandService<SetTelegramCommand>
 			[PlayerPropertyName.Telegram] = command.TelegramId
 		}.ToImmutableDictionary();
 
-		return _client.SetPlayerPropertiesAsync(command.PlayerCode, properties, cancellationToken);
+		return _client.SetPlayerPropertiesAsync(
+			command.PlayerCode,
+			properties,
+			null,
+			cancellationToken);
 	}
 }

@@ -50,6 +50,7 @@ internal class FinalRegisterFlowStep : IRegisterFlowStep
 		await _playerServiceClient.SetPlayerStatusAsync(
 			locationInfo.PlayerCode,
 			PlayerStatus.Enabled,
+			null,
 			cancellationToken).ConfigureAwait(false);
 
 		await _playerServiceClient.RecordRegisterIpAsync(

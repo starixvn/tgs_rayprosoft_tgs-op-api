@@ -57,6 +57,7 @@ public class CommitInitPlayerPhoneCommandService : ICommandService<CommitInitPla
 				[PlayerPropertyName.Phone] = result.Phone,
 				[PlayerPropertyName.PhoneAuthentication] = true.ToString()
 			}.ToImmutableDictionary(),
+			null,
 			cancellationToken)
 			.ConfigureAwait(false);
 

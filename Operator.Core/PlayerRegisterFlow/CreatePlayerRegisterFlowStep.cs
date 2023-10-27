@@ -76,9 +76,11 @@ internal class CreatePlayerRegisterFlowStep : IRegisterFlowStep
 				.ConfigureAwait(false);
 
 			if (info.IsNew)
-				await _playerServiceClient
-					.SetPlayerStatusAsync(info.PlayerCode, PlayerStatus.RegisterUndone, cancellationToken)
-					.ConfigureAwait(false);
+				await _playerServiceClient.SetPlayerStatusAsync(
+					info.PlayerCode,
+					PlayerStatus.RegisterUndone,
+					null,
+					cancellationToken).ConfigureAwait(false);
 
 			return new RegisterFlowProcessResult(
 				info.IsNew,
@@ -105,9 +107,11 @@ internal class CreatePlayerRegisterFlowStep : IRegisterFlowStep
 				.ConfigureAwait(false);
 
 			if (info.IsNew)
-				await _playerServiceClient
-					.SetPlayerStatusAsync(info.PlayerCode, PlayerStatus.RegisterUndone, cancellationToken)
-					.ConfigureAwait(false);
+				await _playerServiceClient.SetPlayerStatusAsync(
+					info.PlayerCode,
+					PlayerStatus.RegisterUndone,
+					null,
+					cancellationToken).ConfigureAwait(false);
 
 			return new RegisterFlowProcessResult(
 				info.IsNew,
@@ -131,9 +135,11 @@ internal class CreatePlayerRegisterFlowStep : IRegisterFlowStep
 			var info = await _createPlayerService.GetAsync(query, cancellationToken).ConfigureAwait(false);
 
 			if (info.IsNew)
-				await _playerServiceClient
-					.SetPlayerStatusAsync(info.PlayerCode, PlayerStatus.RegisterUndone, cancellationToken)
-					.ConfigureAwait(false);
+				await _playerServiceClient.SetPlayerStatusAsync(
+					info.PlayerCode,
+					PlayerStatus.RegisterUndone,
+					null,
+					cancellationToken).ConfigureAwait(false);
 
 			return new RegisterFlowProcessResult(
 				info.IsNew,
