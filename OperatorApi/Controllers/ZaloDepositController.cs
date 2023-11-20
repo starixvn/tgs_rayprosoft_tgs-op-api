@@ -1,6 +1,7 @@
 ﻿using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Tgs.Payment.Clients;
+using Tgs.Payment.SBPay.Client;
 using Tgs.Payment.SkyPay;
 using Tgs.ServiceUtility;
 using TGS.Apis.OperatorApi.Attributes;
@@ -77,6 +78,70 @@ public class ZaloDepositController : ControllerBase
 		{
 			FormId = createdFormId,
 			PaymentUrl = applyInfo.Response.TradeUrl
+		};
+	}
+
+	[HttpPost("sbpay")]
+	[AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+	[EnableUserBlockedCheck]
+	public async Task<DepositFormCreatedResponse> SubmitSBPayDepositRequestAsync(
+		[FromServices] IGetService<CreateDepositFormCommand, Guid> createDepositFormService,
+		[FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
+		[FromServices] IGetService<GetDepositFormQuery, DepositFormInfo> getDepositFormService,
+		[FromServices] ICommandService<SubmitDepositFormThirdPartyOrderNoCommand> updateDepositFormService,
+		[FromBody] SubmitDepositRequest request)
+	{
+		var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+		var brandId = HttpContext.GetBrandId().Value;
+
+		var brandPayment = await getBrandPaymentService
+			.GetAsync(new GetBrandPaymentQuery(request.BrandPaymentId), HttpContext.RequestAborted)
+			.ConfigureAwait(false);
+
+		var brandPaymentInfo = JsonDocument.Parse(brandPayment.ExtendedData);
+
+		var command = new CreateDepositFormCommand(
+			playerTokenData.PlayerCode,
+			brandId,
+			request.BrandPaymentId,
+			request.Amount,
+			$"tgs.payment.sbpay.deposit",
+			request.PromotionId,
+			formId => JsonSerializer.Serialize(
+				new SBPayDepositSettings(
+					ApiToken: brandPaymentInfo.RootElement.GetProperty("apiToken").GetString(),
+					NotifyToken: brandPaymentInfo.RootElement.GetProperty("notifyToken").GetString(),
+					formId,
+					null),
+				SBPayUtility.SerializerOptions));
+
+		var createdFormId = await createDepositFormService
+			.GetAsync(command, HttpContext.RequestAborted)
+			.ConfigureAwait(false);
+
+		var getDepositFormQuery = new GetDepositFormQuery(
+			playerTokenData.PlayerCode,
+			createdFormId,
+			brandId);
+
+		var formData = await getDepositFormService
+			.GetAsync(getDepositFormQuery, HttpContext.RequestAborted)
+			.ConfigureAwait(false);
+
+		var applyInfo = JsonSerializer.Deserialize<SBPayDepositApplyInfo>(formData.ApplyInfo!, SBPayUtility.SerializerOptions);
+
+		var updateThirdPartyOrderNoCommand = new SubmitDepositFormThirdPartyOrderNoCommand(
+				createdFormId,
+				applyInfo.Response.ThirdPartyOrderNo);
+
+		await updateDepositFormService
+			.ExecuteAsync(updateThirdPartyOrderNoCommand, HttpContext.RequestAborted)
+			.ConfigureAwait(false);
+
+		return new DepositFormCreatedResponse
+		{
+			FormId = createdFormId,
+			PaymentUrl = applyInfo.Response.RedirectUrl.ToString(),
 		};
 	}
 }
