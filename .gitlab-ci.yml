@@ -50,9 +50,19 @@ push-nuget:
       - Operator.Client/bin/$BuildConfiguration/*.nupkg
 
 push-docker-image:
-  extends: .push-docker-image-template
-  variables:
-    project: OperatorApi/OperatorApi.csproj
+  stage: publish
+  needs:
+    - build-code
+    - unit-test
+  only:
+    - main
+  cache:
+    key: $BuildCacheKey
+    untracked: true   
+    policy: pull
+  script:
+    - docker build -t "$ImageName:$Tag" --build-arg [BuildConfiguration]=$BuildConfiguration -f "OperatorApi/Dockerfile" . --no-cache
+    - docker push $ImageName:$Tag
 
 push-k8s-template:
   extends: .push-k8s-template
