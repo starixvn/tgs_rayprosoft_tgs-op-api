@@ -10,7 +10,7 @@ export default class OperatorService {
 
     // #endregion Constructors (1)
 
-    // #region Public Methods (35)
+    // #region Public Methods (36)
 
     public async createIdentityAuthenticationForm(
         request: CreateIdentityAuthenticationFormRequest,
@@ -193,6 +193,12 @@ export default class OperatorService {
             .then<SuccessResponse<DepositFormCreatedResponse>>(res => res.data);
     }
 
+    public submitGanyoThirdPartyDepositRequest(request: DepositRequest): Promise<SuccessResponse<DepositFormCreatedResponse>> {
+        return this.http
+            .post("/api/deposit/thirdparty/ganyopay", request)
+            .then(res => res.data);
+    }
+
     public submitMalakiV2ThirdPartyDepositRequest(request: DepositRequest): Promise<SuccessResponse<DepositFormCreatedResponse>> {
         return this.http
             .post("/api/deposit/thirdparty/malakipay-v2", request)
@@ -357,5 +363,5 @@ export default class OperatorService {
             .then(res => res.data);
     }
 
-    // #endregion Public Methods (35)
+    // #endregion Public Methods (36)
 }

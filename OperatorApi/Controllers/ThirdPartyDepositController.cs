@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Tgs.Payment.AlfaPay;
 using Tgs.Payment.Clients;
 using Tgs.Payment.FiveSevenPay.Client;
+using Tgs.Payment.GanyoPay.Client;
 using Tgs.Payment.GCPay.Client;
 using Tgs.Payment.MalakiPay;
 using Tgs.Payment.MetaPay.Client;
@@ -708,6 +709,74 @@ public class ThirdPartyDepositController : ControllerBase
 		var applyInfo = JsonSerializer.Deserialize<SBPayDepositApplyInfo>(
 			formData.ApplyInfo!,
 			SBPayUtility.SerializerOptions);
+
+		var updateThirdPartyOrderNoCommand = new SubmitDepositFormThirdPartyOrderNoCommand(
+			createdFormId,
+			applyInfo.Response.ThirdPartyOrderNo);
+
+		await updateDepositFormService
+			.ExecuteAsync(updateThirdPartyOrderNoCommand)
+			.ConfigureAwait(false);
+
+		return new DepositFormCreatedResponse
+		{
+			FormId = createdFormId,
+			PaymentUrl = applyInfo.Response.RedirectUrl.ToString()
+		};
+	}
+
+	[HttpPost("ganyopay", Name = "SubmitGanyoPayDepositRequest")]
+	[EnableUserBlockedCheck]
+	[AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+	public async Task<DepositFormCreatedResponse> SubmitGanyoPayDepositRequestAsync(
+		[FromServices] IGetService<CreateDepositFormCommand, Guid> createDepositFormService,
+		[FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
+		[FromServices] IGetService<GetDepositFormQuery, DepositFormInfo> getDepositFormService,
+		[FromServices] ICommandService<SubmitDepositFormThirdPartyOrderNoCommand> updateDepositFormService,		
+		[FromBody] SubmitDepositRequest request)
+	{
+		var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+		var brandId = HttpContext.Items.GetBrandId();		
+
+		var brandPayment = await getBrandPaymentService
+			.GetAsync(new GetBrandPaymentQuery(request.BrandPaymentId))
+			.ConfigureAwait(false);
+
+		var brandPaymentInfo = JsonDocument.Parse(brandPayment.ExtendedData);
+
+		var command = new CreateDepositFormCommand(
+			playerTokenData.PlayerCode,
+			brandId,
+			request.BrandPaymentId,
+			request.Amount,
+			"tgs.payment.ganyopay.deposit",
+			request.PromotionId,
+			formId => JsonSerializer.Serialize(
+				new GanyoPayDepositSettings(
+					brandPaymentInfo.RootElement.GetProperty("customerId").GetString(),
+					brandPaymentInfo.RootElement.GetProperty("privateKey").GetString(),
+					formId,
+					CustomData: playerTokenData.PlayerCode,
+					PhoneNumber: null,
+					brandPaymentInfo.RootElement.GetProperty("channel").GetString()),
+				GanyoPayUtility.SerializerOptions));
+
+		var createdFormId = await createDepositFormService
+			.GetAsync(command, HttpContext.RequestAborted)
+			.ConfigureAwait(false);
+
+		var getDepositFormQuery = new GetDepositFormQuery(
+			playerTokenData.PlayerCode,
+			createdFormId,
+			brandId);
+
+		var formData = await getDepositFormService
+			.GetAsync(getDepositFormQuery)
+			.ConfigureAwait(false);
+
+		var applyInfo = JsonSerializer.Deserialize<GanyoPayDepositApplyInfo>(
+			formData.ApplyInfo!,
+			GanyoPayUtility.SerializerOptions);
 
 		var updateThirdPartyOrderNoCommand = new SubmitDepositFormThirdPartyOrderNoCommand(
 			createdFormId,
