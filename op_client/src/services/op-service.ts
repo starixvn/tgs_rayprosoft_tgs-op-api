@@ -10,7 +10,7 @@ export default class OperatorService {
 
     // #endregion Constructors (1)
 
-    // #region Public Methods (36)
+    // #region Public Methods (40)
 
     public async createIdentityAuthenticationForm(
         request: CreateIdentityAuthenticationFormRequest,
@@ -173,6 +173,30 @@ export default class OperatorService {
         return this.http
             .patch(`/api/station-letter/${letterId}:read`)
             .then(res => res.data);
+    }
+
+    public submitDibaoBankDepositRequest(request: DepositRequest): Promise<SuccessResponse<DepositFormCreatedResponse>> {
+        return this.http
+            .post("/api/deposit/bank/dibaopay", request)
+            .then<SuccessResponse<DepositFormCreatedResponse>>(res => res.data);
+    }
+
+    public submitDibaoMomoDepositRequest(request: DepositRequest): Promise<SuccessResponse<DepositFormCreatedResponse>> {
+        return this.http
+            .post("/api/deposit/momo/dibaopay", request)
+            .then<SuccessResponse<DepositFormCreatedResponse>>(res => res.data);
+    }
+
+    public submitDibaoThirdPartyDepositRequest(request: DepositRequest): Promise<SuccessResponse<DepositFormCreatedResponse>> {
+        return this.http
+            .post("/api/deposit/thirdparty/dibaopay", request)
+            .then(res => res.data);
+    }
+
+    public submitDibaoZaloDepositRequest(request: DepositRequest): Promise<SuccessResponse<DepositFormCreatedResponse>> {
+        return this.http
+            .post("/api/deposit/zalo/dibaopay", request)
+            .then<SuccessResponse<DepositFormCreatedResponse>>(res => res.data);
     }
 
     public submitFiveSevenThirdPartyDepositRequest(request: DepositRequest): Promise<SuccessResponse<DepositFormCreatedResponse>> {
@@ -363,5 +387,5 @@ export default class OperatorService {
             .then(res => res.data);
     }
 
-    // #endregion Public Methods (36)
+    // #endregion Public Methods (40)
 }
