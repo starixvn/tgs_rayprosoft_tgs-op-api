@@ -84,6 +84,7 @@
 		<PackageReference Include="Tgs.Payment.SBPay.Client" Version="1.0.1" />
 		<PackageReference Include="Tgs.Payment.SkyPay.Client" Version="0.0.6" />
 		<PackageReference Include="Tgs.Payment.TuPay.Client" Version="0.0.5" />
+		<PackageReference Include="Tgs.Payment.U2Pay.Client" Version="0.0.1" />
 		<PackageReference Include="Tgs.Payment.UmPay.Client" Version="0.0.1" />
 		<PackageReference Include="Tgs.Payment.WandaPay.Client" Version="0.0.5" />
 		<PackageReference Include="Tgs.Payment.ZeroNineNinePay.Client" Version="0.0.7" />
