@@ -55,6 +55,7 @@ public class TransactionController : ControllerBase
 			3850 => "Transaction.PromotionVipLevelSeason",
 			3860 => "Transaction.PromotionVipLevelBirthday",
 			4 => "Transaction.Rebate",
+			6500 => "Transaction.ReceiveCommit",
 			_ => "Unknown"
 		};
 }
