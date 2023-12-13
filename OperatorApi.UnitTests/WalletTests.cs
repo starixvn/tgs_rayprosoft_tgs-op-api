@@ -92,7 +92,7 @@ public class WalletTests
 				Arg.Is(walletId),
 				Arg.Is(query.From),
 				Arg.Is(query.To),
-				Arg.Is<IEnumerable<int>>(x => x.SequenceEqual(new[] { 6, 4100, 3800, 3850, 3860, 4 })),
+				Arg.Is<IEnumerable<int>>(x => x.SequenceEqual(new[] { 6, 4100, 3800, 3850, 3860, 4, 6500 })),
 				Arg.Is(expectedPagingCondition));
 	}
 }

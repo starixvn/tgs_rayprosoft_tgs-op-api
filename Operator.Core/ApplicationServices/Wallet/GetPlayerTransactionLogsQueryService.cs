@@ -36,7 +36,7 @@ internal class GetPlayerTransactionLogsQueryService : IGetService<GetPlayerTrans
 			walletId,
 			query.From,
 			query.To,
-			new[] { 6, 4100, 3800, 3850, 3860, 4 },
+			new[] { 6, 4100, 3800, 3850, 3860, 4, 6500 },
 			paging,
 			cancellationToken).ConfigureAwait(false);
 	}
