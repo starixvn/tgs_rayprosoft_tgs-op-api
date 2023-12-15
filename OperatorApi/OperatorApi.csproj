@@ -69,7 +69,7 @@
 		<PackageReference Include="Tgs.MessageQueue.Compatible" Version="0.0.2" />
 		<PackageReference Include="Tgs.Notification.Client" Version="0.0.3" />
 		<PackageReference Include="Tgs.Payment.AlfaPay.Client" Version="0.0.7" />
-		<PackageReference Include="Tgs.Payment.DibaoPay.Client" Version="0.0.1" />
+		<PackageReference Include="Tgs.Payment.DibaoPay.Client" Version="0.0.2" />
 		<PackageReference Include="Tgs.Payment.FiveSevenPay.Client" Version="0.0.3" />
 		<PackageReference Include="Tgs.Payment.GanyoPay.Client" Version="0.0.2" />
 		<PackageReference Include="Tgs.Payment.GCPay.Client" Version="0.0.2" />
@@ -84,7 +84,7 @@
 		<PackageReference Include="Tgs.Payment.SBPay.Client" Version="1.0.1" />
 		<PackageReference Include="Tgs.Payment.SkyPay.Client" Version="0.0.6" />
 		<PackageReference Include="Tgs.Payment.TuPay.Client" Version="0.0.5" />
-		<PackageReference Include="Tgs.Payment.U2Pay.Client" Version="0.0.1" />
+		<PackageReference Include="Tgs.Payment.U2Pay.Client" Version="0.0.3" />
 		<PackageReference Include="Tgs.Payment.UmPay.Client" Version="0.0.1" />
 		<PackageReference Include="Tgs.Payment.WandaPay.Client" Version="0.0.5" />
 		<PackageReference Include="Tgs.Payment.ZeroNineNinePay.Client" Version="0.0.7" />

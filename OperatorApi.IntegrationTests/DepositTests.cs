@@ -3420,7 +3420,8 @@ public class DepositTests
 				{
 					"merchantId": "merchantId",
 					"privateKey": "privateKey",
-					"channel": "908"
+					"channel": "908",
+					"exchangeRate": 1
 				}
 				""",
 			PaymentId = Guid.NewGuid(),
@@ -3454,7 +3455,8 @@ public class DepositTests
 				"privateKey",
 				Guid.NewGuid(),
 				"908",
-				"127.0.0.1"),
+				"127.0.0.1",
+				1m),
 			new DibaoPayDepositResponse(
 				200000m,
 				Guid.NewGuid(),
@@ -3615,7 +3617,8 @@ public class DepositTests
 				{
 					"merchantId": "merchantId",
 					"privateKey": "privateKey",
-					"channel": "923"
+					"channel": "923",
+					"exchangeRate": 1
 				}
 				""",
 			PaymentId = Guid.NewGuid(),
@@ -3649,7 +3652,8 @@ public class DepositTests
 				"privateKey",
 				Guid.NewGuid(),
 				"923",
-				"127.0.0.1"),
+				"127.0.0.1",
+				1m),
 			new DibaoPayDepositResponse(
 				200000m,
 				Guid.NewGuid(),
@@ -3810,7 +3814,8 @@ public class DepositTests
 				{
 					"merchantId": "merchantId",
 					"privateKey": "privateKey",
-					"channel": "921"
+					"channel": "921",
+					"exchangeRate": 1
 				}
 				""",
 			PaymentId = Guid.NewGuid(),
@@ -3844,7 +3849,8 @@ public class DepositTests
 				"privateKey",
 				Guid.NewGuid(),
 				"921",
-				"127.0.0.1"),
+				"127.0.0.1",
+				1m),
 			new DibaoPayDepositResponse(
 				200000m,
 				Guid.NewGuid(),
@@ -4005,7 +4011,8 @@ public class DepositTests
 				{
 					"merchantId": "merchantId",
 					"privateKey": "privateKey",
-					"channel": "925"
+					"channel": "925",
+					"exchangeRate": 1
 				}
 				""",
 			PaymentId = Guid.NewGuid(),
@@ -4039,7 +4046,8 @@ public class DepositTests
 				"notifyToken",
 				Guid.NewGuid(),
 				"925",
-				"127.0.0.1"),
+				"127.0.0.1",
+				1m),
 			new DibaoPayDepositResponse(
 				200000m,
 				Guid.NewGuid(),

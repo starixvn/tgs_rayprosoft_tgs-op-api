@@ -827,7 +827,8 @@ public class ThirdPartyDepositController : ControllerBase
 					brandPaymentInfo.RootElement.GetProperty("privateKey").GetString(),
 					formId,
 					brandPaymentInfo.RootElement.GetProperty("channel").GetString(),
-					HttpContext.Connection.RemoteIpAddress.ToString()),
+					HttpContext.Connection.RemoteIpAddress.ToString(),
+					brandPaymentInfo.RootElement.GetProperty("exchangeRate").GetDecimal()),
 				DibaoPayUtility.SerializerOptions));
 
 		var createdFormId = await createDepositFormService
