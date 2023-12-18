@@ -765,7 +765,7 @@ public class BankDepositController : ControllerBase
 		[FromServices] IGetService<CreateDepositFormCommand, Guid> createDepositFormService,
 		[FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
 		[FromServices] IGetService<GetDepositFormQuery, DepositFormInfo> getDepositFormService,
-		[FromServices] ICommandService<SubmitDepositFormThirdPartyOrderNoCommand> updateDepositFormService,		
+		[FromServices] ICommandService<SubmitDepositFormThirdPartyOrderNoCommand> updateDepositFormService,
 		[FromBody] SubmitDepositRequest request)
 	{
 		var playerTokenData = HttpContext.Items.GetPlayerTokenData();
@@ -789,7 +789,8 @@ public class BankDepositController : ControllerBase
 					brandPaymentInfo.RootElement.GetProperty("apiToken").GetString(),
 					brandPaymentInfo.RootElement.GetProperty("notifyToken").GetString(),
 					formId,
-					brandPaymentInfo.RootElement.GetProperty("bank").GetString()),
+					brandPaymentInfo.RootElement.GetProperty("bank").GetString(),
+					brandPaymentInfo.RootElement.GetProperty("exchangeRate").GetDecimal()),
 				SBPayUtility.SerializerOptions));
 
 		var createdFormId = await createDepositFormService
@@ -805,7 +806,7 @@ public class BankDepositController : ControllerBase
 			.GetAsync(getDepositFormQuery, HttpContext.RequestAborted)
 			.ConfigureAwait(false);
 
-		var applyInfo = JsonSerializer.Deserialize<SBPayDepositApplyInfo>(formData.ApplyInfo!,SBPayUtility.SerializerOptions);
+		var applyInfo = JsonSerializer.Deserialize<SBPayDepositApplyInfo>(formData.ApplyInfo!, SBPayUtility.SerializerOptions);
 
 		var updateThirdPartyOrderNoCommand = new SubmitDepositFormThirdPartyOrderNoCommand(
 				createdFormId,

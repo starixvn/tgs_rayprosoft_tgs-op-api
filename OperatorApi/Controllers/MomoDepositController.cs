@@ -114,7 +114,8 @@ public class MomoDepositController : ControllerBase
 					ApiToken: brandPaymentInfo.RootElement.GetProperty("apiToken").GetString(),
 					NotifyToken: brandPaymentInfo.RootElement.GetProperty("notifyToken").GetString(),
 					formId,
-					null), SBPayUtility.SerializerOptions));
+					null,
+					brandPaymentInfo.RootElement.GetProperty("exchangeRate").GetDecimal()), SBPayUtility.SerializerOptions));
 
 		var createdFormId = await createDepositFormService
 			.GetAsync(command, HttpContext.RequestAborted)
