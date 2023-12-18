@@ -2451,7 +2451,8 @@ public class DepositTests
 				{
 					"apiToken": "bankApiToken",
 					"notifyToken": "bankNotifyToken",
-					"bank": "ACB"
+					"bank": "ACB",
+					"exchangeRate": 1
 				}
 				""",
 			PaymentId = Guid.NewGuid(),
@@ -2484,7 +2485,8 @@ public class DepositTests
 				"bankApiToken",
 				"bankNotifyToken",
 				Guid.NewGuid(),
-				"ACB"),
+				"ACB",
+				ExchangeRate: 1m),
 			new SBPayDepositResponse(
 				200000m,
 				Guid.NewGuid(),
@@ -2644,7 +2646,8 @@ public class DepositTests
 			ExtendedData = """
 				{
 					"apiToken": "momoApiToken",
-					"notifyToken": "momoNotifyToken"
+					"notifyToken": "momoNotifyToken",
+					"exchangeRate": 1
 				}
 				""",
 			PaymentId = Guid.NewGuid(),
@@ -2677,7 +2680,8 @@ public class DepositTests
 				"momoApiToken",
 				"momoNotifyToken",
 				Guid.NewGuid(),
-				null),
+				null,
+				ExchangeRate: 1m),
 			new SBPayDepositResponse(
 				200000m,
 				Guid.NewGuid(),
@@ -2837,7 +2841,8 @@ public class DepositTests
 			ExtendedData = """
 				{
 					"apiToken": "zaloApiToken",
-					"notifyToken": "zaloNotifyToken"
+					"notifyToken": "zaloNotifyToken",
+					"exchangeRate": 1
 				}
 				""",
 			PaymentId = Guid.NewGuid(),
@@ -2870,7 +2875,8 @@ public class DepositTests
 				"zaloApiToken",
 				"zaloNotifyToken",
 				Guid.NewGuid(),
-				null),
+				null, 
+				ExchangeRate: 1m),
 			new SBPayDepositResponse(
 				200000m,
 				Guid.NewGuid(),
@@ -3030,7 +3036,8 @@ public class DepositTests
 			ExtendedData = """
 				{
 					"apiToken": "apiToken",
-					"notifyToken": "notifyToken"
+					"notifyToken": "notifyToken",
+					"exchangeRate": 1
 				}
 				""",
 			PaymentId = Guid.NewGuid(),
@@ -3063,7 +3070,8 @@ public class DepositTests
 				"apiToken",
 				"notifyToken",
 				Guid.NewGuid(),
-				null),
+				null, 
+				ExchangeRate: 1m),
 			new SBPayDepositResponse(
 				200000m,
 				Guid.NewGuid(),
