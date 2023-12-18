@@ -246,7 +246,8 @@ public class MomoDepositController : ControllerBase
 					brandPaymentInfo.RootElement.GetProperty("privateKey").GetString(),
 					formId,
 					brandPaymentInfo.RootElement.GetProperty("channelNo").GetInt32(),
-					""),
+					"",
+					brandPaymentInfo.RootElement.GetProperty("exchangeRate").GetDecimal()),
 				DibaoPayUtility.SerializerOptions));
 
 		var createdFormId = await createDepositFormService

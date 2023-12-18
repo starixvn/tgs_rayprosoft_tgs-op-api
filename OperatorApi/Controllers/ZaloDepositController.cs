@@ -247,7 +247,8 @@ public class ZaloDepositController : ControllerBase
 					brandPaymentInfo.RootElement.GetProperty("privateKey").GetString(),
 					formId,
 					brandPaymentInfo.RootElement.GetProperty("channelNo").GetInt32(),
-					""),
+					"",
+					brandPaymentInfo.RootElement.GetProperty("exchangeRate").GetDecimal()),
 				U2PayUtility.SerializerOptions));
 
 		var createdFormId = await createDepositFormService

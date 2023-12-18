@@ -2875,7 +2875,7 @@ public class DepositTests
 				"zaloApiToken",
 				"zaloNotifyToken",
 				Guid.NewGuid(),
-				null, 
+				null,
 				ExchangeRate: 1m),
 			new SBPayDepositResponse(
 				200000m,
@@ -3070,7 +3070,7 @@ public class DepositTests
 				"apiToken",
 				"notifyToken",
 				Guid.NewGuid(),
-				null, 
+				null,
 				ExchangeRate: 1m),
 			new SBPayDepositResponse(
 				200000m,
@@ -4218,7 +4218,8 @@ public class DepositTests
 					"appSecret": "appSecret",
 					"privateKey": "privateKey",
 					"channelNo": 2,
-					"bankName": "bankName"
+					"bankName": "bankName",
+					"exchangeRate": 1
 				}
 				""",
 			PaymentId = Guid.NewGuid(),
@@ -4253,7 +4254,8 @@ public class DepositTests
 				"privateKey",
 				Guid.NewGuid(),
 				2,
-				"bankName"),
+				"bankName",
+				ExchangeRate: 1m),
 			new U2PayDepositResponse(
 				100000m,
 				Guid.NewGuid(),
@@ -4415,7 +4417,8 @@ public class DepositTests
 					"merchantNo": "merchantNo",
 					"appSecret": "appSecret",
 					"privateKey": "privateKey",
-					"channelNo": 0
+					"channelNo": 0,
+					"exchangeRate": 1
 				}
 				""",
 			PaymentId = Guid.NewGuid(),
@@ -4450,7 +4453,8 @@ public class DepositTests
 				"privateKey",
 				Guid.NewGuid(),
 				0,
-				""),
+				"",
+				ExchangeRate: 1m),
 			new U2PayDepositResponse(
 				200000m,
 				Guid.NewGuid(),
@@ -4612,7 +4616,8 @@ public class DepositTests
 					"merchantNo": "merchantNo",
 					"appSecret":"appSecret",
 					"privateKey": "privateKey",
-					"channelNo": 1
+					"channelNo": 1,
+					"exchangeRate": 1
 				}
 				""",
 			PaymentId = Guid.NewGuid(),
@@ -4647,7 +4652,8 @@ public class DepositTests
 				"privateKey",
 				Guid.NewGuid(),
 				1,
-				""),
+				"",
+				ExchangeRate: 1m),
 			new U2PayDepositResponse(
 				200000m,
 				Guid.NewGuid(),
@@ -4809,7 +4815,8 @@ public class DepositTests
 					"merchantNo": "merchantNo",
 					"appSecret":"appSecret",
 					"privateKey": "privateKey",
-					"channelNo": 5
+					"channelNo": 5,
+					"exchangeRate": 1
 				}
 				""",
 			PaymentId = Guid.NewGuid(),
@@ -4844,7 +4851,8 @@ public class DepositTests
 				"privateKey",
 				Guid.NewGuid(),
 				5,
-				""),
+				"",
+				ExchangeRate: 1m),
 			new U2PayDepositResponse(
 				200000m,
 				Guid.NewGuid(),
