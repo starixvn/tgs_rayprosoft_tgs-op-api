@@ -241,6 +241,12 @@ export default class OperatorService {
             .then<SuccessResponse<DepositFormCreatedResponse>>(res => res.data);
     }
 
+    public submitHThirdPartyDepositRequest(request: DepositRequest): Promise<SuccessResponse<DepositFormCreatedResponse>> {
+        return this.http
+            .post("/api/deposit/thirdparty/hpay", request)
+            .then<SuccessResponse<DepositFormCreatedResponse>>(res => res.data);
+    }
+
     public submitGanyoThirdPartyDepositRequest(request: DepositRequest): Promise<SuccessResponse<DepositFormCreatedResponse>> {
         return this.http
             .post("/api/deposit/thirdparty/ganyopay", request)

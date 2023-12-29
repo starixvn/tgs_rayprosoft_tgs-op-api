@@ -661,6 +661,72 @@ public class ThirdPartyDepositController : ControllerBase
 		};
 	}
 
+	[HttpPost("hpay", Name = "SubmitHPayDepositRequest")]
+	[EnableUserBlockedCheck]
+	[AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+	public async Task<DepositFormCreatedResponse> SubmitHPayDepositRequestAsync(
+		[FromServices] IGetService<CreateDepositFormCommand, Guid> createDepositFormService,
+		[FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
+		[FromServices] IGetService<GetDepositFormQuery, DepositFormInfo> getDepositFormService,
+		[FromServices] ICommandService<SubmitDepositFormThirdPartyOrderNoCommand> updateDepositFormService,
+		[FromBody] SubmitDepositRequest request)
+	{
+		var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+		var brandId = HttpContext.Items.GetBrandId();
+
+		var brandPayment = await getBrandPaymentService
+			.GetAsync(new GetBrandPaymentQuery(request.BrandPaymentId))
+			.ConfigureAwait(false);
+
+		var brandPaymentInfo = JsonDocument.Parse(brandPayment.ExtendedData);
+
+		var command = new CreateDepositFormCommand(
+			playerTokenData.PlayerCode,
+			brandId,
+			request.BrandPaymentId,
+			request.Amount,
+			"tgs.payment.hpay.deposit",
+			request.PromotionId,
+			formId => JsonSerializer.Serialize(
+				new GCPayDepositSettings(
+					brandPaymentInfo.RootElement.GetProperty("customerId").GetString(),
+					brandPaymentInfo.RootElement.GetProperty("key").GetString(),
+					formId,
+					brandPaymentInfo.RootElement.GetProperty("payChannelId").GetString()),
+				GCPayUtility.SerializerOptions));
+
+		var createdFormId = await createDepositFormService
+			.GetAsync(command, HttpContext.RequestAborted)
+			.ConfigureAwait(false);
+
+		var getDepositFormQuery = new GetDepositFormQuery(
+			playerTokenData.PlayerCode,
+			createdFormId,
+			brandId);
+
+		var formData = await getDepositFormService
+			.GetAsync(getDepositFormQuery)
+			.ConfigureAwait(false);
+
+		var applyInfo = JsonSerializer.Deserialize<GCPayDepositApplyInfo>(
+			formData.ApplyInfo!,
+			GCPayUtility.SerializerOptions);
+
+		var updateThirdPartyOrderNoCommand = new SubmitDepositFormThirdPartyOrderNoCommand(
+			createdFormId,
+			applyInfo.Response.ThirdPartyOrderNo);
+
+		await updateDepositFormService
+			.ExecuteAsync(updateThirdPartyOrderNoCommand)
+			.ConfigureAwait(false);
+
+		return new DepositFormCreatedResponse
+		{
+			FormId = createdFormId,
+			PaymentUrl = applyInfo.Response.RedirectUrl.ToString()
+		};
+	}
+
 	[HttpPost("sbpay", Name = "SubmitSBPayDepositRequest")]
 	[EnableUserBlockedCheck]
 	[AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
