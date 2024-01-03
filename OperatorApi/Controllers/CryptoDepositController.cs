@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Tgs.Payment.Clients;
 using Tgs.Payment.LeePay;
+using Tgs.Payment.UBPay.Client;
 using Tgs.Payment.UmPay;
 using Tgs.ServiceUtility;
 using TGS.Apis.OperatorApi.Attributes;
@@ -235,6 +236,71 @@ public class CryptoDepositController : ControllerBase
 		{
 			FormId = createdFormId,
 			PaymentUrl = applyInfo.Response.JumpUrl
+		};
+	}
+
+	[HttpPost("ubpay")]
+	[AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+	[EnableUserBlockedCheck]
+	public async ValueTask<DepositFormCreatedResponse> SubmitUBPayDepositRequestAsync(
+		[FromServices] IGetService<CreateDepositFormCommand, Guid> createDepositFormService,
+		[FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
+		[FromServices] IGetService<GetDepositFormQuery, DepositFormInfo> getDepositFormService,
+		[FromServices] ICommandService<SubmitDepositFormThirdPartyOrderNoCommand> updateDepositFormService,
+		[FromBody] SubmitDepositRequest request)
+	{
+		var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+		var brandId = HttpContext.Items.GetBrandId();
+
+		var brandPayment = await getBrandPaymentService
+			.GetAsync(new GetBrandPaymentQuery(request.BrandPaymentId), HttpContext.RequestAborted)
+			.ConfigureAwait(false);
+
+		var brandPaymentInfo = JsonDocument.Parse(brandPayment.ExtendedData);
+
+		var canGetCurrency = brandPaymentInfo.RootElement.TryGetProperty("currency", out var jsonCurrency);
+
+		var command = new CreateDepositFormCommand(
+			playerTokenData.PlayerCode,
+			brandId,
+			request.BrandPaymentId,
+			request.Amount,
+			"tgs.payment.ubpay.deposit",
+			request.PromotionId,
+			formId => JsonSerializer.Serialize(
+				new UBPayDepositSettings(
+					brandPaymentInfo.RootElement.GetProperty("apiToken").GetString(),
+					brandPaymentInfo.RootElement.GetProperty("notifyToken").GetString(),
+					formId,
+					canGetCurrency ? jsonCurrency.GetString() : null)));
+
+		var createdFormId = await createDepositFormService
+			.GetAsync(command, HttpContext.RequestAborted)
+			.ConfigureAwait(false);
+
+		var getDepositFormQuery = new GetDepositFormQuery(
+			playerTokenData.PlayerCode,
+			createdFormId,
+			brandId);
+
+		var formData = await getDepositFormService
+			.GetAsync(getDepositFormQuery, HttpContext.RequestAborted)
+			.ConfigureAwait(false);
+
+		var applyInfo = JsonSerializer.Deserialize<UBPayDepositApplyInfo>(formData.ApplyInfo!, UBPayUtility.SerializerOptions);
+
+		var updateThirdPartyOrderNoCommand = new SubmitDepositFormThirdPartyOrderNoCommand(
+			createdFormId,
+			applyInfo.Response.ThirdPartyOrderNo);
+
+		await updateDepositFormService
+			.ExecuteAsync(updateThirdPartyOrderNoCommand, HttpContext.RequestAborted)
+			.ConfigureAwait(false);
+
+		return new DepositFormCreatedResponse
+		{
+			FormId = createdFormId,
+			PaymentUrl = applyInfo.Response.RedirectUrl.ToString()
 		};
 	}
 }
