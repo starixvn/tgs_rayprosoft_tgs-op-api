@@ -10,7 +10,7 @@ export default class OperatorService {
 
     // #endregion Constructors (1)
 
-    // #region Public Methods (40)
+    // #region Public Methods (46)
 
     public async createIdentityAuthenticationForm(
         request: CreateIdentityAuthenticationFormRequest,
@@ -199,30 +199,6 @@ export default class OperatorService {
             .then<SuccessResponse<DepositFormCreatedResponse>>(res => res.data);
     }
 
-    public submitU2BankDepositRequest(request: DepositRequest): Promise<SuccessResponse<DepositFormCreatedResponse>> {
-        return this.http
-            .post("/api/deposit/bank/u2pay", request)
-            .then<SuccessResponse<DepositFormCreatedResponse>>(res => res.data);
-    }
-
-    public submitU2MomoDepositRequest(request: DepositRequest): Promise<SuccessResponse<DepositFormCreatedResponse>> {
-        return this.http
-            .post("/api/deposit/momo/u2pay", request)
-            .then<SuccessResponse<DepositFormCreatedResponse>>(res => res.data);
-    }
-
-    public submitU2ThirdPartyDepositRequest(request: DepositRequest): Promise<SuccessResponse<DepositFormCreatedResponse>> {
-        return this.http
-            .post("/api/deposit/thirdparty/u2pay", request)
-            .then(res => res.data);
-    }
-
-    public submitU2ZaloDepositRequest(request: DepositRequest): Promise<SuccessResponse<DepositFormCreatedResponse>> {
-        return this.http
-            .post("/api/deposit/zalo/u2pay", request)
-            .then<SuccessResponse<DepositFormCreatedResponse>>(res => res.data);
-    }
-
     public submitFiveSevenThirdPartyDepositRequest(request: DepositRequest): Promise<SuccessResponse<DepositFormCreatedResponse>> {
         return this.http
             .post("/api/deposit/thirdparty/fivesevenpay", request)
@@ -241,16 +217,16 @@ export default class OperatorService {
             .then<SuccessResponse<DepositFormCreatedResponse>>(res => res.data);
     }
 
-    public submitHThirdPartyDepositRequest(request: DepositRequest): Promise<SuccessResponse<DepositFormCreatedResponse>> {
-        return this.http
-            .post("/api/deposit/thirdparty/hpay", request)
-            .then<SuccessResponse<DepositFormCreatedResponse>>(res => res.data);
-    }
-
     public submitGanyoThirdPartyDepositRequest(request: DepositRequest): Promise<SuccessResponse<DepositFormCreatedResponse>> {
         return this.http
             .post("/api/deposit/thirdparty/ganyopay", request)
             .then(res => res.data);
+    }
+
+    public submitHThirdPartyDepositRequest(request: DepositRequest): Promise<SuccessResponse<DepositFormCreatedResponse>> {
+        return this.http
+            .post("/api/deposit/thirdparty/hpay", request)
+            .then<SuccessResponse<DepositFormCreatedResponse>>(res => res.data);
     }
 
     public submitMalakiV2ThirdPartyDepositRequest(request: DepositRequest): Promise<SuccessResponse<DepositFormCreatedResponse>> {
@@ -411,11 +387,41 @@ export default class OperatorService {
             .then<SuccessResponse<DepositFormCreatedResponse>>(res => res.data);
     }
 
+    public submitU2BankDepositRequest(request: DepositRequest): Promise<SuccessResponse<DepositFormCreatedResponse>> {
+        return this.http
+            .post("/api/deposit/bank/u2pay", request)
+            .then<SuccessResponse<DepositFormCreatedResponse>>(res => res.data);
+    }
+
+    public submitU2MomoDepositRequest(request: DepositRequest): Promise<SuccessResponse<DepositFormCreatedResponse>> {
+        return this.http
+            .post("/api/deposit/momo/u2pay", request)
+            .then<SuccessResponse<DepositFormCreatedResponse>>(res => res.data);
+    }
+
+    public submitU2ThirdPartyDepositRequest(request: DepositRequest): Promise<SuccessResponse<DepositFormCreatedResponse>> {
+        return this.http
+            .post("/api/deposit/thirdparty/u2pay", request)
+            .then(res => res.data);
+    }
+
+    public submitU2ZaloDepositRequest(request: DepositRequest): Promise<SuccessResponse<DepositFormCreatedResponse>> {
+        return this.http
+            .post("/api/deposit/zalo/u2pay", request)
+            .then<SuccessResponse<DepositFormCreatedResponse>>(res => res.data);
+    }
+
+    public submitUBCryptoDepositRequest(request: DepositRequest): Promise<SuccessResponse<DepositFormCreatedResponse>> {
+        return this.http
+            .post("/api/deposit/crypto/ubpay", request)
+            .then<SuccessResponse<DepositFormCreatedResponse>>(res => res.data);
+    }
+
     public submitWinThirdPartyDepositRequest(request: DepositRequest): Promise<SuccessResponse<DepositFormCreatedResponse>> {
         return this.http
             .post("/api/deposit/thirdparty/winpay", request)
             .then(res => res.data);
     }
 
-    // #endregion Public Methods (40)
+    // #endregion Public Methods (46)
 }
