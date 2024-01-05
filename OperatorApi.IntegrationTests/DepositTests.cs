@@ -5207,7 +5207,8 @@ public class DepositTests
 			ExtendedData = """
 				{
 					"apiToken": "apiToken",
-					"notifyToken": "notifyToken"
+					"notifyToken": "notifyToken",
+					"exchangeRate": 1000
 				}
 				""",
 			PaymentId = Guid.NewGuid(),
@@ -5240,7 +5241,8 @@ public class DepositTests
 				"apiToken",
 				"notifyToken",
 				Guid.NewGuid(),
-				null),
+				Currency: null,
+				ExchangeRate: 1m),
 			new UBPayDepositResponse(
 				200000m,
 				Guid.NewGuid(),

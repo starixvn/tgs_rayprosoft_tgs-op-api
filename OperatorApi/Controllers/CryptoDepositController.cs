@@ -272,7 +272,8 @@ public class CryptoDepositController : ControllerBase
 					brandPaymentInfo.RootElement.GetProperty("apiToken").GetString(),
 					brandPaymentInfo.RootElement.GetProperty("notifyToken").GetString(),
 					formId,
-					canGetCurrency ? jsonCurrency.GetString() : null)));
+					canGetCurrency ? jsonCurrency.GetString() : null,
+					brandPaymentInfo.RootElement.GetProperty("exchangeRate").GetDecimal())));
 
 		var createdFormId = await createDepositFormService
 			.GetAsync(command, HttpContext.RequestAborted)
