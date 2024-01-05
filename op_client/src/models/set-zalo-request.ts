@@ -1,0 +1,3 @@
+interface SetZaloRequest{
+    zalo: string;
+}

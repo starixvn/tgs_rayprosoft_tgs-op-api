@@ -10,7 +10,7 @@ export default class OperatorService {
 
     // #endregion Constructors (1)
 
-    // #region Public Methods (46)
+    // #region Public Methods (47)
 
     public async createIdentityAuthenticationForm(
         request: CreateIdentityAuthenticationFormRequest,
@@ -166,6 +166,12 @@ export default class OperatorService {
     public sendStationLetterToCustomService(request: SendStationLetterRequest): Promise<void> {
         return this.http
             .put('/api/station-letter', request)
+            .then(res => res.data);
+    }
+
+    public setPlayerZalo(request: SetZaloRequest): Promise<void> {
+        return this.http
+            .patch(`/api/player/zalo`, request)
             .then(res => res.data);
     }
 
@@ -423,5 +429,5 @@ export default class OperatorService {
             .then(res => res.data);
     }
 
-    // #endregion Public Methods (46)
+    // #endregion Public Methods (47)
 }
