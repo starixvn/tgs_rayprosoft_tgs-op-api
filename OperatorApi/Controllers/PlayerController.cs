@@ -338,6 +338,7 @@ public class PlayerController : ControllerBase
 			Viber = playerProperties.GetValueOrDefault("Viber"),
 			Telegram = playerProperties.GetValueOrDefault("Telegram"),
 			WhatsApp = playerProperties.GetValueOrDefault("WhatsApp"),
+			Zalo = playerProperties.GetValueOrDefault("Zalo"),
 			BankInfoAuthentication = bankInfoAuthentication,
 			EmailAuthentication = player.EmailAuthentication,
 			PhoneAuthentication = player.PhoneAuthentication,
@@ -722,6 +723,19 @@ public class PlayerController : ControllerBase
 		var playerTokenData = HttpContext.Items.GetPlayerTokenData();
 
 		var command = new SetWhatsAppCommand(playerTokenData.PlayerCode, request.WhatsAppId);
+
+		await setWhatsAppService.ExecuteAsync(command).ConfigureAwait(false);
+	}
+
+	[HttpPatch("zalo", Name = "SetZalo")]
+	[AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+	public async ValueTask SetZaloAsync(
+		[FromServices] ICommandService<SetZaloCommand> setWhatsAppService,
+		[FromBody] SetZaloRequest request)
+	{
+		var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+
+		var command = new SetZaloCommand(playerTokenData.PlayerCode, request.Zalo);
 
 		await setWhatsAppService.ExecuteAsync(command).ConfigureAwait(false);
 	}

@@ -1,12 +1,8 @@
 ﻿#nullable enable
 
-using System;
 using System.Collections.Immutable;
-using System.Threading;
-using System.Threading.Tasks;
 using Moq;
 using NSubstitute;
-using NUnit.Framework;
 using Tgs.PlayerService.Client;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Services.Operations;
@@ -419,5 +415,25 @@ public class PlayerInfoTests
 				Arg.Is(player.PlayerCode),
 				Arg.Is<ImmutableDictionary<PlayerPropertyName, string?>>(
 					props => props[PlayerPropertyName.WhatsApp] == command.WhatsAppId));
+	}
+
+	[Test]
+	public async Task Set_Player_Zalo()
+	{
+		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
+
+		var sut = new SetZaloCommandService(fakePlayerServiceClient);
+
+		var playerCode = "playerCode";
+
+		var command = new SetZaloCommand(playerCode, "testZalo");
+
+		await sut.ExecuteAsync(command);
+
+		_ = fakePlayerServiceClient.Received(1)
+			.SetPlayerPropertiesAsync(
+				Arg.Is(playerCode),
+				Arg.Is<ImmutableDictionary<PlayerPropertyName, string?>>(
+					props => props[PlayerPropertyName.Zalo] == command.Zalo));
 	}
 }
