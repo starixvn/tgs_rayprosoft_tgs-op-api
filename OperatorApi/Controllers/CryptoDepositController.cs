@@ -310,7 +310,8 @@ public class CryptoDepositController : ControllerBase
 					brandPaymentInfo.RootElement.GetProperty("notifyToken").GetString(),
 					formId,
 					canGetCurrency ? jsonCurrency.GetString() : null,
-					brandPaymentInfo.RootElement.GetProperty("exchangeRate").GetDecimal())));
+					brandPaymentInfo.RootElement.GetProperty("exchangeRate").GetDecimal()),
+				UBPayUtility.SerializerOptions));
 
 		var createdFormId = await createDepositFormService
 			.GetAsync(command, HttpContext.RequestAborted)
