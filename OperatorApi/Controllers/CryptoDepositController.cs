@@ -150,6 +150,43 @@ public class CryptoDepositController : ControllerBase
 		};
 	}
 
+	[HttpGet("ubpay/exchangerate/{brandPaymentId}")]
+	[AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = false)]
+	public async Task<GetUBPayExchangeRateResponse> GetUBPayExchangeRateAsync(
+		[FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
+		[FromServices] IGetService<GetUBPayExchangeRateQuery, string> getUBPayExchangeRateService,
+		string brandPaymentId)
+	{
+		var brandPayment = await getBrandPaymentService
+			.GetAsync(new GetBrandPaymentQuery(new Guid(brandPaymentId)))
+			.ConfigureAwait(false);
+
+		var brandPaymentInfo = JsonDocument.Parse(brandPayment.ExtendedData);
+
+		var canGetPlatform = brandPaymentInfo.RootElement.TryGetProperty("platform", out var jsonPlatform);
+
+		var query = new GetUBPayExchangeRateQuery(
+			"tgs.payment.ubpay.queryexchangerate",
+			JsonSerializer.Serialize(
+				new UBPayQueryExchangeRateSettings(
+					brandPaymentInfo.RootElement.GetProperty("apiToken").GetString(),
+					brandPaymentInfo.RootElement.GetProperty("currency").GetString(),
+					brandPaymentInfo.RootElement.GetProperty("exchangeRate").GetDecimal(),
+					canGetPlatform ? jsonPlatform.GetString() : "binance"),
+				UBPayUtility.SerializerOptions));
+
+		var response = await getUBPayExchangeRateService
+			.GetAsync(query)
+			.ConfigureAwait(false);
+
+		var applyInfo = JsonSerializer.Deserialize<UBPayQueryExchangeRateApplyInfo>(response, UBPayUtility.SerializerOptions);
+
+		return new GetUBPayExchangeRateResponse
+		{
+			Rate = applyInfo.Response.Rate
+		};
+	}
+
 	[HttpPost("umpay")]
 	[AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
 	[EnableUserBlockedCheck]
@@ -273,7 +310,8 @@ public class CryptoDepositController : ControllerBase
 					brandPaymentInfo.RootElement.GetProperty("notifyToken").GetString(),
 					formId,
 					canGetCurrency ? jsonCurrency.GetString() : null,
-					brandPaymentInfo.RootElement.GetProperty("exchangeRate").GetDecimal())));
+					brandPaymentInfo.RootElement.GetProperty("exchangeRate").GetDecimal()),
+				UBPayUtility.SerializerOptions));
 
 		var createdFormId = await createDepositFormService
 			.GetAsync(command, HttpContext.RequestAborted)

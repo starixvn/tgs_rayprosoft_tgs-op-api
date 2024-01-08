@@ -1,0 +1,3 @@
+interface GetUBPayExchangeRateResponse{
+    rate: number;
+}
