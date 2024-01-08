@@ -15,9 +15,9 @@ using Tgs.ServiceUtility;
 using TGS.Apis.OperatorApi.Models;
 using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Services.Operator;
+using TGS.Services.Operator.ApplicationServices.BrandPayments;
 using TGS.Services.Operator.ApplicationServices.Player;
 using TGS.Services.Operator.ApplicationServices.Withdraw;
-using Xunit;
 using Xunit.Abstractions;
 
 namespace OperatorApi.IntegrationTests;
@@ -869,5 +869,166 @@ public class WithdrawTests
 		// Assert
 		Assert.NotNull(actual);
 		Assert.Equal((int)OpApiError.WithdrawLimitExceed, actual.Error);
+	}
+
+	[Fact]
+	public async Task 取得提款BrandPayments()
+	{
+		// Arrange
+		var channelName = Guid.NewGuid().ToString();
+
+		var fakeBrandCertClient = Substitute.For<IBrandCertificateClient>();
+		var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
+		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
+		var fakePlayerPasswordValidateCommandService = Substitute.For<IGetService<PlayerPasswordValidateCommand, bool>>();
+		var fakePlayerLoginRecordRepository = Substitute.For<IPlayerLoginRecordRepository>();
+		var fakeBrandRepository = Substitute.For<IBrandRepository>();
+		var fakeValidatePlayerLoginRecordCommandService = Substitute.For<ICommandService<ValidatePlayerLoginRecordCommand>>();
+
+		_ = fakeBrandCertClient.GetSystemValidateSecurityKeyAsync(Arg.Any<CancellationToken>())
+			.Returns(TestOperatorApplication.TestSecurityKey);
+
+		var brandId = Guid.NewGuid();
+		var brandCode = "Test";
+		var brandToken = TestOperatorApplication.MakeTestBrandToken(brandId, brandCode);
+
+		_ = fakeBrandRepository.GetSecretKeyAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
+			.Returns("N2KAnljo5zbLCZDSoUBFJ70ONsy");
+
+		var fakeBrandPaymentsQueryService = Substitute.For<IQueryService<BrandPaymentsQuery, BrandPaymentInfo>>();
+		var fakeGetAllPaymentMethodService = Substitute.For<IGetService<AllPaymentMethodsQuery, IDictionary<Guid, PaymentMethodInfo>>>();
+		var fakeGetPaymentService = Substitute.For<IGetService<GetPaymentQuery, PaymentInfo>>();
+
+		using var web = TestOperatorApplication.Builder
+			.UseTestChannelServer(channelName)
+			.ConfigureLogging(logging => logging.AddXUnit(_testOutputHelper))
+			.ConfigureServices(services => services
+				.AddSingleton(fakeBrandCertClient)
+				.AddSingleton(fakeBrandServiceClient)
+				.AddSingleton(fakePlayerServiceClient)
+				.AddSingleton(fakePlayerPasswordValidateCommandService)
+				.AddSingleton(fakePlayerLoginRecordRepository)
+				.AddSingleton(fakeBrandRepository)
+				.AddSingleton(fakeValidatePlayerLoginRecordCommandService)
+				.AddSingleton(fakeBrandPaymentsQueryService)
+				.AddSingleton(fakeGetAllPaymentMethodService)
+				.AddSingleton(fakeGetPaymentService))
+			.Build();
+
+		await web.StartAsync();
+
+		var playerCode = "test1";
+		var userName = "test";
+
+		_ = fakeBrandServiceClient.GetBrandStatusAsync(
+			Arg.Is(brandId),
+			Arg.Any<CancellationToken>())
+			.Returns(BrandStatus.Active);
+		_ = fakePlayerServiceClient.GetPlayerInfoByUserNameAsync(
+			Arg.Is(brandId),
+			Arg.Is(userName),
+			Arg.Any<CancellationToken>())
+			.Returns(new Tgs.PlayerService.Client.PlayerInfo
+			{
+				BrandId = brandId,
+				UserName = userName,
+				PlayerCode = playerCode
+			});
+		_ = fakePlayerPasswordValidateCommandService.GetAsync(
+			Arg.Any<PlayerPasswordValidateCommand>(),
+			Arg.Any<CancellationToken>())
+			.Returns(true);
+		_ = fakePlayerPasswordValidateCommandService.GetAsync(
+			Arg.Any<PlayerPasswordValidateCommand>(),
+			Arg.Any<CancellationToken>())
+			.Returns(true);
+		_ = fakePlayerLoginRecordRepository.AddPlayerLoginRecordAsync(
+			Arg.Is(brandId),
+			Arg.Is(playerCode),
+			Arg.Is(TGS.Core.Models.Enums.PlatformType.Desktop),
+			Arg.Is("127.0.0.1"))
+			.Returns(new LoginRecordInfo(
+				Guid.NewGuid(),
+				playerCode,
+				TGS.Core.Models.Enums.LoginStatus.Enabled,
+				TGS.Core.Models.Enums.PlatformType.Desktop,
+				DateTimeOffset.Now,
+				DateTimeOffset.Now.AddDays(1D)));
+
+		await using var scope = web.Services.CreateAsyncScope();
+
+		var loginService = scope.ServiceProvider.GetRequiredService<IGetService<LoginCommand, LoginInfo>>();
+
+		var loginCommand = new LoginCommand(
+			brandId,
+			userName,
+			"test123",
+			"127.0.0.1",
+			"localhost",
+			TGS.Core.Models.Enums.PlatformType.Desktop,
+			"operator-api");
+
+		var loginResult = await loginService.GetAsync(loginCommand);
+
+		var paymentId1 = Guid.NewGuid();
+		var methodId1 = Guid.NewGuid();
+
+		_ = fakeGetAllPaymentMethodService.GetAsync(new AllPaymentMethodsQuery())
+			.Returns(new Dictionary<Guid, PaymentMethodInfo>
+			{
+				{ methodId1,new PaymentMethodInfo{ Id = methodId1, Name = "paymentMethodName", BankType ="bankType" } },
+			});
+
+		_ = fakeGetPaymentService.GetAsync(new GetPaymentQuery(paymentId1))
+			.Returns(new PaymentInfo()
+			{
+				Code = "paymentCode",
+				Id = paymentId1,
+			});
+
+		_ = fakeBrandPaymentsQueryService.QueryAsync(new BrandPaymentsQuery(brandId, playerCode))
+			.Returns(new BrandPaymentInfo[]
+			{
+				new()
+				{
+					 Id = Guid.NewGuid(),
+					 ChannelId = Guid.NewGuid(),
+					 ChannelName = "channelName",
+					 ChannelCode = "channelCode",
+					 TransferLimit = new Tgs.Payment.Clients.ValueRange<decimal>
+					 {
+						 From = 20m,
+						 To = 10000m
+					 },
+					 PaymentId = paymentId1,
+					 MethodId = methodId1,
+					 TransferType = TransferType.Withdraw,
+					 DisplayOrder = 99,
+				}
+			}.ToAsyncEnumerable());
+
+		var isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "true" : "false";
+		var nodeModule = $$"""
+			const axiosConfigFactory = require('./models/axios-configuration.js').default;
+			const OperatorService = require('./services/op-service.js').default;
+
+			module.exports = async (brandToken, loginToken) =>
+			{
+				let instance = axiosConfigFactory("{{channelName}}", {{isWindows}}, brandToken, loginToken);
+
+				let svc = new OperatorService(instance);
+
+				return await svc.getWithdrawBrandPayments();
+			};
+			""";
+
+		// Act
+		var actual = await StaticNodeJSService.InvokeFromStringAsync<SuccessResponse<BrandPaymentViewModel[]>>(
+			nodeModule,
+			args: new object?[] { brandToken, loginResult.PlayerToken });
+
+		// Assert
+		Assert.NotNull(actual);
+		Assert.Equal(99, actual.Data[0].DisplayOrder);
 	}
 }

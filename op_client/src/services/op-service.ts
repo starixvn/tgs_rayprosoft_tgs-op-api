@@ -10,7 +10,7 @@ export default class OperatorService {
 
     // #endregion Constructors (1)
 
-    // #region Public Methods (48)
+    // #region Public Methods (49)
 
     public async createIdentityAuthenticationForm(
         request: CreateIdentityAuthenticationFormRequest,
@@ -118,6 +118,12 @@ export default class OperatorService {
     public getUBPayExchangeRate(brandPaymentId: string): Promise<GetUBPayExchangeRateResponse> {
         return this.http
             .get(`/api/deposit/crypto/ubpay/exchangerate/${brandPaymentId}`)
+            .then(res => res.data);
+    }
+
+    public getWithdrawBrandPayments(): Promise<BrandPaymentViewModel[]> {
+        return this.http
+            .get("/api/withdraw")
             .then(res => res.data);
     }
 
@@ -435,5 +441,5 @@ export default class OperatorService {
             .then(res => res.data);
     }
 
-    // #endregion Public Methods (48)
+    // #endregion Public Methods (49)
 }

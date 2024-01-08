@@ -69,8 +69,7 @@ public class WithdrawController : ControllerBase
 	[IgnoreUserBlacklistCheck]
 	public async IAsyncEnumerable<BrandPaymentViewModel> GetBrandPaymentsAsync(
 		[FromServices] IQueryService<BrandPaymentsQuery, BrandPaymentInfo> brandPaymentsQueryService,
-		[FromServices]
-			IGetService<AllPaymentMethodsQuery, IDictionary<Guid, PaymentMethodInfo>> getAllPaymentMethodService,
+		[FromServices] IGetService<AllPaymentMethodsQuery, IDictionary<Guid, PaymentMethodInfo>> getAllPaymentMethodService,
 		[FromServices] IGetService<GetPaymentQuery, PaymentInfo> getPaymentService)
 	{
 		var playerTokenData = HttpContext.Items.GetPlayerTokenData();
@@ -115,7 +114,8 @@ public class WithdrawController : ControllerBase
 				PaymentCode = paymentInfo.Code,
 				MethodId = bp.MethodId,
 				MethodCode = paymentMethod.Name,
-				BankType = paymentMethod.BankType
+				BankType = paymentMethod.BankType,
+				DisplayOrder = bp.DisplayOrder,
 			};
 		}
 	}
