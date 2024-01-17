@@ -92,9 +92,9 @@ internal class CreatePlayerInvitationPlayerCommandService : IGetService<CreatePl
 				$"Brand with id '{command.BrandId}' doesn't have default bet limit.");
 
 		var vipInfo = await _vipLevelServiceClient
-			.VipLevelQueryAsync(command.BrandId, cancellationToken)
-			.FirstOrDefaultAsync(x => x.Level == 1, cancellationToken)
-			.ConfigureAwait(false);
+			.VipLevelGetAsync(command.BrandId, 1, cancellationToken)
+			.ConfigureAwait(false)
+			?? throw new NullReferenceException($"The VIP level for this brand does not exist.(1)");
 
 		var resultPlayerCode = await CreatePlayerByUpperPlayerAsync(
 			command,
@@ -102,6 +102,13 @@ internal class CreatePlayerInvitationPlayerCommandService : IGetService<CreatePl
 			betLimitId.Value,
 			vipInfo!.Id,
 			cancellationToken).ConfigureAwait(false);
+
+		await _vipLevelServiceClient.PlayerVipLevelRegisterAsync(
+			playerCode: resultPlayerCode,
+			vipLevel: vipInfo.Level,
+			autoState: Tgs.VipLevelService.Common.PlayerVipLevelAutoState.Enable,
+			cancellationToken: cancellationToken)
+			.ConfigureAwait(false);
 
 		return new CreatePlayerInfo(resultPlayerCode, true);
 	}
