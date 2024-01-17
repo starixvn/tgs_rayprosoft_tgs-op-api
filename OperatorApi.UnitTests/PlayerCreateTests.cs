@@ -89,35 +89,33 @@ public class PlayerCreateTests
 					 Currency = "CNY"
 				 });
 
-		var vipLevelInfos = new Tgs.VipLevelService.Common.ViewModels.VipLevelInfoViewModel[]
-		{
-			new (
-				Guid.NewGuid(),
-				1,
-				brandId,
-				0M,
-				0M,
-				0M,
-				0M,
-				false,
-				0M,
-				0M,
-				0M,
-				0M,
-				0M,
-				0M,
-				0M,
-				0M,
-				0M,
-				0,
-				0M)
-		};
-
-		_ = fakeVipLevelServiceClient.VipLevelQueryAsync(Arg.Is(brandId))
-			.Returns(vipLevelInfos.ToAsyncEnumerable());
-
 		_ = fakeBrandServiceClient.GetBrandBetLimitIdAsync(Arg.Is(brandId))
 			.Returns(100);
+
+		var vipLevelInfo = new Tgs.VipLevelService.Common.ViewModels.VipLevelInfoViewModel(
+			Id: Guid.NewGuid(),
+			Level: 1,
+			BrandId: brandId,
+			LevelUpAccumulateBetAmount: 0M,
+			LevelUpAccumulateDeposit: 0M,
+			LevelKeepAccumulateBetAmount: 0M,
+			LevelKeepAccumulateDeposit: 0M,
+			LevelKeepCondition: false,
+			BirthBenefit: 0M,
+			PromotionBenefit: 0M,
+			QuarterlyBenefit: 0M,
+			LiveDealerRebate: 0M,
+			SlotRebate: 0M,
+			LotteryRebate: 0M,
+			CardGameRebate: 0M,
+			SportsRebate: 0M,
+			VirtualSportsRebate: 0M,
+			WithdrawTransactionsPerDay: -1,
+			WithdrawTotalAmountPerDay: -1m);
+		_ = fakeVipLevelServiceClient.VipLevelGetAsync(
+			brandId: Arg.Is(brandId),
+			level: Arg.Is(1))
+			.Returns(vipLevelInfo);
 
 		// act
 		_ = Assert.ThrowsAsync<InvalidInvitationCodeException>(
@@ -131,13 +129,13 @@ public class PlayerCreateTests
 		var fakeAgentRepository = Substitute.For<IAgentRepository>();
 		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
 		var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
-		var fakeVipServiceClient = Substitute.For<IVipLevelServiceClient>();
+		var fakeVipLevelServiceClient = Substitute.For<IVipLevelServiceClient>();
 
 		var sut = new CreateAgentInvitationPlayerCommandService(
 			fakeAgentRepository,
 			fakePlayerServiceClient,
 			fakeBrandServiceClient,
-			fakeVipServiceClient);
+			fakeVipLevelServiceClient);
 
 		var brandId = Guid.NewGuid();
 		var invitationCode = "6rd4mq";
@@ -171,35 +169,38 @@ public class PlayerCreateTests
 		_ = fakePlayerServiceClient.CreatePlayerAsync(Arg.Any<CreatePlayerData>())
 			.Returns("TestPlayerCode");
 
-		var vipLevelInfos = new Tgs.VipLevelService.Common.ViewModels.VipLevelInfoViewModel[]
-		{
-			new (
-				Guid.NewGuid(),
-				1,
-				brandId,
-				0M,
-				0M,
-				0M,
-				0M,
-				false,
-				0M,
-				0M,
-				0M,
-				0M,
-				0M,
-				0M,
-				0M,
-				0M,
-				0M,
-				0,
-				0M)
-		};
-
-		_ = fakeVipServiceClient.VipLevelQueryAsync(Arg.Is(brandId))
-			.Returns(vipLevelInfos.ToAsyncEnumerable());
-
 		_ = fakeBrandServiceClient.GetBrandBetLimitIdAsync(Arg.Is(brandId))
 			.Returns(100);
+
+		var vipLevelInfo = new Tgs.VipLevelService.Common.ViewModels.VipLevelInfoViewModel(
+			Id: Guid.NewGuid(),
+			Level: 1,
+			BrandId: brandId,
+			LevelUpAccumulateBetAmount: 0M,
+			LevelUpAccumulateDeposit: 0M,
+			LevelKeepAccumulateBetAmount: 0M,
+			LevelKeepAccumulateDeposit: 0M,
+			LevelKeepCondition: false,
+			BirthBenefit: 0M,
+			PromotionBenefit: 0M,
+			QuarterlyBenefit: 0M,
+			LiveDealerRebate: 0M,
+			SlotRebate: 0M,
+			LotteryRebate: 0M,
+			CardGameRebate: 0M,
+			SportsRebate: 0M,
+			VirtualSportsRebate: 0M,
+			WithdrawTransactionsPerDay: -1,
+			WithdrawTotalAmountPerDay: -1m);
+		_ = fakeVipLevelServiceClient.VipLevelGetAsync(
+			brandId: Arg.Is(brandId),
+			level: Arg.Is(1))
+			.Returns(vipLevelInfo);
+
+		var resultPlayerCode = "TestPlayerCode";
+		_ = fakePlayerServiceClient.CreatePlayerAsync(
+			Arg.Is<CreatePlayerData>(data => data.BrandId == command.BrandId && data.Username == command.UserName && data.AgentId == agentId))
+			.Returns(resultPlayerCode);
 
 		// act
 		var actual = await sut.GetAsync(command);
@@ -207,10 +208,12 @@ public class PlayerCreateTests
 		// assert
 		Assert.IsTrue(actual.IsNew);
 
-		_ = fakePlayerServiceClient.Received(1)
-			.CreatePlayerAsync(Arg.Is<CreatePlayerData>(data => data.BrandId == command.BrandId
-				&& data.Username == command.UserName
-				&& data.AgentId == agentId));
+		_ = fakeVipLevelServiceClient.Received(1)
+			.PlayerVipLevelRegisterAsync(
+			playerCode: Arg.Is(resultPlayerCode),
+			vipLevel: Arg.Is(vipLevelInfo.Level),
+			autoState: Arg.Is(Tgs.VipLevelService.Common.PlayerVipLevelAutoState.Enable),
+			cancellationToken: Arg.Any<CancellationToken>());
 	}
 
 	[Test]
@@ -218,12 +221,12 @@ public class PlayerCreateTests
 	{
 		var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
 		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
-		var fakeVipLevelClient = Substitute.For<IVipLevelServiceClient>();
+		var fakeVipLevelServiceClient = Substitute.For<IVipLevelServiceClient>();
 
 		var sut = new CreatePlayerInvitationPlayerCommandService(
 			fakePlayerServiceClient,
 			fakeBrandServiceClient,
-			fakeVipLevelClient);
+			fakeVipLevelServiceClient);
 
 		var brandId = Guid.NewGuid();
 		var upperPlayerCode = "upper";
@@ -252,45 +255,51 @@ public class PlayerCreateTests
 				BrandId = brandId
 			});
 
-		var vipLevelInfos = new Tgs.VipLevelService.Common.ViewModels.VipLevelInfoViewModel[]
-		{
-			new (
-				Guid.NewGuid(),
-				1,
-				brandId,
-				0M,
-				0M,
-				0M,
-				0M,
-				false,
-				0M,
-				0M,
-				0M,
-				0M,
-				0M,
-				0M,
-				0M,
-				0M,
-				0M,
-				0,
-				0M)
-		};
-
-		_ = fakeVipLevelClient.VipLevelQueryAsync(Arg.Is(brandId))
-			.Returns(vipLevelInfos.ToAsyncEnumerable());
-
 		_ = fakeBrandServiceClient.GetBrandBetLimitIdAsync(Arg.Is(brandId))
 			.Returns(100);
 
+		var vipLevelInfo = new Tgs.VipLevelService.Common.ViewModels.VipLevelInfoViewModel(
+			Id: Guid.NewGuid(),
+			Level: 1,
+			BrandId: brandId,
+			LevelUpAccumulateBetAmount: 0M,
+			LevelUpAccumulateDeposit: 0M,
+			LevelKeepAccumulateBetAmount: 0M,
+			LevelKeepAccumulateDeposit: 0M,
+			LevelKeepCondition: false,
+			BirthBenefit: 0M,
+			PromotionBenefit: 0M,
+			QuarterlyBenefit: 0M,
+			LiveDealerRebate: 0M,
+			SlotRebate: 0M,
+			LotteryRebate: 0M,
+			CardGameRebate: 0M,
+			SportsRebate: 0M,
+			VirtualSportsRebate: 0M,
+			WithdrawTransactionsPerDay: -1,
+			WithdrawTotalAmountPerDay: -1m);
+		_ = fakeVipLevelServiceClient.VipLevelGetAsync(
+			brandId: Arg.Is(brandId),
+			level: Arg.Is(1))
+			.Returns(vipLevelInfo);
+
+		var resultPlayerCode = "TestPlayerCode";
+		_ = fakePlayerServiceClient.CreatePlayerAsync(
+			Arg.Is<CreatePlayerData>(data => data.BrandId == command.BrandId && data.Username == command.UserName))
+			.Returns(resultPlayerCode);
+
+		// act
 		var actual = await sut.GetAsync(command);
 
 		// assert
 		Assert.IsTrue(actual.IsNew);
 
-		_ = fakePlayerServiceClient.Received(1)
-			.CreatePlayerAsync(Arg.Is<CreatePlayerData>(data => data.BrandId == command.BrandId
-				&& data.Username == command.UserName
-				&& data.UpperPlayerCode == command.UpperPlayerCode));
+		_ = fakeVipLevelServiceClient.Received(1)
+			.PlayerVipLevelRegisterAsync(
+			playerCode: Arg.Is(resultPlayerCode),
+			vipLevel: Arg.Is(vipLevelInfo.Level),
+			autoState: Arg.Is(Tgs.VipLevelService.Common.PlayerVipLevelAutoState.Enable),
+			cancellationToken: Arg.Any<CancellationToken>());
 	}
 
 	[Test]
@@ -299,12 +308,12 @@ public class PlayerCreateTests
 		// arrange
 		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
 		var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
-		var fakeVipServiceClient = Substitute.For<IVipLevelServiceClient>();
+		var fakeVipLevelServiceClient = Substitute.For<IVipLevelServiceClient>();
 
 		var sut = new CreatePlayerCommandService(
 			fakePlayerServiceClient,
 			fakeBrandServiceClient,
-			fakeVipServiceClient);
+			fakeVipLevelServiceClient);
 
 		var brandId = Guid.NewGuid();
 		var password = "password";
@@ -329,27 +338,26 @@ public class PlayerCreateTests
 			.Returns(100);
 
 		var vipLevelInfo = new Tgs.VipLevelService.Common.ViewModels.VipLevelInfoViewModel(
-				Id: Guid.NewGuid(),
-				Level: 1,
-				BrandId: brandId,
-				LevelUpAccumulateBetAmount: 0M,
-				LevelUpAccumulateDeposit: 0M,
-				LevelKeepAccumulateBetAmount: 0M,
-				LevelKeepAccumulateDeposit: 0M,
-				LevelKeepCondition: false,
-				BirthBenefit: 0M,
-				PromotionBenefit: 0M,
-				QuarterlyBenefit: 0M,
-				LiveDealerRebate: 0M,
-				SlotRebate: 0M,
-				LotteryRebate: 0M,
-				CardGameRebate: 0M,
-				SportsRebate: 0M,
-				VirtualSportsRebate: 0M,
-				WithdrawTransactionsPerDay: 0,
-				WithdrawTotalAmountPerDay: 0M)
-			;
-		_ = fakeVipServiceClient.VipLevelGetAsync(
+			Id: Guid.NewGuid(),
+			Level: 1,
+			BrandId: brandId,
+			LevelUpAccumulateBetAmount: 0M,
+			LevelUpAccumulateDeposit: 0M,
+			LevelKeepAccumulateBetAmount: 0M,
+			LevelKeepAccumulateDeposit: 0M,
+			LevelKeepCondition: false,
+			BirthBenefit: 0M,
+			PromotionBenefit: 0M,
+			QuarterlyBenefit: 0M,
+			LiveDealerRebate: 0M,
+			SlotRebate: 0M,
+			LotteryRebate: 0M,
+			CardGameRebate: 0M,
+			SportsRebate: 0M,
+			VirtualSportsRebate: 0M,
+			WithdrawTransactionsPerDay: -1,
+			WithdrawTotalAmountPerDay: -1m);
+		_ = fakeVipLevelServiceClient.VipLevelGetAsync(
 			brandId: Arg.Is(brandId),
 			level: Arg.Is(1))
 			.Returns(vipLevelInfo);
@@ -365,7 +373,7 @@ public class PlayerCreateTests
 		// assert
 		Assert.IsTrue(actual.IsNew);
 
-		_ = fakeVipServiceClient.Received(1)
+		_ = fakeVipLevelServiceClient.Received(1)
 			.PlayerVipLevelRegisterAsync(
 			playerCode: Arg.Is(resultPlayerCode),
 			vipLevel: Arg.Is(vipLevelInfo.Level),
@@ -380,13 +388,13 @@ public class PlayerCreateTests
 		var fakeAgentRepository = Substitute.For<IAgentRepository>();
 		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
 		var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
-		var fakeVipServiceClient = Substitute.For<IVipLevelServiceClient>();
+		var fakeVipLevelServiceClient = Substitute.For<IVipLevelServiceClient>();
 
 		var sut = new CreateAgentInvitationPlayerCommandService(
 			fakeAgentRepository,
 			fakePlayerServiceClient,
 			fakeBrandServiceClient,
-			fakeVipServiceClient);
+			fakeVipLevelServiceClient);
 
 		var brandId = Guid.NewGuid();
 		var password = "password";
@@ -408,35 +416,33 @@ public class PlayerCreateTests
 				Currency = "CNY"
 			});
 
-		var vipLevelInfos = new Tgs.VipLevelService.Common.ViewModels.VipLevelInfoViewModel[]
-		{
-			new (
-				Guid.NewGuid(),
-				1,
-				brandId,
-				0M,
-				0M,
-				0M,
-				0M,
-				false,
-				0M,
-				0M,
-				0M,
-				0M,
-				0M,
-				0M,
-				0M,
-				0M,
-				0M,
-				0,
-				0M)
-		};
-
-		_ = fakeVipServiceClient.VipLevelQueryAsync(Arg.Is(brandId))
-			.Returns(vipLevelInfos.ToAsyncEnumerable());
-
 		_ = fakeBrandServiceClient.GetBrandBetLimitIdAsync(Arg.Is(brandId))
 			.Returns(100);
+
+		var vipLevelInfo = new Tgs.VipLevelService.Common.ViewModels.VipLevelInfoViewModel(
+			Id: Guid.NewGuid(),
+			Level: 1,
+			BrandId: brandId,
+			LevelUpAccumulateBetAmount: 0M,
+			LevelUpAccumulateDeposit: 0M,
+			LevelKeepAccumulateBetAmount: 0M,
+			LevelKeepAccumulateDeposit: 0M,
+			LevelKeepCondition: false,
+			BirthBenefit: 0M,
+			PromotionBenefit: 0M,
+			QuarterlyBenefit: 0M,
+			LiveDealerRebate: 0M,
+			SlotRebate: 0M,
+			LotteryRebate: 0M,
+			CardGameRebate: 0M,
+			SportsRebate: 0M,
+			VirtualSportsRebate: 0M,
+			WithdrawTransactionsPerDay: -1,
+			WithdrawTotalAmountPerDay: -1m);
+		_ = fakeVipLevelServiceClient.VipLevelGetAsync(
+			brandId: Arg.Is(brandId),
+			level: Arg.Is(1))
+			.Returns(vipLevelInfo);
 
 		_ = Assert.ThrowsAsync<InvalidInvitationCodeException>(async () => await sut.GetAsync(query));
 	}
@@ -446,12 +452,12 @@ public class PlayerCreateTests
 	{
 		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
 		var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
-		var fakeVipServiceClient = Substitute.For<IVipLevelServiceClient>();
+		var fakeVipLevelServiceClient = Substitute.For<IVipLevelServiceClient>();
 
 		var sut = new CreatePlayerInvitationPlayerCommandService(
 			fakePlayerServiceClient,
 			fakeBrandServiceClient,
-			fakeVipServiceClient);
+			fakeVipLevelServiceClient);
 
 		var brandId = Guid.NewGuid();
 		var upperPlayerCode = "upper";
@@ -472,35 +478,33 @@ public class PlayerCreateTests
 				  Currency = "CNY"
 			  });
 
-		var vipLevelInfos = new Tgs.VipLevelService.Common.ViewModels.VipLevelInfoViewModel[]
-		{
-			new (
-				Guid.NewGuid(),
-				1,
-				brandId,
-				0M,
-				0M,
-				0M,
-				0M,
-				false,
-				0M,
-				0M,
-				0M,
-				0M,
-				0M,
-				0M,
-				0M,
-				0M,
-				0M,
-				0,
-				0M)
-		};
-
-		_ = fakeVipServiceClient.VipLevelQueryAsync(Arg.Is(brandId))
-			.Returns(vipLevelInfos.ToAsyncEnumerable());
-
 		_ = fakeBrandServiceClient.GetBrandBetLimitIdAsync(Arg.Is(brandId))
 			.Returns(100);
+
+		var vipLevelInfo = new Tgs.VipLevelService.Common.ViewModels.VipLevelInfoViewModel(
+			Id: Guid.NewGuid(),
+			Level: 1,
+			BrandId: brandId,
+			LevelUpAccumulateBetAmount: 0M,
+			LevelUpAccumulateDeposit: 0M,
+			LevelKeepAccumulateBetAmount: 0M,
+			LevelKeepAccumulateDeposit: 0M,
+			LevelKeepCondition: false,
+			BirthBenefit: 0M,
+			PromotionBenefit: 0M,
+			QuarterlyBenefit: 0M,
+			LiveDealerRebate: 0M,
+			SlotRebate: 0M,
+			LotteryRebate: 0M,
+			CardGameRebate: 0M,
+			SportsRebate: 0M,
+			VirtualSportsRebate: 0M,
+			WithdrawTransactionsPerDay: -1,
+			WithdrawTotalAmountPerDay: -1m);
+		_ = fakeVipLevelServiceClient.VipLevelGetAsync(
+			brandId: Arg.Is(brandId),
+			level: Arg.Is(1))
+			.Returns(vipLevelInfo);
 
 		_ = Assert.ThrowsAsync<InvalidInvitationCodeException>(async () => await sut.GetAsync(command));
 	}
@@ -510,12 +514,12 @@ public class PlayerCreateTests
 	{
 		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
 		var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
-		var fakeVipServiceClient = Substitute.For<IVipLevelServiceClient>();
+		var fakeVipLevelServiceClient = Substitute.For<IVipLevelServiceClient>();
 
 		var sut = new CreatePlayerInvitationPlayerCommandService(
 			fakePlayerServiceClient,
 			fakeBrandServiceClient,
-			fakeVipServiceClient);
+			fakeVipLevelServiceClient);
 
 		var brandId = Guid.NewGuid();
 		var upperPlayerCode = "upper";
@@ -547,32 +551,30 @@ public class PlayerCreateTests
 		_ = fakeBrandServiceClient.GetBrandBetLimitIdAsync(Arg.Is(brandId))
 			.Returns(100);
 
-		var vipLevelInfos = new Tgs.VipLevelService.Common.ViewModels.VipLevelInfoViewModel[]
-		{
-			new (
-				Guid.NewGuid(),
-				1,
-				brandId,
-				0M,
-				0M,
-				0M,
-				0M,
-				false,
-				0M,
-				0M,
-				0M,
-				0M,
-				0M,
-				0M,
-				0M,
-				0M,
-				0M,
-				0,
-				0M)
-		};
-
-		_ = fakeVipServiceClient.VipLevelQueryAsync(Arg.Is(brandId))
-			.Returns(vipLevelInfos.ToAsyncEnumerable());
+		var vipLevelInfo = new Tgs.VipLevelService.Common.ViewModels.VipLevelInfoViewModel(
+			Id: Guid.NewGuid(),
+			Level: 1,
+			BrandId: brandId,
+			LevelUpAccumulateBetAmount: 0M,
+			LevelUpAccumulateDeposit: 0M,
+			LevelKeepAccumulateBetAmount: 0M,
+			LevelKeepAccumulateDeposit: 0M,
+			LevelKeepCondition: false,
+			BirthBenefit: 0M,
+			PromotionBenefit: 0M,
+			QuarterlyBenefit: 0M,
+			LiveDealerRebate: 0M,
+			SlotRebate: 0M,
+			LotteryRebate: 0M,
+			CardGameRebate: 0M,
+			SportsRebate: 0M,
+			VirtualSportsRebate: 0M,
+			WithdrawTransactionsPerDay: -1,
+			WithdrawTotalAmountPerDay: -1m);
+		_ = fakeVipLevelServiceClient.VipLevelGetAsync(
+			brandId: Arg.Is(brandId),
+			level: Arg.Is(1))
+			.Returns(vipLevelInfo);
 
 		// act
 		_ = Assert.ThrowsAsync<InvalidInvitationCodeException>(
