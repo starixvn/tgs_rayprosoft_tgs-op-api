@@ -48,7 +48,7 @@
     <PackageReference Include="TGS.SmsServiceClient" Version="0.0.8" />
     <PackageReference Include="Tgs.StationLetter.Client" Version="0.0.7" />
     <PackageReference Include="Tgs.ValidateCode.Client" Version="1.1.0" />
-    <PackageReference Include="Tgs.VipLevelService.Client" Version="0.0.9" />
+    <PackageReference Include="Tgs.VipLevelService.Client" Version="0.0.14" />
   </ItemGroup>
 
   <ItemGroup>
