@@ -10,7 +10,7 @@ export default class OperatorService {
 
     // #endregion Constructors (1)
 
-    // #region Public Methods (49)
+    // #region Public Methods (50)
 
     public async createIdentityAuthenticationForm(
         request: CreateIdentityAuthenticationFormRequest,
@@ -190,6 +190,12 @@ export default class OperatorService {
     public setStationLetterHaveRead(letterId: string): Promise<void> {
         return this.http
             .patch(`/api/station-letter/${letterId}:read`)
+            .then(res => res.data);
+    }
+
+    public submit123ThirdPartyDepositRequest(request: DepositRequest): Promise<SuccessResponse<DepositFormCreatedResponse>> {
+        return this.http
+            .post("/api/deposit/thirdparty/123pay", request)
             .then(res => res.data);
     }
 
@@ -441,5 +447,5 @@ export default class OperatorService {
             .then(res => res.data);
     }
 
-    // #endregion Public Methods (49)
+    // #endregion Public Methods (50)
 }
