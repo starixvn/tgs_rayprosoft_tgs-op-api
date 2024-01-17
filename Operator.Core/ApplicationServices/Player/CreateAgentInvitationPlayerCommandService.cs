@@ -57,7 +57,7 @@ internal class CreateAgentInvitationPlayerCommandService
 				$"Brand with id '{command.BrandId}' doesn't have default bet limit.");
 
 		var vipInfo = await _vipLevelServiceClient
-			.GetBrandAllVipLevelsAsync(command.BrandId, cancellationToken)
+			.VipLevelQueryAsync(command.BrandId, cancellationToken)
 			.FirstOrDefaultAsync(x => x.Level == 1, cancellationToken)
 			.ConfigureAwait(false);
 

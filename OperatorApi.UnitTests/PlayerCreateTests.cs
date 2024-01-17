@@ -89,9 +89,9 @@ public class PlayerCreateTests
 					 Currency = "CNY"
 				 });
 
-		var vipLevelInfos = new[]
+		var vipLevelInfos = new Tgs.VipLevelService.Common.ViewModels.VipLevelInfoViewModel[]
 		{
-			new Tgs.VipLevelService.Clients.VipLevelInfo(
+			new (
 				Guid.NewGuid(),
 				1,
 				brandId,
@@ -113,7 +113,7 @@ public class PlayerCreateTests
 				0M)
 		};
 
-		_ = fakeVipLevelServiceClient.GetBrandAllVipLevelsAsync(Arg.Is(brandId))
+		_ = fakeVipLevelServiceClient.VipLevelQueryAsync(Arg.Is(brandId))
 			.Returns(vipLevelInfos.ToAsyncEnumerable());
 
 		_ = fakeBrandServiceClient.GetBrandBetLimitIdAsync(Arg.Is(brandId))
@@ -171,9 +171,9 @@ public class PlayerCreateTests
 		_ = fakePlayerServiceClient.CreatePlayerAsync(Arg.Any<CreatePlayerData>())
 			.Returns("TestPlayerCode");
 
-		var vipLevelInfos = new[]
+		var vipLevelInfos = new Tgs.VipLevelService.Common.ViewModels.VipLevelInfoViewModel[]
 		{
-			new Tgs.VipLevelService.Clients.VipLevelInfo(
+			new (
 				Guid.NewGuid(),
 				1,
 				brandId,
@@ -195,7 +195,7 @@ public class PlayerCreateTests
 				0M)
 		};
 
-		_ = fakeVipServiceClient.GetBrandAllVipLevelsAsync(Arg.Is(brandId))
+		_ = fakeVipServiceClient.VipLevelQueryAsync(Arg.Is(brandId))
 			.Returns(vipLevelInfos.ToAsyncEnumerable());
 
 		_ = fakeBrandServiceClient.GetBrandBetLimitIdAsync(Arg.Is(brandId))
@@ -252,9 +252,9 @@ public class PlayerCreateTests
 				BrandId = brandId
 			});
 
-		var vipLevelInfos = new[]
+		var vipLevelInfos = new Tgs.VipLevelService.Common.ViewModels.VipLevelInfoViewModel[]
 		{
-			new Tgs.VipLevelService.Clients.VipLevelInfo(
+			new (
 				Guid.NewGuid(),
 				1,
 				brandId,
@@ -276,7 +276,7 @@ public class PlayerCreateTests
 				0M)
 		};
 
-		_ = fakeVipLevelClient.GetBrandAllVipLevelsAsync(Arg.Is(brandId))
+		_ = fakeVipLevelClient.VipLevelQueryAsync(Arg.Is(brandId))
 			.Returns(vipLevelInfos.ToAsyncEnumerable());
 
 		_ = fakeBrandServiceClient.GetBrandBetLimitIdAsync(Arg.Is(brandId))
@@ -325,35 +325,39 @@ public class PlayerCreateTests
 					Currency = "CNY"
 				}));
 
-		var vipLevelInfos = new[]
-		{
-			new Tgs.VipLevelService.Clients.VipLevelInfo(
-				Guid.NewGuid(),
-				1,
-				brandId,
-				0M,
-				0M,
-				0M,
-				0M,
-				false,
-				0M,
-				0M,
-				0M,
-				0M,
-				0M,
-				0M,
-				0M,
-				0M,
-				0M,
-				0,
-				0M)
-		};
-
-		_ = fakeVipServiceClient.GetBrandAllVipLevelsAsync(Arg.Is(brandId))
-			.Returns(vipLevelInfos.ToAsyncEnumerable());
-
 		_ = fakeBrandServiceClient.GetBrandBetLimitIdAsync(Arg.Is(brandId))
 			.Returns(100);
+
+		var vipLevelInfo = new Tgs.VipLevelService.Common.ViewModels.VipLevelInfoViewModel(
+				Id: Guid.NewGuid(),
+				Level: 1,
+				BrandId: brandId,
+				LevelUpAccumulateBetAmount: 0M,
+				LevelUpAccumulateDeposit: 0M,
+				LevelKeepAccumulateBetAmount: 0M,
+				LevelKeepAccumulateDeposit: 0M,
+				LevelKeepCondition: false,
+				BirthBenefit: 0M,
+				PromotionBenefit: 0M,
+				QuarterlyBenefit: 0M,
+				LiveDealerRebate: 0M,
+				SlotRebate: 0M,
+				LotteryRebate: 0M,
+				CardGameRebate: 0M,
+				SportsRebate: 0M,
+				VirtualSportsRebate: 0M,
+				WithdrawTransactionsPerDay: 0,
+				WithdrawTotalAmountPerDay: 0M)
+			;
+		_ = fakeVipServiceClient.VipLevelGetAsync(
+			brandId: Arg.Is(brandId),
+			level: Arg.Is(1))
+			.Returns(vipLevelInfo);
+
+		var resultPlayerCode = "TestPlayerCode";
+		_ = fakePlayerServiceClient.CreatePlayerAsync(
+			Arg.Is<CreatePlayerData>(data => data.BrandId == command.BrandId && data.Username == command.UserName))
+			.Returns(resultPlayerCode);
 
 		// act
 		var actual = await sut.GetAsync(command);
@@ -361,9 +365,12 @@ public class PlayerCreateTests
 		// assert
 		Assert.IsTrue(actual.IsNew);
 
-		_ = fakePlayerServiceClient.Received(1)
-			.CreatePlayerAsync(Arg.Is<CreatePlayerData>(data => data.BrandId == command.BrandId
-				&& data.Username == command.UserName));
+		_ = fakeVipServiceClient.Received(1)
+			.PlayerVipLevelRegisterAsync(
+			playerCode: Arg.Is(resultPlayerCode),
+			vipLevel: Arg.Is(vipLevelInfo.Level),
+			autoState: Arg.Is(Tgs.VipLevelService.Common.PlayerVipLevelAutoState.Enable),
+			cancellationToken: Arg.Any<CancellationToken>());
 	}
 
 	[Test]
@@ -401,9 +408,9 @@ public class PlayerCreateTests
 				Currency = "CNY"
 			});
 
-		var vipLevelInfos = new[]
+		var vipLevelInfos = new Tgs.VipLevelService.Common.ViewModels.VipLevelInfoViewModel[]
 		{
-			new Tgs.VipLevelService.Clients.VipLevelInfo(
+			new (
 				Guid.NewGuid(),
 				1,
 				brandId,
@@ -425,7 +432,7 @@ public class PlayerCreateTests
 				0M)
 		};
 
-		_ = fakeVipServiceClient.GetBrandAllVipLevelsAsync(Arg.Is(brandId))
+		_ = fakeVipServiceClient.VipLevelQueryAsync(Arg.Is(brandId))
 			.Returns(vipLevelInfos.ToAsyncEnumerable());
 
 		_ = fakeBrandServiceClient.GetBrandBetLimitIdAsync(Arg.Is(brandId))
@@ -465,9 +472,9 @@ public class PlayerCreateTests
 				  Currency = "CNY"
 			  });
 
-		var vipLevelInfos = new[]
+		var vipLevelInfos = new Tgs.VipLevelService.Common.ViewModels.VipLevelInfoViewModel[]
 		{
-			new Tgs.VipLevelService.Clients.VipLevelInfo(
+			new (
 				Guid.NewGuid(),
 				1,
 				brandId,
@@ -489,7 +496,7 @@ public class PlayerCreateTests
 				0M)
 		};
 
-		_ = fakeVipServiceClient.GetBrandAllVipLevelsAsync(Arg.Is(brandId))
+		_ = fakeVipServiceClient.VipLevelQueryAsync(Arg.Is(brandId))
 			.Returns(vipLevelInfos.ToAsyncEnumerable());
 
 		_ = fakeBrandServiceClient.GetBrandBetLimitIdAsync(Arg.Is(brandId))
@@ -540,9 +547,9 @@ public class PlayerCreateTests
 		_ = fakeBrandServiceClient.GetBrandBetLimitIdAsync(Arg.Is(brandId))
 			.Returns(100);
 
-		var vipLevelInfos = new[]
+		var vipLevelInfos = new Tgs.VipLevelService.Common.ViewModels.VipLevelInfoViewModel[]
 		{
-			new Tgs.VipLevelService.Clients.VipLevelInfo(
+			new (
 				Guid.NewGuid(),
 				1,
 				brandId,
@@ -564,7 +571,7 @@ public class PlayerCreateTests
 				0M)
 		};
 
-		_ = fakeVipServiceClient.GetBrandAllVipLevelsAsync(Arg.Is(brandId))
+		_ = fakeVipServiceClient.VipLevelQueryAsync(Arg.Is(brandId))
 			.Returns(vipLevelInfos.ToAsyncEnumerable());
 
 		// act

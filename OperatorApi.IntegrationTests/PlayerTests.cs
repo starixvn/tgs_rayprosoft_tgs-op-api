@@ -28,6 +28,7 @@ using TGS.Services.Operator.ApplicationServices.Player;
 using TGS.Services.Operator.PlayerRegisterFlow;
 using Valhalla.MessageQueue;
 using Xunit.Abstractions;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 using BrandStatus = Tgs.BrandCertificate.BrandStatus;
 
 namespace OperatorApi.IntegrationTests;
@@ -527,30 +528,36 @@ public class PlayerTests
 		_ = fakeBrandServiceClient.GetBrandBetLimitIdAsync(Arg.Is(brandId), Arg.Any<CancellationToken>())
 			.Returns(100);
 
-		_ = fakeVipServiceClient.GetBrandAllVipLevelsAsync(Arg.Is(brandId), Arg.Any<CancellationToken>())
-			.Returns(new[]
-			{
-				new Tgs.VipLevelService.Clients.VipLevelInfo(
-					Guid.NewGuid(),
-					1,
-					brandId,
-					0M,
-					0M,
-					0M,
-					0M,
-					false,
-					0M,
-					0M,
-					0M,
-					0M,
-					0M,
-					0M,
-					0M,
-					0M,
-					0M,
-					0,
-					0M)
-			}.ToAsyncEnumerable());
+		var vipLevelInfo = new Tgs.VipLevelService.Common.ViewModels.VipLevelInfoViewModel(
+				Id: Guid.NewGuid(),
+				Level: 1,
+				BrandId: brandId,
+				LevelUpAccumulateBetAmount: 0M,
+				LevelUpAccumulateDeposit: 0M,
+				LevelKeepAccumulateBetAmount: 0M,
+				LevelKeepAccumulateDeposit: 0M,
+				LevelKeepCondition: false,
+				BirthBenefit: 0M,
+				PromotionBenefit: 0M,
+				QuarterlyBenefit: 0M,
+				LiveDealerRebate: 0M,
+				SlotRebate: 0M,
+				LotteryRebate: 0M,
+				CardGameRebate: 0M,
+				SportsRebate: 0M,
+				VirtualSportsRebate: 0M,
+				WithdrawTransactionsPerDay: 0,
+				WithdrawTotalAmountPerDay: 0M);
+		_ = fakeVipServiceClient.VipLevelGetAsync(
+			brandId: Arg.Is(brandId),
+			level: Arg.Is(1),
+			Arg.Any<CancellationToken>())
+			.Returns(vipLevelInfo);
+
+		var resultPlayerCode = "TestPlayerCode";
+		_ = fakePlayerServiceClient.CreatePlayerAsync(
+			Arg.Is<CreatePlayerData>(data => data.BrandId == brandId && data.Username == userNamePasswordInput.UserName))
+			.Returns(resultPlayerCode);
 
 		var isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "true" : "false";
 		var nodeModule = $$"""
