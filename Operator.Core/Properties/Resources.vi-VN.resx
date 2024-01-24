@@ -122,7 +122,7 @@
     <comment>忘記密碼</comment>
   </data>
   <data name="ValidateCodeMailBody" xml:space="preserve">
-    <value>[Xác minh danh tính] Mã xác minh là {0}, vui lòng hoàn tất xác minh trong vòng 3 phút.</value>
+    <value>Verification code is {0}, it will expire after 3 minutes.</value>
     <comment>驗證碼</comment>
   </data>
   <data name="ValidateCodeMailSubject" xml:space="preserve">
