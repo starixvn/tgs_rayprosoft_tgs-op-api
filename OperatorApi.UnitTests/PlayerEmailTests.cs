@@ -417,7 +417,7 @@ public class PlayerEmailTests
 		{
 			Receivers = new[] { email },
 			Subject = "Verification Code",
-			Content = $"Your ID verification code is : {validateCode}"
+			Content = $"Verification code is {validateCode}, it will expire after 3 minutes."
 		}.ToExpectedObject();
 
 		SendEmailRequest actual = null;
