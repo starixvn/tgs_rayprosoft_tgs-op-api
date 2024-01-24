@@ -49,7 +49,7 @@ public class StationLetterTests
 
 		var stationLetterPlayers = new List<StationLetterPlayer>
 		{
-			new StationLetterPlayer()
+			new()
 			{
 				PlayerCode = playerCode,
 				StationLetter = new Core.DataServices.Tgs.Models.StationLetter()
@@ -60,7 +60,7 @@ public class StationLetterTests
 					UpdatedByUsername = "System"
 				}
 			},
-			new StationLetterPlayer()
+			new()
 			{
 				PlayerCode = playerCode,
 				StationLetter = new Core.DataServices.Tgs.Models.StationLetter()
@@ -71,7 +71,7 @@ public class StationLetterTests
 					UpdatedByUsername = "System"
 				}
 			},
-			new StationLetterPlayer()
+			new()
 			{
 				PlayerCode = playerCode,
 				StationLetter = new Core.DataServices.Tgs.Models.StationLetter()

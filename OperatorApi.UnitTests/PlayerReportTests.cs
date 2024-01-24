@@ -42,7 +42,7 @@ public class PlayerReportTests
 
 		var roundList = new List<RoundModel>
 		{
-			new RoundModel()
+			new()
 		};
 
 		var rounds = roundList.ToArray();
