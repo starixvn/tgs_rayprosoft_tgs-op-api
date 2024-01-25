@@ -8,24 +8,16 @@ using TGS.Services.Operator.GameProviders;
 
 namespace TGS.Services.Operator.ApplicationServices.GameBalance;
 
-internal class FundInAllGameBalanceCommandService : ICommandService<FundInAllGameBalanceCommand>
+internal class FundInAllGameBalanceCommandService(
+	IGameProviderRepository gameProviderRepository,
+	IGetService<GetGameBalanceQuery, decimal> getGameBalanceService,
+	ICommandService<FundInGameBalanceCommand> fundInService) : ICommandService<FundInAllGameBalanceCommand>
 {
-	private readonly ICommandService<FundInGameBalanceCommand> _fundInService;
-	private readonly IGameProviderRepository _gameProviderRepository;
-	private readonly IGetService<GetGameBalanceQuery, decimal> _getGameBalanceService;
-
-	public FundInAllGameBalanceCommandService(
-		IGameProviderRepository gameProviderRepository,
-		IGetService<GetGameBalanceQuery, decimal> getGameBalanceService,
-		ICommandService<FundInGameBalanceCommand> fundInService)
-	{
-		_gameProviderRepository =
+	private readonly ICommandService<FundInGameBalanceCommand> _fundInService = fundInService ?? throw new ArgumentNullException(nameof(fundInService));
+	private readonly IGameProviderRepository _gameProviderRepository =
 			gameProviderRepository ?? throw new ArgumentNullException(nameof(gameProviderRepository));
-
-		_getGameBalanceService =
+	private readonly IGetService<GetGameBalanceQuery, decimal> _getGameBalanceService =
 			getGameBalanceService ?? throw new ArgumentNullException(nameof(getGameBalanceService));
-		_fundInService = fundInService ?? throw new ArgumentNullException(nameof(fundInService));
-	}
 
 	public async ValueTask ExecuteAsync(
 		FundInAllGameBalanceCommand command,

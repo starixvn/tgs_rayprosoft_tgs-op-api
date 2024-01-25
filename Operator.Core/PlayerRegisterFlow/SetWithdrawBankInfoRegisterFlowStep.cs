@@ -10,19 +10,13 @@ using TGS.Services.Operator.ApplicationServices.Withdraw;
 
 namespace TGS.Services.Operator.PlayerRegisterFlow;
 
-internal class SetWithdrawBankInfoRegisterFlowStep : IRegisterFlowStep
+internal class SetWithdrawBankInfoRegisterFlowStep(
+	IQueryService<GetPlayerBankInfosQuery, PlayerBankInfo> queryPlayerBankInfoService,
+	ICommandService<CreateInitBankInfoCommand> createBankInfoService) : IRegisterFlowStep
 {
-	private readonly ICommandService<CreateInitBankInfoCommand> _createBankInfoService;
-	private readonly IQueryService<GetPlayerBankInfosQuery, PlayerBankInfo> _queryPlayerBankInfoService;
+	private readonly ICommandService<CreateInitBankInfoCommand> _createBankInfoService = createBankInfoService ?? throw new ArgumentNullException(nameof(createBankInfoService));
+	private readonly IQueryService<GetPlayerBankInfosQuery, PlayerBankInfo> _queryPlayerBankInfoService = queryPlayerBankInfoService ?? throw new ArgumentNullException(nameof(queryPlayerBankInfoService));
 	public string Type => "SetWithdrawBankInfo";
-
-	public SetWithdrawBankInfoRegisterFlowStep(
-		IQueryService<GetPlayerBankInfosQuery, PlayerBankInfo> queryPlayerBankInfoService,
-		ICommandService<CreateInitBankInfoCommand> createBankInfoService)
-	{
-		_queryPlayerBankInfoService = queryPlayerBankInfoService ?? throw new ArgumentNullException(nameof(queryPlayerBankInfoService));
-		_createBankInfoService = createBankInfoService ?? throw new ArgumentNullException(nameof(createBankInfoService));
-	}
 
 	public ValueTask<bool> ConfirmCompletedAsync(string? playerCode, CancellationToken cancellationToken = default)
 		=> playerCode is null

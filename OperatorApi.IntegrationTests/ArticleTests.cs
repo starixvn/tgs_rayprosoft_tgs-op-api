@@ -19,14 +19,9 @@ using Xunit.Abstractions;
 
 namespace OperatorApi.IntegrationTests;
 
-public class ArticleTests
+public class ArticleTests(ITestOutputHelper testOutputHelper)
 {
-	private readonly ITestOutputHelper _testOutputHelper;
-
-	public ArticleTests(ITestOutputHelper testOutputHelper)
-	{
-		_testOutputHelper = testOutputHelper ?? throw new ArgumentNullException(nameof(testOutputHelper));
-	}
+	private readonly ITestOutputHelper _testOutputHelper = testOutputHelper ?? throw new ArgumentNullException(nameof(testOutputHelper));
 
 	[Fact]
 	public async Task 取得文章列表()
@@ -177,7 +172,7 @@ public class ArticleTests
 		// Act
 		var actual = await StaticNodeJSService.InvokeFromStringAsync<SuccessResponse<ArticleListItemViewModel[]>>(
 			nodeModule,
-			args: new object?[] { brandToken, loginResult.PlayerToken, 6 });
+			args: [brandToken, loginResult.PlayerToken, 6]);
 
 		// Assert
 		Assert.NotNull(actual);
@@ -332,7 +327,7 @@ public class ArticleTests
 		// Act
 		var actual = await StaticNodeJSService.InvokeFromStringAsync<SuccessResponse<ArticleViewModel>>(
 			nodeModule,
-			args: new object?[] { brandToken, loginResult.PlayerToken, article.FormId });
+			args: [brandToken, loginResult.PlayerToken, article.FormId]);
 
 		// Assert
 		Assert.NotNull(actual);

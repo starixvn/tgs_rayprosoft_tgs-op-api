@@ -18,14 +18,9 @@ using Xunit.Abstractions;
 
 namespace OperatorApi.IntegrationTests;
 
-public class PlayerBucketTests
+public class PlayerBucketTests(ITestOutputHelper testOutputHelper)
 {
-	private readonly ITestOutputHelper _testOutputHelper;
-
-	public PlayerBucketTests(ITestOutputHelper testOutputHelper)
-	{
-		_testOutputHelper = testOutputHelper ?? throw new ArgumentNullException(nameof(testOutputHelper));
-	}
+	private readonly ITestOutputHelper _testOutputHelper = testOutputHelper ?? throw new ArgumentNullException(nameof(testOutputHelper));
 
 	[Fact]
 	public async Task 取得玩家的水桶餘額()
@@ -145,7 +140,7 @@ public class PlayerBucketTests
 		// Act
 		var actual = await StaticNodeJSService.InvokeFromStringAsync<SuccessResponse<decimal?>>(
 			nodeModule,
-			args: new object?[] { brandToken, loginResult.PlayerToken });
+			args: [brandToken, loginResult.PlayerToken]);
 
 		// Assert
 		Assert.Equal(1000M, actual?.Data);
@@ -301,7 +296,7 @@ public class PlayerBucketTests
 		// Act
 		var actual = await StaticNodeJSService.InvokeFromStringAsync<SuccessResponse<TypeBucketResultViewModel[]>>(
 			nodeModule,
-			args: new object?[] { brandToken, loginResult.PlayerToken });
+			args: [brandToken, loginResult.PlayerToken]);
 
 		// Assert
 		Assert.NotNull(actual);

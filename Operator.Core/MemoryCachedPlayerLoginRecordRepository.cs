@@ -5,20 +5,14 @@ using TGS.Core.Models.Enums;
 
 namespace TGS.Services.Operator;
 
-internal class MemoryCachedPlayerLoginRecordRepository : IPlayerLoginRecordRepository
+internal class MemoryCachedPlayerLoginRecordRepository(
+	IPlayerLoginRecordRepository loginRecordRepository,
+	IMemoryCache memoryCache) : IPlayerLoginRecordRepository
 {
 	private static readonly TimeSpan _Expiry = TimeSpan.FromSeconds(10D);
 
-	private readonly IPlayerLoginRecordRepository _loginRecordRepository;
-	private readonly IMemoryCache _memoryCache;
-
-	public MemoryCachedPlayerLoginRecordRepository(
-		IPlayerLoginRecordRepository loginRecordRepository,
-		IMemoryCache memoryCache)
-	{
-		_loginRecordRepository = loginRecordRepository ?? throw new ArgumentNullException(nameof(loginRecordRepository));
-		_memoryCache = memoryCache ?? throw new ArgumentNullException(nameof(memoryCache));
-	}
+	private readonly IPlayerLoginRecordRepository _loginRecordRepository = loginRecordRepository ?? throw new ArgumentNullException(nameof(loginRecordRepository));
+	private readonly IMemoryCache _memoryCache = memoryCache ?? throw new ArgumentNullException(nameof(memoryCache));
 
 	public async ValueTask<LoginRecordInfo> AddPlayerLoginRecordAsync(
 		Guid brandId,

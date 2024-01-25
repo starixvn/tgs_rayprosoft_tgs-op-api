@@ -26,8 +26,7 @@ internal class DepositFormStatusChangedHandler : IMessageHandler<ReadOnlyMemory<
 		IOptions<JsonOptions> jsonOptionsAccessor,
 		ILogger<DepositFormStatusChangedHandler> logger)
 	{
-		if (jsonOptionsAccessor is null)
-			throw new ArgumentNullException(nameof(jsonOptionsAccessor));
+		ArgumentNullException.ThrowIfNull(jsonOptionsAccessor);
 		_paymentServiceClient = paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
 		_notifyEventPublisher = notifyEventPublisher ?? throw new ArgumentNullException(nameof(notifyEventPublisher));
 		_logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -78,5 +77,4 @@ internal class DepositFormStatusChangedHandler : IMessageHandler<ReadOnlyMemory<
 			_logger.LogDebug("Send deposit notify end");
 		}
 	}
-
 }

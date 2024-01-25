@@ -7,12 +7,16 @@ namespace TGS.Apis.OperatorApi.Validators;
 
 public class GetLobbyGameUrlRequestValidator : AbstractValidator<GetLobbyGameUrlRequest>
 {
-	private readonly GameType[] _allowedGameTypes =
-	{
-		GameType.Sportsbook, GameType.VirtualSportsLobby, GameType.ESports,
-		GameType.LiveDealerLobby, GameType.CardGameLobby, GameType.FishingLobby,
-		GameType.ArcadeLobby, GameType.LotteryLobby
-	};
+	private readonly GameType[] _allowedGameTypes = [
+		GameType.Sportsbook,
+		GameType.VirtualSportsLobby,
+		GameType.ESports,
+		GameType.LiveDealerLobby,
+		GameType.CardGameLobby,
+		GameType.FishingLobby,
+		GameType.ArcadeLobby,
+		GameType.LotteryLobby
+	];
 
 	public GetLobbyGameUrlRequestValidator()
 	{

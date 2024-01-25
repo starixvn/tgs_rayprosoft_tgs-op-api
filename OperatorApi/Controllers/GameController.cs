@@ -110,7 +110,7 @@ public class GameController : ControllerBase
 				brandId,
 				playerType,
 				platformType,
-				request.Types ?? Array.Empty<GameType>());
+				request.Types ?? []);
 
 			var games = from info in queryAllGameService.QueryAsync(query)
 						let lang = info.Localization.TryGetValue(cultureCode, out var value)
@@ -151,7 +151,7 @@ public class GameController : ControllerBase
 				request.SubGameProviderCode,
 				playerType,
 				platformType,
-				request.Types ?? Array.Empty<GameType>());
+				request.Types ?? []);
 
 			var games = from info in getGamesQueryService.QueryAsync(query)
 						let lang = info.Localization.TryGetValue(cultureCode, out var value) 

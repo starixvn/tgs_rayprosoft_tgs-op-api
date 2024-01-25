@@ -11,16 +11,11 @@ using TGS.Services.Operator.GameProviders;
 
 namespace TGS.Services.Operator.ApplicationServices.Game;
 
-internal class GetAllGamesByGameTypeQueryService : IQueryService<GetAllGamesByGameTypeQuery, GameInfo>
+internal class GetAllGamesByGameTypeQueryService(
+	IGameProviderRepository gameProviderRepository) : IQueryService<GetAllGamesByGameTypeQuery, GameInfo>
 {
-	private readonly IGameProviderRepository _gameProviderRepository;
-
-	public GetAllGamesByGameTypeQueryService(
-		IGameProviderRepository gameProviderRepository)
-	{
-		_gameProviderRepository =
+	private readonly IGameProviderRepository _gameProviderRepository =
 			gameProviderRepository ?? throw new ArgumentNullException(nameof(gameProviderRepository));
-	}
 
 	public async IAsyncEnumerable<GameInfo> QueryAsync(
 		GetAllGamesByGameTypeQuery query,
@@ -77,7 +72,7 @@ internal class GetAllGamesByGameTypeQueryService : IQueryService<GetAllGamesByGa
 				},
 				DisplayOrder = item.DisplayOrder,
 				Localization = string.IsNullOrEmpty(item.Localization)
-					? new Dictionary<string, JsonDocument>()
+					? []
 					: JsonSerializer.Deserialize<Dictionary<string, JsonDocument>>(
 						item.Localization)
 			};

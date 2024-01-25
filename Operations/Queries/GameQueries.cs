@@ -12,18 +12,11 @@ public interface IGameQueries
 	Task<Dictionary<int, string>> GetGamesLocalizationByGameIdsAsync(int[] gameIds);
 }
 
-public sealed class GameQueries : IGameQueries
+public sealed class GameQueries(ITgsRepository repository) : IGameQueries
 {
-	private readonly ITgsRepository _repository;
-
-	public GameQueries(ITgsRepository repository)
-	{
-		_repository = repository;
-	}
-
 	Task<Dictionary<int, string>> IGameQueries.GetGamesLocalizationByGameIdsAsync(int[] gameIds)
 	{
-		return _repository.Games
+		return repository.Games
 			.Where(x => gameIds.Contains(x.Id)
 				&& x.Localization != null)
 			.ToDictionaryAsync(x => x.Id, x => x.Localization);

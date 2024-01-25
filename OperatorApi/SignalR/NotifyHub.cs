@@ -7,16 +7,10 @@ using TGS.Apis.OperatorApi.Extensions;
 
 namespace TGS.Apis.OperatorApi.SignalR;
 
-public class NotifyHub : Hub
+public class NotifyHub(INotificationClient notificationClient, ILogger<NotifyHub> logger) : Hub
 {
-	private readonly ILogger<NotifyHub> _logger;
-	private readonly INotificationClient _notificationClient;
-
-	public NotifyHub(INotificationClient notificationClient, ILogger<NotifyHub> logger)
-	{
-		_notificationClient = notificationClient ?? throw new ArgumentNullException(nameof(notificationClient));
-		_logger = logger ?? throw new ArgumentNullException(nameof(logger));
-	}
+	private readonly ILogger<NotifyHub> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+	private readonly INotificationClient _notificationClient = notificationClient ?? throw new ArgumentNullException(nameof(notificationClient));
 
 	public async ValueTask AcceptedNotificationAsync(Guid id)
 	{

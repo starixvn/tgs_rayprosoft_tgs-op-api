@@ -7,15 +7,10 @@ using TGS.Services.Operator.StationLetters;
 
 namespace TGS.Services.Operator.ApplicationServices.StationLetters;
 
-internal class GetStationLettersQueryService : IQueryService<GetStationLettersQuery, StationLetter>
+internal class GetStationLettersQueryService(IStationLetterRepository stationLetterRepository) : IQueryService<GetStationLettersQuery, StationLetter>
 {
-	private readonly IStationLetterRepository _stationLetterRepository;
-
-	public GetStationLettersQueryService(IStationLetterRepository stationLetterRepository)
-	{
-		_stationLetterRepository = stationLetterRepository ??
+	private readonly IStationLetterRepository _stationLetterRepository = stationLetterRepository ??
 			throw new ArgumentNullException(nameof(stationLetterRepository));
-	}
 
 	public IAsyncEnumerable<StationLetter> QueryAsync(
 		GetStationLettersQuery query,

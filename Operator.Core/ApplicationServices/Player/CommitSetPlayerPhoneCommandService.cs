@@ -8,24 +8,15 @@ using TGS.Services.Operator.ValidateCode;
 
 namespace TGS.Services.Operator.ApplicationServices.Player;
 
-internal class CommitSetPlayerPhoneCommandService : ICommandService<CommitSetPlayerPhoneCommand>
+internal class CommitSetPlayerPhoneCommandService(
+	IValidateCodeOperator validateCodeOperator,
+	IPlayerRepository playerRepository,
+	IRedisCacheManager cacheManager,
+	IGetService<CheckBrandPhoneCanUseQuery, bool> checkService) : ICommandService<CommitSetPlayerPhoneCommand>
 {
-	private readonly IRedisCacheManager _cacheManager;
-	private readonly IGetService<CheckBrandPhoneCanUseQuery, bool> _checkService;
-	private readonly IPlayerRepository _playerRepository;
-	private readonly IValidateCodeOperator _validateCodeOperator;
-
-	public CommitSetPlayerPhoneCommandService(
-		IValidateCodeOperator validateCodeOperator,
-		IPlayerRepository playerRepository,
-		IRedisCacheManager cacheManager,
-		IGetService<CheckBrandPhoneCanUseQuery, bool> checkService)
-	{
-		_validateCodeOperator = validateCodeOperator ?? throw new ArgumentNullException(nameof(validateCodeOperator));
-		_playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
-		_cacheManager = cacheManager ?? throw new ArgumentNullException(nameof(cacheManager));
-		_checkService = checkService;
-	}
+	private readonly IRedisCacheManager _cacheManager = cacheManager ?? throw new ArgumentNullException(nameof(cacheManager));
+	private readonly IPlayerRepository _playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
+	private readonly IValidateCodeOperator _validateCodeOperator = validateCodeOperator ?? throw new ArgumentNullException(nameof(validateCodeOperator));
 
 	public async ValueTask ExecuteAsync(CommitSetPlayerPhoneCommand command,
 		CancellationToken cancellationToken = default)
@@ -41,7 +32,7 @@ internal class CommitSetPlayerPhoneCommandService : ICommandService<CommitSetPla
 			result.AreaCode,
 			result.Phone);
 
-		var canSetPhone = await _checkService
+		var canSetPhone = await checkService
 			.GetAsync(checkQuery, cancellationToken)
 			.ConfigureAwait(false);
 

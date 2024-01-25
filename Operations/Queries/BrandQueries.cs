@@ -42,20 +42,13 @@ public interface IBrandQueries
 	Task<CachedAnnouncement[]> GetEffectiveAnnouncementsAsync(Guid brandId);
 }
 
-public sealed class BrandQueries : IBrandQueries
+public sealed class BrandQueries(ITgsRepository repository) : IBrandQueries
 {
-	private readonly ITgsRepository _repository;
-
-	public BrandQueries(ITgsRepository repository)
-	{
-		_repository = repository;
-	}
-
 	async Task<Dictionary<string, string>> IBrandQueries.GetBrandCurrenciesByExternalCodeAsync(
 		Guid brandId)
 	{
 		const string spName = "dbo.brand_get_currencies_by_external_code";
-		var r = await _repository.SqlQueryMultipleAsync<Map<string, string>>(spName,
+		var r = await repository.SqlQueryMultipleAsync<Map<string, string>>(spName,
 			parameters: new Dictionary<string, object>
 			{
 				{":brand_id", brandId}
@@ -68,7 +61,7 @@ public sealed class BrandQueries : IBrandQueries
 		Guid brandId)
 	{
 		const string spName = "dbo.brand_get_currencies_by_internal_code";
-		var r = await _repository.SqlQueryMultipleAsync<Map<string, string>>(spName,
+		var r = await repository.SqlQueryMultipleAsync<Map<string, string>>(spName,
 			parameters: new Dictionary<string, object>
 			{
 				{":brand_id", brandId}
@@ -78,14 +71,14 @@ public sealed class BrandQueries : IBrandQueries
 	}
 
 	Task<int?> IBrandQueries.GetBrandDefaultBetLimitAsync(Guid brandId, string currencyCode) =>
-		_repository.BrandBetLimits.Where(bl =>
+		repository.BrandBetLimits.Where(bl =>
 				bl.BrandId == brandId && bl.BetLimit.CurrencyCode == currencyCode && bl.IsDefault)
 			.Select(bl => (int?)bl.BetLimitId).FirstOrDefaultAsync();
 
 	async Task<CachedBrandGameProvider[]> IBrandQueries.GetBrandGameProvidersAsync(Guid brandId)
 	{
 		const string spName = "dbo.brand_get_brand_game_providers_for_cache";
-		var r = await _repository.SqlQueryMultipleAsync<CachedBrandGameProvider>(spName,
+		var r = await repository.SqlQueryMultipleAsync<CachedBrandGameProvider>(spName,
 			parameters: new Dictionary<string, object>
 			{
 				{":brand_id", brandId}
@@ -97,7 +90,7 @@ public sealed class BrandQueries : IBrandQueries
 	async Task<CachedBrandGame[]> IBrandQueries.GetBrandGamesAsync(Guid brandId)
 	{
 		const string spName = "dbo.brand_get_brand_games_for_cache";
-		var r = await _repository.SqlQueryMultipleAsync<CachedBrandGame>(spName,
+		var r = await repository.SqlQueryMultipleAsync<CachedBrandGame>(spName,
 			parameters: new Dictionary<string, object>
 			{
 				{":brand_id", brandId}
@@ -107,21 +100,21 @@ public sealed class BrandQueries : IBrandQueries
 	}
 
 	Task<Guid> IBrandQueries.GetBrandIdByApiKeyAsync(string apiKey) =>
-		_repository.Brands.Where(b => b.ApiKey == apiKey)
+		repository.Brands.Where(b => b.ApiKey == apiKey)
 			.Select(b => b.Id).FirstOrDefaultAsync();
 
 	Task<Guid> IBrandQueries.GetBrandIdByClientIdAsync(string clientId) =>
-		_repository.Brands.Where(b => b.ClientId == clientId)
+		repository.Brands.Where(b => b.ClientId == clientId)
 			.Select(b => b.Id).FirstOrDefaultAsync();
 
 	Task<Guid> IBrandQueries.GetBrandIdByCodeAsync(string brandCode) =>
-		_repository.Brands.Where(b => b.Code == brandCode)
+		repository.Brands.Where(b => b.Code == brandCode)
 			.Select(b => b.Id).FirstOrDefaultAsync();
 
 	async Task<Dictionary<string, string>> IBrandQueries.GetBrandLanguagesByExternalCodeAsync(Guid brandId)
 	{
 		const string spName = "dbo.brand_get_languages_by_external_code";
-		var r = await _repository.SqlQueryMultipleAsync<Map<string, string>>(spName,
+		var r = await repository.SqlQueryMultipleAsync<Map<string, string>>(spName,
 			parameters: new Dictionary<string, object>
 			{
 				{":brand_id", brandId}
@@ -133,7 +126,7 @@ public sealed class BrandQueries : IBrandQueries
 	async Task<Dictionary<string, string>> IBrandQueries.GetBrandLanguagesByInternalCodeAsync(Guid brandId)
 	{
 		const string spName = "dbo.brand_get_languages_by_internal_code";
-		var r = await _repository.SqlQueryMultipleAsync<Map<string, string>>(spName,
+		var r = await repository.SqlQueryMultipleAsync<Map<string, string>>(spName,
 			parameters: new Dictionary<string, object>
 			{
 				{":brand_id", brandId}
@@ -145,7 +138,7 @@ public sealed class BrandQueries : IBrandQueries
 	Task<CachedBrand> IBrandQueries.GetCachedBrandAsync(Guid brandId)
 	{
 		const string sql = "dbo.brand_get_brand_for_cache";
-		return _repository.SqlQuerySingleAsync<CachedBrand>(sql, parameters: new Dictionary<string, object>
+		return repository.SqlQuerySingleAsync<CachedBrand>(sql, parameters: new Dictionary<string, object>
 		{
 			{":brand_id", brandId}
 		});
@@ -155,7 +148,7 @@ public sealed class BrandQueries : IBrandQueries
 		GetCachedBrandGameProviderConfigurationAsync(Guid brandId, Guid gameProviderId)
 	{
 		const string spName = "dbo.brand_get_brand_game_provider_configuration_for_cache";
-		return _repository.SqlQuerySingleAsync<GetCachedBrandGameProviderConfigurationResult>(spName, parameters:
+		return repository.SqlQuerySingleAsync<GetCachedBrandGameProviderConfigurationResult>(spName, parameters:
 			new Dictionary<string, object>
 			{
 				{":brand_id", brandId},
@@ -167,7 +160,7 @@ public sealed class BrandQueries : IBrandQueries
 	{
 		var now = DateTimeOffset.UtcNow;
 
-		return _repository.Announcements
+		return repository.Announcements
 			.Where(a => a.BrandId == brandId &&
 				a.Status == AnnounceStatus.Effective &&
 				now >= a.From && now < a.To)

@@ -16,15 +16,14 @@ public static class EnumExtensions
 		};
 
 	public static IEnumerable<PaymentFlowState> ToPaymentFlowState(this FlowState? status)
-	{
-		return status switch
+		=> status switch
 		{
-			FlowState.WaitingPayment => new[] { PaymentFlowState.WaitPayment },
-			FlowState.Review => new[] { PaymentFlowState.WaitApprove },
-			FlowState.Approved => new[] { PaymentFlowState.Approved },
-			FlowState.WaitingPaid => new[] { PaymentFlowState.Approved },
-			FlowState.Rejected => new[] { PaymentFlowState.Reject },
-			FlowState.Paid => new[] { PaymentFlowState.Paid },
+			FlowState.WaitingPayment => [PaymentFlowState.WaitPayment],
+			FlowState.Review => [PaymentFlowState.WaitApprove],
+			FlowState.Approved => [PaymentFlowState.Approved],
+			FlowState.WaitingPaid => [PaymentFlowState.Approved],
+			FlowState.Rejected => [PaymentFlowState.Reject],
+			FlowState.Paid => [PaymentFlowState.Paid],
 			_ => new[] {
 				PaymentFlowState.WaitPayment,
 				PaymentFlowState.WaitApprove,
@@ -33,7 +32,6 @@ public static class EnumExtensions
 				PaymentFlowState.Paid
 			}
 		};
-	}
 
 	public static FlowState ToWithdrawFlowState(this PaymentFlowState status)
 		=> status switch

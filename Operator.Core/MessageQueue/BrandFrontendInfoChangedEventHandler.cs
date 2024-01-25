@@ -8,14 +8,9 @@ using Valhalla.MessageQueue;
 
 namespace TGS.Services.Operator.MessageQueue;
 
-internal class BrandFrontendInfoChangedEventHandler : IMessageHandler<ReadOnlyMemory<byte>>
+internal class BrandFrontendInfoChangedEventHandler(IBrandFrontendInfoCacheCleaner brandFrontendInfoCacheCleaner) : IMessageHandler<ReadOnlyMemory<byte>>
 {
-	private readonly IBrandFrontendInfoCacheCleaner _brandFrontendInfoCacheCleaner;
-
-	public BrandFrontendInfoChangedEventHandler(IBrandFrontendInfoCacheCleaner brandFrontendInfoCacheCleaner)
-	{
-		_brandFrontendInfoCacheCleaner = brandFrontendInfoCacheCleaner ?? throw new ArgumentNullException(nameof(brandFrontendInfoCacheCleaner));
-	}
+	private readonly IBrandFrontendInfoCacheCleaner _brandFrontendInfoCacheCleaner = brandFrontendInfoCacheCleaner ?? throw new ArgumentNullException(nameof(brandFrontendInfoCacheCleaner));
 
 	public ValueTask HandleAsync(
 		string subject,
@@ -29,5 +24,4 @@ internal class BrandFrontendInfoChangedEventHandler : IMessageHandler<ReadOnlyMe
 
 		return ValueTask.CompletedTask;
 	}
-
 }

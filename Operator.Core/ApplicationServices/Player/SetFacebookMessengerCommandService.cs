@@ -8,14 +8,9 @@ using Tgs.ServiceUtility;
 
 namespace TGS.Services.Operator.ApplicationServices.Player;
 
-internal class SetFacebookMessengerCommandService : ICommandService<SetFacebookMessengerCommand>
+internal class SetFacebookMessengerCommandService(IPlayerServiceClient client) : ICommandService<SetFacebookMessengerCommand>
 {
-	private readonly IPlayerServiceClient _client;
-
-	public SetFacebookMessengerCommandService(IPlayerServiceClient client)
-	{
-		_client = client ?? throw new ArgumentNullException(nameof(client));
-	}
+	private readonly IPlayerServiceClient _client = client ?? throw new ArgumentNullException(nameof(client));
 
 	public ValueTask ExecuteAsync(SetFacebookMessengerCommand command, CancellationToken cancellationToken = default)
 	{

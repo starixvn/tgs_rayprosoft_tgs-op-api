@@ -14,30 +14,20 @@ using BrandStatus = Tgs.BrandCertificate.BrandStatus;
 
 namespace TGS.Services.Operator.ApplicationServices.Player;
 
-internal class LoginCommandService : IGetService<LoginCommand, LoginInfo>
+internal class LoginCommandService(
+	IJwtTokenHandler jwtTokenHandler,
+	IBrandRepository brandRepository,
+	IPlayerLoginRecordRepository loginRecordRepository,
+	IPlayerServiceClient playerServiceClient,
+	IBrandServiceClient brandServiceClient,
+	IGetService<PlayerPasswordValidateCommand, bool> passwordValidateCommandService) : IGetService<LoginCommand, LoginInfo>
 {
-	private readonly IBrandRepository _brandRepository;
-	private readonly IBrandServiceClient _brandServiceClient;
-	private readonly IJwtTokenHandler _jwtTokenHandler;
-	private readonly IPlayerLoginRecordRepository _loginRecordRepository;
-	private readonly IGetService<PlayerPasswordValidateCommand, bool> _passwordValidateCommandService;
-	private readonly IPlayerServiceClient _playerServiceClient;
-
-	public LoginCommandService(
-		IJwtTokenHandler jwtTokenHandler,
-		IBrandRepository brandRepository,
-		IPlayerLoginRecordRepository loginRecordRepository,
-		IPlayerServiceClient playerServiceClient,
-		IBrandServiceClient brandServiceClient,
-		IGetService<PlayerPasswordValidateCommand, bool> passwordValidateCommandService)
-	{
-		_jwtTokenHandler = jwtTokenHandler ?? throw new ArgumentNullException(nameof(jwtTokenHandler));
-		_brandRepository = brandRepository ?? throw new ArgumentNullException(nameof(brandRepository));
-		_loginRecordRepository = loginRecordRepository ?? throw new ArgumentNullException(nameof(loginRecordRepository));
-		_playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
-		_brandServiceClient = brandServiceClient ?? throw new ArgumentNullException(nameof(brandServiceClient));
-		_passwordValidateCommandService = passwordValidateCommandService ?? throw new ArgumentNullException(nameof(passwordValidateCommandService));
-	}
+	private readonly IBrandRepository _brandRepository = brandRepository ?? throw new ArgumentNullException(nameof(brandRepository));
+	private readonly IBrandServiceClient _brandServiceClient = brandServiceClient ?? throw new ArgumentNullException(nameof(brandServiceClient));
+	private readonly IJwtTokenHandler _jwtTokenHandler = jwtTokenHandler ?? throw new ArgumentNullException(nameof(jwtTokenHandler));
+	private readonly IPlayerLoginRecordRepository _loginRecordRepository = loginRecordRepository ?? throw new ArgumentNullException(nameof(loginRecordRepository));
+	private readonly IGetService<PlayerPasswordValidateCommand, bool> _passwordValidateCommandService = passwordValidateCommandService ?? throw new ArgumentNullException(nameof(passwordValidateCommandService));
+	private readonly IPlayerServiceClient _playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
 
 	public async ValueTask<LoginInfo> GetAsync(LoginCommand command, CancellationToken cancellationToken = default)
 	{

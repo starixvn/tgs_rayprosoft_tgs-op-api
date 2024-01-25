@@ -22,14 +22,9 @@ using Xunit.Abstractions;
 
 namespace OperatorApi.IntegrationTests;
 
-public class WithdrawTests
+public class WithdrawTests(ITestOutputHelper testOutputHelper)
 {
-	private readonly ITestOutputHelper _testOutputHelper;
-
-	public WithdrawTests(ITestOutputHelper testOutputHelper)
-	{
-		_testOutputHelper = testOutputHelper ?? throw new ArgumentNullException(nameof(testOutputHelper));
-	}
+	private readonly ITestOutputHelper _testOutputHelper = testOutputHelper ?? throw new ArgumentNullException(nameof(testOutputHelper));
 
 	[Fact]
 	public async Task 取得玩家的水桶餘額()
@@ -149,7 +144,7 @@ public class WithdrawTests
 		// Act
 		var actual = await StaticNodeJSService.InvokeFromStringAsync<SuccessResponse<decimal?>>(
 			nodeModule,
-			args: new object?[] { brandToken, loginResult.PlayerToken });
+			args: [brandToken, loginResult.PlayerToken]);
 
 		// Assert
 		Assert.Equal(1000M, actual?.Data);
@@ -324,7 +319,7 @@ public class WithdrawTests
 		// Act
 		var actual = await StaticNodeJSService.InvokeFromStringAsync<SuccessResponse<Guid?>>(
 			nodeModule,
-			args: new object?[] { brandToken, loginResult.PlayerToken, request });
+			args: [brandToken, loginResult.PlayerToken, request]);
 
 		// Assert
 		Assert.NotNull(actual);
@@ -508,7 +503,7 @@ public class WithdrawTests
 		// Act
 		var actual = await StaticNodeJSService.InvokeFromStringAsync<FailResponse>(
 			nodeModule,
-			args: new object?[] { brandToken, loginResult.PlayerToken, request });
+			args: [brandToken, loginResult.PlayerToken, request]);
 
 		// Assert
 		Assert.NotNull(actual);
@@ -686,7 +681,7 @@ public class WithdrawTests
 		// Act
 		var actual = await StaticNodeJSService.InvokeFromStringAsync<FailResponse>(
 			nodeModule,
-			args: new object?[] { brandToken, loginResult.PlayerToken, request });
+			args: [brandToken, loginResult.PlayerToken, request]);
 
 		// Assert
 		Assert.NotNull(actual);
@@ -864,7 +859,7 @@ public class WithdrawTests
 		// Act
 		var actual = await StaticNodeJSService.InvokeFromStringAsync<FailResponse>(
 			nodeModule,
-			args: new object?[] { brandToken, loginResult.PlayerToken, request });
+			args: [brandToken, loginResult.PlayerToken, request]);
 
 		// Assert
 		Assert.NotNull(actual);
@@ -1025,7 +1020,7 @@ public class WithdrawTests
 		// Act
 		var actual = await StaticNodeJSService.InvokeFromStringAsync<SuccessResponse<BrandPaymentViewModel[]>>(
 			nodeModule,
-			args: new object?[] { brandToken, loginResult.PlayerToken });
+			args: [brandToken, loginResult.PlayerToken]);
 
 		// Assert
 		Assert.NotNull(actual);

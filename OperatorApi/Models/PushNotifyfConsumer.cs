@@ -7,21 +7,14 @@ using TGS.Services.Operator.Notify;
 
 namespace TGS.Apis.OperatorApi.Models;
 
-public class PushNotifyfConsumer : BackgroundService
+public class PushNotifyfConsumer(
+	IObservable<NotifyEvent> eventObservable,
+	IHubContext<NotifyHub> hubContext,
+	ILogger<PushNotifyfConsumer> logger) : BackgroundService
 {
-	private readonly IObservable<NotifyEvent> _eventObservable;
-	private readonly IHubContext<NotifyHub> _hubContext;
-	private readonly ILogger<PushNotifyfConsumer> _logger;
-
-	public PushNotifyfConsumer(
-		IObservable<NotifyEvent> eventObservable,
-		IHubContext<NotifyHub> hubContext,
-		ILogger<PushNotifyfConsumer> logger)
-	{
-		_eventObservable = eventObservable ?? throw new ArgumentNullException(nameof(eventObservable));
-		_hubContext = hubContext ?? throw new ArgumentNullException(nameof(hubContext));
-		_logger = logger ?? throw new ArgumentNullException(nameof(logger));
-	}
+	private readonly IObservable<NotifyEvent> _eventObservable = eventObservable ?? throw new ArgumentNullException(nameof(eventObservable));
+	private readonly IHubContext<NotifyHub> _hubContext = hubContext ?? throw new ArgumentNullException(nameof(hubContext));
+	private readonly ILogger<PushNotifyfConsumer> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
 	protected override Task ExecuteAsync(CancellationToken stoppingToken)
 		=> _eventObservable

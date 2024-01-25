@@ -60,10 +60,9 @@ public sealed class BrandOperations : IBrandOperations
 
 		await _cacheManager.SafeCacheHashSetAsync(type,
 			brandId,
-			new HashEntry[]
-			{
+			[
 				new(currencyCode, betLimitId.Value)
-			},
+			],
 			TimeSpan.FromHours(2));
 
 		return betLimitId.Value;
@@ -266,7 +265,7 @@ public sealed class BrandOperations : IBrandOperations
 		}
 		catch (Exception e)
 		{
-			_logger.LogError($"Failed to cache brand for brandId: {brandId}", e);
+			_logger.LogError(e, "Failed to cache brand for brandId: {brandId}", brandId);
 		}
 	}
 
@@ -289,7 +288,7 @@ public sealed class BrandOperations : IBrandOperations
 		}
 		catch (Exception e)
 		{
-			_logger.LogError($"Failed to cache brand game provider configuration for brandId: {brandId}", e);
+			_logger.LogError(e, "Failed to cache brand game provider configuration for brandId: {brandId}", brandId);
 		}
 	}
 
@@ -315,8 +314,8 @@ public sealed class BrandOperations : IBrandOperations
 		}
 		catch (Exception e)
 		{
-			_logger.LogError($"Failed to get cached brand game provider configuration for brandId: {brandId}",
-				e);
+			_logger.LogError(e, "Failed to get cached brand game provider configuration for brandId: {brandId}",
+				brandId);
 		}
 
 		return null;
@@ -360,7 +359,7 @@ public sealed class BrandOperations : IBrandOperations
 		}
 		catch (Exception e)
 		{
-			_logger.LogError($"Failed to get cached brand for brandId: {brandId}", e);
+			_logger.LogError(e, "Failed to get cached brand for brandId: {brandId}", brandId);
 		}
 
 		return null;

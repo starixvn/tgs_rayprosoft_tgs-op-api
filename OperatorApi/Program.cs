@@ -76,12 +76,12 @@ builder.Services
 		if (!string.IsNullOrWhiteSpace(forwardedForHeaderName))
 			options.ForwardedForHeaderName = forwardedForHeaderName;
 
-		var knownProxies = config.GetSection("ForwardedHeaders:KnownProxies").Get<string[]>() ?? Array.Empty<string>();
+		var knownProxies = config.GetSection("ForwardedHeaders:KnownProxies").Get<string[]>() ?? [];
 
 		foreach (var knownProxie in knownProxies)
 			options.KnownProxies.Add(IPAddress.Parse(knownProxie));
 
-		var knownNetworks = config.GetSection("ForwardedHeaders:KnownNetworks").Get<string[]>() ?? Array.Empty<string>();
+		var knownNetworks = config.GetSection("ForwardedHeaders:KnownNetworks").Get<string[]>() ?? [];
 
 		foreach (var cidr in knownNetworks)
 		{
@@ -273,6 +273,7 @@ builder.Services
 	.AddHttpLogging(logging => logging.LoggingFields = HttpLoggingFields.All)
 	.AddHealthChecks();
 
+var excludeExtensions = new[] { "html", "ico", "png", "jpg" };
 builder.Services
 	.AddOpenTelemetry()
 	.WithTracing(builder => builder
@@ -287,7 +288,7 @@ builder.Services
 				&& !httpContext.Request.Path.StartsWithSegments("/health")
 				&& !httpContext.Request.Path.StartsWithSegments("/profiler/")
 				&& !httpContext.Request.Path.StartsWithSegments("/metrics")
-				&& !new[] { "html", "ico", "png", "jpg" }.Any(
+				&& !excludeExtensions.Any(
 					ext => httpContext.Request.Path.Value.EndsWith($".{ext}")))
 		.AddHttpClientInstrumentation()
 		.AddEntityFrameworkCoreInstrumentation(options => options.SetDbStatementForText = true)

@@ -23,8 +23,7 @@ internal class WithdrawFormStatusChangedEventHandler : IMessageHandler<ReadOnlyM
 		INotifyEventPublisher notifyEventPublisher,
 		IOptions<JsonOptions> jsonOptionsAccessor)
 	{
-		if (jsonOptionsAccessor is null)
-			throw new ArgumentNullException(nameof(jsonOptionsAccessor));
+		ArgumentNullException.ThrowIfNull(jsonOptionsAccessor);
 		_paymentServiceClient = paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
 		_notifyEventPublisher = notifyEventPublisher ?? throw new ArgumentNullException(nameof(notifyEventPublisher));
 
@@ -69,5 +68,4 @@ internal class WithdrawFormStatusChangedEventHandler : IMessageHandler<ReadOnlyM
 				JsonSerializer.SerializeToDocument(notifyBody, _serializerOptions)));
 		}
 	}
-
 }

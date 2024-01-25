@@ -9,21 +9,14 @@ using Tgs.VipLevelService.Clients;
 
 namespace TGS.Services.Operator.ApplicationServices.Player;
 
-internal class CreatePlayerCommandService : IGetService<CreatePlayerCommand, CreatePlayerInfo>
+internal class CreatePlayerCommandService(
+	IPlayerServiceClient playerServiceClient,
+	IBrandServiceClient brandServiceClient,
+	IVipLevelServiceClient vipLevelServiceClient) : IGetService<CreatePlayerCommand, CreatePlayerInfo>
 {
-	private readonly IBrandServiceClient _brandServiceClient;
-	private readonly IVipLevelServiceClient _vipLevelServiceClient;
-	private readonly IPlayerServiceClient _playerServiceClient;
-
-	public CreatePlayerCommandService(
-		IPlayerServiceClient playerServiceClient,
-		IBrandServiceClient brandServiceClient,
-		IVipLevelServiceClient vipLevelServiceClient)
-	{
-		_playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
-		_brandServiceClient = brandServiceClient ?? throw new ArgumentNullException(nameof(brandServiceClient));
-		_vipLevelServiceClient = vipLevelServiceClient ?? throw new ArgumentNullException(nameof(vipLevelServiceClient));
-	}
+	private readonly IBrandServiceClient _brandServiceClient = brandServiceClient ?? throw new ArgumentNullException(nameof(brandServiceClient));
+	private readonly IVipLevelServiceClient _vipLevelServiceClient = vipLevelServiceClient ?? throw new ArgumentNullException(nameof(vipLevelServiceClient));
+	private readonly IPlayerServiceClient _playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
 
 	public async ValueTask<CreatePlayerInfo> GetAsync(
 		CreatePlayerCommand command,

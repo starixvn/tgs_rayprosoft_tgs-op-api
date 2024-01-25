@@ -9,18 +9,12 @@ using TGS.Services.Operator.BrandPayment;
 
 namespace TGS.Services.Operator.ApplicationServices.Withdraw;
 
-internal class CreateWithdrawFormCommandService : ICommandService<CreateWithdrawFormCommand>
+internal class CreateWithdrawFormCommandService(
+	IPaymentServiceClient paymentServiceClient,
+	IPlayerServiceClient playerServiceClient) : ICommandService<CreateWithdrawFormCommand>
 {
-	private readonly IPaymentServiceClient _paymentServiceClient;
-	private readonly IPlayerServiceClient _playerServiceClient;
-
-	public CreateWithdrawFormCommandService(
-		IPaymentServiceClient paymentServiceClient,
-		IPlayerServiceClient playerServiceClient)
-	{
-		_paymentServiceClient = paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
-		_playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
-	}
+	private readonly IPaymentServiceClient _paymentServiceClient = paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
+	private readonly IPlayerServiceClient _playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
 
 	public async ValueTask ExecuteAsync(CreateWithdrawFormCommand command, CancellationToken cancellationToken = default)
 	{

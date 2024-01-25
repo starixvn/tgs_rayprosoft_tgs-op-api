@@ -10,18 +10,12 @@ using Valhalla.MessageQueue;
 
 namespace TGS.Services.Operator.ApplicationServices.Player;
 
-internal class PublishPlayerLoggedInEventCommandService : ICommandService<PublishPlayerLoggedInEventCommand>
+internal class PublishPlayerLoggedInEventCommandService(
+	IMessageSender messageSender,
+	ILogger<PublishPlayerLoggedInEventCommandService> logger) : ICommandService<PublishPlayerLoggedInEventCommand>
 {
-	private readonly IMessageSender _messageSender;
-	private readonly ILogger<PublishPlayerLoggedInEventCommandService> _logger;
-
-	public PublishPlayerLoggedInEventCommandService(
-		IMessageSender messageSender,
-		ILogger<PublishPlayerLoggedInEventCommandService> logger)
-	{
-		_messageSender = messageSender ?? throw new ArgumentNullException(nameof(messageSender));
-		_logger = logger ?? throw new ArgumentNullException(nameof(logger));
-	}
+	private readonly IMessageSender _messageSender = messageSender ?? throw new ArgumentNullException(nameof(messageSender));
+	private readonly ILogger<PublishPlayerLoggedInEventCommandService> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
 	public async ValueTask ExecuteAsync(
 		PublishPlayerLoggedInEventCommand command,

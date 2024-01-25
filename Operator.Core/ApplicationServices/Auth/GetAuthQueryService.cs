@@ -8,15 +8,10 @@ using TGS.Services.Operations;
 
 namespace TGS.Services.Operator.ApplicationServices.Auth;
 
-internal class GetAuthQueryService : IGetService<GetAuthQuery, ClaimsIdentity>
+internal class GetAuthQueryService(
+	IBrandOperations brandOperations) : IGetService<GetAuthQuery, ClaimsIdentity>
 {
-	private readonly IBrandOperations _brandOperations;
-
-	public GetAuthQueryService(
-		IBrandOperations brandOperations)
-	{
-		_brandOperations = brandOperations ?? throw new ArgumentNullException(nameof(brandOperations));
-	}
+	private readonly IBrandOperations _brandOperations = brandOperations ?? throw new ArgumentNullException(nameof(brandOperations));
 
 	public async ValueTask<ClaimsIdentity> GetAsync(
 		GetAuthQuery query,

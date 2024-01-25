@@ -7,20 +7,13 @@ using TGS.Services.Operations;
 
 namespace TGS.Services.Operator.ApplicationServices.Wallet;
 
-internal class GetBalanceQueryService : IGetService<GetBalanceQuery, BalanceInfo>
+internal class GetBalanceQueryService(ICashServiceClient cashServiceClient,
+	IPlayerOperations playerOperations,
+	IPlayerOnlineRepository playerOnlineRepository) : IGetService<GetBalanceQuery, BalanceInfo>
 {
-	private readonly ICashServiceClient _cashServiceClient;
-	private readonly IPlayerOnlineRepository _playerOnlineRepository;
-	private readonly IPlayerOperations _playerOperations;
-
-	public GetBalanceQueryService(ICashServiceClient cashServiceClient,
-		IPlayerOperations playerOperations,
-		IPlayerOnlineRepository playerOnlineRepository)
-	{
-		_cashServiceClient = cashServiceClient ?? throw new ArgumentNullException(nameof(cashServiceClient));
-		_playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
-		_playerOnlineRepository = playerOnlineRepository ?? throw new ArgumentNullException(nameof(playerOnlineRepository));
-	}
+	private readonly ICashServiceClient _cashServiceClient = cashServiceClient ?? throw new ArgumentNullException(nameof(cashServiceClient));
+	private readonly IPlayerOnlineRepository _playerOnlineRepository = playerOnlineRepository ?? throw new ArgumentNullException(nameof(playerOnlineRepository));
+	private readonly IPlayerOperations _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
 
 	public async ValueTask<BalanceInfo> GetAsync(GetBalanceQuery query, CancellationToken cancellationToken = default)
 	{

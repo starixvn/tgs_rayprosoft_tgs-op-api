@@ -11,21 +11,14 @@ using TGS.Services.Operator.ValidateCode;
 
 namespace TGS.Services.Operator.ApplicationServices.Player;
 
-internal class CommitInitPlayerEmailCommandService : ICommandService<CommitInitPlayerEmailCommand>
-{
-	private readonly IRedisCacheManager _cacheManager;
-	private readonly IPlayerServiceClient _playerServiceClient;
-	private readonly IValidateCodeOperator _validateCodeOperator;
-
-	public CommitInitPlayerEmailCommandService(
+internal class CommitInitPlayerEmailCommandService(
 	   IPlayerServiceClient playerServiceClient,
 	   IValidateCodeOperator validateCodeOperator,
-	   IRedisCacheManager cacheManager)
-	{
-		_playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
-		_validateCodeOperator = validateCodeOperator ?? throw new ArgumentNullException(nameof(validateCodeOperator));
-		_cacheManager = cacheManager ?? throw new ArgumentNullException(nameof(cacheManager));
-	}
+	   IRedisCacheManager cacheManager) : ICommandService<CommitInitPlayerEmailCommand>
+{
+	private readonly IRedisCacheManager _cacheManager = cacheManager ?? throw new ArgumentNullException(nameof(cacheManager));
+	private readonly IPlayerServiceClient _playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
+	private readonly IValidateCodeOperator _validateCodeOperator = validateCodeOperator ?? throw new ArgumentNullException(nameof(validateCodeOperator));
 
 	public async ValueTask ExecuteAsync(
 		CommitInitPlayerEmailCommand command,

@@ -6,15 +6,10 @@ using Tgs.ServiceUtility;
 
 namespace TGS.Services.Operator.ApplicationServices.Vip;
 
-internal class GetVipLevelListQueryService : IQueryService<GetVipLevelListQuery, VipRecord>
+internal class GetVipLevelListQueryService(IVipLevelRepository vipLevelRepository) : IQueryService<GetVipLevelListQuery, VipRecord>
 {
-	private readonly IVipLevelRepository _vipLevelRepository;
-
-	public GetVipLevelListQueryService(IVipLevelRepository vipLevelRepository)
-	{
-		_vipLevelRepository = vipLevelRepository ??
+	private readonly IVipLevelRepository _vipLevelRepository = vipLevelRepository ??
 			throw new ArgumentNullException(nameof(vipLevelRepository));
-	}
 
 	public IAsyncEnumerable<VipRecord> QueryAsync(
 		GetVipLevelListQuery query,

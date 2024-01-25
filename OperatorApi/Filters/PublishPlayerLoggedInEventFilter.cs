@@ -7,14 +7,9 @@ using TGS.Services.Operator.ApplicationServices.Player;
 
 namespace TGS.Apis.OperatorApi.Filters;
 
-public class PublishPlayerLoggedInEventFilter : IAsyncActionFilter
+public class PublishPlayerLoggedInEventFilter(ILogger<PublishPlayerLoggedInEventFilter> logger) : IAsyncActionFilter
 {
-	private readonly ILogger<PublishPlayerLoggedInEventFilter> _logger;
-
-	public PublishPlayerLoggedInEventFilter(ILogger<PublishPlayerLoggedInEventFilter> logger)
-	{
-		_logger = logger ?? throw new ArgumentNullException(nameof(logger));
-	}
+	private readonly ILogger<PublishPlayerLoggedInEventFilter> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
 	public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
 	{

@@ -7,15 +7,10 @@ using TGS.Core.Models.Exceptions;
 
 namespace TGS.Services.Operator.ApplicationServices.Player;
 
-internal class ValidatePlayerLoginRecordCommandService : ICommandService<ValidatePlayerLoginRecordCommand>
+internal class ValidatePlayerLoginRecordCommandService(
+	IPlayerLoginRecordRepository loginRecordRepository) : ICommandService<ValidatePlayerLoginRecordCommand>
 {
-	private readonly IPlayerLoginRecordRepository _loginRecordRepository;
-
-	public ValidatePlayerLoginRecordCommandService(
-		IPlayerLoginRecordRepository loginRecordRepository)
-	{
-		_loginRecordRepository = loginRecordRepository ?? throw new ArgumentNullException(nameof(loginRecordRepository));
-	}
+	private readonly IPlayerLoginRecordRepository _loginRecordRepository = loginRecordRepository ?? throw new ArgumentNullException(nameof(loginRecordRepository));
 
 	public async ValueTask ExecuteAsync(ValidatePlayerLoginRecordCommand command, CancellationToken cancellationToken = default)
 	{

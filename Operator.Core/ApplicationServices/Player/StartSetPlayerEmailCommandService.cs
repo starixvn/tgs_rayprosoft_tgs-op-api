@@ -9,21 +9,14 @@ using TGS.Services.Operator.ValidateCode;
 
 namespace TGS.Services.Operator.ApplicationServices.Player;
 
-internal class StartSetPlayerEmailCommandService : IGetService<StartSetPlayerEmailCommand, string>
+internal class StartSetPlayerEmailCommandService(
+	IEmailClient emailClient,
+	IValidateCodeGenerator codeGenerator,
+	IValidateCodeOperator validateCodeOperator) : IGetService<StartSetPlayerEmailCommand, string>
 {
-	private readonly IValidateCodeGenerator _codeGenerator;
-	private readonly IEmailClient _emailClient;
-	private readonly IValidateCodeOperator _validateCodeOperator;
-
-	public StartSetPlayerEmailCommandService(
-		IEmailClient emailClient,
-		IValidateCodeGenerator codeGenerator,
-		IValidateCodeOperator validateCodeOperator)
-	{
-		_emailClient = emailClient ?? throw new ArgumentNullException(nameof(emailClient));
-		_codeGenerator = codeGenerator ?? throw new ArgumentNullException(nameof(codeGenerator));
-		_validateCodeOperator = validateCodeOperator ?? throw new ArgumentNullException(nameof(validateCodeOperator));
-	}
+	private readonly IValidateCodeGenerator _codeGenerator = codeGenerator ?? throw new ArgumentNullException(nameof(codeGenerator));
+	private readonly IEmailClient _emailClient = emailClient ?? throw new ArgumentNullException(nameof(emailClient));
+	private readonly IValidateCodeOperator _validateCodeOperator = validateCodeOperator ?? throw new ArgumentNullException(nameof(validateCodeOperator));
 
 	public async ValueTask<string> GetAsync(StartSetPlayerEmailCommand command, CancellationToken cancellationToken = default)
 	{

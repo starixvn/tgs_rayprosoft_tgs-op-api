@@ -13,16 +13,10 @@ using TGS.Services.Operator;
 
 namespace TGS.Operator.Repositories;
 
-internal class BrandRepository : IBrandRepository
+internal class BrandRepository(ITgsRepository tgsRepository, ISystemClock systemClock) : IBrandRepository
 {
-	private readonly ISystemClock _systemClock;
-	private readonly ITgsRepository _tgsRepository;
-
-	public BrandRepository(ITgsRepository tgsRepository, ISystemClock systemClock)
-	{
-		_tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
-		_systemClock = systemClock ?? throw new ArgumentNullException(nameof(systemClock));
-	}
+	private readonly ISystemClock _systemClock = systemClock ?? throw new ArgumentNullException(nameof(systemClock));
+	private readonly ITgsRepository _tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
 
 	public async ValueTask<string?> GetSecretKeyAsync(
 		Guid brandId,

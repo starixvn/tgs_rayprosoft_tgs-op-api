@@ -6,14 +6,9 @@ using TGS.Services.Operator.StationLetters;
 
 namespace TGS.Services.Operator.ApplicationServices.StationLetters;
 
-internal class CountStationLettersQueryService : IGetService<GetStationLettersQuery, int>
+internal class CountStationLettersQueryService(IStationLetterRepository stationLetterRepository) : IGetService<GetStationLettersQuery, int>
 {
-	private readonly IStationLetterRepository _stationLetterRepository;
-
-	public CountStationLettersQueryService(IStationLetterRepository stationLetterRepository)
-	{
-		_stationLetterRepository = stationLetterRepository ?? throw new ArgumentNullException(nameof(stationLetterRepository));
-	}
+	private readonly IStationLetterRepository _stationLetterRepository = stationLetterRepository ?? throw new ArgumentNullException(nameof(stationLetterRepository));
 
 	public async ValueTask<int> GetAsync(GetStationLettersQuery query, CancellationToken cancellationToken = default) =>
 		await _stationLetterRepository

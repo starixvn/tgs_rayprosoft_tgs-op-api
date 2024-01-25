@@ -6,21 +6,15 @@ using Tgs.ServiceUtility;
 
 namespace TGS.Services.Operator.ApplicationServices.Withdraw;
 
-internal class WithdrawFormsQueryService : IGetService<WithdrawFormsQuery, PagingResponse<WithdrawFormInfo>>
+internal class WithdrawFormsQueryService(
+	IPaymentServiceClient paymentServiceClient) : IGetService<WithdrawFormsQuery, PagingResponse<WithdrawFormInfo>>
 {
-	private readonly IPaymentServiceClient _paymentServiceClient;
-
-	public WithdrawFormsQueryService(
-		IPaymentServiceClient paymentServiceClient)
-	{
-		_paymentServiceClient = paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
-	}
+	private readonly IPaymentServiceClient _paymentServiceClient = paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
 
 	public async ValueTask<PagingResponse<WithdrawFormInfo>> GetAsync(
 		WithdrawFormsQuery query,
 		CancellationToken cancellationToken = default)
-	{
-		return await _paymentServiceClient.QueryWithdrawFormsAsync(
+		=> await _paymentServiceClient.QueryWithdrawFormsAsync(
 			new WithdrawFormQueryConditions
 			{
 				BrandId = query.BrandId,
@@ -30,14 +24,6 @@ internal class WithdrawFormsQueryService : IGetService<WithdrawFormsQuery, Pagin
 				CreateOnRange = query.CreateOnRange,
 				UpdateOnRange = query.UpdateOnRange
 			},
-			new Paging
-			{
-				IsDesc = query.Paging.IsDesc,
-				Page = query.Paging.Page,
-				Rows = query.Paging.Rows,
-				ShowAll = query.Paging.ShowAll,
-				SortBy = query.Paging.SortBy
-			},
+			query.Paging,
 			cancellationToken).ConfigureAwait(false);
-	}
 }

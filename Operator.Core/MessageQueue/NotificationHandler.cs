@@ -9,14 +9,9 @@ using Valhalla.MessageQueue;
 
 namespace TGS.Services.Operator.MessageQueue;
 
-internal class NotificationHandler : IMessageHandler<ReadOnlyMemory<byte>>
+internal class NotificationHandler(INotifyEventPublisher notifyEventPublisher) : IMessageHandler<ReadOnlyMemory<byte>>
 {
-	private readonly INotifyEventPublisher _notifyEventPublisher;
-
-	public NotificationHandler(INotifyEventPublisher notifyEventPublisher)
-	{
-		_notifyEventPublisher = notifyEventPublisher ?? throw new ArgumentNullException(nameof(notifyEventPublisher));
-	}
+	private readonly INotifyEventPublisher _notifyEventPublisher = notifyEventPublisher ?? throw new ArgumentNullException(nameof(notifyEventPublisher));
 
 	public ValueTask HandleAsync(
 		string subject,

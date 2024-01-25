@@ -17,20 +17,14 @@ using PlayerInfo = Tgs.PlayerService.Client.PlayerInfo;
 
 namespace TGS.Apis.OperatorApi.Middlewares;
 
-public sealed class VerifyPlayerTokenMiddleware
+public sealed class VerifyPlayerTokenMiddleware(
+	RequestDelegate next,
+	ILogger<VerifyPlayerTokenMiddleware> logger)
 {
 	private static readonly ActivitySource _VerifyPlayerTokenMiddlewareSource = new($"TGS.Apis.OperatorApi.Middlewares.{nameof(VerifyPlayerTokenMiddleware)}");
 
-	private readonly ILogger<VerifyPlayerTokenMiddleware> _logger;
-	private readonly RequestDelegate _next;
-
-	public VerifyPlayerTokenMiddleware(
-		RequestDelegate next,
-		ILogger<VerifyPlayerTokenMiddleware> logger)
-	{
-		_next = next ?? throw new ArgumentNullException(nameof(next));
-		_logger = logger ?? throw new ArgumentNullException(nameof(logger));
-	}
+	private readonly ILogger<VerifyPlayerTokenMiddleware> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+	private readonly RequestDelegate _next = next ?? throw new ArgumentNullException(nameof(next));
 
 	public async Task InvokeAsync(
 		HttpContext context,

@@ -4,14 +4,9 @@ using Tgs.ServiceUtility;
 
 namespace TGS.Services.Operator.ApplicationServices.Agent;
 
-internal class GetAgentInfoByInvitationCodeQueryService : IGetService<GetAgentInfoByInvitationCodeQuery, AgentInfo?>
+internal class GetAgentInfoByInvitationCodeQueryService(IAgentRepository agentRepository) : IGetService<GetAgentInfoByInvitationCodeQuery, AgentInfo?>
 {
-	private readonly IAgentRepository _agentRepository;
-
-	public GetAgentInfoByInvitationCodeQueryService(IAgentRepository agentRepository)
-	{
-		_agentRepository = agentRepository ?? throw new System.ArgumentNullException(nameof(agentRepository));
-	}
+	private readonly IAgentRepository _agentRepository = agentRepository ?? throw new System.ArgumentNullException(nameof(agentRepository));
 
 	public ValueTask<AgentInfo?> GetAsync(
 		GetAgentInfoByInvitationCodeQuery query,

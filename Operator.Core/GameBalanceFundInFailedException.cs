@@ -2,10 +2,6 @@
 
 namespace TGS.Services.Operator;
 
-public class GameBalanceFundInFailedException : Exception
+public class GameBalanceFundInFailedException(string errorMessage) : Exception($"The Game Balance Fund In Has Error ({errorMessage}).")
 {
-	public GameBalanceFundInFailedException(string errorMessage)
-		: base($"The Game Balance Fund In Has Error ({errorMessage}).")
-	{
-	}
 }

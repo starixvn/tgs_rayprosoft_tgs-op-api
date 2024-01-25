@@ -9,21 +9,14 @@ using Tgs.BrandCertificate.Clients;
 
 namespace TGS.Services.Operator.PlayerRegisterFlow;
 
-internal class BrandFlowDefinitionManager : IBrandRegisterFlowDefinitionManager, IBrandFrontendInfoCacheCleaner
+internal class BrandFlowDefinitionManager(
+	RegisterFlowBuilder registerFlowBuilder,
+	IBrandServiceClient brandServiceClient,
+	IMemoryCache memoryCache) : IBrandRegisterFlowDefinitionManager, IBrandFrontendInfoCacheCleaner
 {
-	private readonly IBrandServiceClient _brandServiceClient;
-	private readonly IMemoryCache _memoryCache;
-	private readonly RegisterFlowBuilder _registerFlowBuilder;
-
-	public BrandFlowDefinitionManager(
-		RegisterFlowBuilder registerFlowBuilder,
-		IBrandServiceClient brandServiceClient,
-		IMemoryCache memoryCache)
-	{
-		_registerFlowBuilder = registerFlowBuilder ?? throw new ArgumentNullException(nameof(registerFlowBuilder));
-		_brandServiceClient = brandServiceClient ?? throw new ArgumentNullException(nameof(brandServiceClient));
-		_memoryCache = memoryCache ?? throw new ArgumentNullException(nameof(memoryCache));
-	}
+	private readonly IBrandServiceClient _brandServiceClient = brandServiceClient ?? throw new ArgumentNullException(nameof(brandServiceClient));
+	private readonly IMemoryCache _memoryCache = memoryCache ?? throw new ArgumentNullException(nameof(memoryCache));
+	private readonly RegisterFlowBuilder _registerFlowBuilder = registerFlowBuilder ?? throw new ArgumentNullException(nameof(registerFlowBuilder));
 
 	public void Clean(Guid brandId)
 	{

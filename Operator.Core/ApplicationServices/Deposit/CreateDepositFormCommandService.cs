@@ -8,24 +8,16 @@ using Tgs.ServiceUtility;
 
 namespace TGS.Services.Operator.ApplicationServices.Deposit;
 
-internal class CreateDepositFormCommandService : IGetService<CreateDepositFormCommand, Guid>
+internal class CreateDepositFormCommandService(
+	IBrandServiceClient brandServiceClient,
+	IPaymentServiceClient paymentServiceClient,
+	IPaymentClient paymentClient,
+	IPromotionClient promotionClient) : IGetService<CreateDepositFormCommand, Guid>
 {
-	private readonly IBrandServiceClient _brandServiceClient;
-	private readonly IPaymentClient _paymentClient;
-	private readonly IPaymentServiceClient _paymentServiceClient;
-	private readonly IPromotionClient _promotionClient;
-
-	public CreateDepositFormCommandService(
-		IBrandServiceClient brandServiceClient,
-		IPaymentServiceClient paymentServiceClient,
-		IPaymentClient paymentClient,
-		IPromotionClient promotionClient)
-	{
-		_brandServiceClient = brandServiceClient ?? throw new ArgumentNullException(nameof(brandServiceClient));
-		_paymentServiceClient = paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
-		_paymentClient = paymentClient ?? throw new ArgumentNullException(nameof(paymentClient));
-		_promotionClient = promotionClient ?? throw new ArgumentNullException(nameof(promotionClient));
-	}
+	private readonly IBrandServiceClient _brandServiceClient = brandServiceClient ?? throw new ArgumentNullException(nameof(brandServiceClient));
+	private readonly IPaymentClient _paymentClient = paymentClient ?? throw new ArgumentNullException(nameof(paymentClient));
+	private readonly IPaymentServiceClient _paymentServiceClient = paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
+	private readonly IPromotionClient _promotionClient = promotionClient ?? throw new ArgumentNullException(nameof(promotionClient));
 
 	public async ValueTask<Guid> GetAsync(CreateDepositFormCommand command, CancellationToken cancellationToken = default)
 	{

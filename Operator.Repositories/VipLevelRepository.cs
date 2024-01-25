@@ -10,15 +10,10 @@ using TGS.Services.Operator.ApplicationServices.Vip;
 
 namespace TGS.Operator.Repositories;
 
-internal class VipLevelRepository : IVipLevelRepository
+internal class VipLevelRepository(ITgsRepository tgsRepository) : IVipLevelRepository
 {
-	private readonly ITgsRepository _tgsRepository;
-
-	public VipLevelRepository(ITgsRepository tgsRepository)
-	{
-		_tgsRepository = tgsRepository ??
+	private readonly ITgsRepository _tgsRepository = tgsRepository ??
 			throw new ArgumentNullException(nameof(tgsRepository));
-	}
 
 	public async ValueTask<int?> GetVipLevelAsync(Guid vipLevelId)
 		=> await _tgsRepository.VipLevels.AsQueryable()

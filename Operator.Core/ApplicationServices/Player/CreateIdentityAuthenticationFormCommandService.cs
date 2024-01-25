@@ -7,18 +7,12 @@ using Tgs.ServiceUtility;
 
 namespace TGS.Services.Operator.ApplicationServices.Player;
 
-internal class CreateIdentityAuthenticationFormCommandService : ICommandService<CreateIdentityAuthenticationFormCommand>
+internal class CreateIdentityAuthenticationFormCommandService(
+	IBrandServiceClient brandServiceClient,
+	IPlayerRepository playerRepository) : ICommandService<CreateIdentityAuthenticationFormCommand>
 {
-	private readonly IBrandServiceClient _brandServiceClient;
-	private readonly IPlayerRepository _playerRepository;
-
-	public CreateIdentityAuthenticationFormCommandService(
-		IBrandServiceClient brandServiceClient,
-		IPlayerRepository playerRepository)
-	{
-		_brandServiceClient = brandServiceClient ?? throw new ArgumentNullException(nameof(brandServiceClient));
-		_playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
-	}
+	private readonly IBrandServiceClient _brandServiceClient = brandServiceClient ?? throw new ArgumentNullException(nameof(brandServiceClient));
+	private readonly IPlayerRepository _playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
 
 	public async ValueTask ExecuteAsync(
 		CreateIdentityAuthenticationFormCommand command,

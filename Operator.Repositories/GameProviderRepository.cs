@@ -12,15 +12,10 @@ using TGS.Services.Operator.GameProviders;
 
 namespace TGS.Operator.Repositories;
 
-internal class GameProviderRepository : IGameProviderRepository
+internal class GameProviderRepository(
+	ITgsRepository tgsRepository) : IGameProviderRepository
 {
-	private readonly ITgsRepository _tgsRepository;
-
-	public GameProviderRepository(
-		ITgsRepository tgsRepository)
-	{
-		_tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
-	}
+	private readonly ITgsRepository _tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
 
 	public async ValueTask AddFavoriteGameAsync(Guid brandId, FavoriteGameInfo gameInfo)
 	{

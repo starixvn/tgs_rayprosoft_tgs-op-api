@@ -7,15 +7,10 @@ using TGS.Services.Operator.GameProviders;
 
 namespace TGS.Services.Operator.ApplicationServices.Game;
 
-internal class GetGpCodeQueryService : IGetService<GetGpCodeQuery, BrandSubGameProviderInfo>
+internal class GetGpCodeQueryService(
+	IGameProviderRepository gameProviderRepository) : IGetService<GetGpCodeQuery, BrandSubGameProviderInfo>
 {
-	private readonly IGameProviderRepository _gameProviderRepository;
-
-	public GetGpCodeQueryService(
-		IGameProviderRepository gameProviderRepository)
-	{
-		_gameProviderRepository = gameProviderRepository ?? throw new ArgumentNullException(nameof(gameProviderRepository));
-	}
+	private readonly IGameProviderRepository _gameProviderRepository = gameProviderRepository ?? throw new ArgumentNullException(nameof(gameProviderRepository));
 
 	public async ValueTask<BrandSubGameProviderInfo> GetAsync(
 		GetGpCodeQuery query,

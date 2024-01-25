@@ -6,14 +6,9 @@ using Tgs.ServiceUtility;
 
 namespace TGS.Services.Operator.ApplicationServices.GameBalance;
 
-internal class GetGameBalanceQueryService : IGetService<GetGameBalanceQuery, decimal>
+internal class GetGameBalanceQueryService(IGameProvidersOperatorPluggableClient providersOperatorPluggableClient) : IGetService<GetGameBalanceQuery, decimal>
 {
-	private readonly IGameProvidersOperatorPluggableClient _providersOperatorPluggableClient;
-
-	public GetGameBalanceQueryService(IGameProvidersOperatorPluggableClient providersOperatorPluggableClient)
-	{
-		_providersOperatorPluggableClient = providersOperatorPluggableClient ?? throw new ArgumentNullException(nameof(providersOperatorPluggableClient));
-	}
+	private readonly IGameProvidersOperatorPluggableClient _providersOperatorPluggableClient = providersOperatorPluggableClient ?? throw new ArgumentNullException(nameof(providersOperatorPluggableClient));
 
 	public ValueTask<decimal> GetAsync(GetGameBalanceQuery query, CancellationToken cancellationToken = default)
 		=> _providersOperatorPluggableClient.GetBalanceAsync(

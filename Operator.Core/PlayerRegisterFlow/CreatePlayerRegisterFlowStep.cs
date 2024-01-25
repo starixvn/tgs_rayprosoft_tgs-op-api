@@ -11,28 +11,19 @@ using TGS.Services.Operator.ApplicationServices.Player;
 
 namespace TGS.Services.Operator.PlayerRegisterFlow;
 
-internal class CreatePlayerRegisterFlowStep : IRegisterFlowStep
+internal class CreatePlayerRegisterFlowStep(
+	IGetService<CreatePlayerCommand, CreatePlayerInfo> createPlayerService,
+	IGetService<CreatePlayerWithAgentInvitationCodeCommand, CreatePlayerInfo> createAgentInvitationPlayerService,
+	IGetService<CreatePlayerWithPlayerInvitationCommand, CreatePlayerInfo> createPlayerInvitationPlayerService,
+	IPlayerServiceClient playerServiceClient,
+	IBrandServiceClient brandServiceClient) : IRegisterFlowStep
 {
-	private readonly IBrandServiceClient _brandServiceClient;
-	private readonly IGetService<CreatePlayerWithAgentInvitationCodeCommand, CreatePlayerInfo> _createAgentInvitationPlayerService;
-	private readonly IGetService<CreatePlayerWithPlayerInvitationCommand, CreatePlayerInfo> _createPlayerInvitationPlayerService;
-	private readonly IGetService<CreatePlayerCommand, CreatePlayerInfo> _createPlayerService;
-	private readonly IPlayerServiceClient _playerServiceClient;
+	private readonly IBrandServiceClient _brandServiceClient = brandServiceClient ?? throw new ArgumentNullException(nameof(brandServiceClient));
+	private readonly IGetService<CreatePlayerWithAgentInvitationCodeCommand, CreatePlayerInfo> _createAgentInvitationPlayerService = createAgentInvitationPlayerService ?? throw new ArgumentNullException(nameof(createAgentInvitationPlayerService));
+	private readonly IGetService<CreatePlayerWithPlayerInvitationCommand, CreatePlayerInfo> _createPlayerInvitationPlayerService = createPlayerInvitationPlayerService ?? throw new ArgumentNullException(nameof(createPlayerInvitationPlayerService));
+	private readonly IGetService<CreatePlayerCommand, CreatePlayerInfo> _createPlayerService = createPlayerService ?? throw new ArgumentNullException(nameof(createPlayerService));
+	private readonly IPlayerServiceClient _playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
 	public string Type => "CreatePlayer";
-
-	public CreatePlayerRegisterFlowStep(
-		IGetService<CreatePlayerCommand, CreatePlayerInfo> createPlayerService,
-		IGetService<CreatePlayerWithAgentInvitationCodeCommand, CreatePlayerInfo> createAgentInvitationPlayerService,
-		IGetService<CreatePlayerWithPlayerInvitationCommand, CreatePlayerInfo> createPlayerInvitationPlayerService,
-		IPlayerServiceClient playerServiceClient,
-		IBrandServiceClient brandServiceClient)
-	{
-		_createPlayerService = createPlayerService ?? throw new ArgumentNullException(nameof(createPlayerService));
-		_createAgentInvitationPlayerService = createAgentInvitationPlayerService ?? throw new ArgumentNullException(nameof(createAgentInvitationPlayerService));
-		_createPlayerInvitationPlayerService = createPlayerInvitationPlayerService ?? throw new ArgumentNullException(nameof(createPlayerInvitationPlayerService));
-		_playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
-		_brandServiceClient = brandServiceClient ?? throw new ArgumentNullException(nameof(brandServiceClient));
-	}
 
 	public async ValueTask<bool> ConfirmCompletedAsync(string? playerCode, CancellationToken cancellationToken = default)
 	{

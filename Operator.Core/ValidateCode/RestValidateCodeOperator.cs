@@ -9,21 +9,14 @@ using TGS.SmsService.Client;
 
 namespace TGS.Services.Operator.ValidateCode;
 
-internal class RestValidateCodeOperator : IValidateCodeOperator
+internal class RestValidateCodeOperator(
+	IValidateCodeServiceClient validateCodeServiceClient,
+	ISmsServiceClient smsServiceClient,
+	IEmailClient emailClient) : IValidateCodeOperator
 {
-	private readonly IEmailClient _emailClient;
-	private readonly ISmsServiceClient _smsServiceClient;
-	private readonly IValidateCodeServiceClient _validateCodeServiceClient;
-
-	public RestValidateCodeOperator(
-		IValidateCodeServiceClient validateCodeServiceClient,
-		ISmsServiceClient smsServiceClient,
-		IEmailClient emailClient)
-	{
-		_validateCodeServiceClient = validateCodeServiceClient ?? throw new ArgumentNullException(nameof(validateCodeServiceClient));
-		_smsServiceClient = smsServiceClient ?? throw new ArgumentNullException(nameof(smsServiceClient));
-		_emailClient = emailClient ?? throw new ArgumentNullException(nameof(emailClient));
-	}
+	private readonly IEmailClient _emailClient = emailClient ?? throw new ArgumentNullException(nameof(emailClient));
+	private readonly ISmsServiceClient _smsServiceClient = smsServiceClient ?? throw new ArgumentNullException(nameof(smsServiceClient));
+	private readonly IValidateCodeServiceClient _validateCodeServiceClient = validateCodeServiceClient ?? throw new ArgumentNullException(nameof(validateCodeServiceClient));
 
 	public async ValueTask<TData?> GetValidateCodeDataAsync<TData>(string validateCode, string token)
 	{

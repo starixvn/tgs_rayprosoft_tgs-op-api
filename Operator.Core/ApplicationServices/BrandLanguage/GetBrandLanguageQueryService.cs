@@ -9,14 +9,9 @@ using TGS.Core.DataServices.Tgs;
 
 namespace TGS.Services.Operator.ApplicationServices.BrandLanguage;
 
-internal class GetBrandLanguageQueryService : IQueryService<BrandLanguageQuery, BrandLanguageInfo>
+internal class GetBrandLanguageQueryService(ITgsRepository tgsRepository) : IQueryService<BrandLanguageQuery, BrandLanguageInfo>
 {
-	private readonly ITgsRepository _tgsRepository;
-
-	public GetBrandLanguageQueryService(ITgsRepository tgsRepository)
-	{
-		_tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
-	}
+	private readonly ITgsRepository _tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
 
 	public async IAsyncEnumerable<BrandLanguageInfo> QueryAsync(
 		BrandLanguageQuery query,

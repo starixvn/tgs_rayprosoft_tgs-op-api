@@ -5,14 +5,9 @@ using Tgs.ServiceUtility;
 
 namespace TGS.Services.Operator.ApplicationServices.Announcement;
 
-internal class GetAnnouncementQueryService : IQueryService<GetAnnouncementQuery, AnnouncementInfo>
+internal class GetAnnouncementQueryService(IBrandRepository brandRepository) : IQueryService<GetAnnouncementQuery, AnnouncementInfo>
 {
-	private readonly IBrandRepository _brandRepository;
-
-	public GetAnnouncementQueryService(IBrandRepository brandRepository)
-	{
-		_brandRepository = brandRepository ?? throw new ArgumentNullException(nameof(brandRepository));
-	}
+	private readonly IBrandRepository _brandRepository = brandRepository ?? throw new ArgumentNullException(nameof(brandRepository));
 
 	public IAsyncEnumerable<AnnouncementInfo> QueryAsync(
 		GetAnnouncementQuery query,

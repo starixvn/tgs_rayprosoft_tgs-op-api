@@ -25,8 +25,7 @@ public class PlayerWithdrawTests
 			new List<PaymentFlowState>(),
 			CreateOnRange: null,
 			UpdateOnRange: null,
-			new PageableRequest()
-			);
+			new Paging());
 
 		_ = await sut.GetAsync(query, default);
 
@@ -50,7 +49,7 @@ public class PlayerWithdrawTests
 			Array.Empty<PaymentFlowState>(),
 			null,
 			null,
-			new PageableRequest());
+			new Paging());
 
 		_ = await sut.GetAsync(query, default);
 

@@ -6,18 +6,12 @@ using Tgs.ServiceUtility;
 
 namespace TGS.Services.Operator.ApplicationServices.Player;
 
-public class PlayerPasswordValidateCommandService : IGetService<PlayerPasswordValidateCommand, bool>
+public class PlayerPasswordValidateCommandService(
+	IPlayerRepository playerRepository,
+	IPasswordHandler passwordHandler) : IGetService<PlayerPasswordValidateCommand, bool>
 {
-	private readonly IPasswordHandler _passwordHandler;
-	private readonly IPlayerRepository _playerRepository;
-
-	public PlayerPasswordValidateCommandService(
-		IPlayerRepository playerRepository,
-		IPasswordHandler passwordHandler)
-	{
-		_playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
-		_passwordHandler = passwordHandler ?? throw new ArgumentNullException(nameof(passwordHandler));
-	}
+	private readonly IPasswordHandler _passwordHandler = passwordHandler ?? throw new ArgumentNullException(nameof(passwordHandler));
+	private readonly IPlayerRepository _playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
 
 	public async ValueTask<bool> GetAsync(
 		PlayerPasswordValidateCommand command,

@@ -1,11 +1,8 @@
-﻿using System;
-using System.Globalization;
-using System.Threading.Tasks;
+﻿using System.Globalization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using NSubstitute;
-using NUnit.Framework;
 using NUnit.Framework.Legacy;
 using Tgs.BrandCertificate.Clients;
 using Tgs.Core.Infrastructures.Security;
@@ -39,18 +36,16 @@ public class PlayerPasswordTests
 		_ = fakePlayerRepository
 			  .GetPlayerLoginPasswordInfoAsync(Arg.Any<string>())
 			  .Returns(new PasswordInfo(
-				  Salt: new byte[]
-				  {
-					1,
-					2,
-					3
-				  },
-				  Password: new byte[]
-				  {
-					4,
-					5,
-					6
-				  }));
+				  Salt: [
+					  1,
+					  2,
+					  3
+				  ],
+				  Password: [
+					  4,
+					  5,
+					  6
+				  ]));
 
 		var fakePasswordHandler = Substitute.For<IPasswordHandler>();
 
@@ -209,10 +204,10 @@ public class PlayerPasswordTests
 			Email = email,
 			PhoneAuthentication = true,
 			DefaultWalletCurrencyCode = "CNY",
-			Password = Array.Empty<byte>(),
-			Salt = Array.Empty<byte>(),
-			WithdrawPassword = Array.Empty<byte>(),
-			WithdrawSalt = Array.Empty<byte>()
+			Password = [],
+			Salt = [],
+			WithdrawPassword = [],
+			WithdrawSalt = []
 		};
 
 		_ = await fakeTgsRepository.Players.AddAsync(player);
@@ -315,8 +310,8 @@ public class PlayerPasswordTests
 
 		_ = fakePlayerRepository.GetPlayerLoginPasswordInfoAsync(Arg.Any<string>())
 			.Returns(new PasswordInfo(
-				Array.Empty<byte>(),
-				Array.Empty<byte>()
+				[],
+				[]
 			));
 
 		var sut = new PlayerPasswordValidateCommandService(fakePlayerRepository, fakePasswordHandler);

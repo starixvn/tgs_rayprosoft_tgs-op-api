@@ -6,15 +6,10 @@ using Tgs.ServiceUtility;
 
 namespace TGS.Services.Operator.ApplicationServices.Player;
 
-internal class CheckPlayerBannedQueryService : IGetService<CheckPlayerBannedQuery, bool>
+internal class CheckPlayerBannedQueryService(
+	IPlayerServiceClient playerServiceClient) : IGetService<CheckPlayerBannedQuery, bool>
 {
-	private readonly IPlayerServiceClient _playerServiceClient;
-
-	public CheckPlayerBannedQueryService(
-		IPlayerServiceClient playerServiceClient)
-	{
-		_playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
-	}
+	private readonly IPlayerServiceClient _playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
 
 	public async ValueTask<bool> GetAsync(CheckPlayerBannedQuery query, CancellationToken cancellationToken = default)
 	{

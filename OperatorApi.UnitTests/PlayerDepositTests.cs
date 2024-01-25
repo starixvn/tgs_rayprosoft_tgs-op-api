@@ -26,7 +26,7 @@ public class PlayerDepositTests
 			new List<PaymentFlowState>(),
 			CreateOnRange: null,
 			UpdateOnRange: null,
-			new PageableRequest());
+			new Paging());
 
 		_ = await sut.GetAsync(query, default);
 
@@ -34,7 +34,7 @@ public class PlayerDepositTests
 			.Received(1)
 			.QueryDepositFormsAsync(
 				Arg.Any<DepositFormQueryConditions>(),
-				Arg.Any<Tgs.Payment.Clients.Paging>());
+				Arg.Any<Paging>());
 	}
 
 	[Test]
@@ -50,7 +50,7 @@ public class PlayerDepositTests
 			new List<PaymentFlowState>(),
 			CreateOnRange: null,
 			UpdateOnRange: null,
-			new PageableRequest());
+			new Paging());
 
 		_ = await sut.GetAsync(query, default);
 

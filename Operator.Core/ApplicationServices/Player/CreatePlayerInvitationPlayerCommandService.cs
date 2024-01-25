@@ -11,21 +11,14 @@ using TGS.Services.Operations;
 
 namespace TGS.Services.Operator.ApplicationServices.Player;
 
-internal class CreatePlayerInvitationPlayerCommandService : IGetService<CreatePlayerWithPlayerInvitationCommand, CreatePlayerInfo>
+internal class CreatePlayerInvitationPlayerCommandService(
+	IPlayerServiceClient playerServiceClient,
+	IBrandServiceClient brandServiceClient,
+	IVipLevelServiceClient vipLevelServiceClient) : IGetService<CreatePlayerWithPlayerInvitationCommand, CreatePlayerInfo>
 {
-	private readonly IBrandServiceClient _brandServiceClient;
-	private readonly IPlayerServiceClient _playerServiceClient;
-	private readonly IVipLevelServiceClient _vipLevelServiceClient;
-
-	public CreatePlayerInvitationPlayerCommandService(
-		IPlayerServiceClient playerServiceClient,
-		IBrandServiceClient brandServiceClient,
-		IVipLevelServiceClient vipLevelServiceClient)
-	{
-		_playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
-		_brandServiceClient = brandServiceClient ?? throw new ArgumentNullException(nameof(brandServiceClient));
-		_vipLevelServiceClient = vipLevelServiceClient ?? throw new ArgumentNullException(nameof(vipLevelServiceClient));
-	}
+	private readonly IBrandServiceClient _brandServiceClient = brandServiceClient ?? throw new ArgumentNullException(nameof(brandServiceClient));
+	private readonly IPlayerServiceClient _playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
+	private readonly IVipLevelServiceClient _vipLevelServiceClient = vipLevelServiceClient ?? throw new ArgumentNullException(nameof(vipLevelServiceClient));
 
 	private async Task<string> CreatePlayerByUpperPlayerAsync(
 		CreatePlayerWithPlayerInvitationCommand command,

@@ -12,11 +12,8 @@ namespace TGS.Apis.OperatorApi.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class PlayerReportController : ControllerBase
+public class PlayerReportController(IReportClient client) : ControllerBase
 {
-	private readonly IReportClient _client;
-
-	public PlayerReportController(IReportClient client) => _client = client;
 
 	/// <summary>
 	/// Get player round report
@@ -46,12 +43,12 @@ public class PlayerReportController : ControllerBase
 			ShowAll = request.ShowAll
 		};
 
-		var response = await _client.GetRoundsAsync(roundsRequest);
+		var response = await client.GetRoundsAsync(roundsRequest);
 
 		return new PagingResponse<RoundModel>
 		{
 			TotalCount = response.TotalCount,
-			Items = response.Items ?? Array.Empty<RoundModel>()
+			Items = response.Items ?? []
 		};
 	}
 
@@ -80,7 +77,7 @@ public class PlayerReportController : ControllerBase
 			ClosedTo = null
 		};
 
-		var response = await _client.GetRoundsTotalAsync(roundsRequest);
+		var response = await client.GetRoundsTotalAsync(roundsRequest);
 
 		return new RoundTotalModel
 		{

@@ -8,14 +8,9 @@ using TGS.Core.Models;
 
 namespace TGS.Services.Operator.ApplicationServices.Auth;
 
-internal class MakeBrandAuthTokenCommandService : IGetService<MakeBrandAuthTokenCommand, AuthInfo>
+internal class MakeBrandAuthTokenCommandService(IJwtTokenHandler jwtTokenHandler) : IGetService<MakeBrandAuthTokenCommand, AuthInfo>
 {
-	private readonly IJwtTokenHandler _jwtTokenHandler;
-
-	public MakeBrandAuthTokenCommandService(IJwtTokenHandler jwtTokenHandler)
-	{
-		_jwtTokenHandler = jwtTokenHandler ?? throw new ArgumentNullException(nameof(jwtTokenHandler));
-	}
+	private readonly IJwtTokenHandler _jwtTokenHandler = jwtTokenHandler ?? throw new ArgumentNullException(nameof(jwtTokenHandler));
 
 	public ValueTask<AuthInfo> GetAsync(
 		MakeBrandAuthTokenCommand query, CancellationToken cancellationToken = default)

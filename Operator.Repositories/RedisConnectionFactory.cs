@@ -10,8 +10,7 @@ internal class RedisConnectionFactory
 	public RedisConnectionFactory(
 		IConnectionMultiplexer connectionMultiplexer)
 	{
-		if (connectionMultiplexer is null)
-			throw new ArgumentNullException(nameof(connectionMultiplexer));
+		ArgumentNullException.ThrowIfNull(connectionMultiplexer);
 
 		Database = connectionMultiplexer.GetDatabase();
 	}

@@ -468,7 +468,7 @@ public class GameTests
 			brandId,
 			PlayerType.RealPlayer,
 			PlatformType.Desktop,
-			Array.Empty<GameType>());
+			[]);
 
 		// act
 		var result = await sut.QueryAsync(query).ToArrayAsync();
@@ -611,7 +611,7 @@ public class GameTests
 			brandId,
 			PlayerType.RealPlayer,
 			PlatformType.Desktop,
-			Array.Empty<GameType>());
+			[]);
 
 		var sut = new GetAllGamesByGameTypeQueryService(
 			fakeGameProviderRepository);
@@ -636,7 +636,7 @@ public class GameTests
 			"Test",
 			PlayerType.RealPlayer,
 			PlatformType.Desktop,
-			Array.Empty<GameType>());
+			[]);
 
 		_ = fakeQueryAllService.QueryAsync(Arg.Any<GetAllGamesByGameTypeQuery>())
 			.Returns(new[]

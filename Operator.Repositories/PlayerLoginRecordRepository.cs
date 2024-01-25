@@ -8,15 +8,10 @@ using TGS.Services.Operator;
 
 namespace TGS.Operator.Repositories;
 
-internal class PlayerLoginRecordRepository : IPlayerLoginRecordRepository
+internal class PlayerLoginRecordRepository(
+	ITgsRepository tgsRepository) : IPlayerLoginRecordRepository
 {
-	private readonly ITgsRepository _tgsRepository;
-
-	public PlayerLoginRecordRepository(
-		ITgsRepository tgsRepository)
-	{
-		_tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
-	}
+	private readonly ITgsRepository _tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
 
 	public async ValueTask<LoginRecordInfo> AddPlayerLoginRecordAsync(Guid brandId, string playerCode, PlatformType platformType, string ipAddress)
 	{

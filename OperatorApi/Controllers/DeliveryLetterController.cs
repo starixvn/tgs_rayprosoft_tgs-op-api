@@ -39,7 +39,7 @@ public class DeliveryLetterController : ControllerBase
 		return new PagingResponse<DeliveryLetterListItemViewModel>
 		{
 			TotalCount = result.Length,
-			Items = result.Chunk(rows).Skip(page - 1).FirstOrDefault() ?? Array.Empty<DeliveryLetterListItemViewModel>()
+			Items = result.Chunk(rows).Skip(page - 1).FirstOrDefault() ?? []
 		};
 	}
 

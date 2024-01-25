@@ -359,9 +359,10 @@ public sealed class GameProviderOperations : IGameProviderOperations
 
 	private async Task<CachedGameProvider> GetCachedGameProviderOrNullAsync(Guid gameProviderId)
 	{
-		var values = await _cacheManager.SafeGetHashSetAsync(RedisCacheType.GameProvider, gameProviderId,
-			new RedisValue[]
-			{
+		var values = await _cacheManager.SafeGetHashSetAsync(
+			RedisCacheType.GameProvider,
+			gameProviderId,
+			[
 				CachedGameProviderFields.GameProviderId,
 				CachedGameProviderFields.GameProviderCode,
 				CachedGameProviderFields.GameProviderName,
@@ -373,7 +374,7 @@ public sealed class GameProviderOperations : IGameProviderOperations
 				CachedGameProviderFields.SettleBetTimeout,
 				CachedGameProviderFields.AllowKickPlayer,
 				CachedGameProviderFields.IsTransferWallet
-			});
+			]).ConfigureAwait(false);
 
 		return values.All(a => !a.IsNull)
 			? new()

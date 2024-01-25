@@ -9,14 +9,9 @@ using TGS.Services.Operator.StationLetters;
 
 namespace TGS.Services.Operator.Configuration;
 
-public class OperatorConfiguration
+public class OperatorConfiguration(IServiceCollection services)
 {
-	public IServiceCollection Services { get; }
-
-	public OperatorConfiguration(IServiceCollection services)
-	{
-		Services = services ?? throw new ArgumentNullException(nameof(services));
-	}
+	public IServiceCollection Services { get; } = services ?? throw new ArgumentNullException(nameof(services));
 
 	public OperatorConfiguration AddAgentRepository<TAgentRepository>()
 		where TAgentRepository : class, IAgentRepository

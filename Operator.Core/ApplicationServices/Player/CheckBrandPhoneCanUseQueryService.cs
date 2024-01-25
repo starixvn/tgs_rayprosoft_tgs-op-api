@@ -6,14 +6,9 @@ using Tgs.ServiceUtility;
 
 namespace TGS.Services.Operator.ApplicationServices.Player;
 
-internal class CheckBrandPhoneCanUseQueryService : IGetService<CheckBrandPhoneCanUseQuery, bool>
+internal class CheckBrandPhoneCanUseQueryService(IPlayerServiceClient playerServiceClient) : IGetService<CheckBrandPhoneCanUseQuery, bool>
 {
-	private readonly IPlayerServiceClient _playerServiceClient;
-
-	public CheckBrandPhoneCanUseQueryService(IPlayerServiceClient playerServiceClient)
-	{
-		_playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
-	}
+	private readonly IPlayerServiceClient _playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
 
 	public async ValueTask<bool> GetAsync(CheckBrandPhoneCanUseQuery query, CancellationToken cancellationToken = default)
 	{

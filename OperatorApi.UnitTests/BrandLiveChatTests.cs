@@ -20,7 +20,7 @@ public class BrandLiveChatTests
 		_ = dbContextOptionsBuilder
 			.UseInMemoryDatabase(Guid.NewGuid().ToString())
 			.ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
-		ITgsRepository repository = new TgsRepository(dbContextOptionsBuilder.Options);
+		var repository = new TgsRepository(dbContextOptionsBuilder.Options);
 		var brandId = Guid.NewGuid();
 
 		_ = repository.BrandLiveChats.Add(new CoreModels.BrandLiveChat()

@@ -7,29 +7,20 @@ using TGS.Services.Operations;
 
 namespace TGS.Services.Operator;
 
-internal class GameProviderStatusValidator : IGameProviderStatusValidator
+internal class GameProviderStatusValidator(
+	IGameProviderOperations gameProviderOperations,
+	IBrandOperations brandOperations) : IGameProviderStatusValidator
 {
-	private readonly IBrandOperations _brandOperations;
-	private readonly IGameProviderOperations _gameProviderOperations;
-
-	public GameProviderStatusValidator(
-		IGameProviderOperations gameProviderOperations,
-		IBrandOperations brandOperations)
-	{
-		_gameProviderOperations = gameProviderOperations;
-		_brandOperations = brandOperations;
-	}
-
 	public async ValueTask CheckGameProviderStatusAsync(PlayerTokenData playerTokenData, string gameProviderCode, Guid brandId)
 	{
-		var gameProviderId = await _gameProviderOperations.GetGameProviderIdByCodeAsync(gameProviderCode);
-		var gameProviderStatus = await _gameProviderOperations.GetGameProviderStatusAsync(gameProviderId)
+		var gameProviderId = await gameProviderOperations.GetGameProviderIdByCodeAsync(gameProviderCode);
+		var gameProviderStatus = await gameProviderOperations.GetGameProviderStatusAsync(gameProviderId)
 			?? throw new InvalidStatusException("GameProvider doesn't exist");
 
 		ValidateGameProviderStatus(gameProviderStatus);
 
 		var brandGameProviderStatus =
-			await _brandOperations.GetBrandGameProviderStatusAsync(brandId, gameProviderId)
+			await brandOperations.GetBrandGameProviderStatusAsync(brandId, gameProviderId)
 			?? throw new InvalidStatusException("Brand doesn't have the configuration of GameProvider");
 
 		ValidateGameProviderStatus(brandGameProviderStatus);

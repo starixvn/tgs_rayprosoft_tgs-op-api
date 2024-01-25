@@ -9,15 +9,10 @@ using TGS.Services.Operator.ApplicationServices.Player;
 
 namespace TGS.Apis.OperatorApi.Filters;
 
-public class CheckPlayerEnabledFilter : IAsyncAuthorizationFilter
+public class CheckPlayerEnabledFilter(
+	IGetService<GetPlayerStatusQuery, PlayerStatus> getService) : IAsyncAuthorizationFilter
 {
-	private readonly IGetService<GetPlayerStatusQuery, PlayerStatus> _getService;
-
-	public CheckPlayerEnabledFilter(
-		IGetService<GetPlayerStatusQuery, PlayerStatus> getService)
-	{
-		_getService = getService ?? throw new ArgumentNullException(nameof(getService));
-	}
+	private readonly IGetService<GetPlayerStatusQuery, PlayerStatus> _getService = getService ?? throw new ArgumentNullException(nameof(getService));
 
 	public async Task OnAuthorizationAsync(AuthorizationFilterContext context)
 	{

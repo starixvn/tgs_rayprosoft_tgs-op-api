@@ -7,7 +7,7 @@ using System.Text.Json;
 namespace TGS.Services.Operator.Notify;
 public record NotifyEvent
 {
-	private readonly NameValueCollection _tags = new();
+	private readonly NameValueCollection _tags = [];
 
 	public JsonDocument Body { get; private set; }
 

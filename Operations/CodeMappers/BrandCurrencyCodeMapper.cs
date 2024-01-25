@@ -14,19 +14,12 @@ public interface IBrandCurrencyCodeMapper : ICodeMapper
 {
 }
 
-public sealed class BrandCurrencyCodeMapper : BaseCodeMapper, IBrandCurrencyCodeMapper
+public sealed class BrandCurrencyCodeMapper(
+	IRedisCacheManager cacheManager,
+	IJsonSerializationProvider json,
+	IBrandQueries brandQueries) : BaseCodeMapper(cacheManager, json), IBrandCurrencyCodeMapper
 {
 	private const int CacheForMinutes = 30;
-	private readonly IBrandQueries _brandQueries;
-
-	public BrandCurrencyCodeMapper(
-		IRedisCacheManager cacheManager,
-		IJsonSerializationProvider json,
-		IBrandQueries brandQueries)
-		: base(cacheManager, json)
-	{
-		_brandQueries = brandQueries;
-	}
 
 	async Task<string> ICodeMapper.ExternalToInternalAsync(string externalCode, Guid brandId)
 	{
@@ -37,7 +30,7 @@ public sealed class BrandCurrencyCodeMapper : BaseCodeMapper, IBrandCurrencyCode
 			Consts.CachePrefix.BrandToTgsMap,
 			"currency",
 			CacheForMinutes,
-			id => _brandQueries.GetBrandCurrenciesByExternalCodeAsync(id));
+			id => brandQueries.GetBrandCurrenciesByExternalCodeAsync(id));
 
 		return !found
 			? throw new InvalidOperationException(
@@ -49,12 +42,12 @@ public sealed class BrandCurrencyCodeMapper : BaseCodeMapper, IBrandCurrencyCode
 	Task<Dictionary<string, string>> ICodeMapper.GetMapByExternalCodeAsync(Guid brandId) =>
 		GetMappedCodesAsync(brandId, RedisCacheType.Currencies,
 			Consts.CachePrefix.BrandToTgsMap, CacheForMinutes,
-			id => _brandQueries.GetBrandCurrenciesByExternalCodeAsync(id));
+			id => brandQueries.GetBrandCurrenciesByExternalCodeAsync(id));
 
 	Task<Dictionary<string, string>> ICodeMapper.GetMapByInternalCodeAsync(Guid brandId) =>
 		GetMappedCodesAsync(brandId, RedisCacheType.Currencies,
 			Consts.CachePrefix.TgsToBrandMap, CacheForMinutes,
-			id => _brandQueries.GetBrandCurrenciesByInternalCodeAsync(id));
+			id => brandQueries.GetBrandCurrenciesByInternalCodeAsync(id));
 
 	async Task<string> ICodeMapper.InternalToExternalAsync(string internalCode, Guid brandId)
 	{
@@ -65,7 +58,7 @@ public sealed class BrandCurrencyCodeMapper : BaseCodeMapper, IBrandCurrencyCode
 			Consts.CachePrefix.TgsToBrandMap,
 			"currency",
 			CacheForMinutes,
-			id => _brandQueries.GetBrandCurrenciesByInternalCodeAsync(id));
+			id => brandQueries.GetBrandCurrenciesByInternalCodeAsync(id));
 
 		return !found
 			? throw new InvalidOperationException(

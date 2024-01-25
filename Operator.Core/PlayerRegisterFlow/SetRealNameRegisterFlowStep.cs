@@ -9,16 +9,11 @@ using Tgs.PlayerService.Client;
 
 namespace TGS.Services.Operator.PlayerRegisterFlow;
 
-internal class SetRealNameRegisterFlowStep : IRegisterFlowStep
+internal class SetRealNameRegisterFlowStep(IPlayerServiceClient playerServiceClient) : IRegisterFlowStep
 {
-	private readonly IPlayerServiceClient _playerServiceClient;
+	private readonly IPlayerServiceClient _playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
 
 	public string Type => "SetRealName";
-
-	public SetRealNameRegisterFlowStep(IPlayerServiceClient playerServiceClient)
-	{
-		_playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
-	}
 
 	public async ValueTask<bool> ConfirmCompletedAsync(string? playerCode, CancellationToken cancellationToken = default)
 	{

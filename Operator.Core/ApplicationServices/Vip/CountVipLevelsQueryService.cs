@@ -5,15 +5,10 @@ using Tgs.ServiceUtility;
 
 namespace TGS.Services.Operator.ApplicationServices.Vip;
 
-internal class CountVipLevelsQueryService : IGetService<GetVipLevelListQuery, int>
+internal class CountVipLevelsQueryService(IVipLevelRepository vipLevelRepository) : IGetService<GetVipLevelListQuery, int>
 {
-	private readonly IVipLevelRepository _vipLevelRepository;
-
-	public CountVipLevelsQueryService(IVipLevelRepository vipLevelRepository)
-	{
-		_vipLevelRepository = vipLevelRepository ??
+	private readonly IVipLevelRepository _vipLevelRepository = vipLevelRepository ??
 			throw new ArgumentNullException(nameof(vipLevelRepository));
-	}
 
 	public async ValueTask<int> GetAsync(
 		GetVipLevelListQuery query,

@@ -7,21 +7,14 @@ using TGS.Services.Operator.ValidateCode;
 
 namespace TGS.Services.Operator.ApplicationServices.Player;
 
-internal class CommitSetPlayerEmailCommandService : ICommandService<CommitSetPlayerEmailCommand>
+internal class CommitSetPlayerEmailCommandService(
+	IValidateCodeOperator validateCodeOperator,
+	IPlayerOperations playerOperations,
+	IGetService<CheckBrandEmailQuery, bool> getService) : ICommandService<CommitSetPlayerEmailCommand>
 {
-	private readonly IGetService<CheckBrandEmailQuery, bool> _getService;
-	private readonly IPlayerOperations _playerOperations;
-	private readonly IValidateCodeOperator _validateCodeOperator;
-
-	public CommitSetPlayerEmailCommandService(
-		IValidateCodeOperator validateCodeOperator,
-		IPlayerOperations playerOperations,
-		IGetService<CheckBrandEmailQuery, bool> getService)
-	{
-		_validateCodeOperator = validateCodeOperator ?? throw new ArgumentNullException(nameof(validateCodeOperator));
-		_playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
-		_getService = getService ?? throw new ArgumentNullException(nameof(getService));
-	}
+	private readonly IGetService<CheckBrandEmailQuery, bool> _getService = getService ?? throw new ArgumentNullException(nameof(getService));
+	private readonly IPlayerOperations _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
+	private readonly IValidateCodeOperator _validateCodeOperator = validateCodeOperator ?? throw new ArgumentNullException(nameof(validateCodeOperator));
 
 	public async ValueTask ExecuteAsync(CommitSetPlayerEmailCommand command, CancellationToken cancellationToken = default)
 	{

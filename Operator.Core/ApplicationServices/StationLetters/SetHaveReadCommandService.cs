@@ -6,15 +6,10 @@ using TGS.Services.Operator.StationLetters;
 
 namespace TGS.Services.Operator.ApplicationServices.StationLetters;
 
-internal class SetHaveReadCommandService : ICommandService<SetHaveReadCommand>
+internal class SetHaveReadCommandService(IStationLetterRepository stationLetterRepository) : ICommandService<SetHaveReadCommand>
 {
-	private readonly IStationLetterRepository _stationLetterRepository;
-
-	public SetHaveReadCommandService(IStationLetterRepository stationLetterRepository)
-	{
-		_stationLetterRepository = stationLetterRepository ??
+	private readonly IStationLetterRepository _stationLetterRepository = stationLetterRepository ??
 			throw new ArgumentNullException(nameof(stationLetterRepository));
-	}
 
 	public ValueTask ExecuteAsync(SetHaveReadCommand command, CancellationToken cancellationToken = default) =>
 		_stationLetterRepository.SetStationLetterHaveReadAsync(command.PlayerCode, command.LetterId);

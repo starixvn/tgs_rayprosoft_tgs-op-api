@@ -6,14 +6,9 @@ using TGS.Services.Operations;
 
 namespace TGS.Services.Operator.ApplicationServices.Player;
 
-internal class SetIdentityCommandService : ICommandService<SetIdentityCommand>
+internal class SetIdentityCommandService(IPlayerOperations playerOperations) : ICommandService<SetIdentityCommand>
 {
-	private readonly IPlayerOperations _playerOperations;
-
-	public SetIdentityCommandService(IPlayerOperations playerOperations)
-	{
-		_playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
-	}
+	private readonly IPlayerOperations _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
 
 	public async ValueTask ExecuteAsync(SetIdentityCommand command, CancellationToken cancellationToken = default)
 	{

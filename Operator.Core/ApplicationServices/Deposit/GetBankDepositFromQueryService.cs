@@ -6,14 +6,9 @@ using Tgs.ServiceUtility;
 
 namespace TGS.Services.Operator.ApplicationServices.Deposit;
 
-internal class GetBankDepositFromQueryService : IGetService<GetBankDepositFormQuery, DepositFormInfo>
+internal class GetBankDepositFromQueryService(IPaymentServiceClient paymentServiceClient) : IGetService<GetBankDepositFormQuery, DepositFormInfo>
 {
-	private readonly IPaymentServiceClient _paymentServiceClient;
-
-	public GetBankDepositFromQueryService(IPaymentServiceClient paymentServiceClient)
-	{
-		_paymentServiceClient = paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
-	}
+	private readonly IPaymentServiceClient _paymentServiceClient = paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
 
 	public async ValueTask<DepositFormInfo> GetAsync(GetBankDepositFormQuery query, CancellationToken cancellationToken = default)
 	{

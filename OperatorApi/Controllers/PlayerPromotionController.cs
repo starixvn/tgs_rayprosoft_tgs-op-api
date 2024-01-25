@@ -15,11 +15,8 @@ namespace TGS.Apis.OperatorApi.Controllers;
 [Route("api/[controller]")]
 [ApiController]
 [Produces(MediaTypeNames.Application.Json)]
-public class PlayerPromotionController : ControllerBase
+public class PlayerPromotionController(IPromotionClient client) : ControllerBase
 {
-	private readonly IPromotionClient _client;
-
-	public PlayerPromotionController(IPromotionClient client) => _client = client;
 
 	/// <summary>
 	/// Get promotions that the player has already joined in.
@@ -45,7 +42,7 @@ public class PlayerPromotionController : ControllerBase
 			ShowAll = request.ShowAll
 		};
 
-		var response = await _client.GetJoinedPromotionsAsync(joinedPromotionRequest);
+		var response = await client.GetJoinedPromotionsAsync(joinedPromotionRequest);
 
 		return new PagingResponse<JoinedPromotionsResponse>
 		{
@@ -81,7 +78,7 @@ public class PlayerPromotionController : ControllerBase
 			ShowAll = request.ShowAll
 		};
 
-		var response = await _client.GetValidPromotionsAsync(promotionsRequest);
+		var response = await client.GetValidPromotionsAsync(promotionsRequest);
 
 		return new PagingResponse<PromotionResponse>
 		{

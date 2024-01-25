@@ -8,14 +8,9 @@ using Tgs.ServiceUtility;
 
 namespace TGS.Services.Operator.ApplicationServices.Player;
 
-internal class SetBirthdateCommandService : ICommandService<SetBirthdateCommand>
+internal class SetBirthdateCommandService(IPlayerServiceClient playerServiceClient) : ICommandService<SetBirthdateCommand>
 {
-	private readonly IPlayerServiceClient _playerServiceClient;
-
-	public SetBirthdateCommandService(IPlayerServiceClient playerServiceClient)
-	{
-		_playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
-	}
+	private readonly IPlayerServiceClient _playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
 
 	public ValueTask ExecuteAsync(SetBirthdateCommand command, CancellationToken cancellationToken = default)
 	{

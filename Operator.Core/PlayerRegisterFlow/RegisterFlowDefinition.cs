@@ -4,15 +4,10 @@ using Microsoft.Extensions.Logging;
 
 namespace TGS.Services.Operator.PlayerRegisterFlow;
 
-internal class RegisterFlowDefinition
+internal class RegisterFlowDefinition(ILogger<RegisterFlow> logger)
 {
-	private readonly ILogger<RegisterFlow> _logger;
-	private readonly List<IRegisterFlowStep> _stepDefinitions = new();
-
-	public RegisterFlowDefinition(ILogger<RegisterFlow> logger)
-	{
-		_logger = logger ?? throw new ArgumentNullException(nameof(logger));
-	}
+	private readonly ILogger<RegisterFlow> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+	private readonly List<IRegisterFlowStep> _stepDefinitions = [];
 
 	public void AddStep(IRegisterFlowStep step)
 	{

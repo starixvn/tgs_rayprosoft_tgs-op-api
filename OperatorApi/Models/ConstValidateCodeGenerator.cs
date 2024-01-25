@@ -3,19 +3,12 @@ using TGS.Services.Operator.ValidateCode;
 
 namespace TGS.Apis.OperatorApi.Models;
 
-public class ConstValidateCodeGenerator : IValidateCodeGenerator
+public class ConstValidateCodeGenerator(IValidateCodeGenerator validateCodeGenerator, IOptions<ConstValidateCodeOptions> optionsAccessor) : IValidateCodeGenerator
 {
-	private readonly ConstValidateCodeOptions _options;
-	private readonly IValidateCodeGenerator _validateCodeGenerator;
-
-	public ConstValidateCodeGenerator(IValidateCodeGenerator validateCodeGenerator, IOptions<ConstValidateCodeOptions> optionsAccessor)
-	{
-		_validateCodeGenerator = validateCodeGenerator;
-		_options = optionsAccessor.Value;
-	}
+	private readonly ConstValidateCodeOptions _options = optionsAccessor.Value;
 
 	public string GenerateCode()
-		=> _options.ValidateCodeTestEnabled ? "123456" : _validateCodeGenerator.GenerateCode();
+		=> _options.ValidateCodeTestEnabled ? "123456" : validateCodeGenerator.GenerateCode();
 
-	public string GenerateSecurityKey() => _validateCodeGenerator.GenerateSecurityKey();
+	public string GenerateSecurityKey() => validateCodeGenerator.GenerateSecurityKey();
 }

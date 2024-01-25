@@ -134,12 +134,11 @@ public class PayPasswordTests
 			{
 				PlayerCode = playerCode,
 				Username = "Tester",
-				WithdrawPassword = new byte[]
-				{
+				WithdrawPassword = [
 					1,
 					2,
 					3
-				}
+				]
 			});
 
 		_ = Assert.ThrowsAsync<PayPasswordAlreadySetException>(async () => await sut.ExecuteAsync(command));
@@ -165,7 +164,7 @@ public class PayPasswordTests
 			{
 				PlayerCode = playerCode,
 				Username = "Tester",
-				WithdrawPassword = Array.Empty<byte>()
+				WithdrawPassword = []
 			});
 
 		await sut.ExecuteAsync(command);

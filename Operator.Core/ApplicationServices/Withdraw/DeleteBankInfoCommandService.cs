@@ -6,14 +6,9 @@ using Tgs.ServiceUtility;
 
 namespace TGS.Services.Operator.ApplicationServices.Withdraw;
 
-internal class DeleteBankInfoCommandService : ICommandService<DeleteBankInfoCommand>
+internal class DeleteBankInfoCommandService(IPaymentServiceClient paymentServiceClient) : ICommandService<DeleteBankInfoCommand>
 {
-	private readonly IPaymentServiceClient _paymentServiceClient;
-
-	public DeleteBankInfoCommandService(IPaymentServiceClient paymentServiceClient)
-	{
-		_paymentServiceClient = paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
-	}
+	private readonly IPaymentServiceClient _paymentServiceClient = paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
 
 	public ValueTask ExecuteAsync(DeleteBankInfoCommand command, CancellationToken cancellationToken = default)
 		=> _paymentServiceClient.DeletePlayerBankInfoAsync(

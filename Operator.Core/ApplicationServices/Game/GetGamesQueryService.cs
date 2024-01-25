@@ -6,15 +6,10 @@ using Tgs.ServiceUtility;
 
 namespace TGS.Services.Operator.ApplicationServices.Game;
 
-internal class GetGamesQueryService : IQueryService<GetGamesQuery, GameInfo>
+internal class GetGamesQueryService(
+	IQueryService<GetAllGamesByGameTypeQuery, GameInfo> queryService) : IQueryService<GetGamesQuery, GameInfo>
 {
-	private readonly IQueryService<GetAllGamesByGameTypeQuery, GameInfo> _queryService;
-
-	public GetGamesQueryService(
-		IQueryService<GetAllGamesByGameTypeQuery, GameInfo> queryService)
-	{
-		_queryService = queryService ?? throw new ArgumentNullException(nameof(queryService));
-	}
+	private readonly IQueryService<GetAllGamesByGameTypeQuery, GameInfo> _queryService = queryService ?? throw new ArgumentNullException(nameof(queryService));
 
 	public IAsyncEnumerable<GameInfo> QueryAsync(
 		GetGamesQuery query,

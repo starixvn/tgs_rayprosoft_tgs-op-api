@@ -6,18 +6,13 @@ using Tgs.PlayerService.Client;
 
 namespace TGS.Services.Operator.PlayerRegisterFlow;
 
-internal class FinalRegisterFlowStep : IRegisterFlowStep
+internal class FinalRegisterFlowStep(IPlayerServiceClient playerServiceClient) : IRegisterFlowStep
 {
-	private readonly IPlayerServiceClient _playerServiceClient;
+	private readonly IPlayerServiceClient _playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
 
 	public bool IsAuto => true;
 
 	public string Type => "Final";
-
-	public FinalRegisterFlowStep(IPlayerServiceClient playerServiceClient)
-	{
-		_playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
-	}
 
 	public async ValueTask<bool> ConfirmCompletedAsync(string? playerCode, CancellationToken cancellationToken = default)
 	{

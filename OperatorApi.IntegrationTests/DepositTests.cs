@@ -30,13 +30,994 @@ using Xunit.Abstractions;
 
 namespace OperatorApi.IntegrationTests;
 
-public class DepositTests
+public class DepositTests(ITestOutputHelper testOutputHelper)
 {
-	private readonly ITestOutputHelper _testOutputHelper;
+	private readonly ITestOutputHelper _testOutputHelper = testOutputHelper ?? throw new ArgumentNullException(nameof(testOutputHelper));
 
-	public DepositTests(ITestOutputHelper testOutputHelper)
+	[Fact]
+	public async Task _123Pay存款()
 	{
-		_testOutputHelper = testOutputHelper ?? throw new ArgumentNullException(nameof(testOutputHelper));
+		// Arrange
+		var channelName = Guid.NewGuid().ToString();
+
+		var fakeBrandCertClient = Substitute.For<IBrandCertificateClient>();
+		var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
+		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
+		var fakePlayerPasswordValidateCommandService = Substitute.For<IGetService<PlayerPasswordValidateCommand, bool>>();
+		var fakePlayerLoginRecordRepository = Substitute.For<IPlayerLoginRecordRepository>();
+		var fakeBrandRepository = Substitute.For<IBrandRepository>();
+		var fakeValidatePlayerLoginRecordCommandService = Substitute.For<ICommandService<ValidatePlayerLoginRecordCommand>>();
+
+		_ = fakeBrandCertClient.GetSystemValidateSecurityKeyAsync(Arg.Any<CancellationToken>())
+			.Returns(TestOperatorApplication.TestSecurityKey);
+
+		var brandId = Guid.NewGuid();
+		var brandCode = "Test";
+		var brandToken = TestOperatorApplication.MakeTestBrandToken(brandId, brandCode);
+
+		_ = fakeBrandRepository.GetSecretKeyAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
+			.Returns("N2KAnljo5zbLCZDSoUBFJ70ONsy");
+
+		var fakePaymentServiceClient = Substitute.For<IPaymentServiceClient>();
+		var fakePromotionClient = Substitute.For<IPromotionClient>();
+
+		using var web = TestOperatorApplication.Builder
+			.UseTestChannelServer(channelName)
+			.ConfigureLogging(logging => logging.AddXUnit(_testOutputHelper))
+			.ConfigureServices(services => services
+				.AddSingleton(fakeBrandCertClient)
+				.AddSingleton(fakeBrandServiceClient)
+				.AddSingleton(fakePlayerServiceClient)
+				.AddSingleton(fakePlayerPasswordValidateCommandService)
+				.AddSingleton(fakePlayerLoginRecordRepository)
+				.AddSingleton(fakeBrandRepository)
+				.AddSingleton(fakeValidatePlayerLoginRecordCommandService)
+				.AddSingleton(fakePaymentServiceClient)
+				.AddSingleton(fakePromotionClient))
+			.Build();
+
+		await web.StartAsync();
+
+		var playerCode = "test1";
+		var userName = "test";
+
+		_ = fakeBrandServiceClient.GetBrandStatusAsync(
+			Arg.Is(brandId),
+			Arg.Any<CancellationToken>())
+			.Returns(BrandStatus.Active);
+		_ = fakePlayerServiceClient.GetPlayerInfoByUserNameAsync(
+			Arg.Is(brandId),
+			Arg.Is(userName),
+			Arg.Any<CancellationToken>())
+			.Returns(new Tgs.PlayerService.Client.PlayerInfo
+			{
+				BrandId = brandId,
+				UserName = userName,
+				PlayerCode = playerCode
+			});
+		_ = fakePlayerPasswordValidateCommandService.GetAsync(
+			Arg.Any<PlayerPasswordValidateCommand>(),
+			Arg.Any<CancellationToken>())
+			.Returns(true);
+		_ = fakePlayerPasswordValidateCommandService.GetAsync(
+			Arg.Any<PlayerPasswordValidateCommand>(),
+			Arg.Any<CancellationToken>())
+			.Returns(true);
+		_ = fakePlayerLoginRecordRepository.AddPlayerLoginRecordAsync(
+			Arg.Is(brandId),
+			Arg.Is(playerCode),
+			Arg.Is(TGS.Core.Models.Enums.PlatformType.Desktop),
+			Arg.Is("127.0.0.1"))
+			.Returns(new LoginRecordInfo(
+				Guid.NewGuid(),
+				playerCode,
+				TGS.Core.Models.Enums.LoginStatus.Enabled,
+				TGS.Core.Models.Enums.PlatformType.Desktop,
+				DateTimeOffset.Now,
+				DateTimeOffset.Now.AddDays(1D)));
+
+		await using var scope = web.Services.CreateAsyncScope();
+
+		var loginService = scope.ServiceProvider.GetRequiredService<IGetService<LoginCommand, LoginInfo>>();
+
+		var loginCommand = new LoginCommand(
+			brandId,
+			userName,
+			"test123",
+			"127.0.0.1",
+			"localhost",
+			TGS.Core.Models.Enums.PlatformType.Desktop,
+			"operator-api");
+
+		var loginResult = await loginService.GetAsync(loginCommand);
+
+		var request = new SubmitDepositRequest
+		{
+			Amount = 100M,
+			BrandPaymentId = Guid.NewGuid(),
+			PromotionId = null
+		};
+
+		var brandPaymentInfo = new BrandPaymentInfo
+		{
+			Id = request.BrandPaymentId,
+			ChannelId = Guid.NewGuid(),
+			ChannelName = "Test",
+			Enabled = true,
+			ExtendedData = """
+				{
+					"merchant": "test123",
+					"key": "aabbccddeeff",
+					"paymentType": "3",
+					"bankCode": "gcash"
+				}
+				""",
+			PaymentId = Guid.NewGuid(),
+			BrandId = brandId
+		};
+
+		_ = fakePaymentServiceClient.GetBrandPaymentByIdAsync(
+			Arg.Is(request.BrandPaymentId),
+			Arg.Any<CancellationToken>())
+			.Returns(brandPaymentInfo);
+
+		_ = fakePaymentServiceClient.GetPaymentByIdAsync(
+			Arg.Is(brandPaymentInfo.PaymentId),
+			Arg.Any<CancellationToken>())
+			.Returns(new PaymentInfo
+			{
+				Id = brandPaymentInfo.PaymentId,
+				Code = "123Pay"
+			});
+
+		_ = fakePaymentServiceClient.LockDepositPaymentAsync(
+			Arg.Any<Guid>(),
+			Arg.Is("123Pay"),
+			Arg.Is(playerCode),
+			Arg.Any<CancellationToken>())
+			.Returns(callInfo => callInfo.ArgAt<Guid>(0));
+
+		var applyInfo = new PhpGoPayDepositApplyInfo(
+			new PhpGoPayDepositSettings(
+				"test123",
+				"aabbccddeeff",
+				PhpGoPaymentType.Direct,
+				PhpGoBankCode.GCash,
+				new Uri("http://localhost"),
+				Guid.NewGuid()),
+			new PhpGoPayDepositResponse(
+				100M,
+				null,
+				Guid.NewGuid(),
+				new Uri("http://localhost/test"),
+				new Uri("http://localhost")));
+
+		_ = fakePaymentServiceClient.GetDepositFormAsync(
+			Arg.Is(brandId),
+			Arg.Any<Guid>(),
+			Arg.Any<CancellationToken>())
+			.Returns(new DepositFormInfo
+			{
+				PlayerCode = playerCode,
+				ApplyInfo = JsonSerializer.Serialize(applyInfo, PhpGoPayUtility.SerializerOptions)
+			});
+
+		var expected = new DepositFormCreatedResponse
+		{
+			FormId = Guid.NewGuid(),
+			PaymentUrl = "https://localhost"
+		};
+
+		var isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "true" : "false";
+		var nodeModule = $$"""
+			const axiosConfigFactory = require('./models/axios-configuration.js').default;
+			const OperatorService = require('./services/op-service.js').default;
+
+			module.exports = async (brandToken, loginToken, request) =>
+			{
+				let instance = axiosConfigFactory("{{channelName}}", {{isWindows}}, brandToken, loginToken);
+
+				let svc = new OperatorService(instance);
+
+				return await svc.submit123ThirdPartyDepositRequest(request);
+			};
+			""";
+
+		// Act
+		var actual = await StaticNodeJSService.InvokeFromStringAsync<SuccessResponse<DepositFormCreatedResponse>>(
+			nodeModule,
+			args: [brandToken, loginResult.PlayerToken, request]);
+
+		// Assert
+		Assert.Equal(applyInfo.Response.RedirectUrl.ToString(), actual?.Data.PaymentUrl);
+	}
+
+	[Fact]
+	public async Task DibaoPayMomo存款()
+	{
+		// Arrange
+		var channelName = Guid.NewGuid().ToString();
+
+		var fakeBrandCertClient = Substitute.For<IBrandCertificateClient>();
+		var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
+		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
+		var fakePlayerPasswordValidateCommandService = Substitute.For<IGetService<PlayerPasswordValidateCommand, bool>>();
+		var fakePlayerLoginRecordRepository = Substitute.For<IPlayerLoginRecordRepository>();
+		var fakeBrandRepository = Substitute.For<IBrandRepository>();
+		var fakeValidatePlayerLoginRecordCommandService = Substitute.For<ICommandService<ValidatePlayerLoginRecordCommand>>();
+
+		_ = fakeBrandCertClient.GetSystemValidateSecurityKeyAsync(Arg.Any<CancellationToken>())
+			.Returns(TestOperatorApplication.TestSecurityKey);
+
+		var brandId = Guid.NewGuid();
+		var brandCode = "Test";
+		var brandToken = TestOperatorApplication.MakeTestBrandToken(brandId, brandCode);
+
+		_ = fakeBrandRepository.GetSecretKeyAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
+			.Returns("N2KAnljo5zbLCZDSoUBFJ70ONsy");
+
+		var fakePaymentServiceClient = Substitute.For<IPaymentServiceClient>();
+		var fakePromotionClient = Substitute.For<IPromotionClient>();
+
+		using var web = TestOperatorApplication.Builder
+			.UseTestChannelServer(channelName)
+			.ConfigureLogging(logging => logging.AddXUnit(_testOutputHelper))
+			.ConfigureServices(services => services
+				.AddSingleton(fakeBrandCertClient)
+				.AddSingleton(fakeBrandServiceClient)
+				.AddSingleton(fakePlayerServiceClient)
+				.AddSingleton(fakePlayerPasswordValidateCommandService)
+				.AddSingleton(fakePlayerLoginRecordRepository)
+				.AddSingleton(fakeBrandRepository)
+				.AddSingleton(fakeValidatePlayerLoginRecordCommandService)
+				.AddSingleton(fakePaymentServiceClient)
+				.AddSingleton(fakePromotionClient))
+			.Build();
+
+		await web.StartAsync();
+
+		var playerCode = "test1";
+		var userName = "test";
+
+		_ = fakeBrandServiceClient.GetBrandStatusAsync(
+			Arg.Is(brandId),
+			Arg.Any<CancellationToken>())
+			.Returns(BrandStatus.Active);
+		_ = fakePlayerServiceClient.GetPlayerInfoByUserNameAsync(
+			Arg.Is(brandId),
+			Arg.Is(userName),
+			Arg.Any<CancellationToken>())
+			.Returns(new Tgs.PlayerService.Client.PlayerInfo
+			{
+				BrandId = brandId,
+				UserName = userName,
+				PlayerCode = playerCode
+			});
+		_ = fakePlayerPasswordValidateCommandService.GetAsync(
+			Arg.Any<PlayerPasswordValidateCommand>(),
+			Arg.Any<CancellationToken>())
+			.Returns(true);
+		_ = fakePlayerPasswordValidateCommandService.GetAsync(
+			Arg.Any<PlayerPasswordValidateCommand>(),
+			Arg.Any<CancellationToken>())
+			.Returns(true);
+		_ = fakePlayerLoginRecordRepository.AddPlayerLoginRecordAsync(
+			Arg.Is(brandId),
+			Arg.Is(playerCode),
+			Arg.Is(TGS.Core.Models.Enums.PlatformType.Desktop),
+			Arg.Is("127.0.0.1"))
+			.Returns(new LoginRecordInfo(
+				Guid.NewGuid(),
+				playerCode,
+				TGS.Core.Models.Enums.LoginStatus.Enabled,
+				TGS.Core.Models.Enums.PlatformType.Desktop,
+				DateTimeOffset.Now,
+				DateTimeOffset.Now.AddDays(1D)));
+
+		await using var scope = web.Services.CreateAsyncScope();
+
+		var loginService = scope.ServiceProvider.GetRequiredService<IGetService<LoginCommand, LoginInfo>>();
+
+		var loginCommand = new LoginCommand(
+			brandId,
+			userName,
+			"test123",
+			"127.0.0.1",
+			"localhost",
+			TGS.Core.Models.Enums.PlatformType.Desktop,
+			"operator-api");
+
+		var loginResult = await loginService.GetAsync(loginCommand);
+
+		var request = new SubmitDepositRequest
+		{
+			Amount = 200000M,
+			BrandPaymentId = Guid.NewGuid(),
+			PromotionId = null
+		};
+
+		var brandPaymentInfo = new BrandPaymentInfo
+		{
+			Id = request.BrandPaymentId,
+			ChannelId = Guid.NewGuid(),
+			ChannelName = "Test",
+			Enabled = true,
+			ExtendedData = """
+				{
+					"merchantId": "merchantId",
+					"privateKey": "privateKey",
+					"channel": "923",
+					"exchangeRate": 1
+				}
+				""",
+			PaymentId = Guid.NewGuid(),
+			BrandId = brandId
+		};
+
+		_ = fakePaymentServiceClient.GetBrandPaymentByIdAsync(
+			Arg.Is(request.BrandPaymentId),
+			Arg.Any<CancellationToken>())
+			.Returns(brandPaymentInfo);
+
+		_ = fakePaymentServiceClient.GetPaymentByIdAsync(
+			Arg.Is(brandPaymentInfo.PaymentId),
+			Arg.Any<CancellationToken>())
+			.Returns(new PaymentInfo
+			{
+				Id = brandPaymentInfo.PaymentId,
+				Code = "DibaoPay"
+			});
+
+		_ = fakePaymentServiceClient.LockDepositPaymentAsync(
+			Arg.Any<Guid>(),
+			Arg.Is("DibaoPay"),
+			Arg.Is(playerCode),
+			Arg.Any<CancellationToken>())
+			.Returns(callInfo => callInfo.ArgAt<Guid>(0));
+
+		var applyInfo = new DibaoPayDepositApplyInfo(
+			new DibaoPayDepositSettings(
+				"merchantId",
+				"privateKey",
+				Guid.NewGuid(),
+				"923",
+				"127.0.0.1",
+				1m),
+			new DibaoPayDepositResponse(
+				200000m,
+				Guid.NewGuid(),
+				new Uri("http://localhost/test"),
+				"thirdPartyOrderNo"));
+
+		_ = fakePaymentServiceClient.GetDepositFormAsync(
+			Arg.Is(brandId),
+			Arg.Any<Guid>(),
+			Arg.Any<CancellationToken>())
+			.Returns(new DepositFormInfo
+			{
+				PlayerCode = playerCode,
+				ApplyInfo = JsonSerializer.Serialize(applyInfo, DibaoPayUtility.SerializerOptions)
+			});
+
+		var expected = new DepositFormCreatedResponse
+		{
+			FormId = Guid.NewGuid(),
+			PaymentUrl = "https://localhost"
+		};
+
+		var isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "true" : "false";
+		var nodeModule = $$"""
+			const axiosConfigFactory = require('./models/axios-configuration.js').default;
+			const OperatorService = require('./services/op-service.js').default;
+
+			module.exports = async (brandToken, loginToken, request) =>
+			{
+				let instance = axiosConfigFactory("{{channelName}}", {{isWindows}}, brandToken, loginToken);
+
+				let svc = new OperatorService(instance);
+
+				return await svc.submitDibaoMomoDepositRequest(request);
+			};
+			""";
+
+		// Act
+		var actual = await StaticNodeJSService.InvokeFromStringAsync<SuccessResponse<DepositFormCreatedResponse>>(
+			nodeModule,
+			args: [brandToken, loginResult.PlayerToken, request]);
+
+		// Assert
+		Assert.Equal(applyInfo.Response.RedirectUrl.ToString(), actual?.Data.PaymentUrl);
+	}
+
+	[Fact]
+	public async Task DibaoPayZalo存款()
+	{
+		// Arrange
+		var channelName = Guid.NewGuid().ToString();
+
+		var fakeBrandCertClient = Substitute.For<IBrandCertificateClient>();
+		var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
+		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
+		var fakePlayerPasswordValidateCommandService = Substitute.For<IGetService<PlayerPasswordValidateCommand, bool>>();
+		var fakePlayerLoginRecordRepository = Substitute.For<IPlayerLoginRecordRepository>();
+		var fakeBrandRepository = Substitute.For<IBrandRepository>();
+		var fakeValidatePlayerLoginRecordCommandService = Substitute.For<ICommandService<ValidatePlayerLoginRecordCommand>>();
+
+		_ = fakeBrandCertClient.GetSystemValidateSecurityKeyAsync(Arg.Any<CancellationToken>())
+			.Returns(TestOperatorApplication.TestSecurityKey);
+
+		var brandId = Guid.NewGuid();
+		var brandCode = "Test";
+		var brandToken = TestOperatorApplication.MakeTestBrandToken(brandId, brandCode);
+
+		_ = fakeBrandRepository.GetSecretKeyAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
+			.Returns("N2KAnljo5zbLCZDSoUBFJ70ONsy");
+
+		var fakePaymentServiceClient = Substitute.For<IPaymentServiceClient>();
+		var fakePromotionClient = Substitute.For<IPromotionClient>();
+
+		using var web = TestOperatorApplication.Builder
+			.UseTestChannelServer(channelName)
+			.ConfigureLogging(logging => logging.AddXUnit(_testOutputHelper))
+			.ConfigureServices(services => services
+				.AddSingleton(fakeBrandCertClient)
+				.AddSingleton(fakeBrandServiceClient)
+				.AddSingleton(fakePlayerServiceClient)
+				.AddSingleton(fakePlayerPasswordValidateCommandService)
+				.AddSingleton(fakePlayerLoginRecordRepository)
+				.AddSingleton(fakeBrandRepository)
+				.AddSingleton(fakeValidatePlayerLoginRecordCommandService)
+				.AddSingleton(fakePaymentServiceClient)
+				.AddSingleton(fakePromotionClient))
+			.Build();
+
+		await web.StartAsync();
+
+		var playerCode = "test1";
+		var userName = "test";
+
+		_ = fakeBrandServiceClient.GetBrandStatusAsync(
+			Arg.Is(brandId),
+			Arg.Any<CancellationToken>())
+			.Returns(BrandStatus.Active);
+		_ = fakePlayerServiceClient.GetPlayerInfoByUserNameAsync(
+			Arg.Is(brandId),
+			Arg.Is(userName),
+			Arg.Any<CancellationToken>())
+			.Returns(new Tgs.PlayerService.Client.PlayerInfo
+			{
+				BrandId = brandId,
+				UserName = userName,
+				PlayerCode = playerCode
+			});
+		_ = fakePlayerPasswordValidateCommandService.GetAsync(
+			Arg.Any<PlayerPasswordValidateCommand>(),
+			Arg.Any<CancellationToken>())
+			.Returns(true);
+		_ = fakePlayerPasswordValidateCommandService.GetAsync(
+			Arg.Any<PlayerPasswordValidateCommand>(),
+			Arg.Any<CancellationToken>())
+			.Returns(true);
+		_ = fakePlayerLoginRecordRepository.AddPlayerLoginRecordAsync(
+			Arg.Is(brandId),
+			Arg.Is(playerCode),
+			Arg.Is(TGS.Core.Models.Enums.PlatformType.Desktop),
+			Arg.Is("127.0.0.1"))
+			.Returns(new LoginRecordInfo(
+				Guid.NewGuid(),
+				playerCode,
+				TGS.Core.Models.Enums.LoginStatus.Enabled,
+				TGS.Core.Models.Enums.PlatformType.Desktop,
+				DateTimeOffset.Now,
+				DateTimeOffset.Now.AddDays(1D)));
+
+		await using var scope = web.Services.CreateAsyncScope();
+
+		var loginService = scope.ServiceProvider.GetRequiredService<IGetService<LoginCommand, LoginInfo>>();
+
+		var loginCommand = new LoginCommand(
+			brandId,
+			userName,
+			"test123",
+			"127.0.0.1",
+			"localhost",
+			TGS.Core.Models.Enums.PlatformType.Desktop,
+			"operator-api");
+
+		var loginResult = await loginService.GetAsync(loginCommand);
+
+		var request = new SubmitDepositRequest
+		{
+			Amount = 200000M,
+			BrandPaymentId = Guid.NewGuid(),
+			PromotionId = null
+		};
+
+		var brandPaymentInfo = new BrandPaymentInfo
+		{
+			Id = request.BrandPaymentId,
+			ChannelId = Guid.NewGuid(),
+			ChannelName = "Test",
+			Enabled = true,
+			ExtendedData = """
+				{
+					"merchantId": "merchantId",
+					"privateKey": "privateKey",
+					"channel": "921",
+					"exchangeRate": 1
+				}
+				""",
+			PaymentId = Guid.NewGuid(),
+			BrandId = brandId
+		};
+
+		_ = fakePaymentServiceClient.GetBrandPaymentByIdAsync(
+			Arg.Is(request.BrandPaymentId),
+			Arg.Any<CancellationToken>())
+			.Returns(brandPaymentInfo);
+
+		_ = fakePaymentServiceClient.GetPaymentByIdAsync(
+			Arg.Is(brandPaymentInfo.PaymentId),
+			Arg.Any<CancellationToken>())
+			.Returns(new PaymentInfo
+			{
+				Id = brandPaymentInfo.PaymentId,
+				Code = "DibaoPay"
+			});
+
+		_ = fakePaymentServiceClient.LockDepositPaymentAsync(
+			Arg.Any<Guid>(),
+			Arg.Is("DibaoPay"),
+			Arg.Is(playerCode),
+			Arg.Any<CancellationToken>())
+			.Returns(callInfo => callInfo.ArgAt<Guid>(0));
+
+		var applyInfo = new DibaoPayDepositApplyInfo(
+			new DibaoPayDepositSettings(
+				"merchantId",
+				"privateKey",
+				Guid.NewGuid(),
+				"921",
+				"127.0.0.1",
+				1m),
+			new DibaoPayDepositResponse(
+				200000m,
+				Guid.NewGuid(),
+				new Uri("http://localhost/test"),
+				"thirdPartyOrderNo"));
+
+		_ = fakePaymentServiceClient.GetDepositFormAsync(
+			Arg.Is(brandId),
+			Arg.Any<Guid>(),
+			Arg.Any<CancellationToken>())
+			.Returns(new DepositFormInfo
+			{
+				PlayerCode = playerCode,
+				ApplyInfo = JsonSerializer.Serialize(applyInfo, DibaoPayUtility.SerializerOptions)
+			});
+
+		var expected = new DepositFormCreatedResponse
+		{
+			FormId = Guid.NewGuid(),
+			PaymentUrl = "https://localhost"
+		};
+
+		var isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "true" : "false";
+		var nodeModule = $$"""
+			const axiosConfigFactory = require('./models/axios-configuration.js').default;
+			const OperatorService = require('./services/op-service.js').default;
+
+			module.exports = async (brandToken, loginToken, request) =>
+			{
+				let instance = axiosConfigFactory("{{channelName}}", {{isWindows}}, brandToken, loginToken);
+
+				let svc = new OperatorService(instance);
+
+				return await svc.submitDibaoZaloDepositRequest(request);
+			};
+			""";
+
+		// Act
+		var actual = await StaticNodeJSService.InvokeFromStringAsync<SuccessResponse<DepositFormCreatedResponse>>(
+			nodeModule,
+			args: [brandToken, loginResult.PlayerToken, request]);
+
+		// Assert
+		Assert.Equal(applyInfo.Response.RedirectUrl.ToString(), actual?.Data.PaymentUrl);
+	}
+
+	[Fact]
+	public async Task DibaoPay三方存款()
+	{
+		// Arrange
+		var channelName = Guid.NewGuid().ToString();
+
+		var fakeBrandCertClient = Substitute.For<IBrandCertificateClient>();
+		var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
+		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
+		var fakePlayerPasswordValidateCommandService = Substitute.For<IGetService<PlayerPasswordValidateCommand, bool>>();
+		var fakePlayerLoginRecordRepository = Substitute.For<IPlayerLoginRecordRepository>();
+		var fakeBrandRepository = Substitute.For<IBrandRepository>();
+		var fakeValidatePlayerLoginRecordCommandService = Substitute.For<ICommandService<ValidatePlayerLoginRecordCommand>>();
+
+		_ = fakeBrandCertClient.GetSystemValidateSecurityKeyAsync(Arg.Any<CancellationToken>())
+			.Returns(TestOperatorApplication.TestSecurityKey);
+
+		var brandId = Guid.NewGuid();
+		var brandCode = "Test";
+		var brandToken = TestOperatorApplication.MakeTestBrandToken(brandId, brandCode);
+
+		_ = fakeBrandRepository.GetSecretKeyAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
+			.Returns("N2KAnljo5zbLCZDSoUBFJ70ONsy");
+
+		var fakePaymentServiceClient = Substitute.For<IPaymentServiceClient>();
+		var fakePromotionClient = Substitute.For<IPromotionClient>();
+
+		using var web = TestOperatorApplication.Builder
+			.UseTestChannelServer(channelName)
+			.ConfigureLogging(logging => logging.AddXUnit(_testOutputHelper))
+			.ConfigureServices(services => services
+				.AddSingleton(fakeBrandCertClient)
+				.AddSingleton(fakeBrandServiceClient)
+				.AddSingleton(fakePlayerServiceClient)
+				.AddSingleton(fakePlayerPasswordValidateCommandService)
+				.AddSingleton(fakePlayerLoginRecordRepository)
+				.AddSingleton(fakeBrandRepository)
+				.AddSingleton(fakeValidatePlayerLoginRecordCommandService)
+				.AddSingleton(fakePaymentServiceClient)
+				.AddSingleton(fakePromotionClient))
+			.Build();
+
+		await web.StartAsync();
+
+		var playerCode = "test1";
+		var userName = "test";
+
+		_ = fakeBrandServiceClient.GetBrandStatusAsync(
+			Arg.Is(brandId),
+			Arg.Any<CancellationToken>())
+			.Returns(BrandStatus.Active);
+		_ = fakePlayerServiceClient.GetPlayerInfoByUserNameAsync(
+			Arg.Is(brandId),
+			Arg.Is(userName),
+			Arg.Any<CancellationToken>())
+			.Returns(new Tgs.PlayerService.Client.PlayerInfo
+			{
+				BrandId = brandId,
+				UserName = userName,
+				PlayerCode = playerCode
+			});
+		_ = fakePlayerPasswordValidateCommandService.GetAsync(
+			Arg.Any<PlayerPasswordValidateCommand>(),
+			Arg.Any<CancellationToken>())
+			.Returns(true);
+		_ = fakePlayerPasswordValidateCommandService.GetAsync(
+			Arg.Any<PlayerPasswordValidateCommand>(),
+			Arg.Any<CancellationToken>())
+			.Returns(true);
+		_ = fakePlayerLoginRecordRepository.AddPlayerLoginRecordAsync(
+			Arg.Is(brandId),
+			Arg.Is(playerCode),
+			Arg.Is(TGS.Core.Models.Enums.PlatformType.Desktop),
+			Arg.Is("127.0.0.1"))
+			.Returns(new LoginRecordInfo(
+				Guid.NewGuid(),
+				playerCode,
+				TGS.Core.Models.Enums.LoginStatus.Enabled,
+				TGS.Core.Models.Enums.PlatformType.Desktop,
+				DateTimeOffset.Now,
+				DateTimeOffset.Now.AddDays(1D)));
+
+		await using var scope = web.Services.CreateAsyncScope();
+
+		var loginService = scope.ServiceProvider.GetRequiredService<IGetService<LoginCommand, LoginInfo>>();
+
+		var loginCommand = new LoginCommand(
+			brandId,
+			userName,
+			"test123",
+			"127.0.0.1",
+			"localhost",
+			TGS.Core.Models.Enums.PlatformType.Desktop,
+			"operator-api");
+
+		var loginResult = await loginService.GetAsync(loginCommand);
+
+		var request = new SubmitDepositRequest
+		{
+			Amount = 200000M,
+			BrandPaymentId = Guid.NewGuid(),
+			PromotionId = null
+		};
+
+		var brandPaymentInfo = new BrandPaymentInfo
+		{
+			Id = request.BrandPaymentId,
+			ChannelId = Guid.NewGuid(),
+			ChannelName = "Test",
+			Enabled = true,
+			ExtendedData = """
+				{
+					"merchantId": "merchantId",
+					"privateKey": "privateKey",
+					"channel": "925",
+					"exchangeRate": 1
+				}
+				""",
+			PaymentId = Guid.NewGuid(),
+			BrandId = brandId
+		};
+
+		_ = fakePaymentServiceClient.GetBrandPaymentByIdAsync(
+			Arg.Is(request.BrandPaymentId),
+			Arg.Any<CancellationToken>())
+			.Returns(brandPaymentInfo);
+
+		_ = fakePaymentServiceClient.GetPaymentByIdAsync(
+			Arg.Is(brandPaymentInfo.PaymentId),
+			Arg.Any<CancellationToken>())
+			.Returns(new PaymentInfo
+			{
+				Id = brandPaymentInfo.PaymentId,
+				Code = "DibaoPay"
+			});
+
+		_ = fakePaymentServiceClient.LockDepositPaymentAsync(
+			Arg.Any<Guid>(),
+			Arg.Is("DibaoPay"),
+			Arg.Is(playerCode),
+			Arg.Any<CancellationToken>())
+			.Returns(callInfo => callInfo.ArgAt<Guid>(0));
+
+		var applyInfo = new DibaoPayDepositApplyInfo(
+			new DibaoPayDepositSettings(
+				"apiToken",
+				"notifyToken",
+				Guid.NewGuid(),
+				"925",
+				"127.0.0.1",
+				1m),
+			new DibaoPayDepositResponse(
+				200000m,
+				Guid.NewGuid(),
+				new Uri("http://localhost/test"),
+				"thirdPartyOrderNo"));
+
+		_ = fakePaymentServiceClient.GetDepositFormAsync(
+			Arg.Is(brandId),
+			Arg.Any<Guid>(),
+			Arg.Any<CancellationToken>())
+			.Returns(new DepositFormInfo
+			{
+				PlayerCode = playerCode,
+				ApplyInfo = JsonSerializer.Serialize(applyInfo, DibaoPayUtility.SerializerOptions)
+			});
+
+		var expected = new DepositFormCreatedResponse
+		{
+			FormId = Guid.NewGuid(),
+			PaymentUrl = "https://localhost"
+		};
+
+		var isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "true" : "false";
+		var nodeModule = $$"""
+			const axiosConfigFactory = require('./models/axios-configuration.js').default;
+			const OperatorService = require('./services/op-service.js').default;
+
+			module.exports = async (brandToken, loginToken, request) =>
+			{
+				let instance = axiosConfigFactory("{{channelName}}", {{isWindows}}, brandToken, loginToken);
+
+				let svc = new OperatorService(instance);
+
+				return await svc.submitDibaoThirdPartyDepositRequest(request);
+			};
+			""";
+
+		// Act
+		var actual = await StaticNodeJSService.InvokeFromStringAsync<SuccessResponse<DepositFormCreatedResponse>>(
+			nodeModule,
+			args: [brandToken, loginResult.PlayerToken, request]);
+
+		// Assert
+		Assert.Equal(applyInfo.Response.RedirectUrl.ToString(), actual?.Data.PaymentUrl);
+	}
+
+	[Fact]
+	public async Task DibaoPay銀行存款()
+	{
+		// Arrange
+		var channelName = Guid.NewGuid().ToString();
+
+		var fakeBrandCertClient = Substitute.For<IBrandCertificateClient>();
+		var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
+		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
+		var fakePlayerPasswordValidateCommandService = Substitute.For<IGetService<PlayerPasswordValidateCommand, bool>>();
+		var fakePlayerLoginRecordRepository = Substitute.For<IPlayerLoginRecordRepository>();
+		var fakeBrandRepository = Substitute.For<IBrandRepository>();
+		var fakeValidatePlayerLoginRecordCommandService = Substitute.For<ICommandService<ValidatePlayerLoginRecordCommand>>();
+
+		_ = fakeBrandCertClient.GetSystemValidateSecurityKeyAsync(Arg.Any<CancellationToken>())
+			.Returns(TestOperatorApplication.TestSecurityKey);
+
+		var brandId = Guid.NewGuid();
+		var brandCode = "Test";
+		var brandToken = TestOperatorApplication.MakeTestBrandToken(brandId, brandCode);
+
+		_ = fakeBrandRepository.GetSecretKeyAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
+			.Returns("N2KAnljo5zbLCZDSoUBFJ70ONsy");
+
+		var fakePaymentServiceClient = Substitute.For<IPaymentServiceClient>();
+		var fakePromotionClient = Substitute.For<IPromotionClient>();
+
+		using var web = TestOperatorApplication.Builder
+			.UseTestChannelServer(channelName)
+			.ConfigureLogging(logging => logging.AddXUnit(_testOutputHelper))
+			.ConfigureServices(services => services
+				.AddSingleton(fakeBrandCertClient)
+				.AddSingleton(fakeBrandServiceClient)
+				.AddSingleton(fakePlayerServiceClient)
+				.AddSingleton(fakePlayerPasswordValidateCommandService)
+				.AddSingleton(fakePlayerLoginRecordRepository)
+				.AddSingleton(fakeBrandRepository)
+				.AddSingleton(fakeValidatePlayerLoginRecordCommandService)
+				.AddSingleton(fakePaymentServiceClient)
+				.AddSingleton(fakePromotionClient))
+			.Build();
+
+		await web.StartAsync();
+
+		var playerCode = "test1";
+		var userName = "test";
+
+		_ = fakeBrandServiceClient.GetBrandStatusAsync(
+			Arg.Is(brandId),
+			Arg.Any<CancellationToken>())
+			.Returns(BrandStatus.Active);
+		_ = fakePlayerServiceClient.GetPlayerInfoByUserNameAsync(
+			Arg.Is(brandId),
+			Arg.Is(userName),
+			Arg.Any<CancellationToken>())
+			.Returns(new Tgs.PlayerService.Client.PlayerInfo
+			{
+				BrandId = brandId,
+				UserName = userName,
+				PlayerCode = playerCode
+			});
+		_ = fakePlayerPasswordValidateCommandService.GetAsync(
+			Arg.Any<PlayerPasswordValidateCommand>(),
+			Arg.Any<CancellationToken>())
+			.Returns(true);
+		_ = fakePlayerPasswordValidateCommandService.GetAsync(
+			Arg.Any<PlayerPasswordValidateCommand>(),
+			Arg.Any<CancellationToken>())
+			.Returns(true);
+		_ = fakePlayerLoginRecordRepository.AddPlayerLoginRecordAsync(
+			Arg.Is(brandId),
+			Arg.Is(playerCode),
+			Arg.Is(TGS.Core.Models.Enums.PlatformType.Desktop),
+			Arg.Is("127.0.0.1"))
+			.Returns(new LoginRecordInfo(
+				Guid.NewGuid(),
+				playerCode,
+				TGS.Core.Models.Enums.LoginStatus.Enabled,
+				TGS.Core.Models.Enums.PlatformType.Desktop,
+				DateTimeOffset.Now,
+				DateTimeOffset.Now.AddDays(1D)));
+
+		await using var scope = web.Services.CreateAsyncScope();
+
+		var loginService = scope.ServiceProvider.GetRequiredService<IGetService<LoginCommand, LoginInfo>>();
+
+		var loginCommand = new LoginCommand(
+			brandId,
+			userName,
+			"test123",
+			"127.0.0.1",
+			"localhost",
+			TGS.Core.Models.Enums.PlatformType.Desktop,
+			"operator-api");
+
+		var loginResult = await loginService.GetAsync(loginCommand);
+
+		var request = new SubmitDepositRequest
+		{
+			Amount = 200000M,
+			BrandPaymentId = Guid.NewGuid(),
+			PromotionId = null
+		};
+
+		var brandPaymentInfo = new BrandPaymentInfo
+		{
+			Id = request.BrandPaymentId,
+			ChannelId = Guid.NewGuid(),
+			ChannelName = "Test",
+			Enabled = true,
+			ExtendedData = """
+				{
+					"merchantId": "merchantId",
+					"privateKey": "privateKey",
+					"channel": "908",
+					"exchangeRate": 1
+				}
+				""",
+			PaymentId = Guid.NewGuid(),
+			BrandId = brandId
+		};
+
+		_ = fakePaymentServiceClient.GetBrandPaymentByIdAsync(
+			Arg.Is(request.BrandPaymentId),
+			Arg.Any<CancellationToken>())
+			.Returns(brandPaymentInfo);
+
+		_ = fakePaymentServiceClient.GetPaymentByIdAsync(
+			Arg.Is(brandPaymentInfo.PaymentId),
+			Arg.Any<CancellationToken>())
+			.Returns(new PaymentInfo
+			{
+				Id = brandPaymentInfo.PaymentId,
+				Code = "DibaoPay"
+			});
+
+		_ = fakePaymentServiceClient.LockDepositPaymentAsync(
+			Arg.Any<Guid>(),
+			Arg.Is("DibaoPay"),
+			Arg.Is(playerCode),
+			Arg.Any<CancellationToken>())
+			.Returns(callInfo => callInfo.ArgAt<Guid>(0));
+
+		var applyInfo = new DibaoPayDepositApplyInfo(
+			new DibaoPayDepositSettings(
+				"merchantId",
+				"privateKey",
+				Guid.NewGuid(),
+				"908",
+				"127.0.0.1",
+				1m),
+			new DibaoPayDepositResponse(
+				200000m,
+				Guid.NewGuid(),
+				new Uri("http://localhost/test"),
+				"thirdPartyOrderNo"));
+
+		_ = fakePaymentServiceClient.GetDepositFormAsync(
+			Arg.Is(brandId),
+			Arg.Any<Guid>(),
+			Arg.Any<CancellationToken>())
+			.Returns(new DepositFormInfo
+			{
+				PlayerCode = playerCode,
+				ApplyInfo = JsonSerializer.Serialize(applyInfo, DibaoPayUtility.SerializerOptions)
+			});
+
+		var expected = new DepositFormCreatedResponse
+		{
+			FormId = Guid.NewGuid(),
+			PaymentUrl = "https://localhost"
+		};
+
+		var isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "true" : "false";
+		var nodeModule = $$"""
+			const axiosConfigFactory = require('./models/axios-configuration.js').default;
+			const OperatorService = require('./services/op-service.js').default;
+
+			module.exports = async (brandToken, loginToken, request) =>
+			{
+				let instance = axiosConfigFactory("{{channelName}}", {{isWindows}}, brandToken, loginToken);
+
+				let svc = new OperatorService(instance);
+
+				return await svc.submitDibaoBankDepositRequest(request);
+			};
+			""";
+
+		// Act
+		var actual = await StaticNodeJSService.InvokeFromStringAsync<SuccessResponse<DepositFormCreatedResponse>>(
+			nodeModule,
+			args: [brandToken, loginResult.PlayerToken, request]);
+
+		// Assert
+		Assert.Equal(applyInfo.Response.RedirectUrl.ToString(), actual?.Data.PaymentUrl);
 	}
 
 	[Fact]
@@ -231,7 +1212,7 @@ public class DepositTests
 		// Act
 		var actual = await StaticNodeJSService.InvokeFromStringAsync<SuccessResponse<DepositFormCreatedResponse>>(
 			nodeModule,
-			args: new object?[] { brandToken, loginResult.PlayerToken, request });
+			args: [brandToken, loginResult.PlayerToken, request]);
 
 		// Assert
 		Assert.Equal(applyInfo.Response.RedirectUrl.ToString(), actual?.Data.PaymentUrl);
@@ -430,11 +1411,207 @@ public class DepositTests
 		// Act
 		var actual = await StaticNodeJSService.InvokeFromStringAsync<SuccessResponse<DepositFormCreatedResponse>>(
 			nodeModule,
-			args: new object?[] { brandToken, loginResult.PlayerToken, request });
+			args: [brandToken, loginResult.PlayerToken, request]);
 
 		// Assert
 		Assert.NotNull(actual);
 		Assert.Equal(applyInfo.Response.RedirectUrl.ToString(), actual.Data.PaymentUrl);
+	}
+
+	[Fact]
+	public async Task GanyoPay三方存款()
+	{
+		// Arrange
+		var channelName = Guid.NewGuid().ToString();
+
+		var fakeBrandCertClient = Substitute.For<IBrandCertificateClient>();
+		var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
+		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
+		var fakePlayerPasswordValidateCommandService = Substitute.For<IGetService<PlayerPasswordValidateCommand, bool>>();
+		var fakePlayerLoginRecordRepository = Substitute.For<IPlayerLoginRecordRepository>();
+		var fakeBrandRepository = Substitute.For<IBrandRepository>();
+		var fakeValidatePlayerLoginRecordCommandService = Substitute.For<ICommandService<ValidatePlayerLoginRecordCommand>>();
+
+		_ = fakeBrandCertClient.GetSystemValidateSecurityKeyAsync(Arg.Any<CancellationToken>())
+			.Returns(TestOperatorApplication.TestSecurityKey);
+
+		var brandId = Guid.NewGuid();
+		var brandCode = "Test";
+		var brandToken = TestOperatorApplication.MakeTestBrandToken(brandId, brandCode);
+
+		_ = fakeBrandRepository.GetSecretKeyAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
+			.Returns("N2KAnljo5zbLCZDSoUBFJ70ONsy");
+
+		var fakePaymentServiceClient = Substitute.For<IPaymentServiceClient>();
+		var fakePromotionClient = Substitute.For<IPromotionClient>();
+
+		using var web = TestOperatorApplication.Builder
+			.UseTestChannelServer(channelName)
+			.ConfigureLogging(logging => logging.AddXUnit(_testOutputHelper))
+			.ConfigureServices(services => services
+				.AddSingleton(fakeBrandCertClient)
+				.AddSingleton(fakeBrandServiceClient)
+				.AddSingleton(fakePlayerServiceClient)
+				.AddSingleton(fakePlayerPasswordValidateCommandService)
+				.AddSingleton(fakePlayerLoginRecordRepository)
+				.AddSingleton(fakeBrandRepository)
+				.AddSingleton(fakeValidatePlayerLoginRecordCommandService)
+				.AddSingleton(fakePaymentServiceClient)
+				.AddSingleton(fakePromotionClient))
+			.Build();
+
+		await web.StartAsync();
+
+		var playerCode = "test1";
+		var userName = "test";
+
+		_ = fakeBrandServiceClient.GetBrandStatusAsync(
+			Arg.Is(brandId),
+			Arg.Any<CancellationToken>())
+			.Returns(BrandStatus.Active);
+		_ = fakePlayerServiceClient.GetPlayerInfoByUserNameAsync(
+			Arg.Is(brandId),
+			Arg.Is(userName),
+			Arg.Any<CancellationToken>())
+			.Returns(new Tgs.PlayerService.Client.PlayerInfo
+			{
+				BrandId = brandId,
+				UserName = userName,
+				PlayerCode = playerCode
+			});
+		_ = fakePlayerPasswordValidateCommandService.GetAsync(
+			Arg.Any<PlayerPasswordValidateCommand>(),
+			Arg.Any<CancellationToken>())
+			.Returns(true);
+		_ = fakePlayerPasswordValidateCommandService.GetAsync(
+			Arg.Any<PlayerPasswordValidateCommand>(),
+			Arg.Any<CancellationToken>())
+			.Returns(true);
+		_ = fakePlayerLoginRecordRepository.AddPlayerLoginRecordAsync(
+			Arg.Is(brandId),
+			Arg.Is(playerCode),
+			Arg.Is(TGS.Core.Models.Enums.PlatformType.Desktop),
+			Arg.Is("127.0.0.1"))
+			.Returns(new LoginRecordInfo(
+				Guid.NewGuid(),
+				playerCode,
+				TGS.Core.Models.Enums.LoginStatus.Enabled,
+				TGS.Core.Models.Enums.PlatformType.Desktop,
+				DateTimeOffset.Now,
+				DateTimeOffset.Now.AddDays(1D)));
+
+		await using var scope = web.Services.CreateAsyncScope();
+
+		var loginService = scope.ServiceProvider.GetRequiredService<IGetService<LoginCommand, LoginInfo>>();
+
+		var loginCommand = new LoginCommand(
+			brandId,
+			userName,
+			"test123",
+			"127.0.0.1",
+			"localhost",
+			TGS.Core.Models.Enums.PlatformType.Desktop,
+			"operator-api");
+
+		var loginResult = await loginService.GetAsync(loginCommand);
+
+		var request = new SubmitDepositRequest
+		{
+			Amount = 25000m,
+			BrandPaymentId = Guid.NewGuid(),
+			PromotionId = null
+		};
+
+		var brandPaymentInfo = new BrandPaymentInfo
+		{
+			Id = request.BrandPaymentId,
+			ChannelId = Guid.NewGuid(),
+			ChannelName = "Test",
+			Enabled = true,
+			ExtendedData = """
+				{
+					"customerId": "customerId",
+					"privateKey": "privateKey",
+					"channel": "nagad"
+				}
+				""",
+			PaymentId = Guid.NewGuid(),
+			BrandId = brandId
+		};
+
+		_ = fakePaymentServiceClient.GetBrandPaymentByIdAsync(
+			Arg.Is(request.BrandPaymentId),
+			Arg.Any<CancellationToken>())
+			.Returns(brandPaymentInfo);
+
+		_ = fakePaymentServiceClient.GetPaymentByIdAsync(
+			Arg.Is(brandPaymentInfo.PaymentId),
+			Arg.Any<CancellationToken>())
+			.Returns(new PaymentInfo
+			{
+				Id = brandPaymentInfo.PaymentId,
+				Code = "GanyoPay"
+			});
+
+		_ = fakePaymentServiceClient.LockDepositPaymentAsync(
+			Arg.Any<Guid>(),
+			Arg.Is("GanyoPay"),
+			Arg.Is(playerCode),
+			Arg.Any<CancellationToken>())
+			.Returns(callInfo => callInfo.ArgAt<Guid>(0));
+
+		var applyInfo = new GanyoPayDepositApplyInfo(
+			new GanyoPayDepositSettings(
+				"customerId",
+				"privateKey",
+				Guid.NewGuid(),
+				playerCode,
+				PhoneNumber: null,
+				"channel"),
+			new GanyoPayDepositResponse(
+				25000m,
+				Guid.NewGuid(),
+				new Uri("http://localhost/test"),
+				"thirdPartyOrderNo"));
+
+		_ = fakePaymentServiceClient.GetDepositFormAsync(
+			Arg.Is(brandId),
+			Arg.Any<Guid>(),
+			Arg.Any<CancellationToken>())
+			.Returns(new DepositFormInfo
+			{
+				PlayerCode = playerCode,
+				ApplyInfo = JsonSerializer.Serialize(applyInfo, PhpGoPayUtility.SerializerOptions)
+			});
+
+		var expected = new DepositFormCreatedResponse
+		{
+			FormId = Guid.NewGuid(),
+			PaymentUrl = "https://localhost"
+		};
+
+		var isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "true" : "false";
+		var nodeModule = $$"""
+			const axiosConfigFactory = require('./models/axios-configuration.js').default;
+			const OperatorService = require('./services/op-service.js').default;
+
+			module.exports = async (brandToken, loginToken, request) =>
+			{
+				let instance = axiosConfigFactory("{{channelName}}", {{isWindows}}, brandToken, loginToken);
+
+				let svc = new OperatorService(instance);
+
+				return await svc.submitGanyoThirdPartyDepositRequest(request);
+			};
+			""";
+
+		// Act
+		var actual = await StaticNodeJSService.InvokeFromStringAsync<SuccessResponse<DepositFormCreatedResponse>>(
+			nodeModule,
+			args: [brandToken, loginResult.PlayerToken, request]);
+
+		// Assert
+		Assert.Equal(applyInfo.Response.RedirectUrl.ToString(), actual?.Data.PaymentUrl);
 	}
 
 	[Fact]
@@ -625,7 +1802,7 @@ public class DepositTests
 		// Act
 		var actual = await StaticNodeJSService.InvokeFromStringAsync<SuccessResponse<DepositFormCreatedResponse>>(
 			nodeModule,
-			args: new object?[] { brandToken, loginResult.PlayerToken, request });
+			args: [brandToken, loginResult.PlayerToken, request]);
 
 		// Assert
 		Assert.Equal(applyInfo.Response.RedirectUrl.ToString(), actual?.Data.PaymentUrl);
@@ -819,7 +1996,205 @@ public class DepositTests
 		// Act
 		var actual = await StaticNodeJSService.InvokeFromStringAsync<SuccessResponse<DepositFormCreatedResponse>>(
 			nodeModule,
-			args: new object?[] { brandToken, loginResult.PlayerToken, request });
+			args: [brandToken, loginResult.PlayerToken, request]);
+
+		// Assert
+		Assert.Equal(applyInfo.Response.RedirectUrl.ToString(), actual?.Data.PaymentUrl);
+	}
+
+	[Fact]
+	public async Task MalakiV2Pay存款()
+	{
+		// Arrange
+		var channelName = Guid.NewGuid().ToString();
+
+		var fakeBrandCertClient = Substitute.For<IBrandCertificateClient>();
+		var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
+		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
+		var fakePlayerPasswordValidateCommandService = Substitute.For<IGetService<PlayerPasswordValidateCommand, bool>>();
+		var fakePlayerLoginRecordRepository = Substitute.For<IPlayerLoginRecordRepository>();
+		var fakeBrandRepository = Substitute.For<IBrandRepository>();
+		var fakeValidatePlayerLoginRecordCommandService = Substitute.For<ICommandService<ValidatePlayerLoginRecordCommand>>();
+
+		_ = fakeBrandCertClient.GetSystemValidateSecurityKeyAsync(Arg.Any<CancellationToken>())
+			.Returns(TestOperatorApplication.TestSecurityKey);
+
+		var brandId = Guid.NewGuid();
+		var brandCode = "Test";
+		var brandToken = TestOperatorApplication.MakeTestBrandToken(brandId, brandCode);
+
+		_ = fakeBrandRepository.GetSecretKeyAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
+			.Returns("N2KAnljo5zbLCZDSoUBFJ70ONsy");
+
+		var fakePaymentServiceClient = Substitute.For<IPaymentServiceClient>();
+		var fakePromotionClient = Substitute.For<IPromotionClient>();
+
+		using var web = TestOperatorApplication.Builder
+			.UseTestChannelServer(channelName)
+			.ConfigureLogging(logging => logging.AddXUnit(_testOutputHelper))
+			.ConfigureServices(services => services
+				.AddSingleton(fakeBrandCertClient)
+				.AddSingleton(fakeBrandServiceClient)
+				.AddSingleton(fakePlayerServiceClient)
+				.AddSingleton(fakePlayerPasswordValidateCommandService)
+				.AddSingleton(fakePlayerLoginRecordRepository)
+				.AddSingleton(fakeBrandRepository)
+				.AddSingleton(fakeValidatePlayerLoginRecordCommandService)
+				.AddSingleton(fakePaymentServiceClient)
+				.AddSingleton(fakePromotionClient))
+			.Build();
+
+		await web.StartAsync();
+
+		var playerCode = "test1";
+		var userName = "test";
+
+		_ = fakeBrandServiceClient.GetBrandStatusAsync(
+			Arg.Is(brandId),
+			Arg.Any<CancellationToken>())
+			.Returns(BrandStatus.Active);
+		_ = fakePlayerServiceClient.GetPlayerInfoByUserNameAsync(
+			Arg.Is(brandId),
+			Arg.Is(userName),
+			Arg.Any<CancellationToken>())
+			.Returns(new Tgs.PlayerService.Client.PlayerInfo
+			{
+				BrandId = brandId,
+				UserName = userName,
+				PlayerCode = playerCode
+			});
+		_ = fakePlayerPasswordValidateCommandService.GetAsync(
+			Arg.Any<PlayerPasswordValidateCommand>(),
+			Arg.Any<CancellationToken>())
+			.Returns(true);
+		_ = fakePlayerPasswordValidateCommandService.GetAsync(
+			Arg.Any<PlayerPasswordValidateCommand>(),
+			Arg.Any<CancellationToken>())
+			.Returns(true);
+		_ = fakePlayerLoginRecordRepository.AddPlayerLoginRecordAsync(
+			Arg.Is(brandId),
+			Arg.Is(playerCode),
+			Arg.Is(TGS.Core.Models.Enums.PlatformType.Desktop),
+			Arg.Is("127.0.0.1"))
+			.Returns(new LoginRecordInfo(
+				Guid.NewGuid(),
+				playerCode,
+				TGS.Core.Models.Enums.LoginStatus.Enabled,
+				TGS.Core.Models.Enums.PlatformType.Desktop,
+				DateTimeOffset.Now,
+				DateTimeOffset.Now.AddDays(1D)));
+
+		await using var scope = web.Services.CreateAsyncScope();
+
+		var loginService = scope.ServiceProvider.GetRequiredService<IGetService<LoginCommand, LoginInfo>>();
+
+		var loginCommand = new LoginCommand(
+			brandId,
+			userName,
+			"test123",
+			"127.0.0.1",
+			"localhost",
+			TGS.Core.Models.Enums.PlatformType.Desktop,
+			"operator-api");
+
+		var loginResult = await loginService.GetAsync(loginCommand);
+
+		var request = new SubmitDepositRequest
+		{
+			Amount = 100M,
+			BrandPaymentId = Guid.NewGuid(),
+			PromotionId = null
+		};
+
+		var brandPaymentInfo = new BrandPaymentInfo
+		{
+			Id = request.BrandPaymentId,
+			ChannelId = Guid.NewGuid(),
+			ChannelName = "Test",
+			Enabled = true,
+			ExtendedData = """
+				{
+					"merchant": "test123",
+					"key": "aabbccddeeff",
+					"paymentType": "3",
+					"bankCode": "gcash"
+				}
+				""",
+			PaymentId = Guid.NewGuid(),
+			BrandId = brandId
+		};
+
+		_ = fakePaymentServiceClient.GetBrandPaymentByIdAsync(
+			Arg.Is(request.BrandPaymentId),
+			Arg.Any<CancellationToken>())
+			.Returns(brandPaymentInfo);
+
+		_ = fakePaymentServiceClient.GetPaymentByIdAsync(
+			Arg.Is(brandPaymentInfo.PaymentId),
+			Arg.Any<CancellationToken>())
+			.Returns(new PaymentInfo
+			{
+				Id = brandPaymentInfo.PaymentId,
+				Code = "WinPay"
+			});
+
+		_ = fakePaymentServiceClient.LockDepositPaymentAsync(
+			Arg.Any<Guid>(),
+			Arg.Is("WinPay"),
+			Arg.Is(playerCode),
+			Arg.Any<CancellationToken>())
+			.Returns(callInfo => callInfo.ArgAt<Guid>(0));
+
+		var applyInfo = new PhpGoPayDepositApplyInfo(
+			new PhpGoPayDepositSettings(
+				"test123",
+				"aabbccddeeff",
+				PhpGoPaymentType.Direct,
+				PhpGoBankCode.GCash,
+				new Uri("http://localhost"),
+				Guid.NewGuid()),
+			new PhpGoPayDepositResponse(
+				100M,
+				null,
+				Guid.NewGuid(),
+				new Uri("http://localhost/test"),
+				new Uri("http://localhost")));
+
+		_ = fakePaymentServiceClient.GetDepositFormAsync(
+			Arg.Is(brandId),
+			Arg.Any<Guid>(),
+			Arg.Any<CancellationToken>())
+			.Returns(new DepositFormInfo
+			{
+				PlayerCode = playerCode,
+				ApplyInfo = JsonSerializer.Serialize(applyInfo, PhpGoPayUtility.SerializerOptions)
+			});
+
+		var expected = new DepositFormCreatedResponse
+		{
+			FormId = Guid.NewGuid(),
+			PaymentUrl = "https://localhost"
+		};
+
+		var isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "true" : "false";
+		var nodeModule = $$"""
+			const axiosConfigFactory = require('./models/axios-configuration.js').default;
+			const OperatorService = require('./services/op-service.js').default;
+
+			module.exports = async (brandToken, loginToken, request) =>
+			{
+				let instance = axiosConfigFactory("{{channelName}}", {{isWindows}}, brandToken, loginToken);
+
+				let svc = new OperatorService(instance);
+
+				return await svc.submitMalakiV2ThirdPartyDepositRequest(request);
+			};
+			""";
+
+		// Act
+		var actual = await StaticNodeJSService.InvokeFromStringAsync<SuccessResponse<DepositFormCreatedResponse>>(
+			nodeModule,
+			args: [brandToken, loginResult.PlayerToken, request]);
 
 		// Assert
 		Assert.Equal(applyInfo.Response.RedirectUrl.ToString(), actual?.Data.PaymentUrl);
@@ -1018,7 +2393,7 @@ public class DepositTests
 		// Act
 		var actual = await StaticNodeJSService.InvokeFromStringAsync<SuccessResponse<DepositFormCreatedResponse>>(
 			nodeModule,
-			args: new object?[] { brandToken, loginResult.PlayerToken, request });
+			args: [brandToken, loginResult.PlayerToken, request]);
 
 		// Assert
 		Assert.Equal(applyInfo.Response.RedirectUrl.ToString(), actual?.Data.PaymentUrl);
@@ -1217,7 +2592,7 @@ public class DepositTests
 		// Act
 		var actual = await StaticNodeJSService.InvokeFromStringAsync<SuccessResponse<DepositFormCreatedResponse>>(
 			nodeModule,
-			args: new object?[] { brandToken, loginResult.PlayerToken, request });
+			args: [brandToken, loginResult.PlayerToken, request]);
 
 		// Assert
 		Assert.Equal(applyInfo.Response.RedirectUrl.ToString(), actual?.Data.PaymentUrl);
@@ -1415,729 +2790,14 @@ public class DepositTests
 		// Act
 		var actual = await StaticNodeJSService.InvokeFromStringAsync<SuccessResponse<DepositFormCreatedResponse>>(
 			nodeModule,
-			args: new object?[] { brandToken, loginResult.PlayerToken, request });
+			args: [brandToken, loginResult.PlayerToken, request]);
 
 		// Assert
 		Assert.Equal(applyInfo.Response.RedirectUrl.ToString(), actual?.Data.PaymentUrl);
 	}
 
 	[Fact]
-	public async Task 手動USDT存款時QRCode為非必填()
-	{
-		// Arrange
-		var channelName = Guid.NewGuid().ToString();
-
-		var fakeBrandCertClient = Substitute.For<IBrandCertificateClient>();
-		var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
-		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
-		var fakePlayerPasswordValidateCommandService = Substitute.For<IGetService<PlayerPasswordValidateCommand, bool>>();
-		var fakePlayerLoginRecordRepository = Substitute.For<IPlayerLoginRecordRepository>();
-		var fakeBrandRepository = Substitute.For<IBrandRepository>();
-		var fakeValidatePlayerLoginRecordCommandService = Substitute.For<ICommandService<ValidatePlayerLoginRecordCommand>>();
-
-		var fakeCreateDepositFormService = Substitute.For<IGetService<CreateDepositFormCommand, Guid>>();
-		var fakeGetBrandPaymentService = Substitute.For<IGetService<GetBrandPaymentQuery, BrandPaymentInfo>>();
-
-		_ = fakeBrandCertClient.GetSystemValidateSecurityKeyAsync(Arg.Any<CancellationToken>())
-			.Returns(TestOperatorApplication.TestSecurityKey);
-
-		var brandId = Guid.NewGuid();
-		var brandCode = "Test";
-		var brandToken = TestOperatorApplication.MakeTestBrandToken(brandId, brandCode);
-
-		_ = fakeBrandRepository.GetSecretKeyAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
-			.Returns("N2KAnljo5zbLCZDSoUBFJ70ONsy");
-
-		using var web = TestOperatorApplication.Builder
-			.UseTestChannelServer(channelName)
-			.ConfigureLogging(logging => logging.AddXUnit(_testOutputHelper))
-			.ConfigureServices(services => services
-				.AddSingleton(fakeBrandCertClient)
-				.AddSingleton(fakeBrandServiceClient)
-				.AddSingleton(fakePlayerServiceClient)
-				.AddSingleton(fakePlayerPasswordValidateCommandService)
-				.AddSingleton(fakePlayerLoginRecordRepository)
-				.AddSingleton(fakeBrandRepository)
-				.AddSingleton(fakeValidatePlayerLoginRecordCommandService)
-				.AddSingleton(fakeCreateDepositFormService)
-				.AddSingleton(fakeGetBrandPaymentService)
-				.AddSingleton<ManualDepositSerializer>())
-			.Build();
-
-		await web.StartAsync();
-
-		var playerCode = "test1";
-		var userName = "test";
-
-		_ = fakeBrandServiceClient.GetBrandStatusAsync(Arg.Is(brandId))
-			.Returns(BrandStatus.Active);
-		_ = fakePlayerServiceClient.GetPlayerInfoByUserNameAsync(Arg.Is(brandId), Arg.Is(userName))
-			.Returns(new Tgs.PlayerService.Client.PlayerInfo
-			{
-				BrandId = brandId,
-				UserName = userName,
-				PlayerCode = playerCode
-			});
-		_ = fakePlayerPasswordValidateCommandService.GetAsync(Arg.Any<PlayerPasswordValidateCommand>())
-			.Returns(true);
-		_ = fakePlayerLoginRecordRepository.AddPlayerLoginRecordAsync(
-			Arg.Is(brandId),
-			Arg.Is(playerCode),
-			Arg.Is(TGS.Core.Models.Enums.PlatformType.Desktop),
-			Arg.Is("127.0.0.1"))
-			.Returns(new LoginRecordInfo(
-				Guid.NewGuid(),
-				playerCode,
-				TGS.Core.Models.Enums.LoginStatus.Enabled,
-				TGS.Core.Models.Enums.PlatformType.Desktop,
-				DateTimeOffset.Now,
-				DateTimeOffset.Now.AddDays(1D)));
-
-		await using var scope = web.Services.CreateAsyncScope();
-
-		var loginService = scope.ServiceProvider.GetRequiredService<IGetService<LoginCommand, LoginInfo>>();
-
-		var loginCommand = new LoginCommand(
-			brandId,
-			userName,
-			"test123",
-			"127.0.0.1",
-			"localhost",
-			TGS.Core.Models.Enums.PlatformType.Desktop,
-			"operator-api");
-
-		var loginResult = await loginService.GetAsync(loginCommand);
-
-		var brandPaymentId = Guid.NewGuid();
-		var amount = 1000m;
-
-		var brandPaymentInfo = new BrandPaymentInfo
-		{
-			Id = brandPaymentId,
-			ChannelId = Guid.NewGuid(),
-			ChannelName = "Usdt",
-			Enabled = true,
-			ExtendedData = """
-				{
-					"rate": 0.01,
-					"address": "usdt_address"
-				}
-				"""
-		};
-
-		_ = fakeGetBrandPaymentService.GetAsync(
-			Arg.Is<GetBrandPaymentQuery>(x => x.Id == brandPaymentId),
-			Arg.Any<CancellationToken>())
-			.Returns(brandPaymentInfo);
-
-		var expected = Guid.NewGuid();
-
-		_ = fakeCreateDepositFormService.GetAsync(
-			Arg.Is<CreateDepositFormCommand>(x =>
-					x.PlayerCode == playerCode
-					&& x.BrandId == brandId
-					&& x.BrandPaymentId == brandPaymentId),
-			Arg.Any<CancellationToken>())
-			.Returns(expected);
-
-		var isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "true" : "false";
-		var nodeModule = $$"""
-			const axiosConfigFactory = require('./models/axios-configuration.js').default;
-			const OperatorService = require('./services/op-service.js').default;
-
-			module.exports = async (brandToken, loginToken, amount, paymentId, promotionId, bankType) =>
-			{
-				let instance = axiosConfigFactory("{{channelName}}", {{isWindows}}, brandToken, loginToken);
-
-				let svc = new OperatorService(instance);
-
-				return await svc.submitManualDepositUsdt(amount, paymentId, promotionId, bankType);
-			};
-		""";
-
-		// Act
-		var actual = await StaticNodeJSService.InvokeFromStringAsync<SuccessResponse<string>>(
-			nodeModule,
-			args: new object?[] { brandToken, loginResult.PlayerToken, amount, brandPaymentId, null, "usdt" });
-
-		// Assert
-		Assert.Equal(expected, Guid.Parse(actual!.Data));
-	}
-
-	[Fact]
-	public async Task 手動存款Bank()
-	{
-		// Arrange
-		var channelName = Guid.NewGuid().ToString();
-
-		var fakeBrandCertClient = Substitute.For<IBrandCertificateClient>();
-		var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
-		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
-		var fakePlayerPasswordValidateCommandService = Substitute.For<IGetService<PlayerPasswordValidateCommand, bool>>();
-		var fakePlayerLoginRecordRepository = Substitute.For<IPlayerLoginRecordRepository>();
-		var fakeBrandRepository = Substitute.For<IBrandRepository>();
-		var fakeValidatePlayerLoginRecordCommandService = Substitute.For<ICommandService<ValidatePlayerLoginRecordCommand>>();
-
-		var fakeCreateDepositFormService = Substitute.For<IGetService<CreateDepositFormCommand, Guid>>();
-		var fakeGetBrandPaymentService = Substitute.For<IGetService<GetBrandPaymentQuery, BrandPaymentInfo>>();
-
-		_ = fakeBrandCertClient.GetSystemValidateSecurityKeyAsync(Arg.Any<CancellationToken>())
-			.Returns(TestOperatorApplication.TestSecurityKey);
-
-		var brandId = Guid.NewGuid();
-		var brandCode = "Test";
-		var brandToken = TestOperatorApplication.MakeTestBrandToken(brandId, brandCode);
-
-		_ = fakeBrandRepository.GetSecretKeyAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
-			.Returns("N2KAnljo5zbLCZDSoUBFJ70ONsy");
-
-		using var web = TestOperatorApplication.Builder
-			.UseTestChannelServer(channelName)
-			.ConfigureLogging(logging => logging.AddXUnit(_testOutputHelper))
-			.ConfigureServices(services => services
-				.AddSingleton(fakeBrandCertClient)
-				.AddSingleton(fakeBrandServiceClient)
-				.AddSingleton(fakePlayerServiceClient)
-				.AddSingleton(fakePlayerPasswordValidateCommandService)
-				.AddSingleton(fakePlayerLoginRecordRepository)
-				.AddSingleton(fakeBrandRepository)
-				.AddSingleton(fakeValidatePlayerLoginRecordCommandService)
-				.AddSingleton(fakeCreateDepositFormService)
-				.AddSingleton(fakeGetBrandPaymentService)
-				.AddSingleton<ManualDepositSerializer>())
-			.Build();
-
-		await web.StartAsync();
-
-		var playerCode = "test1";
-		var userName = "test";
-
-		_ = fakeBrandServiceClient.GetBrandStatusAsync(Arg.Is(brandId))
-			.Returns(BrandStatus.Active);
-		_ = fakePlayerServiceClient.GetPlayerInfoByUserNameAsync(Arg.Is(brandId), Arg.Is(userName))
-			.Returns(new Tgs.PlayerService.Client.PlayerInfo
-			{
-				BrandId = brandId,
-				UserName = userName,
-				PlayerCode = playerCode
-			});
-		_ = fakePlayerPasswordValidateCommandService.GetAsync(Arg.Any<PlayerPasswordValidateCommand>())
-			.Returns(true);
-		_ = fakePlayerLoginRecordRepository.AddPlayerLoginRecordAsync(
-				Arg.Is(brandId),
-				Arg.Is(playerCode),
-				Arg.Is(TGS.Core.Models.Enums.PlatformType.Desktop),
-				Arg.Is("127.0.0.1"))
-			.Returns(new LoginRecordInfo(
-				Guid.NewGuid(),
-				playerCode,
-				TGS.Core.Models.Enums.LoginStatus.Enabled,
-				TGS.Core.Models.Enums.PlatformType.Desktop,
-				DateTimeOffset.Now,
-				DateTimeOffset.Now.AddDays(1D)));
-
-		await using var scope = web.Services.CreateAsyncScope();
-
-		var loginService = scope.ServiceProvider.GetRequiredService<IGetService<LoginCommand, LoginInfo>>();
-
-		var loginCommand = new LoginCommand(
-			brandId,
-			userName,
-			"test123",
-			"127.0.0.1",
-			"localhost",
-			TGS.Core.Models.Enums.PlatformType.Desktop,
-			"operator-api");
-
-		var loginResult = await loginService.GetAsync(loginCommand);
-
-		var brandPaymentId = Guid.NewGuid();
-		var amount = 1000m;
-
-		var brandPaymentInfo = new BrandPaymentInfo
-		{
-			Id = brandPaymentId,
-			ChannelId = Guid.NewGuid(),
-			ChannelName = "Usdt",
-			Enabled = true,
-			ExtendedData = """
-				{
-					"name": "testName",
-					"bankAccount": "testBankAccount"
-				}
-				"""
-		};
-
-		_ = fakeGetBrandPaymentService.GetAsync(
-			Arg.Is<GetBrandPaymentQuery>(x => x.Id == brandPaymentId),
-			Arg.Any<CancellationToken>())
-			.Returns(brandPaymentInfo);
-
-		var expected = Guid.NewGuid();
-
-		_ = fakeCreateDepositFormService.GetAsync(
-			Arg.Is<CreateDepositFormCommand>(x =>
-					x.PlayerCode == playerCode
-					&& x.BrandId == brandId
-					&& x.BrandPaymentId == brandPaymentId),
-			Arg.Any<CancellationToken>())
-			.Returns(expected);
-
-		var isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "true" : "false";
-		var nodeModule = $$"""
-			const axiosConfigFactory = require('./models/axios-configuration.js').default;
-			const OperatorService = require('./services/op-service.js').default;
-
-			module.exports = async (brandToken, loginToken, amount, paymentId, promotionId, bankType, account, name, note, realname) =>
-			{
-				let instance = axiosConfigFactory("{{channelName}}", {{isWindows}}, brandToken, loginToken);
-
-				let svc = new OperatorService(instance);
-
-				return await svc.submitManualDepositBankRequest(amount, paymentId, promotionId, bankType, account, name, note, realname);
-			};
-			""";
-
-		// Act
-		var actual = await StaticNodeJSService.InvokeFromStringAsync<SuccessResponse<string>>(
-			nodeModule,
-			args: new object?[] { brandToken, loginResult.PlayerToken, amount, brandPaymentId, null, "bank", "testAccount", "testBankName", "testNote", null });
-
-		// Assert
-		Assert.Equal(expected, Guid.Parse(actual!.Data));
-	}
-
-	[Fact]
-	public async Task 手動存款EWallet()
-	{
-		// Arrange
-		var channelName = Guid.NewGuid().ToString();
-
-		var fakeBrandCertClient = Substitute.For<IBrandCertificateClient>();
-		var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
-		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
-		var fakePlayerPasswordValidateCommandService = Substitute.For<IGetService<PlayerPasswordValidateCommand, bool>>();
-		var fakePlayerLoginRecordRepository = Substitute.For<IPlayerLoginRecordRepository>();
-		var fakeBrandRepository = Substitute.For<IBrandRepository>();
-		var fakeValidatePlayerLoginRecordCommandService = Substitute.For<ICommandService<ValidatePlayerLoginRecordCommand>>();
-
-		var fakeCreateDepositFormService = Substitute.For<IGetService<CreateDepositFormCommand, Guid>>();
-		var fakeGetBrandPaymentService = Substitute.For<IGetService<GetBrandPaymentQuery, BrandPaymentInfo>>();
-
-		_ = fakeBrandCertClient.GetSystemValidateSecurityKeyAsync(Arg.Any<CancellationToken>())
-			.Returns(TestOperatorApplication.TestSecurityKey);
-
-		var brandId = Guid.NewGuid();
-		var brandCode = "Test";
-		var brandToken = TestOperatorApplication.MakeTestBrandToken(brandId, brandCode);
-
-		_ = fakeBrandRepository.GetSecretKeyAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
-			.Returns("N2KAnljo5zbLCZDSoUBFJ70ONsy");
-
-		using var web = TestOperatorApplication.Builder
-			.UseTestChannelServer(channelName)
-			.ConfigureLogging(logging => logging.AddXUnit(_testOutputHelper))
-			.ConfigureServices(services => services
-				.AddSingleton(fakeBrandCertClient)
-				.AddSingleton(fakeBrandServiceClient)
-				.AddSingleton(fakePlayerServiceClient)
-				.AddSingleton(fakePlayerPasswordValidateCommandService)
-				.AddSingleton(fakePlayerLoginRecordRepository)
-				.AddSingleton(fakeBrandRepository)
-				.AddSingleton(fakeValidatePlayerLoginRecordCommandService)
-				.AddSingleton(fakeCreateDepositFormService)
-				.AddSingleton(fakeGetBrandPaymentService)
-				.AddSingleton<ManualDepositSerializer>())
-			.Build();
-
-		await web.StartAsync();
-
-		var playerCode = "test1";
-		var userName = "test";
-
-		_ = fakeBrandServiceClient.GetBrandStatusAsync(Arg.Is(brandId))
-			.Returns(BrandStatus.Active);
-		_ = fakePlayerServiceClient.GetPlayerInfoByUserNameAsync(Arg.Is(brandId), Arg.Is(userName))
-			.Returns(new Tgs.PlayerService.Client.PlayerInfo
-			{
-				BrandId = brandId,
-				UserName = userName,
-				PlayerCode = playerCode
-			});
-		_ = fakePlayerPasswordValidateCommandService.GetAsync(Arg.Any<PlayerPasswordValidateCommand>())
-			.Returns(true);
-		_ = fakePlayerLoginRecordRepository.AddPlayerLoginRecordAsync(
-				Arg.Is(brandId),
-				Arg.Is(playerCode),
-				Arg.Is(TGS.Core.Models.Enums.PlatformType.Desktop),
-				Arg.Is("127.0.0.1"))
-			.Returns(new LoginRecordInfo(
-				Guid.NewGuid(),
-				playerCode,
-				TGS.Core.Models.Enums.LoginStatus.Enabled,
-				TGS.Core.Models.Enums.PlatformType.Desktop,
-				DateTimeOffset.Now,
-				DateTimeOffset.Now.AddDays(1D)));
-
-		await using var scope = web.Services.CreateAsyncScope();
-
-		var loginService = scope.ServiceProvider.GetRequiredService<IGetService<LoginCommand, LoginInfo>>();
-
-		var loginCommand = new LoginCommand(
-			brandId,
-			userName,
-			"test123",
-			"127.0.0.1",
-			"localhost",
-			TGS.Core.Models.Enums.PlatformType.Desktop,
-			"operator-api");
-
-		var loginResult = await loginService.GetAsync(loginCommand);
-
-		var brandPaymentId = Guid.NewGuid();
-		var amount = 1000m;
-
-		var brandPaymentInfo = new BrandPaymentInfo
-		{
-			Id = brandPaymentId,
-			ChannelId = Guid.NewGuid(),
-			ChannelName = "Usdt",
-			Enabled = true,
-			ExtendedData = """
-				{
-					"phone": "0912345678",
-					"eMoneyName": "testEMoneyName"
-				}
-				"""
-		};
-
-		_ = fakeGetBrandPaymentService.GetAsync(
-			Arg.Is<GetBrandPaymentQuery>(x => x.Id == brandPaymentId),
-			Arg.Any<CancellationToken>())
-			.Returns(brandPaymentInfo);
-
-		var expected = Guid.NewGuid();
-
-		_ = fakeCreateDepositFormService.GetAsync(
-			Arg.Is<CreateDepositFormCommand>(x =>
-					x.PlayerCode == playerCode
-					&& x.BrandId == brandId
-					&& x.BrandPaymentId == brandPaymentId),
-			Arg.Any<CancellationToken>())
-			.Returns(expected);
-
-		var isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "true" : "false";
-		var nodeModule = $$"""
-			const axiosConfigFactory = require('./models/axios-configuration.js').default;
-			const OperatorService = require('./services/op-service.js').default;
-
-			module.exports = async (brandToken, loginToken, amount, paymentId, promotionId, bankType, note, realname, phone) =>
-			{
-				let instance = axiosConfigFactory("{{channelName}}", {{isWindows}}, brandToken, loginToken);
-
-				let svc = new OperatorService(instance);
-
-				return await svc.submitManualDepositEWalletRequest(amount, paymentId, promotionId, bankType, note, realname, phone);
-			};
-		""";
-
-		// Act
-		var actual = await StaticNodeJSService.InvokeFromStringAsync<SuccessResponse<string>>(
-			nodeModule,
-			args: new object?[] { brandToken, loginResult.PlayerToken, amount, brandPaymentId, null, "ewallet", "testNote", "testRealName", "0912345678" });
-
-		// Assert
-		Assert.Equal(expected, Guid.Parse(actual!.Data));
-	}
-
-	[Fact]
-	public async Task 手動存款Pulsa()
-	{
-		// Arrange
-		var channelName = Guid.NewGuid().ToString();
-
-		var fakeBrandCertClient = Substitute.For<IBrandCertificateClient>();
-		var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
-		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
-		var fakePlayerPasswordValidateCommandService = Substitute.For<IGetService<PlayerPasswordValidateCommand, bool>>();
-		var fakePlayerLoginRecordRepository = Substitute.For<IPlayerLoginRecordRepository>();
-		var fakeBrandRepository = Substitute.For<IBrandRepository>();
-		var fakeValidatePlayerLoginRecordCommandService = Substitute.For<ICommandService<ValidatePlayerLoginRecordCommand>>();
-
-		var fakeCreateDepositFormService = Substitute.For<IGetService<CreateDepositFormCommand, Guid>>();
-		var fakeGetBrandPaymentService = Substitute.For<IGetService<GetBrandPaymentQuery, BrandPaymentInfo>>();
-
-		_ = fakeBrandCertClient.GetSystemValidateSecurityKeyAsync(Arg.Any<CancellationToken>())
-			.Returns(TestOperatorApplication.TestSecurityKey);
-
-		var brandId = Guid.NewGuid();
-		var brandCode = "Test";
-		var brandToken = TestOperatorApplication.MakeTestBrandToken(brandId, brandCode);
-
-		_ = fakeBrandRepository.GetSecretKeyAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
-			.Returns("N2KAnljo5zbLCZDSoUBFJ70ONsy");
-
-		using var web = TestOperatorApplication.Builder
-			.UseTestChannelServer(channelName)
-			.ConfigureLogging(logging => logging.AddXUnit(_testOutputHelper))
-			.ConfigureServices(services => services
-				.AddSingleton(fakeBrandCertClient)
-				.AddSingleton(fakeBrandServiceClient)
-				.AddSingleton(fakePlayerServiceClient)
-				.AddSingleton(fakePlayerPasswordValidateCommandService)
-				.AddSingleton(fakePlayerLoginRecordRepository)
-				.AddSingleton(fakeBrandRepository)
-				.AddSingleton(fakeValidatePlayerLoginRecordCommandService)
-				.AddSingleton(fakeCreateDepositFormService)
-				.AddSingleton(fakeGetBrandPaymentService)
-				.AddSingleton<ManualDepositSerializer>())
-			.Build();
-
-		await web.StartAsync();
-
-		var playerCode = "test1";
-		var userName = "test";
-
-		_ = fakeBrandServiceClient.GetBrandStatusAsync(Arg.Is(brandId))
-			.Returns(BrandStatus.Active);
-		_ = fakePlayerServiceClient.GetPlayerInfoByUserNameAsync(Arg.Is(brandId), Arg.Is(userName))
-			.Returns(new Tgs.PlayerService.Client.PlayerInfo
-			{
-				BrandId = brandId,
-				UserName = userName,
-				PlayerCode = playerCode
-			});
-		_ = fakePlayerPasswordValidateCommandService.GetAsync(Arg.Any<PlayerPasswordValidateCommand>())
-			.Returns(true);
-		_ = fakePlayerLoginRecordRepository.AddPlayerLoginRecordAsync(
-				Arg.Is(brandId),
-				Arg.Is(playerCode),
-				Arg.Is(TGS.Core.Models.Enums.PlatformType.Desktop),
-				Arg.Is("127.0.0.1"))
-			.Returns(new LoginRecordInfo(
-				Guid.NewGuid(),
-				playerCode,
-				TGS.Core.Models.Enums.LoginStatus.Enabled,
-				TGS.Core.Models.Enums.PlatformType.Desktop,
-				DateTimeOffset.Now,
-				DateTimeOffset.Now.AddDays(1D)));
-
-		await using var scope = web.Services.CreateAsyncScope();
-
-		var loginService = scope.ServiceProvider.GetRequiredService<IGetService<LoginCommand, LoginInfo>>();
-
-		var loginCommand = new LoginCommand(
-			brandId,
-			userName,
-			"test123",
-			"127.0.0.1",
-			"localhost",
-			TGS.Core.Models.Enums.PlatformType.Desktop,
-			"operator-api");
-
-		var loginResult = await loginService.GetAsync(loginCommand);
-
-		var brandPaymentId = Guid.NewGuid();
-		var amount = 1000m;
-
-		var brandPaymentInfo = new BrandPaymentInfo
-		{
-			Id = brandPaymentId,
-			ChannelId = Guid.NewGuid(),
-			ChannelName = "Usdt",
-			Enabled = true,
-			ExtendedData = """
-				{
-					"phone": "0912345678"
-				}
-				"""
-		};
-
-		_ = fakeGetBrandPaymentService.GetAsync(
-			Arg.Is<GetBrandPaymentQuery>(x => x.Id == brandPaymentId),
-			Arg.Any<CancellationToken>())
-			.Returns(brandPaymentInfo);
-
-		var expected = Guid.NewGuid();
-
-		_ = fakeCreateDepositFormService.GetAsync(
-			Arg.Is<CreateDepositFormCommand>(x =>
-					x.PlayerCode == playerCode
-					&& x.BrandId == brandId
-					&& x.BrandPaymentId == brandPaymentId),
-			Arg.Any<CancellationToken>())
-			.Returns(expected);
-
-		var isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "true" : "false";
-		var nodeModule = $$"""
-			const axiosConfigFactory = require('./models/axios-configuration.js').default;
-			const OperatorService = require('./services/op-service.js').default;
-
-			module.exports = async (brandToken, loginToken, amount, paymentId, promotionId, bankType, note, realname, phone) =>
-			{
-				let instance = axiosConfigFactory("{{channelName}}", {{isWindows}}, brandToken, loginToken);
-
-				let svc = new OperatorService(instance);
-
-				return await svc.submitManualDepositPulsaRequest(amount, paymentId, promotionId, bankType, note, realname, phone);
-			};
-		""";
-
-		// Act
-		var actual = await StaticNodeJSService.InvokeFromStringAsync<SuccessResponse<string>>(
-			nodeModule,
-			args: new object?[] { brandToken, loginResult.PlayerToken, amount, brandPaymentId, null, "pulsa", "testNote", "testRealName", "0912345678" });
-
-		// Assert
-		Assert.Equal(expected, Guid.Parse(actual!.Data));
-	}
-
-	[Fact]
-	public async Task 手動存款Coinsph()
-	{
-		// Arrange
-		var channelName = Guid.NewGuid().ToString();
-
-		var fakeBrandCertClient = Substitute.For<IBrandCertificateClient>();
-		var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
-		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
-		var fakePlayerPasswordValidateCommandService = Substitute.For<IGetService<PlayerPasswordValidateCommand, bool>>();
-		var fakePlayerLoginRecordRepository = Substitute.For<IPlayerLoginRecordRepository>();
-		var fakeBrandRepository = Substitute.For<IBrandRepository>();
-		var fakeValidatePlayerLoginRecordCommandService = Substitute.For<ICommandService<ValidatePlayerLoginRecordCommand>>();
-
-		var fakeCreateDepositFormService = Substitute.For<IGetService<CreateDepositFormCommand, Guid>>();
-		var fakeGetBrandPaymentService = Substitute.For<IGetService<GetBrandPaymentQuery, BrandPaymentInfo>>();
-
-		_ = fakeBrandCertClient.GetSystemValidateSecurityKeyAsync(Arg.Any<CancellationToken>())
-			.Returns(TestOperatorApplication.TestSecurityKey);
-
-		var brandId = Guid.NewGuid();
-		var brandCode = "Test";
-		var brandToken = TestOperatorApplication.MakeTestBrandToken(brandId, brandCode);
-
-		_ = fakeBrandRepository.GetSecretKeyAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
-			.Returns("N2KAnljo5zbLCZDSoUBFJ70ONsy");
-
-		using var web = TestOperatorApplication.Builder
-			.UseTestChannelServer(channelName)
-			.ConfigureLogging(logging => logging.AddXUnit(_testOutputHelper))
-			.ConfigureServices(services => services
-				.AddSingleton(fakeBrandCertClient)
-				.AddSingleton(fakeBrandServiceClient)
-				.AddSingleton(fakePlayerServiceClient)
-				.AddSingleton(fakePlayerPasswordValidateCommandService)
-				.AddSingleton(fakePlayerLoginRecordRepository)
-				.AddSingleton(fakeBrandRepository)
-				.AddSingleton(fakeValidatePlayerLoginRecordCommandService)
-				.AddSingleton(fakeCreateDepositFormService)
-				.AddSingleton(fakeGetBrandPaymentService)
-				.AddSingleton<ManualDepositSerializer>())
-			.Build();
-
-		await web.StartAsync();
-
-		var playerCode = "test1";
-		var userName = "test";
-
-		_ = fakeBrandServiceClient.GetBrandStatusAsync(Arg.Is(brandId))
-			.Returns(BrandStatus.Active);
-		_ = fakePlayerServiceClient.GetPlayerInfoByUserNameAsync(Arg.Is(brandId), Arg.Is(userName))
-			.Returns(new Tgs.PlayerService.Client.PlayerInfo
-			{
-				BrandId = brandId,
-				UserName = userName,
-				PlayerCode = playerCode
-			});
-		_ = fakePlayerPasswordValidateCommandService.GetAsync(Arg.Any<PlayerPasswordValidateCommand>())
-			.Returns(true);
-		_ = fakePlayerLoginRecordRepository.AddPlayerLoginRecordAsync(
-				Arg.Is(brandId),
-				Arg.Is(playerCode),
-				Arg.Is(TGS.Core.Models.Enums.PlatformType.Desktop),
-				Arg.Is("127.0.0.1"))
-			.Returns(new LoginRecordInfo(
-				Guid.NewGuid(),
-				playerCode,
-				TGS.Core.Models.Enums.LoginStatus.Enabled,
-				TGS.Core.Models.Enums.PlatformType.Desktop,
-				DateTimeOffset.Now,
-				DateTimeOffset.Now.AddDays(1D)));
-
-		await using var scope = web.Services.CreateAsyncScope();
-
-		var loginService = scope.ServiceProvider.GetRequiredService<IGetService<LoginCommand, LoginInfo>>();
-
-		var loginCommand = new LoginCommand(
-			brandId,
-			userName,
-			"test123",
-			"127.0.0.1",
-			"localhost",
-			TGS.Core.Models.Enums.PlatformType.Desktop,
-			"operator-api");
-
-		var loginResult = await loginService.GetAsync(loginCommand);
-
-		var brandPaymentId = Guid.NewGuid();
-		var amount = 1000m;
-
-		var brandPaymentInfo = new BrandPaymentInfo
-		{
-			Id = brandPaymentId,
-			ChannelId = Guid.NewGuid(),
-			ChannelName = "Coinsph",
-			Enabled = true,
-			ExtendedData = """
-				{
-					"phone": "0912345678",
-					"name": "testName",
-					"qrCode": "testQrCode"
-				}
-				"""
-		};
-
-		_ = fakeGetBrandPaymentService.GetAsync(
-			Arg.Is<GetBrandPaymentQuery>(x => x.Id == brandPaymentId),
-			Arg.Any<CancellationToken>())
-			.Returns(brandPaymentInfo);
-
-		var expected = Guid.NewGuid();
-
-		_ = fakeCreateDepositFormService.GetAsync(
-			Arg.Is<CreateDepositFormCommand>(x =>
-					x.PlayerCode == playerCode
-					&& x.BrandId == brandId
-					&& x.BrandPaymentId == brandPaymentId),
-			Arg.Any<CancellationToken>())
-			.Returns(expected);
-
-		var isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "true" : "false";
-		var nodeModule = $$"""
-			const axiosConfigFactory = require('./models/axios-configuration.js').default;
-			const OperatorService = require('./services/op-service.js').default;
-
-			module.exports = async (brandToken, loginToken, amount, paymentId, promotionId, bankType, realname, phone, address) =>
-			{
-				let instance = axiosConfigFactory("{{channelName}}", {{isWindows}}, brandToken, loginToken);
-
-				let svc = new OperatorService(instance);
-
-				return await svc.submitManualDepositCoinsphRequest(amount, paymentId, promotionId, bankType, realname, phone, address);
-			};
-		""";
-
-		// Act
-		var actual = await StaticNodeJSService.InvokeFromStringAsync<SuccessResponse<string>>(
-			nodeModule,
-			args: new object?[] { brandToken, loginResult.PlayerToken, amount, brandPaymentId, null, "coinsph", "testRealName", "0912345678", "T1123456789101112" });
-
-		// Assert
-		Assert.Equal(expected, Guid.Parse(actual!.Data));
-	}
-
-	[Fact]
-	public async Task WinPay存款()
+	public async Task SBPayMomo存款()
 	{
 		// Arrange
 		var channelName = Guid.NewGuid().ToString();
@@ -2235,7 +2895,7 @@ public class DepositTests
 
 		var request = new SubmitDepositRequest
 		{
-			Amount = 100M,
+			Amount = 200000M,
 			BrandPaymentId = Guid.NewGuid(),
 			PromotionId = null
 		};
@@ -2248,10 +2908,9 @@ public class DepositTests
 			Enabled = true,
 			ExtendedData = """
 				{
-					"merchant": "test123",
-					"key": "aabbccddeeff",
-					"paymentType": "3",
-					"bankCode": "gcash"
+					"apiToken": "momoApiToken",
+					"notifyToken": "momoNotifyToken",
+					"exchangeRate": 1
 				}
 				""",
 			PaymentId = Guid.NewGuid(),
@@ -2269,30 +2928,28 @@ public class DepositTests
 			.Returns(new PaymentInfo
 			{
 				Id = brandPaymentInfo.PaymentId,
-				Code = "WinPay"
+				Code = "SBPay"
 			});
 
 		_ = fakePaymentServiceClient.LockDepositPaymentAsync(
 			Arg.Any<Guid>(),
-			Arg.Is("WinPay"),
+			Arg.Is("SBPay"),
 			Arg.Is(playerCode),
 			Arg.Any<CancellationToken>())
 			.Returns(callInfo => callInfo.ArgAt<Guid>(0));
 
-		var applyInfo = new PhpGoPayDepositApplyInfo(
-			new PhpGoPayDepositSettings(
-				"test123",
-				"aabbccddeeff",
-				PhpGoPaymentType.Direct,
-				PhpGoBankCode.GCash,
-				new Uri("http://localhost"),
-				Guid.NewGuid()),
-			new PhpGoPayDepositResponse(
-				100M,
+		var applyInfo = new SBPayDepositApplyInfo(
+			new SBPayDepositSettings(
+				"momoApiToken",
+				"momoNotifyToken",
+				Guid.NewGuid(),
 				null,
+				ExchangeRate: 1m),
+			new SBPayDepositResponse(
+				200000m,
 				Guid.NewGuid(),
 				new Uri("http://localhost/test"),
-				new Uri("http://localhost")));
+				"thirdPartyOrderNo"));
 
 		_ = fakePaymentServiceClient.GetDepositFormAsync(
 			Arg.Is(brandId),
@@ -2301,7 +2958,7 @@ public class DepositTests
 			.Returns(new DepositFormInfo
 			{
 				PlayerCode = playerCode,
-				ApplyInfo = JsonSerializer.Serialize(applyInfo, PhpGoPayUtility.SerializerOptions)
+				ApplyInfo = JsonSerializer.Serialize(applyInfo, SBPayUtility.SerializerOptions)
 			});
 
 		var expected = new DepositFormCreatedResponse
@@ -2321,21 +2978,21 @@ public class DepositTests
 
 				let svc = new OperatorService(instance);
 
-				return await svc.submitWinThirdPartyDepositRequest(request);
+				return await svc.submitSBMomoDepositRequest(request);
 			};
 			""";
 
 		// Act
 		var actual = await StaticNodeJSService.InvokeFromStringAsync<SuccessResponse<DepositFormCreatedResponse>>(
 			nodeModule,
-			args: new object?[] { brandToken, loginResult.PlayerToken, request });
+			args: [brandToken, loginResult.PlayerToken, request]);
 
 		// Assert
 		Assert.Equal(applyInfo.Response.RedirectUrl.ToString(), actual?.Data.PaymentUrl);
 	}
 
 	[Fact]
-	public async Task _123Pay存款()
+	public async Task SBPayZalo存款()
 	{
 		// Arrange
 		var channelName = Guid.NewGuid().ToString();
@@ -2433,7 +3090,7 @@ public class DepositTests
 
 		var request = new SubmitDepositRequest
 		{
-			Amount = 100M,
+			Amount = 200000M,
 			BrandPaymentId = Guid.NewGuid(),
 			PromotionId = null
 		};
@@ -2446,10 +3103,9 @@ public class DepositTests
 			Enabled = true,
 			ExtendedData = """
 				{
-					"merchant": "test123",
-					"key": "aabbccddeeff",
-					"paymentType": "3",
-					"bankCode": "gcash"
+					"apiToken": "zaloApiToken",
+					"notifyToken": "zaloNotifyToken",
+					"exchangeRate": 1
 				}
 				""",
 			PaymentId = Guid.NewGuid(),
@@ -2467,30 +3123,28 @@ public class DepositTests
 			.Returns(new PaymentInfo
 			{
 				Id = brandPaymentInfo.PaymentId,
-				Code = "123Pay"
+				Code = "SBPay"
 			});
 
 		_ = fakePaymentServiceClient.LockDepositPaymentAsync(
 			Arg.Any<Guid>(),
-			Arg.Is("123Pay"),
+			Arg.Is("SBPay"),
 			Arg.Is(playerCode),
 			Arg.Any<CancellationToken>())
 			.Returns(callInfo => callInfo.ArgAt<Guid>(0));
 
-		var applyInfo = new PhpGoPayDepositApplyInfo(
-			new PhpGoPayDepositSettings(
-				"test123",
-				"aabbccddeeff",
-				PhpGoPaymentType.Direct,
-				PhpGoBankCode.GCash,
-				new Uri("http://localhost"),
-				Guid.NewGuid()),
-			new PhpGoPayDepositResponse(
-				100M,
+		var applyInfo = new SBPayDepositApplyInfo(
+			new SBPayDepositSettings(
+				"zaloApiToken",
+				"zaloNotifyToken",
+				Guid.NewGuid(),
 				null,
+				ExchangeRate: 1m),
+			new SBPayDepositResponse(
+				200000m,
 				Guid.NewGuid(),
 				new Uri("http://localhost/test"),
-				new Uri("http://localhost")));
+				"thirdPartyOrderNo"));
 
 		_ = fakePaymentServiceClient.GetDepositFormAsync(
 			Arg.Is(brandId),
@@ -2499,7 +3153,7 @@ public class DepositTests
 			.Returns(new DepositFormInfo
 			{
 				PlayerCode = playerCode,
-				ApplyInfo = JsonSerializer.Serialize(applyInfo, PhpGoPayUtility.SerializerOptions)
+				ApplyInfo = JsonSerializer.Serialize(applyInfo, SBPayUtility.SerializerOptions)
 			});
 
 		var expected = new DepositFormCreatedResponse
@@ -2519,21 +3173,21 @@ public class DepositTests
 
 				let svc = new OperatorService(instance);
 
-				return await svc.submit123ThirdPartyDepositRequest(request);
+				return await svc.submitSBZaloDepositRequest(request);
 			};
 			""";
 
 		// Act
 		var actual = await StaticNodeJSService.InvokeFromStringAsync<SuccessResponse<DepositFormCreatedResponse>>(
 			nodeModule,
-			args: new object?[] { brandToken, loginResult.PlayerToken, request });
+			args: [brandToken, loginResult.PlayerToken, request]);
 
 		// Assert
 		Assert.Equal(applyInfo.Response.RedirectUrl.ToString(), actual?.Data.PaymentUrl);
 	}
 
 	[Fact]
-	public async Task MalakiV2Pay存款()
+	public async Task SBPay三方存款()
 	{
 		// Arrange
 		var channelName = Guid.NewGuid().ToString();
@@ -2631,7 +3285,7 @@ public class DepositTests
 
 		var request = new SubmitDepositRequest
 		{
-			Amount = 100M,
+			Amount = 200000M,
 			BrandPaymentId = Guid.NewGuid(),
 			PromotionId = null
 		};
@@ -2644,10 +3298,9 @@ public class DepositTests
 			Enabled = true,
 			ExtendedData = """
 				{
-					"merchant": "test123",
-					"key": "aabbccddeeff",
-					"paymentType": "3",
-					"bankCode": "gcash"
+					"apiToken": "apiToken",
+					"notifyToken": "notifyToken",
+					"exchangeRate": 1
 				}
 				""",
 			PaymentId = Guid.NewGuid(),
@@ -2665,30 +3318,28 @@ public class DepositTests
 			.Returns(new PaymentInfo
 			{
 				Id = brandPaymentInfo.PaymentId,
-				Code = "WinPay"
+				Code = "SBPay"
 			});
 
 		_ = fakePaymentServiceClient.LockDepositPaymentAsync(
 			Arg.Any<Guid>(),
-			Arg.Is("WinPay"),
+			Arg.Is("SBPay"),
 			Arg.Is(playerCode),
 			Arg.Any<CancellationToken>())
 			.Returns(callInfo => callInfo.ArgAt<Guid>(0));
 
-		var applyInfo = new PhpGoPayDepositApplyInfo(
-			new PhpGoPayDepositSettings(
-				"test123",
-				"aabbccddeeff",
-				PhpGoPaymentType.Direct,
-				PhpGoBankCode.GCash,
-				new Uri("http://localhost"),
-				Guid.NewGuid()),
-			new PhpGoPayDepositResponse(
-				100M,
+		var applyInfo = new SBPayDepositApplyInfo(
+			new SBPayDepositSettings(
+				"apiToken",
+				"notifyToken",
+				Guid.NewGuid(),
 				null,
+				ExchangeRate: 1m),
+			new SBPayDepositResponse(
+				200000m,
 				Guid.NewGuid(),
 				new Uri("http://localhost/test"),
-				new Uri("http://localhost")));
+				"thirdPartyOrderNo"));
 
 		_ = fakePaymentServiceClient.GetDepositFormAsync(
 			Arg.Is(brandId),
@@ -2697,7 +3348,7 @@ public class DepositTests
 			.Returns(new DepositFormInfo
 			{
 				PlayerCode = playerCode,
-				ApplyInfo = JsonSerializer.Serialize(applyInfo, PhpGoPayUtility.SerializerOptions)
+				ApplyInfo = JsonSerializer.Serialize(applyInfo, SBPayUtility.SerializerOptions)
 			});
 
 		var expected = new DepositFormCreatedResponse
@@ -2717,14 +3368,14 @@ public class DepositTests
 
 				let svc = new OperatorService(instance);
 
-				return await svc.submitMalakiV2ThirdPartyDepositRequest(request);
+				return await svc.submitSBThirdPartyDepositRequest(request);
 			};
 			""";
 
 		// Act
 		var actual = await StaticNodeJSService.InvokeFromStringAsync<SuccessResponse<DepositFormCreatedResponse>>(
 			nodeModule,
-			args: new object?[] { brandToken, loginResult.PlayerToken, request });
+			args: [brandToken, loginResult.PlayerToken, request]);
 
 		// Assert
 		Assert.Equal(applyInfo.Response.RedirectUrl.ToString(), actual?.Data.PaymentUrl);
@@ -2920,14 +3571,14 @@ public class DepositTests
 		// Act
 		var actual = await StaticNodeJSService.InvokeFromStringAsync<SuccessResponse<DepositFormCreatedResponse>>(
 			nodeModule,
-			args: new object?[] { brandToken, loginResult.PlayerToken, request });
+			args: [brandToken, loginResult.PlayerToken, request]);
 
 		// Assert
 		Assert.Equal(applyInfo.Response.RedirectUrl.ToString(), actual?.Data.PaymentUrl);
 	}
 
 	[Fact]
-	public async Task SBPayMomo存款()
+	public async Task U2PayMomo存款()
 	{
 		// Arrange
 		var channelName = Guid.NewGuid().ToString();
@@ -3038,8 +3689,10 @@ public class DepositTests
 			Enabled = true,
 			ExtendedData = """
 				{
-					"apiToken": "momoApiToken",
-					"notifyToken": "momoNotifyToken",
+					"merchantNo": "merchantNo",
+					"appSecret": "appSecret",
+					"privateKey": "privateKey",
+					"channelNo": 0,
 					"exchangeRate": 1
 				}
 				""",
@@ -3058,24 +3711,26 @@ public class DepositTests
 			.Returns(new PaymentInfo
 			{
 				Id = brandPaymentInfo.PaymentId,
-				Code = "SBPay"
+				Code = "U2Pay"
 			});
 
 		_ = fakePaymentServiceClient.LockDepositPaymentAsync(
 			Arg.Any<Guid>(),
-			Arg.Is("SBPay"),
+			Arg.Is("U2Pay"),
 			Arg.Is(playerCode),
 			Arg.Any<CancellationToken>())
 			.Returns(callInfo => callInfo.ArgAt<Guid>(0));
 
-		var applyInfo = new SBPayDepositApplyInfo(
-			new SBPayDepositSettings(
-				"momoApiToken",
-				"momoNotifyToken",
+		var applyInfo = new U2PayDepositApplyInfo(
+			new U2PayDepositSettings(
+				"merchantNo",
+				"appSecret",
+				"privateKey",
 				Guid.NewGuid(),
-				null,
+				0,
+				"",
 				ExchangeRate: 1m),
-			new SBPayDepositResponse(
+			new U2PayDepositResponse(
 				200000m,
 				Guid.NewGuid(),
 				new Uri("http://localhost/test"),
@@ -3088,7 +3743,7 @@ public class DepositTests
 			.Returns(new DepositFormInfo
 			{
 				PlayerCode = playerCode,
-				ApplyInfo = JsonSerializer.Serialize(applyInfo, SBPayUtility.SerializerOptions)
+				ApplyInfo = JsonSerializer.Serialize(applyInfo, U2PayUtility.SerializerOptions)
 			});
 
 		var expected = new DepositFormCreatedResponse
@@ -3108,21 +3763,21 @@ public class DepositTests
 
 				let svc = new OperatorService(instance);
 
-				return await svc.submitSBMomoDepositRequest(request);
+				return await svc.submitU2MomoDepositRequest(request);
 			};
 			""";
 
 		// Act
 		var actual = await StaticNodeJSService.InvokeFromStringAsync<SuccessResponse<DepositFormCreatedResponse>>(
 			nodeModule,
-			args: new object?[] { brandToken, loginResult.PlayerToken, request });
+			args: [brandToken, loginResult.PlayerToken, request]);
 
 		// Assert
 		Assert.Equal(applyInfo.Response.RedirectUrl.ToString(), actual?.Data.PaymentUrl);
 	}
 
 	[Fact]
-	public async Task SBPayZalo存款()
+	public async Task U2PayZalo存款()
 	{
 		// Arrange
 		var channelName = Guid.NewGuid().ToString();
@@ -3233,8 +3888,10 @@ public class DepositTests
 			Enabled = true,
 			ExtendedData = """
 				{
-					"apiToken": "zaloApiToken",
-					"notifyToken": "zaloNotifyToken",
+					"merchantNo": "merchantNo",
+					"appSecret":"appSecret",
+					"privateKey": "privateKey",
+					"channelNo": 1,
 					"exchangeRate": 1
 				}
 				""",
@@ -3253,24 +3910,26 @@ public class DepositTests
 			.Returns(new PaymentInfo
 			{
 				Id = brandPaymentInfo.PaymentId,
-				Code = "SBPay"
+				Code = "U2Pay"
 			});
 
 		_ = fakePaymentServiceClient.LockDepositPaymentAsync(
 			Arg.Any<Guid>(),
-			Arg.Is("SBPay"),
+			Arg.Is("U2Pay"),
 			Arg.Is(playerCode),
 			Arg.Any<CancellationToken>())
 			.Returns(callInfo => callInfo.ArgAt<Guid>(0));
 
-		var applyInfo = new SBPayDepositApplyInfo(
-			new SBPayDepositSettings(
-				"zaloApiToken",
-				"zaloNotifyToken",
+		var applyInfo = new U2PayDepositApplyInfo(
+			new U2PayDepositSettings(
+				"merchantNo",
+				"appSecret",
+				"privateKey",
 				Guid.NewGuid(),
-				null,
+				1,
+				"",
 				ExchangeRate: 1m),
-			new SBPayDepositResponse(
+			new U2PayDepositResponse(
 				200000m,
 				Guid.NewGuid(),
 				new Uri("http://localhost/test"),
@@ -3283,7 +3942,7 @@ public class DepositTests
 			.Returns(new DepositFormInfo
 			{
 				PlayerCode = playerCode,
-				ApplyInfo = JsonSerializer.Serialize(applyInfo, SBPayUtility.SerializerOptions)
+				ApplyInfo = JsonSerializer.Serialize(applyInfo, U2PayUtility.SerializerOptions)
 			});
 
 		var expected = new DepositFormCreatedResponse
@@ -3303,21 +3962,21 @@ public class DepositTests
 
 				let svc = new OperatorService(instance);
 
-				return await svc.submitSBZaloDepositRequest(request);
+				return await svc.submitU2ZaloDepositRequest(request);
 			};
 			""";
 
 		// Act
 		var actual = await StaticNodeJSService.InvokeFromStringAsync<SuccessResponse<DepositFormCreatedResponse>>(
 			nodeModule,
-			args: new object?[] { brandToken, loginResult.PlayerToken, request });
+			args: [brandToken, loginResult.PlayerToken, request]);
 
 		// Assert
 		Assert.Equal(applyInfo.Response.RedirectUrl.ToString(), actual?.Data.PaymentUrl);
 	}
 
 	[Fact]
-	public async Task SBPay三方存款()
+	public async Task U2Pay三方存款()
 	{
 		// Arrange
 		var channelName = Guid.NewGuid().ToString();
@@ -3428,8 +4087,10 @@ public class DepositTests
 			Enabled = true,
 			ExtendedData = """
 				{
-					"apiToken": "apiToken",
-					"notifyToken": "notifyToken",
+					"merchantNo": "merchantNo",
+					"appSecret":"appSecret",
+					"privateKey": "privateKey",
+					"channelNo": 5,
 					"exchangeRate": 1
 				}
 				""",
@@ -3448,24 +4109,26 @@ public class DepositTests
 			.Returns(new PaymentInfo
 			{
 				Id = brandPaymentInfo.PaymentId,
-				Code = "SBPay"
+				Code = "U2Pay"
 			});
 
 		_ = fakePaymentServiceClient.LockDepositPaymentAsync(
 			Arg.Any<Guid>(),
-			Arg.Is("SBPay"),
+			Arg.Is("U2Pay"),
 			Arg.Is(playerCode),
 			Arg.Any<CancellationToken>())
 			.Returns(callInfo => callInfo.ArgAt<Guid>(0));
 
-		var applyInfo = new SBPayDepositApplyInfo(
-			new SBPayDepositSettings(
-				"apiToken",
-				"notifyToken",
+		var applyInfo = new U2PayDepositApplyInfo(
+			new U2PayDepositSettings(
+				"merchantNo",
+				"appSecret",
+				"privateKey",
 				Guid.NewGuid(),
-				null,
+				5,
+				"",
 				ExchangeRate: 1m),
-			new SBPayDepositResponse(
+			new U2PayDepositResponse(
 				200000m,
 				Guid.NewGuid(),
 				new Uri("http://localhost/test"),
@@ -3478,7 +4141,7 @@ public class DepositTests
 			.Returns(new DepositFormInfo
 			{
 				PlayerCode = playerCode,
-				ApplyInfo = JsonSerializer.Serialize(applyInfo, SBPayUtility.SerializerOptions)
+				ApplyInfo = JsonSerializer.Serialize(applyInfo, U2PayUtility.SerializerOptions)
 			});
 
 		var expected = new DepositFormCreatedResponse
@@ -3498,998 +4161,14 @@ public class DepositTests
 
 				let svc = new OperatorService(instance);
 
-				return await svc.submitSBThirdPartyDepositRequest(request);
+				return await svc.submitU2ThirdPartyDepositRequest(request);
 			};
 			""";
 
 		// Act
 		var actual = await StaticNodeJSService.InvokeFromStringAsync<SuccessResponse<DepositFormCreatedResponse>>(
 			nodeModule,
-			args: new object?[] { brandToken, loginResult.PlayerToken, request });
-
-		// Assert
-		Assert.Equal(applyInfo.Response.RedirectUrl.ToString(), actual?.Data.PaymentUrl);
-	}
-
-	[Fact]
-	public async Task GanyoPay三方存款()
-	{
-		// Arrange
-		var channelName = Guid.NewGuid().ToString();
-
-		var fakeBrandCertClient = Substitute.For<IBrandCertificateClient>();
-		var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
-		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
-		var fakePlayerPasswordValidateCommandService = Substitute.For<IGetService<PlayerPasswordValidateCommand, bool>>();
-		var fakePlayerLoginRecordRepository = Substitute.For<IPlayerLoginRecordRepository>();
-		var fakeBrandRepository = Substitute.For<IBrandRepository>();
-		var fakeValidatePlayerLoginRecordCommandService = Substitute.For<ICommandService<ValidatePlayerLoginRecordCommand>>();
-
-		_ = fakeBrandCertClient.GetSystemValidateSecurityKeyAsync(Arg.Any<CancellationToken>())
-			.Returns(TestOperatorApplication.TestSecurityKey);
-
-		var brandId = Guid.NewGuid();
-		var brandCode = "Test";
-		var brandToken = TestOperatorApplication.MakeTestBrandToken(brandId, brandCode);
-
-		_ = fakeBrandRepository.GetSecretKeyAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
-			.Returns("N2KAnljo5zbLCZDSoUBFJ70ONsy");
-
-		var fakePaymentServiceClient = Substitute.For<IPaymentServiceClient>();
-		var fakePromotionClient = Substitute.For<IPromotionClient>();
-
-		using var web = TestOperatorApplication.Builder
-			.UseTestChannelServer(channelName)
-			.ConfigureLogging(logging => logging.AddXUnit(_testOutputHelper))
-			.ConfigureServices(services => services
-				.AddSingleton(fakeBrandCertClient)
-				.AddSingleton(fakeBrandServiceClient)
-				.AddSingleton(fakePlayerServiceClient)
-				.AddSingleton(fakePlayerPasswordValidateCommandService)
-				.AddSingleton(fakePlayerLoginRecordRepository)
-				.AddSingleton(fakeBrandRepository)
-				.AddSingleton(fakeValidatePlayerLoginRecordCommandService)
-				.AddSingleton(fakePaymentServiceClient)
-				.AddSingleton(fakePromotionClient))
-			.Build();
-
-		await web.StartAsync();
-
-		var playerCode = "test1";
-		var userName = "test";
-
-		_ = fakeBrandServiceClient.GetBrandStatusAsync(
-			Arg.Is(brandId),
-			Arg.Any<CancellationToken>())
-			.Returns(BrandStatus.Active);
-		_ = fakePlayerServiceClient.GetPlayerInfoByUserNameAsync(
-			Arg.Is(brandId),
-			Arg.Is(userName),
-			Arg.Any<CancellationToken>())
-			.Returns(new Tgs.PlayerService.Client.PlayerInfo
-			{
-				BrandId = brandId,
-				UserName = userName,
-				PlayerCode = playerCode
-			});
-		_ = fakePlayerPasswordValidateCommandService.GetAsync(
-			Arg.Any<PlayerPasswordValidateCommand>(),
-			Arg.Any<CancellationToken>())
-			.Returns(true);
-		_ = fakePlayerPasswordValidateCommandService.GetAsync(
-			Arg.Any<PlayerPasswordValidateCommand>(),
-			Arg.Any<CancellationToken>())
-			.Returns(true);
-		_ = fakePlayerLoginRecordRepository.AddPlayerLoginRecordAsync(
-			Arg.Is(brandId),
-			Arg.Is(playerCode),
-			Arg.Is(TGS.Core.Models.Enums.PlatformType.Desktop),
-			Arg.Is("127.0.0.1"))
-			.Returns(new LoginRecordInfo(
-				Guid.NewGuid(),
-				playerCode,
-				TGS.Core.Models.Enums.LoginStatus.Enabled,
-				TGS.Core.Models.Enums.PlatformType.Desktop,
-				DateTimeOffset.Now,
-				DateTimeOffset.Now.AddDays(1D)));
-
-		await using var scope = web.Services.CreateAsyncScope();
-
-		var loginService = scope.ServiceProvider.GetRequiredService<IGetService<LoginCommand, LoginInfo>>();
-
-		var loginCommand = new LoginCommand(
-			brandId,
-			userName,
-			"test123",
-			"127.0.0.1",
-			"localhost",
-			TGS.Core.Models.Enums.PlatformType.Desktop,
-			"operator-api");
-
-		var loginResult = await loginService.GetAsync(loginCommand);
-
-		var request = new SubmitDepositRequest
-		{
-			Amount = 25000m,
-			BrandPaymentId = Guid.NewGuid(),
-			PromotionId = null
-		};
-
-		var brandPaymentInfo = new BrandPaymentInfo
-		{
-			Id = request.BrandPaymentId,
-			ChannelId = Guid.NewGuid(),
-			ChannelName = "Test",
-			Enabled = true,
-			ExtendedData = """
-				{
-					"customerId": "customerId",
-					"privateKey": "privateKey",
-					"channel": "nagad"
-				}
-				""",
-			PaymentId = Guid.NewGuid(),
-			BrandId = brandId
-		};
-
-		_ = fakePaymentServiceClient.GetBrandPaymentByIdAsync(
-			Arg.Is(request.BrandPaymentId),
-			Arg.Any<CancellationToken>())
-			.Returns(brandPaymentInfo);
-
-		_ = fakePaymentServiceClient.GetPaymentByIdAsync(
-			Arg.Is(brandPaymentInfo.PaymentId),
-			Arg.Any<CancellationToken>())
-			.Returns(new PaymentInfo
-			{
-				Id = brandPaymentInfo.PaymentId,
-				Code = "GanyoPay"
-			});
-
-		_ = fakePaymentServiceClient.LockDepositPaymentAsync(
-			Arg.Any<Guid>(),
-			Arg.Is("GanyoPay"),
-			Arg.Is(playerCode),
-			Arg.Any<CancellationToken>())
-			.Returns(callInfo => callInfo.ArgAt<Guid>(0));
-
-		var applyInfo = new GanyoPayDepositApplyInfo(
-			new GanyoPayDepositSettings(
-				"customerId",
-				"privateKey",
-				Guid.NewGuid(),
-				playerCode,
-				PhoneNumber: null,
-				"channel"),
-			new GanyoPayDepositResponse(
-				25000m,
-				Guid.NewGuid(),
-				new Uri("http://localhost/test"),
-				"thirdPartyOrderNo"));
-
-		_ = fakePaymentServiceClient.GetDepositFormAsync(
-			Arg.Is(brandId),
-			Arg.Any<Guid>(),
-			Arg.Any<CancellationToken>())
-			.Returns(new DepositFormInfo
-			{
-				PlayerCode = playerCode,
-				ApplyInfo = JsonSerializer.Serialize(applyInfo, PhpGoPayUtility.SerializerOptions)
-			});
-
-		var expected = new DepositFormCreatedResponse
-		{
-			FormId = Guid.NewGuid(),
-			PaymentUrl = "https://localhost"
-		};
-
-		var isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "true" : "false";
-		var nodeModule = $$"""
-			const axiosConfigFactory = require('./models/axios-configuration.js').default;
-			const OperatorService = require('./services/op-service.js').default;
-
-			module.exports = async (brandToken, loginToken, request) =>
-			{
-				let instance = axiosConfigFactory("{{channelName}}", {{isWindows}}, brandToken, loginToken);
-
-				let svc = new OperatorService(instance);
-
-				return await svc.submitGanyoThirdPartyDepositRequest(request);
-			};
-			""";
-
-		// Act
-		var actual = await StaticNodeJSService.InvokeFromStringAsync<SuccessResponse<DepositFormCreatedResponse>>(
-			nodeModule,
-			args: new object?[] { brandToken, loginResult.PlayerToken, request });
-
-		// Assert
-		Assert.Equal(applyInfo.Response.RedirectUrl.ToString(), actual?.Data.PaymentUrl);
-	}
-
-	[Fact]
-	public async Task DibaoPay銀行存款()
-	{
-		// Arrange
-		var channelName = Guid.NewGuid().ToString();
-
-		var fakeBrandCertClient = Substitute.For<IBrandCertificateClient>();
-		var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
-		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
-		var fakePlayerPasswordValidateCommandService = Substitute.For<IGetService<PlayerPasswordValidateCommand, bool>>();
-		var fakePlayerLoginRecordRepository = Substitute.For<IPlayerLoginRecordRepository>();
-		var fakeBrandRepository = Substitute.For<IBrandRepository>();
-		var fakeValidatePlayerLoginRecordCommandService = Substitute.For<ICommandService<ValidatePlayerLoginRecordCommand>>();
-
-		_ = fakeBrandCertClient.GetSystemValidateSecurityKeyAsync(Arg.Any<CancellationToken>())
-			.Returns(TestOperatorApplication.TestSecurityKey);
-
-		var brandId = Guid.NewGuid();
-		var brandCode = "Test";
-		var brandToken = TestOperatorApplication.MakeTestBrandToken(brandId, brandCode);
-
-		_ = fakeBrandRepository.GetSecretKeyAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
-			.Returns("N2KAnljo5zbLCZDSoUBFJ70ONsy");
-
-		var fakePaymentServiceClient = Substitute.For<IPaymentServiceClient>();
-		var fakePromotionClient = Substitute.For<IPromotionClient>();
-
-		using var web = TestOperatorApplication.Builder
-			.UseTestChannelServer(channelName)
-			.ConfigureLogging(logging => logging.AddXUnit(_testOutputHelper))
-			.ConfigureServices(services => services
-				.AddSingleton(fakeBrandCertClient)
-				.AddSingleton(fakeBrandServiceClient)
-				.AddSingleton(fakePlayerServiceClient)
-				.AddSingleton(fakePlayerPasswordValidateCommandService)
-				.AddSingleton(fakePlayerLoginRecordRepository)
-				.AddSingleton(fakeBrandRepository)
-				.AddSingleton(fakeValidatePlayerLoginRecordCommandService)
-				.AddSingleton(fakePaymentServiceClient)
-				.AddSingleton(fakePromotionClient))
-			.Build();
-
-		await web.StartAsync();
-
-		var playerCode = "test1";
-		var userName = "test";
-
-		_ = fakeBrandServiceClient.GetBrandStatusAsync(
-			Arg.Is(brandId),
-			Arg.Any<CancellationToken>())
-			.Returns(BrandStatus.Active);
-		_ = fakePlayerServiceClient.GetPlayerInfoByUserNameAsync(
-			Arg.Is(brandId),
-			Arg.Is(userName),
-			Arg.Any<CancellationToken>())
-			.Returns(new Tgs.PlayerService.Client.PlayerInfo
-			{
-				BrandId = brandId,
-				UserName = userName,
-				PlayerCode = playerCode
-			});
-		_ = fakePlayerPasswordValidateCommandService.GetAsync(
-			Arg.Any<PlayerPasswordValidateCommand>(),
-			Arg.Any<CancellationToken>())
-			.Returns(true);
-		_ = fakePlayerPasswordValidateCommandService.GetAsync(
-			Arg.Any<PlayerPasswordValidateCommand>(),
-			Arg.Any<CancellationToken>())
-			.Returns(true);
-		_ = fakePlayerLoginRecordRepository.AddPlayerLoginRecordAsync(
-			Arg.Is(brandId),
-			Arg.Is(playerCode),
-			Arg.Is(TGS.Core.Models.Enums.PlatformType.Desktop),
-			Arg.Is("127.0.0.1"))
-			.Returns(new LoginRecordInfo(
-				Guid.NewGuid(),
-				playerCode,
-				TGS.Core.Models.Enums.LoginStatus.Enabled,
-				TGS.Core.Models.Enums.PlatformType.Desktop,
-				DateTimeOffset.Now,
-				DateTimeOffset.Now.AddDays(1D)));
-
-		await using var scope = web.Services.CreateAsyncScope();
-
-		var loginService = scope.ServiceProvider.GetRequiredService<IGetService<LoginCommand, LoginInfo>>();
-
-		var loginCommand = new LoginCommand(
-			brandId,
-			userName,
-			"test123",
-			"127.0.0.1",
-			"localhost",
-			TGS.Core.Models.Enums.PlatformType.Desktop,
-			"operator-api");
-
-		var loginResult = await loginService.GetAsync(loginCommand);
-
-		var request = new SubmitDepositRequest
-		{
-			Amount = 200000M,
-			BrandPaymentId = Guid.NewGuid(),
-			PromotionId = null
-		};
-
-		var brandPaymentInfo = new BrandPaymentInfo
-		{
-			Id = request.BrandPaymentId,
-			ChannelId = Guid.NewGuid(),
-			ChannelName = "Test",
-			Enabled = true,
-			ExtendedData = """
-				{
-					"merchantId": "merchantId",
-					"privateKey": "privateKey",
-					"channel": "908",
-					"exchangeRate": 1
-				}
-				""",
-			PaymentId = Guid.NewGuid(),
-			BrandId = brandId
-		};
-
-		_ = fakePaymentServiceClient.GetBrandPaymentByIdAsync(
-			Arg.Is(request.BrandPaymentId),
-			Arg.Any<CancellationToken>())
-			.Returns(brandPaymentInfo);
-
-		_ = fakePaymentServiceClient.GetPaymentByIdAsync(
-			Arg.Is(brandPaymentInfo.PaymentId),
-			Arg.Any<CancellationToken>())
-			.Returns(new PaymentInfo
-			{
-				Id = brandPaymentInfo.PaymentId,
-				Code = "DibaoPay"
-			});
-
-		_ = fakePaymentServiceClient.LockDepositPaymentAsync(
-			Arg.Any<Guid>(),
-			Arg.Is("DibaoPay"),
-			Arg.Is(playerCode),
-			Arg.Any<CancellationToken>())
-			.Returns(callInfo => callInfo.ArgAt<Guid>(0));
-
-		var applyInfo = new DibaoPayDepositApplyInfo(
-			new DibaoPayDepositSettings(
-				"merchantId",
-				"privateKey",
-				Guid.NewGuid(),
-				"908",
-				"127.0.0.1",
-				1m),
-			new DibaoPayDepositResponse(
-				200000m,
-				Guid.NewGuid(),
-				new Uri("http://localhost/test"),
-				"thirdPartyOrderNo"));
-
-		_ = fakePaymentServiceClient.GetDepositFormAsync(
-			Arg.Is(brandId),
-			Arg.Any<Guid>(),
-			Arg.Any<CancellationToken>())
-			.Returns(new DepositFormInfo
-			{
-				PlayerCode = playerCode,
-				ApplyInfo = JsonSerializer.Serialize(applyInfo, DibaoPayUtility.SerializerOptions)
-			});
-
-		var expected = new DepositFormCreatedResponse
-		{
-			FormId = Guid.NewGuid(),
-			PaymentUrl = "https://localhost"
-		};
-
-		var isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "true" : "false";
-		var nodeModule = $$"""
-			const axiosConfigFactory = require('./models/axios-configuration.js').default;
-			const OperatorService = require('./services/op-service.js').default;
-
-			module.exports = async (brandToken, loginToken, request) =>
-			{
-				let instance = axiosConfigFactory("{{channelName}}", {{isWindows}}, brandToken, loginToken);
-
-				let svc = new OperatorService(instance);
-
-				return await svc.submitDibaoBankDepositRequest(request);
-			};
-			""";
-
-		// Act
-		var actual = await StaticNodeJSService.InvokeFromStringAsync<SuccessResponse<DepositFormCreatedResponse>>(
-			nodeModule,
-			args: new object?[] { brandToken, loginResult.PlayerToken, request });
-
-		// Assert
-		Assert.Equal(applyInfo.Response.RedirectUrl.ToString(), actual?.Data.PaymentUrl);
-	}
-
-	[Fact]
-	public async Task DibaoPayMomo存款()
-	{
-		// Arrange
-		var channelName = Guid.NewGuid().ToString();
-
-		var fakeBrandCertClient = Substitute.For<IBrandCertificateClient>();
-		var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
-		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
-		var fakePlayerPasswordValidateCommandService = Substitute.For<IGetService<PlayerPasswordValidateCommand, bool>>();
-		var fakePlayerLoginRecordRepository = Substitute.For<IPlayerLoginRecordRepository>();
-		var fakeBrandRepository = Substitute.For<IBrandRepository>();
-		var fakeValidatePlayerLoginRecordCommandService = Substitute.For<ICommandService<ValidatePlayerLoginRecordCommand>>();
-
-		_ = fakeBrandCertClient.GetSystemValidateSecurityKeyAsync(Arg.Any<CancellationToken>())
-			.Returns(TestOperatorApplication.TestSecurityKey);
-
-		var brandId = Guid.NewGuid();
-		var brandCode = "Test";
-		var brandToken = TestOperatorApplication.MakeTestBrandToken(brandId, brandCode);
-
-		_ = fakeBrandRepository.GetSecretKeyAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
-			.Returns("N2KAnljo5zbLCZDSoUBFJ70ONsy");
-
-		var fakePaymentServiceClient = Substitute.For<IPaymentServiceClient>();
-		var fakePromotionClient = Substitute.For<IPromotionClient>();
-
-		using var web = TestOperatorApplication.Builder
-			.UseTestChannelServer(channelName)
-			.ConfigureLogging(logging => logging.AddXUnit(_testOutputHelper))
-			.ConfigureServices(services => services
-				.AddSingleton(fakeBrandCertClient)
-				.AddSingleton(fakeBrandServiceClient)
-				.AddSingleton(fakePlayerServiceClient)
-				.AddSingleton(fakePlayerPasswordValidateCommandService)
-				.AddSingleton(fakePlayerLoginRecordRepository)
-				.AddSingleton(fakeBrandRepository)
-				.AddSingleton(fakeValidatePlayerLoginRecordCommandService)
-				.AddSingleton(fakePaymentServiceClient)
-				.AddSingleton(fakePromotionClient))
-			.Build();
-
-		await web.StartAsync();
-
-		var playerCode = "test1";
-		var userName = "test";
-
-		_ = fakeBrandServiceClient.GetBrandStatusAsync(
-			Arg.Is(brandId),
-			Arg.Any<CancellationToken>())
-			.Returns(BrandStatus.Active);
-		_ = fakePlayerServiceClient.GetPlayerInfoByUserNameAsync(
-			Arg.Is(brandId),
-			Arg.Is(userName),
-			Arg.Any<CancellationToken>())
-			.Returns(new Tgs.PlayerService.Client.PlayerInfo
-			{
-				BrandId = brandId,
-				UserName = userName,
-				PlayerCode = playerCode
-			});
-		_ = fakePlayerPasswordValidateCommandService.GetAsync(
-			Arg.Any<PlayerPasswordValidateCommand>(),
-			Arg.Any<CancellationToken>())
-			.Returns(true);
-		_ = fakePlayerPasswordValidateCommandService.GetAsync(
-			Arg.Any<PlayerPasswordValidateCommand>(),
-			Arg.Any<CancellationToken>())
-			.Returns(true);
-		_ = fakePlayerLoginRecordRepository.AddPlayerLoginRecordAsync(
-			Arg.Is(brandId),
-			Arg.Is(playerCode),
-			Arg.Is(TGS.Core.Models.Enums.PlatformType.Desktop),
-			Arg.Is("127.0.0.1"))
-			.Returns(new LoginRecordInfo(
-				Guid.NewGuid(),
-				playerCode,
-				TGS.Core.Models.Enums.LoginStatus.Enabled,
-				TGS.Core.Models.Enums.PlatformType.Desktop,
-				DateTimeOffset.Now,
-				DateTimeOffset.Now.AddDays(1D)));
-
-		await using var scope = web.Services.CreateAsyncScope();
-
-		var loginService = scope.ServiceProvider.GetRequiredService<IGetService<LoginCommand, LoginInfo>>();
-
-		var loginCommand = new LoginCommand(
-			brandId,
-			userName,
-			"test123",
-			"127.0.0.1",
-			"localhost",
-			TGS.Core.Models.Enums.PlatformType.Desktop,
-			"operator-api");
-
-		var loginResult = await loginService.GetAsync(loginCommand);
-
-		var request = new SubmitDepositRequest
-		{
-			Amount = 200000M,
-			BrandPaymentId = Guid.NewGuid(),
-			PromotionId = null
-		};
-
-		var brandPaymentInfo = new BrandPaymentInfo
-		{
-			Id = request.BrandPaymentId,
-			ChannelId = Guid.NewGuid(),
-			ChannelName = "Test",
-			Enabled = true,
-			ExtendedData = """
-				{
-					"merchantId": "merchantId",
-					"privateKey": "privateKey",
-					"channel": "923",
-					"exchangeRate": 1
-				}
-				""",
-			PaymentId = Guid.NewGuid(),
-			BrandId = brandId
-		};
-
-		_ = fakePaymentServiceClient.GetBrandPaymentByIdAsync(
-			Arg.Is(request.BrandPaymentId),
-			Arg.Any<CancellationToken>())
-			.Returns(brandPaymentInfo);
-
-		_ = fakePaymentServiceClient.GetPaymentByIdAsync(
-			Arg.Is(brandPaymentInfo.PaymentId),
-			Arg.Any<CancellationToken>())
-			.Returns(new PaymentInfo
-			{
-				Id = brandPaymentInfo.PaymentId,
-				Code = "DibaoPay"
-			});
-
-		_ = fakePaymentServiceClient.LockDepositPaymentAsync(
-			Arg.Any<Guid>(),
-			Arg.Is("DibaoPay"),
-			Arg.Is(playerCode),
-			Arg.Any<CancellationToken>())
-			.Returns(callInfo => callInfo.ArgAt<Guid>(0));
-
-		var applyInfo = new DibaoPayDepositApplyInfo(
-			new DibaoPayDepositSettings(
-				"merchantId",
-				"privateKey",
-				Guid.NewGuid(),
-				"923",
-				"127.0.0.1",
-				1m),
-			new DibaoPayDepositResponse(
-				200000m,
-				Guid.NewGuid(),
-				new Uri("http://localhost/test"),
-				"thirdPartyOrderNo"));
-
-		_ = fakePaymentServiceClient.GetDepositFormAsync(
-			Arg.Is(brandId),
-			Arg.Any<Guid>(),
-			Arg.Any<CancellationToken>())
-			.Returns(new DepositFormInfo
-			{
-				PlayerCode = playerCode,
-				ApplyInfo = JsonSerializer.Serialize(applyInfo, DibaoPayUtility.SerializerOptions)
-			});
-
-		var expected = new DepositFormCreatedResponse
-		{
-			FormId = Guid.NewGuid(),
-			PaymentUrl = "https://localhost"
-		};
-
-		var isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "true" : "false";
-		var nodeModule = $$"""
-			const axiosConfigFactory = require('./models/axios-configuration.js').default;
-			const OperatorService = require('./services/op-service.js').default;
-
-			module.exports = async (brandToken, loginToken, request) =>
-			{
-				let instance = axiosConfigFactory("{{channelName}}", {{isWindows}}, brandToken, loginToken);
-
-				let svc = new OperatorService(instance);
-
-				return await svc.submitDibaoMomoDepositRequest(request);
-			};
-			""";
-
-		// Act
-		var actual = await StaticNodeJSService.InvokeFromStringAsync<SuccessResponse<DepositFormCreatedResponse>>(
-			nodeModule,
-			args: new object?[] { brandToken, loginResult.PlayerToken, request });
-
-		// Assert
-		Assert.Equal(applyInfo.Response.RedirectUrl.ToString(), actual?.Data.PaymentUrl);
-	}
-
-	[Fact]
-	public async Task DibaoPayZalo存款()
-	{
-		// Arrange
-		var channelName = Guid.NewGuid().ToString();
-
-		var fakeBrandCertClient = Substitute.For<IBrandCertificateClient>();
-		var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
-		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
-		var fakePlayerPasswordValidateCommandService = Substitute.For<IGetService<PlayerPasswordValidateCommand, bool>>();
-		var fakePlayerLoginRecordRepository = Substitute.For<IPlayerLoginRecordRepository>();
-		var fakeBrandRepository = Substitute.For<IBrandRepository>();
-		var fakeValidatePlayerLoginRecordCommandService = Substitute.For<ICommandService<ValidatePlayerLoginRecordCommand>>();
-
-		_ = fakeBrandCertClient.GetSystemValidateSecurityKeyAsync(Arg.Any<CancellationToken>())
-			.Returns(TestOperatorApplication.TestSecurityKey);
-
-		var brandId = Guid.NewGuid();
-		var brandCode = "Test";
-		var brandToken = TestOperatorApplication.MakeTestBrandToken(brandId, brandCode);
-
-		_ = fakeBrandRepository.GetSecretKeyAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
-			.Returns("N2KAnljo5zbLCZDSoUBFJ70ONsy");
-
-		var fakePaymentServiceClient = Substitute.For<IPaymentServiceClient>();
-		var fakePromotionClient = Substitute.For<IPromotionClient>();
-
-		using var web = TestOperatorApplication.Builder
-			.UseTestChannelServer(channelName)
-			.ConfigureLogging(logging => logging.AddXUnit(_testOutputHelper))
-			.ConfigureServices(services => services
-				.AddSingleton(fakeBrandCertClient)
-				.AddSingleton(fakeBrandServiceClient)
-				.AddSingleton(fakePlayerServiceClient)
-				.AddSingleton(fakePlayerPasswordValidateCommandService)
-				.AddSingleton(fakePlayerLoginRecordRepository)
-				.AddSingleton(fakeBrandRepository)
-				.AddSingleton(fakeValidatePlayerLoginRecordCommandService)
-				.AddSingleton(fakePaymentServiceClient)
-				.AddSingleton(fakePromotionClient))
-			.Build();
-
-		await web.StartAsync();
-
-		var playerCode = "test1";
-		var userName = "test";
-
-		_ = fakeBrandServiceClient.GetBrandStatusAsync(
-			Arg.Is(brandId),
-			Arg.Any<CancellationToken>())
-			.Returns(BrandStatus.Active);
-		_ = fakePlayerServiceClient.GetPlayerInfoByUserNameAsync(
-			Arg.Is(brandId),
-			Arg.Is(userName),
-			Arg.Any<CancellationToken>())
-			.Returns(new Tgs.PlayerService.Client.PlayerInfo
-			{
-				BrandId = brandId,
-				UserName = userName,
-				PlayerCode = playerCode
-			});
-		_ = fakePlayerPasswordValidateCommandService.GetAsync(
-			Arg.Any<PlayerPasswordValidateCommand>(),
-			Arg.Any<CancellationToken>())
-			.Returns(true);
-		_ = fakePlayerPasswordValidateCommandService.GetAsync(
-			Arg.Any<PlayerPasswordValidateCommand>(),
-			Arg.Any<CancellationToken>())
-			.Returns(true);
-		_ = fakePlayerLoginRecordRepository.AddPlayerLoginRecordAsync(
-			Arg.Is(brandId),
-			Arg.Is(playerCode),
-			Arg.Is(TGS.Core.Models.Enums.PlatformType.Desktop),
-			Arg.Is("127.0.0.1"))
-			.Returns(new LoginRecordInfo(
-				Guid.NewGuid(),
-				playerCode,
-				TGS.Core.Models.Enums.LoginStatus.Enabled,
-				TGS.Core.Models.Enums.PlatformType.Desktop,
-				DateTimeOffset.Now,
-				DateTimeOffset.Now.AddDays(1D)));
-
-		await using var scope = web.Services.CreateAsyncScope();
-
-		var loginService = scope.ServiceProvider.GetRequiredService<IGetService<LoginCommand, LoginInfo>>();
-
-		var loginCommand = new LoginCommand(
-			brandId,
-			userName,
-			"test123",
-			"127.0.0.1",
-			"localhost",
-			TGS.Core.Models.Enums.PlatformType.Desktop,
-			"operator-api");
-
-		var loginResult = await loginService.GetAsync(loginCommand);
-
-		var request = new SubmitDepositRequest
-		{
-			Amount = 200000M,
-			BrandPaymentId = Guid.NewGuid(),
-			PromotionId = null
-		};
-
-		var brandPaymentInfo = new BrandPaymentInfo
-		{
-			Id = request.BrandPaymentId,
-			ChannelId = Guid.NewGuid(),
-			ChannelName = "Test",
-			Enabled = true,
-			ExtendedData = """
-				{
-					"merchantId": "merchantId",
-					"privateKey": "privateKey",
-					"channel": "921",
-					"exchangeRate": 1
-				}
-				""",
-			PaymentId = Guid.NewGuid(),
-			BrandId = brandId
-		};
-
-		_ = fakePaymentServiceClient.GetBrandPaymentByIdAsync(
-			Arg.Is(request.BrandPaymentId),
-			Arg.Any<CancellationToken>())
-			.Returns(brandPaymentInfo);
-
-		_ = fakePaymentServiceClient.GetPaymentByIdAsync(
-			Arg.Is(brandPaymentInfo.PaymentId),
-			Arg.Any<CancellationToken>())
-			.Returns(new PaymentInfo
-			{
-				Id = brandPaymentInfo.PaymentId,
-				Code = "DibaoPay"
-			});
-
-		_ = fakePaymentServiceClient.LockDepositPaymentAsync(
-			Arg.Any<Guid>(),
-			Arg.Is("DibaoPay"),
-			Arg.Is(playerCode),
-			Arg.Any<CancellationToken>())
-			.Returns(callInfo => callInfo.ArgAt<Guid>(0));
-
-		var applyInfo = new DibaoPayDepositApplyInfo(
-			new DibaoPayDepositSettings(
-				"merchantId",
-				"privateKey",
-				Guid.NewGuid(),
-				"921",
-				"127.0.0.1",
-				1m),
-			new DibaoPayDepositResponse(
-				200000m,
-				Guid.NewGuid(),
-				new Uri("http://localhost/test"),
-				"thirdPartyOrderNo"));
-
-		_ = fakePaymentServiceClient.GetDepositFormAsync(
-			Arg.Is(brandId),
-			Arg.Any<Guid>(),
-			Arg.Any<CancellationToken>())
-			.Returns(new DepositFormInfo
-			{
-				PlayerCode = playerCode,
-				ApplyInfo = JsonSerializer.Serialize(applyInfo, DibaoPayUtility.SerializerOptions)
-			});
-
-		var expected = new DepositFormCreatedResponse
-		{
-			FormId = Guid.NewGuid(),
-			PaymentUrl = "https://localhost"
-		};
-
-		var isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "true" : "false";
-		var nodeModule = $$"""
-			const axiosConfigFactory = require('./models/axios-configuration.js').default;
-			const OperatorService = require('./services/op-service.js').default;
-
-			module.exports = async (brandToken, loginToken, request) =>
-			{
-				let instance = axiosConfigFactory("{{channelName}}", {{isWindows}}, brandToken, loginToken);
-
-				let svc = new OperatorService(instance);
-
-				return await svc.submitDibaoZaloDepositRequest(request);
-			};
-			""";
-
-		// Act
-		var actual = await StaticNodeJSService.InvokeFromStringAsync<SuccessResponse<DepositFormCreatedResponse>>(
-			nodeModule,
-			args: new object?[] { brandToken, loginResult.PlayerToken, request });
-
-		// Assert
-		Assert.Equal(applyInfo.Response.RedirectUrl.ToString(), actual?.Data.PaymentUrl);
-	}
-
-	[Fact]
-	public async Task DibaoPay三方存款()
-	{
-		// Arrange
-		var channelName = Guid.NewGuid().ToString();
-
-		var fakeBrandCertClient = Substitute.For<IBrandCertificateClient>();
-		var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
-		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
-		var fakePlayerPasswordValidateCommandService = Substitute.For<IGetService<PlayerPasswordValidateCommand, bool>>();
-		var fakePlayerLoginRecordRepository = Substitute.For<IPlayerLoginRecordRepository>();
-		var fakeBrandRepository = Substitute.For<IBrandRepository>();
-		var fakeValidatePlayerLoginRecordCommandService = Substitute.For<ICommandService<ValidatePlayerLoginRecordCommand>>();
-
-		_ = fakeBrandCertClient.GetSystemValidateSecurityKeyAsync(Arg.Any<CancellationToken>())
-			.Returns(TestOperatorApplication.TestSecurityKey);
-
-		var brandId = Guid.NewGuid();
-		var brandCode = "Test";
-		var brandToken = TestOperatorApplication.MakeTestBrandToken(brandId, brandCode);
-
-		_ = fakeBrandRepository.GetSecretKeyAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
-			.Returns("N2KAnljo5zbLCZDSoUBFJ70ONsy");
-
-		var fakePaymentServiceClient = Substitute.For<IPaymentServiceClient>();
-		var fakePromotionClient = Substitute.For<IPromotionClient>();
-
-		using var web = TestOperatorApplication.Builder
-			.UseTestChannelServer(channelName)
-			.ConfigureLogging(logging => logging.AddXUnit(_testOutputHelper))
-			.ConfigureServices(services => services
-				.AddSingleton(fakeBrandCertClient)
-				.AddSingleton(fakeBrandServiceClient)
-				.AddSingleton(fakePlayerServiceClient)
-				.AddSingleton(fakePlayerPasswordValidateCommandService)
-				.AddSingleton(fakePlayerLoginRecordRepository)
-				.AddSingleton(fakeBrandRepository)
-				.AddSingleton(fakeValidatePlayerLoginRecordCommandService)
-				.AddSingleton(fakePaymentServiceClient)
-				.AddSingleton(fakePromotionClient))
-			.Build();
-
-		await web.StartAsync();
-
-		var playerCode = "test1";
-		var userName = "test";
-
-		_ = fakeBrandServiceClient.GetBrandStatusAsync(
-			Arg.Is(brandId),
-			Arg.Any<CancellationToken>())
-			.Returns(BrandStatus.Active);
-		_ = fakePlayerServiceClient.GetPlayerInfoByUserNameAsync(
-			Arg.Is(brandId),
-			Arg.Is(userName),
-			Arg.Any<CancellationToken>())
-			.Returns(new Tgs.PlayerService.Client.PlayerInfo
-			{
-				BrandId = brandId,
-				UserName = userName,
-				PlayerCode = playerCode
-			});
-		_ = fakePlayerPasswordValidateCommandService.GetAsync(
-			Arg.Any<PlayerPasswordValidateCommand>(),
-			Arg.Any<CancellationToken>())
-			.Returns(true);
-		_ = fakePlayerPasswordValidateCommandService.GetAsync(
-			Arg.Any<PlayerPasswordValidateCommand>(),
-			Arg.Any<CancellationToken>())
-			.Returns(true);
-		_ = fakePlayerLoginRecordRepository.AddPlayerLoginRecordAsync(
-			Arg.Is(brandId),
-			Arg.Is(playerCode),
-			Arg.Is(TGS.Core.Models.Enums.PlatformType.Desktop),
-			Arg.Is("127.0.0.1"))
-			.Returns(new LoginRecordInfo(
-				Guid.NewGuid(),
-				playerCode,
-				TGS.Core.Models.Enums.LoginStatus.Enabled,
-				TGS.Core.Models.Enums.PlatformType.Desktop,
-				DateTimeOffset.Now,
-				DateTimeOffset.Now.AddDays(1D)));
-
-		await using var scope = web.Services.CreateAsyncScope();
-
-		var loginService = scope.ServiceProvider.GetRequiredService<IGetService<LoginCommand, LoginInfo>>();
-
-		var loginCommand = new LoginCommand(
-			brandId,
-			userName,
-			"test123",
-			"127.0.0.1",
-			"localhost",
-			TGS.Core.Models.Enums.PlatformType.Desktop,
-			"operator-api");
-
-		var loginResult = await loginService.GetAsync(loginCommand);
-
-		var request = new SubmitDepositRequest
-		{
-			Amount = 200000M,
-			BrandPaymentId = Guid.NewGuid(),
-			PromotionId = null
-		};
-
-		var brandPaymentInfo = new BrandPaymentInfo
-		{
-			Id = request.BrandPaymentId,
-			ChannelId = Guid.NewGuid(),
-			ChannelName = "Test",
-			Enabled = true,
-			ExtendedData = """
-				{
-					"merchantId": "merchantId",
-					"privateKey": "privateKey",
-					"channel": "925",
-					"exchangeRate": 1
-				}
-				""",
-			PaymentId = Guid.NewGuid(),
-			BrandId = brandId
-		};
-
-		_ = fakePaymentServiceClient.GetBrandPaymentByIdAsync(
-			Arg.Is(request.BrandPaymentId),
-			Arg.Any<CancellationToken>())
-			.Returns(brandPaymentInfo);
-
-		_ = fakePaymentServiceClient.GetPaymentByIdAsync(
-			Arg.Is(brandPaymentInfo.PaymentId),
-			Arg.Any<CancellationToken>())
-			.Returns(new PaymentInfo
-			{
-				Id = brandPaymentInfo.PaymentId,
-				Code = "DibaoPay"
-			});
-
-		_ = fakePaymentServiceClient.LockDepositPaymentAsync(
-			Arg.Any<Guid>(),
-			Arg.Is("DibaoPay"),
-			Arg.Is(playerCode),
-			Arg.Any<CancellationToken>())
-			.Returns(callInfo => callInfo.ArgAt<Guid>(0));
-
-		var applyInfo = new DibaoPayDepositApplyInfo(
-			new DibaoPayDepositSettings(
-				"apiToken",
-				"notifyToken",
-				Guid.NewGuid(),
-				"925",
-				"127.0.0.1",
-				1m),
-			new DibaoPayDepositResponse(
-				200000m,
-				Guid.NewGuid(),
-				new Uri("http://localhost/test"),
-				"thirdPartyOrderNo"));
-
-		_ = fakePaymentServiceClient.GetDepositFormAsync(
-			Arg.Is(brandId),
-			Arg.Any<Guid>(),
-			Arg.Any<CancellationToken>())
-			.Returns(new DepositFormInfo
-			{
-				PlayerCode = playerCode,
-				ApplyInfo = JsonSerializer.Serialize(applyInfo, DibaoPayUtility.SerializerOptions)
-			});
-
-		var expected = new DepositFormCreatedResponse
-		{
-			FormId = Guid.NewGuid(),
-			PaymentUrl = "https://localhost"
-		};
-
-		var isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "true" : "false";
-		var nodeModule = $$"""
-			const axiosConfigFactory = require('./models/axios-configuration.js').default;
-			const OperatorService = require('./services/op-service.js').default;
-
-			module.exports = async (brandToken, loginToken, request) =>
-			{
-				let instance = axiosConfigFactory("{{channelName}}", {{isWindows}}, brandToken, loginToken);
-
-				let svc = new OperatorService(instance);
-
-				return await svc.submitDibaoThirdPartyDepositRequest(request);
-			};
-			""";
-
-		// Act
-		var actual = await StaticNodeJSService.InvokeFromStringAsync<SuccessResponse<DepositFormCreatedResponse>>(
-			nodeModule,
-			args: new object?[] { brandToken, loginResult.PlayerToken, request });
+			args: [brandToken, loginResult.PlayerToken, request]);
 
 		// Assert
 		Assert.Equal(applyInfo.Response.RedirectUrl.ToString(), actual?.Data.PaymentUrl);
@@ -4689,604 +4368,7 @@ public class DepositTests
 		// Act
 		var actual = await StaticNodeJSService.InvokeFromStringAsync<SuccessResponse<DepositFormCreatedResponse>>(
 			nodeModule,
-			args: new object?[] { brandToken, loginResult.PlayerToken, request });
-
-		// Assert
-		Assert.Equal(applyInfo.Response.RedirectUrl.ToString(), actual?.Data.PaymentUrl);
-	}
-
-	[Fact]
-	public async Task U2PayMomo存款()
-	{
-		// Arrange
-		var channelName = Guid.NewGuid().ToString();
-
-		var fakeBrandCertClient = Substitute.For<IBrandCertificateClient>();
-		var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
-		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
-		var fakePlayerPasswordValidateCommandService = Substitute.For<IGetService<PlayerPasswordValidateCommand, bool>>();
-		var fakePlayerLoginRecordRepository = Substitute.For<IPlayerLoginRecordRepository>();
-		var fakeBrandRepository = Substitute.For<IBrandRepository>();
-		var fakeValidatePlayerLoginRecordCommandService = Substitute.For<ICommandService<ValidatePlayerLoginRecordCommand>>();
-
-		_ = fakeBrandCertClient.GetSystemValidateSecurityKeyAsync(Arg.Any<CancellationToken>())
-			.Returns(TestOperatorApplication.TestSecurityKey);
-
-		var brandId = Guid.NewGuid();
-		var brandCode = "Test";
-		var brandToken = TestOperatorApplication.MakeTestBrandToken(brandId, brandCode);
-
-		_ = fakeBrandRepository.GetSecretKeyAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
-			.Returns("N2KAnljo5zbLCZDSoUBFJ70ONsy");
-
-		var fakePaymentServiceClient = Substitute.For<IPaymentServiceClient>();
-		var fakePromotionClient = Substitute.For<IPromotionClient>();
-
-		using var web = TestOperatorApplication.Builder
-			.UseTestChannelServer(channelName)
-			.ConfigureLogging(logging => logging.AddXUnit(_testOutputHelper))
-			.ConfigureServices(services => services
-				.AddSingleton(fakeBrandCertClient)
-				.AddSingleton(fakeBrandServiceClient)
-				.AddSingleton(fakePlayerServiceClient)
-				.AddSingleton(fakePlayerPasswordValidateCommandService)
-				.AddSingleton(fakePlayerLoginRecordRepository)
-				.AddSingleton(fakeBrandRepository)
-				.AddSingleton(fakeValidatePlayerLoginRecordCommandService)
-				.AddSingleton(fakePaymentServiceClient)
-				.AddSingleton(fakePromotionClient))
-			.Build();
-
-		await web.StartAsync();
-
-		var playerCode = "test1";
-		var userName = "test";
-
-		_ = fakeBrandServiceClient.GetBrandStatusAsync(
-			Arg.Is(brandId),
-			Arg.Any<CancellationToken>())
-			.Returns(BrandStatus.Active);
-		_ = fakePlayerServiceClient.GetPlayerInfoByUserNameAsync(
-			Arg.Is(brandId),
-			Arg.Is(userName),
-			Arg.Any<CancellationToken>())
-			.Returns(new Tgs.PlayerService.Client.PlayerInfo
-			{
-				BrandId = brandId,
-				UserName = userName,
-				PlayerCode = playerCode
-			});
-		_ = fakePlayerPasswordValidateCommandService.GetAsync(
-			Arg.Any<PlayerPasswordValidateCommand>(),
-			Arg.Any<CancellationToken>())
-			.Returns(true);
-		_ = fakePlayerPasswordValidateCommandService.GetAsync(
-			Arg.Any<PlayerPasswordValidateCommand>(),
-			Arg.Any<CancellationToken>())
-			.Returns(true);
-		_ = fakePlayerLoginRecordRepository.AddPlayerLoginRecordAsync(
-			Arg.Is(brandId),
-			Arg.Is(playerCode),
-			Arg.Is(TGS.Core.Models.Enums.PlatformType.Desktop),
-			Arg.Is("127.0.0.1"))
-			.Returns(new LoginRecordInfo(
-				Guid.NewGuid(),
-				playerCode,
-				TGS.Core.Models.Enums.LoginStatus.Enabled,
-				TGS.Core.Models.Enums.PlatformType.Desktop,
-				DateTimeOffset.Now,
-				DateTimeOffset.Now.AddDays(1D)));
-
-		await using var scope = web.Services.CreateAsyncScope();
-
-		var loginService = scope.ServiceProvider.GetRequiredService<IGetService<LoginCommand, LoginInfo>>();
-
-		var loginCommand = new LoginCommand(
-			brandId,
-			userName,
-			"test123",
-			"127.0.0.1",
-			"localhost",
-			TGS.Core.Models.Enums.PlatformType.Desktop,
-			"operator-api");
-
-		var loginResult = await loginService.GetAsync(loginCommand);
-
-		var request = new SubmitDepositRequest
-		{
-			Amount = 200000M,
-			BrandPaymentId = Guid.NewGuid(),
-			PromotionId = null
-		};
-
-		var brandPaymentInfo = new BrandPaymentInfo
-		{
-			Id = request.BrandPaymentId,
-			ChannelId = Guid.NewGuid(),
-			ChannelName = "Test",
-			Enabled = true,
-			ExtendedData = """
-				{
-					"merchantNo": "merchantNo",
-					"appSecret": "appSecret",
-					"privateKey": "privateKey",
-					"channelNo": 0,
-					"exchangeRate": 1
-				}
-				""",
-			PaymentId = Guid.NewGuid(),
-			BrandId = brandId
-		};
-
-		_ = fakePaymentServiceClient.GetBrandPaymentByIdAsync(
-			Arg.Is(request.BrandPaymentId),
-			Arg.Any<CancellationToken>())
-			.Returns(brandPaymentInfo);
-
-		_ = fakePaymentServiceClient.GetPaymentByIdAsync(
-			Arg.Is(brandPaymentInfo.PaymentId),
-			Arg.Any<CancellationToken>())
-			.Returns(new PaymentInfo
-			{
-				Id = brandPaymentInfo.PaymentId,
-				Code = "U2Pay"
-			});
-
-		_ = fakePaymentServiceClient.LockDepositPaymentAsync(
-			Arg.Any<Guid>(),
-			Arg.Is("U2Pay"),
-			Arg.Is(playerCode),
-			Arg.Any<CancellationToken>())
-			.Returns(callInfo => callInfo.ArgAt<Guid>(0));
-
-		var applyInfo = new U2PayDepositApplyInfo(
-			new U2PayDepositSettings(
-				"merchantNo",
-				"appSecret",
-				"privateKey",
-				Guid.NewGuid(),
-				0,
-				"",
-				ExchangeRate: 1m),
-			new U2PayDepositResponse(
-				200000m,
-				Guid.NewGuid(),
-				new Uri("http://localhost/test"),
-				"thirdPartyOrderNo"));
-
-		_ = fakePaymentServiceClient.GetDepositFormAsync(
-			Arg.Is(brandId),
-			Arg.Any<Guid>(),
-			Arg.Any<CancellationToken>())
-			.Returns(new DepositFormInfo
-			{
-				PlayerCode = playerCode,
-				ApplyInfo = JsonSerializer.Serialize(applyInfo, U2PayUtility.SerializerOptions)
-			});
-
-		var expected = new DepositFormCreatedResponse
-		{
-			FormId = Guid.NewGuid(),
-			PaymentUrl = "https://localhost"
-		};
-
-		var isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "true" : "false";
-		var nodeModule = $$"""
-			const axiosConfigFactory = require('./models/axios-configuration.js').default;
-			const OperatorService = require('./services/op-service.js').default;
-
-			module.exports = async (brandToken, loginToken, request) =>
-			{
-				let instance = axiosConfigFactory("{{channelName}}", {{isWindows}}, brandToken, loginToken);
-
-				let svc = new OperatorService(instance);
-
-				return await svc.submitU2MomoDepositRequest(request);
-			};
-			""";
-
-		// Act
-		var actual = await StaticNodeJSService.InvokeFromStringAsync<SuccessResponse<DepositFormCreatedResponse>>(
-			nodeModule,
-			args: new object?[] { brandToken, loginResult.PlayerToken, request });
-
-		// Assert
-		Assert.Equal(applyInfo.Response.RedirectUrl.ToString(), actual?.Data.PaymentUrl);
-	}
-
-	[Fact]
-	public async Task U2PayZalo存款()
-	{
-		// Arrange
-		var channelName = Guid.NewGuid().ToString();
-
-		var fakeBrandCertClient = Substitute.For<IBrandCertificateClient>();
-		var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
-		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
-		var fakePlayerPasswordValidateCommandService = Substitute.For<IGetService<PlayerPasswordValidateCommand, bool>>();
-		var fakePlayerLoginRecordRepository = Substitute.For<IPlayerLoginRecordRepository>();
-		var fakeBrandRepository = Substitute.For<IBrandRepository>();
-		var fakeValidatePlayerLoginRecordCommandService = Substitute.For<ICommandService<ValidatePlayerLoginRecordCommand>>();
-
-		_ = fakeBrandCertClient.GetSystemValidateSecurityKeyAsync(Arg.Any<CancellationToken>())
-			.Returns(TestOperatorApplication.TestSecurityKey);
-
-		var brandId = Guid.NewGuid();
-		var brandCode = "Test";
-		var brandToken = TestOperatorApplication.MakeTestBrandToken(brandId, brandCode);
-
-		_ = fakeBrandRepository.GetSecretKeyAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
-			.Returns("N2KAnljo5zbLCZDSoUBFJ70ONsy");
-
-		var fakePaymentServiceClient = Substitute.For<IPaymentServiceClient>();
-		var fakePromotionClient = Substitute.For<IPromotionClient>();
-
-		using var web = TestOperatorApplication.Builder
-			.UseTestChannelServer(channelName)
-			.ConfigureLogging(logging => logging.AddXUnit(_testOutputHelper))
-			.ConfigureServices(services => services
-				.AddSingleton(fakeBrandCertClient)
-				.AddSingleton(fakeBrandServiceClient)
-				.AddSingleton(fakePlayerServiceClient)
-				.AddSingleton(fakePlayerPasswordValidateCommandService)
-				.AddSingleton(fakePlayerLoginRecordRepository)
-				.AddSingleton(fakeBrandRepository)
-				.AddSingleton(fakeValidatePlayerLoginRecordCommandService)
-				.AddSingleton(fakePaymentServiceClient)
-				.AddSingleton(fakePromotionClient))
-			.Build();
-
-		await web.StartAsync();
-
-		var playerCode = "test1";
-		var userName = "test";
-
-		_ = fakeBrandServiceClient.GetBrandStatusAsync(
-			Arg.Is(brandId),
-			Arg.Any<CancellationToken>())
-			.Returns(BrandStatus.Active);
-		_ = fakePlayerServiceClient.GetPlayerInfoByUserNameAsync(
-			Arg.Is(brandId),
-			Arg.Is(userName),
-			Arg.Any<CancellationToken>())
-			.Returns(new Tgs.PlayerService.Client.PlayerInfo
-			{
-				BrandId = brandId,
-				UserName = userName,
-				PlayerCode = playerCode
-			});
-		_ = fakePlayerPasswordValidateCommandService.GetAsync(
-			Arg.Any<PlayerPasswordValidateCommand>(),
-			Arg.Any<CancellationToken>())
-			.Returns(true);
-		_ = fakePlayerPasswordValidateCommandService.GetAsync(
-			Arg.Any<PlayerPasswordValidateCommand>(),
-			Arg.Any<CancellationToken>())
-			.Returns(true);
-		_ = fakePlayerLoginRecordRepository.AddPlayerLoginRecordAsync(
-			Arg.Is(brandId),
-			Arg.Is(playerCode),
-			Arg.Is(TGS.Core.Models.Enums.PlatformType.Desktop),
-			Arg.Is("127.0.0.1"))
-			.Returns(new LoginRecordInfo(
-				Guid.NewGuid(),
-				playerCode,
-				TGS.Core.Models.Enums.LoginStatus.Enabled,
-				TGS.Core.Models.Enums.PlatformType.Desktop,
-				DateTimeOffset.Now,
-				DateTimeOffset.Now.AddDays(1D)));
-
-		await using var scope = web.Services.CreateAsyncScope();
-
-		var loginService = scope.ServiceProvider.GetRequiredService<IGetService<LoginCommand, LoginInfo>>();
-
-		var loginCommand = new LoginCommand(
-			brandId,
-			userName,
-			"test123",
-			"127.0.0.1",
-			"localhost",
-			TGS.Core.Models.Enums.PlatformType.Desktop,
-			"operator-api");
-
-		var loginResult = await loginService.GetAsync(loginCommand);
-
-		var request = new SubmitDepositRequest
-		{
-			Amount = 200000M,
-			BrandPaymentId = Guid.NewGuid(),
-			PromotionId = null
-		};
-
-		var brandPaymentInfo = new BrandPaymentInfo
-		{
-			Id = request.BrandPaymentId,
-			ChannelId = Guid.NewGuid(),
-			ChannelName = "Test",
-			Enabled = true,
-			ExtendedData = """
-				{
-					"merchantNo": "merchantNo",
-					"appSecret":"appSecret",
-					"privateKey": "privateKey",
-					"channelNo": 1,
-					"exchangeRate": 1
-				}
-				""",
-			PaymentId = Guid.NewGuid(),
-			BrandId = brandId
-		};
-
-		_ = fakePaymentServiceClient.GetBrandPaymentByIdAsync(
-			Arg.Is(request.BrandPaymentId),
-			Arg.Any<CancellationToken>())
-			.Returns(brandPaymentInfo);
-
-		_ = fakePaymentServiceClient.GetPaymentByIdAsync(
-			Arg.Is(brandPaymentInfo.PaymentId),
-			Arg.Any<CancellationToken>())
-			.Returns(new PaymentInfo
-			{
-				Id = brandPaymentInfo.PaymentId,
-				Code = "U2Pay"
-			});
-
-		_ = fakePaymentServiceClient.LockDepositPaymentAsync(
-			Arg.Any<Guid>(),
-			Arg.Is("U2Pay"),
-			Arg.Is(playerCode),
-			Arg.Any<CancellationToken>())
-			.Returns(callInfo => callInfo.ArgAt<Guid>(0));
-
-		var applyInfo = new U2PayDepositApplyInfo(
-			new U2PayDepositSettings(
-				"merchantNo",
-				"appSecret",
-				"privateKey",
-				Guid.NewGuid(),
-				1,
-				"",
-				ExchangeRate: 1m),
-			new U2PayDepositResponse(
-				200000m,
-				Guid.NewGuid(),
-				new Uri("http://localhost/test"),
-				"thirdPartyOrderNo"));
-
-		_ = fakePaymentServiceClient.GetDepositFormAsync(
-			Arg.Is(brandId),
-			Arg.Any<Guid>(),
-			Arg.Any<CancellationToken>())
-			.Returns(new DepositFormInfo
-			{
-				PlayerCode = playerCode,
-				ApplyInfo = JsonSerializer.Serialize(applyInfo, U2PayUtility.SerializerOptions)
-			});
-
-		var expected = new DepositFormCreatedResponse
-		{
-			FormId = Guid.NewGuid(),
-			PaymentUrl = "https://localhost"
-		};
-
-		var isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "true" : "false";
-		var nodeModule = $$"""
-			const axiosConfigFactory = require('./models/axios-configuration.js').default;
-			const OperatorService = require('./services/op-service.js').default;
-
-			module.exports = async (brandToken, loginToken, request) =>
-			{
-				let instance = axiosConfigFactory("{{channelName}}", {{isWindows}}, brandToken, loginToken);
-
-				let svc = new OperatorService(instance);
-
-				return await svc.submitU2ZaloDepositRequest(request);
-			};
-			""";
-
-		// Act
-		var actual = await StaticNodeJSService.InvokeFromStringAsync<SuccessResponse<DepositFormCreatedResponse>>(
-			nodeModule,
-			args: new object?[] { brandToken, loginResult.PlayerToken, request });
-
-		// Assert
-		Assert.Equal(applyInfo.Response.RedirectUrl.ToString(), actual?.Data.PaymentUrl);
-	}
-
-	[Fact]
-	public async Task U2Pay三方存款()
-	{
-		// Arrange
-		var channelName = Guid.NewGuid().ToString();
-
-		var fakeBrandCertClient = Substitute.For<IBrandCertificateClient>();
-		var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
-		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
-		var fakePlayerPasswordValidateCommandService = Substitute.For<IGetService<PlayerPasswordValidateCommand, bool>>();
-		var fakePlayerLoginRecordRepository = Substitute.For<IPlayerLoginRecordRepository>();
-		var fakeBrandRepository = Substitute.For<IBrandRepository>();
-		var fakeValidatePlayerLoginRecordCommandService = Substitute.For<ICommandService<ValidatePlayerLoginRecordCommand>>();
-
-		_ = fakeBrandCertClient.GetSystemValidateSecurityKeyAsync(Arg.Any<CancellationToken>())
-			.Returns(TestOperatorApplication.TestSecurityKey);
-
-		var brandId = Guid.NewGuid();
-		var brandCode = "Test";
-		var brandToken = TestOperatorApplication.MakeTestBrandToken(brandId, brandCode);
-
-		_ = fakeBrandRepository.GetSecretKeyAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
-			.Returns("N2KAnljo5zbLCZDSoUBFJ70ONsy");
-
-		var fakePaymentServiceClient = Substitute.For<IPaymentServiceClient>();
-		var fakePromotionClient = Substitute.For<IPromotionClient>();
-
-		using var web = TestOperatorApplication.Builder
-			.UseTestChannelServer(channelName)
-			.ConfigureLogging(logging => logging.AddXUnit(_testOutputHelper))
-			.ConfigureServices(services => services
-				.AddSingleton(fakeBrandCertClient)
-				.AddSingleton(fakeBrandServiceClient)
-				.AddSingleton(fakePlayerServiceClient)
-				.AddSingleton(fakePlayerPasswordValidateCommandService)
-				.AddSingleton(fakePlayerLoginRecordRepository)
-				.AddSingleton(fakeBrandRepository)
-				.AddSingleton(fakeValidatePlayerLoginRecordCommandService)
-				.AddSingleton(fakePaymentServiceClient)
-				.AddSingleton(fakePromotionClient))
-			.Build();
-
-		await web.StartAsync();
-
-		var playerCode = "test1";
-		var userName = "test";
-
-		_ = fakeBrandServiceClient.GetBrandStatusAsync(
-			Arg.Is(brandId),
-			Arg.Any<CancellationToken>())
-			.Returns(BrandStatus.Active);
-		_ = fakePlayerServiceClient.GetPlayerInfoByUserNameAsync(
-			Arg.Is(brandId),
-			Arg.Is(userName),
-			Arg.Any<CancellationToken>())
-			.Returns(new Tgs.PlayerService.Client.PlayerInfo
-			{
-				BrandId = brandId,
-				UserName = userName,
-				PlayerCode = playerCode
-			});
-		_ = fakePlayerPasswordValidateCommandService.GetAsync(
-			Arg.Any<PlayerPasswordValidateCommand>(),
-			Arg.Any<CancellationToken>())
-			.Returns(true);
-		_ = fakePlayerPasswordValidateCommandService.GetAsync(
-			Arg.Any<PlayerPasswordValidateCommand>(),
-			Arg.Any<CancellationToken>())
-			.Returns(true);
-		_ = fakePlayerLoginRecordRepository.AddPlayerLoginRecordAsync(
-			Arg.Is(brandId),
-			Arg.Is(playerCode),
-			Arg.Is(TGS.Core.Models.Enums.PlatformType.Desktop),
-			Arg.Is("127.0.0.1"))
-			.Returns(new LoginRecordInfo(
-				Guid.NewGuid(),
-				playerCode,
-				TGS.Core.Models.Enums.LoginStatus.Enabled,
-				TGS.Core.Models.Enums.PlatformType.Desktop,
-				DateTimeOffset.Now,
-				DateTimeOffset.Now.AddDays(1D)));
-
-		await using var scope = web.Services.CreateAsyncScope();
-
-		var loginService = scope.ServiceProvider.GetRequiredService<IGetService<LoginCommand, LoginInfo>>();
-
-		var loginCommand = new LoginCommand(
-			brandId,
-			userName,
-			"test123",
-			"127.0.0.1",
-			"localhost",
-			TGS.Core.Models.Enums.PlatformType.Desktop,
-			"operator-api");
-
-		var loginResult = await loginService.GetAsync(loginCommand);
-
-		var request = new SubmitDepositRequest
-		{
-			Amount = 200000M,
-			BrandPaymentId = Guid.NewGuid(),
-			PromotionId = null
-		};
-
-		var brandPaymentInfo = new BrandPaymentInfo
-		{
-			Id = request.BrandPaymentId,
-			ChannelId = Guid.NewGuid(),
-			ChannelName = "Test",
-			Enabled = true,
-			ExtendedData = """
-				{
-					"merchantNo": "merchantNo",
-					"appSecret":"appSecret",
-					"privateKey": "privateKey",
-					"channelNo": 5,
-					"exchangeRate": 1
-				}
-				""",
-			PaymentId = Guid.NewGuid(),
-			BrandId = brandId
-		};
-
-		_ = fakePaymentServiceClient.GetBrandPaymentByIdAsync(
-			Arg.Is(request.BrandPaymentId),
-			Arg.Any<CancellationToken>())
-			.Returns(brandPaymentInfo);
-
-		_ = fakePaymentServiceClient.GetPaymentByIdAsync(
-			Arg.Is(brandPaymentInfo.PaymentId),
-			Arg.Any<CancellationToken>())
-			.Returns(new PaymentInfo
-			{
-				Id = brandPaymentInfo.PaymentId,
-				Code = "U2Pay"
-			});
-
-		_ = fakePaymentServiceClient.LockDepositPaymentAsync(
-			Arg.Any<Guid>(),
-			Arg.Is("U2Pay"),
-			Arg.Is(playerCode),
-			Arg.Any<CancellationToken>())
-			.Returns(callInfo => callInfo.ArgAt<Guid>(0));
-
-		var applyInfo = new U2PayDepositApplyInfo(
-			new U2PayDepositSettings(
-				"merchantNo",
-				"appSecret",
-				"privateKey",
-				Guid.NewGuid(),
-				5,
-				"",
-				ExchangeRate: 1m),
-			new U2PayDepositResponse(
-				200000m,
-				Guid.NewGuid(),
-				new Uri("http://localhost/test"),
-				"thirdPartyOrderNo"));
-
-		_ = fakePaymentServiceClient.GetDepositFormAsync(
-			Arg.Is(brandId),
-			Arg.Any<Guid>(),
-			Arg.Any<CancellationToken>())
-			.Returns(new DepositFormInfo
-			{
-				PlayerCode = playerCode,
-				ApplyInfo = JsonSerializer.Serialize(applyInfo, U2PayUtility.SerializerOptions)
-			});
-
-		var expected = new DepositFormCreatedResponse
-		{
-			FormId = Guid.NewGuid(),
-			PaymentUrl = "https://localhost"
-		};
-
-		var isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "true" : "false";
-		var nodeModule = $$"""
-			const axiosConfigFactory = require('./models/axios-configuration.js').default;
-			const OperatorService = require('./services/op-service.js').default;
-
-			module.exports = async (brandToken, loginToken, request) =>
-			{
-				let instance = axiosConfigFactory("{{channelName}}", {{isWindows}}, brandToken, loginToken);
-
-				let svc = new OperatorService(instance);
-
-				return await svc.submitU2ThirdPartyDepositRequest(request);
-			};
-			""";
-
-		// Act
-		var actual = await StaticNodeJSService.InvokeFromStringAsync<SuccessResponse<DepositFormCreatedResponse>>(
-			nodeModule,
-			args: new object?[] { brandToken, loginResult.PlayerToken, request });
+			args: [brandToken, loginResult.PlayerToken, request]);
 
 		// Assert
 		Assert.Equal(applyInfo.Response.RedirectUrl.ToString(), actual?.Data.PaymentUrl);
@@ -5481,7 +4563,7 @@ public class DepositTests
 		// Act
 		var actual = await StaticNodeJSService.InvokeFromStringAsync<SuccessResponse<DepositFormCreatedResponse>>(
 			nodeModule,
-			args: new object?[] { brandToken, loginResult.PlayerToken, request });
+			args: [brandToken, loginResult.PlayerToken, request]);
 
 		// Assert
 		Assert.Equal(applyInfo.Response.RedirectUrl.ToString(), actual?.Data.PaymentUrl);
@@ -5652,9 +4734,922 @@ public class DepositTests
 		// Act
 		var actual = await StaticNodeJSService.InvokeFromStringAsync<GetUBPayExchangeRateResponse>(
 			nodeModule,
-			args: new object?[] { brandToken, loginResult.PlayerToken, brandPaymentId });
+			args: [brandToken, loginResult.PlayerToken, brandPaymentId]);
 
 		// Assert
 		Assert.Equal(applyInfo.Response.Rate, actual?.Rate);
+	}
+
+	[Fact]
+	public async Task WinPay存款()
+	{
+		// Arrange
+		var channelName = Guid.NewGuid().ToString();
+
+		var fakeBrandCertClient = Substitute.For<IBrandCertificateClient>();
+		var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
+		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
+		var fakePlayerPasswordValidateCommandService = Substitute.For<IGetService<PlayerPasswordValidateCommand, bool>>();
+		var fakePlayerLoginRecordRepository = Substitute.For<IPlayerLoginRecordRepository>();
+		var fakeBrandRepository = Substitute.For<IBrandRepository>();
+		var fakeValidatePlayerLoginRecordCommandService = Substitute.For<ICommandService<ValidatePlayerLoginRecordCommand>>();
+
+		_ = fakeBrandCertClient.GetSystemValidateSecurityKeyAsync(Arg.Any<CancellationToken>())
+			.Returns(TestOperatorApplication.TestSecurityKey);
+
+		var brandId = Guid.NewGuid();
+		var brandCode = "Test";
+		var brandToken = TestOperatorApplication.MakeTestBrandToken(brandId, brandCode);
+
+		_ = fakeBrandRepository.GetSecretKeyAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
+			.Returns("N2KAnljo5zbLCZDSoUBFJ70ONsy");
+
+		var fakePaymentServiceClient = Substitute.For<IPaymentServiceClient>();
+		var fakePromotionClient = Substitute.For<IPromotionClient>();
+
+		using var web = TestOperatorApplication.Builder
+			.UseTestChannelServer(channelName)
+			.ConfigureLogging(logging => logging.AddXUnit(_testOutputHelper))
+			.ConfigureServices(services => services
+				.AddSingleton(fakeBrandCertClient)
+				.AddSingleton(fakeBrandServiceClient)
+				.AddSingleton(fakePlayerServiceClient)
+				.AddSingleton(fakePlayerPasswordValidateCommandService)
+				.AddSingleton(fakePlayerLoginRecordRepository)
+				.AddSingleton(fakeBrandRepository)
+				.AddSingleton(fakeValidatePlayerLoginRecordCommandService)
+				.AddSingleton(fakePaymentServiceClient)
+				.AddSingleton(fakePromotionClient))
+			.Build();
+
+		await web.StartAsync();
+
+		var playerCode = "test1";
+		var userName = "test";
+
+		_ = fakeBrandServiceClient.GetBrandStatusAsync(
+			Arg.Is(brandId),
+			Arg.Any<CancellationToken>())
+			.Returns(BrandStatus.Active);
+		_ = fakePlayerServiceClient.GetPlayerInfoByUserNameAsync(
+			Arg.Is(brandId),
+			Arg.Is(userName),
+			Arg.Any<CancellationToken>())
+			.Returns(new Tgs.PlayerService.Client.PlayerInfo
+			{
+				BrandId = brandId,
+				UserName = userName,
+				PlayerCode = playerCode
+			});
+		_ = fakePlayerPasswordValidateCommandService.GetAsync(
+			Arg.Any<PlayerPasswordValidateCommand>(),
+			Arg.Any<CancellationToken>())
+			.Returns(true);
+		_ = fakePlayerPasswordValidateCommandService.GetAsync(
+			Arg.Any<PlayerPasswordValidateCommand>(),
+			Arg.Any<CancellationToken>())
+			.Returns(true);
+		_ = fakePlayerLoginRecordRepository.AddPlayerLoginRecordAsync(
+			Arg.Is(brandId),
+			Arg.Is(playerCode),
+			Arg.Is(TGS.Core.Models.Enums.PlatformType.Desktop),
+			Arg.Is("127.0.0.1"))
+			.Returns(new LoginRecordInfo(
+				Guid.NewGuid(),
+				playerCode,
+				TGS.Core.Models.Enums.LoginStatus.Enabled,
+				TGS.Core.Models.Enums.PlatformType.Desktop,
+				DateTimeOffset.Now,
+				DateTimeOffset.Now.AddDays(1D)));
+
+		await using var scope = web.Services.CreateAsyncScope();
+
+		var loginService = scope.ServiceProvider.GetRequiredService<IGetService<LoginCommand, LoginInfo>>();
+
+		var loginCommand = new LoginCommand(
+			brandId,
+			userName,
+			"test123",
+			"127.0.0.1",
+			"localhost",
+			TGS.Core.Models.Enums.PlatformType.Desktop,
+			"operator-api");
+
+		var loginResult = await loginService.GetAsync(loginCommand);
+
+		var request = new SubmitDepositRequest
+		{
+			Amount = 100M,
+			BrandPaymentId = Guid.NewGuid(),
+			PromotionId = null
+		};
+
+		var brandPaymentInfo = new BrandPaymentInfo
+		{
+			Id = request.BrandPaymentId,
+			ChannelId = Guid.NewGuid(),
+			ChannelName = "Test",
+			Enabled = true,
+			ExtendedData = """
+				{
+					"merchant": "test123",
+					"key": "aabbccddeeff",
+					"paymentType": "3",
+					"bankCode": "gcash"
+				}
+				""",
+			PaymentId = Guid.NewGuid(),
+			BrandId = brandId
+		};
+
+		_ = fakePaymentServiceClient.GetBrandPaymentByIdAsync(
+			Arg.Is(request.BrandPaymentId),
+			Arg.Any<CancellationToken>())
+			.Returns(brandPaymentInfo);
+
+		_ = fakePaymentServiceClient.GetPaymentByIdAsync(
+			Arg.Is(brandPaymentInfo.PaymentId),
+			Arg.Any<CancellationToken>())
+			.Returns(new PaymentInfo
+			{
+				Id = brandPaymentInfo.PaymentId,
+				Code = "WinPay"
+			});
+
+		_ = fakePaymentServiceClient.LockDepositPaymentAsync(
+			Arg.Any<Guid>(),
+			Arg.Is("WinPay"),
+			Arg.Is(playerCode),
+			Arg.Any<CancellationToken>())
+			.Returns(callInfo => callInfo.ArgAt<Guid>(0));
+
+		var applyInfo = new PhpGoPayDepositApplyInfo(
+			new PhpGoPayDepositSettings(
+				"test123",
+				"aabbccddeeff",
+				PhpGoPaymentType.Direct,
+				PhpGoBankCode.GCash,
+				new Uri("http://localhost"),
+				Guid.NewGuid()),
+			new PhpGoPayDepositResponse(
+				100M,
+				null,
+				Guid.NewGuid(),
+				new Uri("http://localhost/test"),
+				new Uri("http://localhost")));
+
+		_ = fakePaymentServiceClient.GetDepositFormAsync(
+			Arg.Is(brandId),
+			Arg.Any<Guid>(),
+			Arg.Any<CancellationToken>())
+			.Returns(new DepositFormInfo
+			{
+				PlayerCode = playerCode,
+				ApplyInfo = JsonSerializer.Serialize(applyInfo, PhpGoPayUtility.SerializerOptions)
+			});
+
+		var expected = new DepositFormCreatedResponse
+		{
+			FormId = Guid.NewGuid(),
+			PaymentUrl = "https://localhost"
+		};
+
+		var isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "true" : "false";
+		var nodeModule = $$"""
+			const axiosConfigFactory = require('./models/axios-configuration.js').default;
+			const OperatorService = require('./services/op-service.js').default;
+
+			module.exports = async (brandToken, loginToken, request) =>
+			{
+				let instance = axiosConfigFactory("{{channelName}}", {{isWindows}}, brandToken, loginToken);
+
+				let svc = new OperatorService(instance);
+
+				return await svc.submitWinThirdPartyDepositRequest(request);
+			};
+			""";
+
+		// Act
+		var actual = await StaticNodeJSService.InvokeFromStringAsync<SuccessResponse<DepositFormCreatedResponse>>(
+			nodeModule,
+			args: [brandToken, loginResult.PlayerToken, request]);
+
+		// Assert
+		Assert.Equal(applyInfo.Response.RedirectUrl.ToString(), actual?.Data.PaymentUrl);
+	}
+
+	[Fact]
+	public async Task 手動USDT存款時QRCode為非必填()
+	{
+		// Arrange
+		var channelName = Guid.NewGuid().ToString();
+
+		var fakeBrandCertClient = Substitute.For<IBrandCertificateClient>();
+		var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
+		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
+		var fakePlayerPasswordValidateCommandService = Substitute.For<IGetService<PlayerPasswordValidateCommand, bool>>();
+		var fakePlayerLoginRecordRepository = Substitute.For<IPlayerLoginRecordRepository>();
+		var fakeBrandRepository = Substitute.For<IBrandRepository>();
+		var fakeValidatePlayerLoginRecordCommandService = Substitute.For<ICommandService<ValidatePlayerLoginRecordCommand>>();
+
+		var fakeCreateDepositFormService = Substitute.For<IGetService<CreateDepositFormCommand, Guid>>();
+		var fakeGetBrandPaymentService = Substitute.For<IGetService<GetBrandPaymentQuery, BrandPaymentInfo>>();
+
+		_ = fakeBrandCertClient.GetSystemValidateSecurityKeyAsync(Arg.Any<CancellationToken>())
+			.Returns(TestOperatorApplication.TestSecurityKey);
+
+		var brandId = Guid.NewGuid();
+		var brandCode = "Test";
+		var brandToken = TestOperatorApplication.MakeTestBrandToken(brandId, brandCode);
+
+		_ = fakeBrandRepository.GetSecretKeyAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
+			.Returns("N2KAnljo5zbLCZDSoUBFJ70ONsy");
+
+		using var web = TestOperatorApplication.Builder
+			.UseTestChannelServer(channelName)
+			.ConfigureLogging(logging => logging.AddXUnit(_testOutputHelper))
+			.ConfigureServices(services => services
+				.AddSingleton(fakeBrandCertClient)
+				.AddSingleton(fakeBrandServiceClient)
+				.AddSingleton(fakePlayerServiceClient)
+				.AddSingleton(fakePlayerPasswordValidateCommandService)
+				.AddSingleton(fakePlayerLoginRecordRepository)
+				.AddSingleton(fakeBrandRepository)
+				.AddSingleton(fakeValidatePlayerLoginRecordCommandService)
+				.AddSingleton(fakeCreateDepositFormService)
+				.AddSingleton(fakeGetBrandPaymentService)
+				.AddSingleton<ManualDepositSerializer>())
+			.Build();
+
+		await web.StartAsync();
+
+		var playerCode = "test1";
+		var userName = "test";
+
+		_ = fakeBrandServiceClient.GetBrandStatusAsync(Arg.Is(brandId))
+			.Returns(BrandStatus.Active);
+		_ = fakePlayerServiceClient.GetPlayerInfoByUserNameAsync(Arg.Is(brandId), Arg.Is(userName))
+			.Returns(new Tgs.PlayerService.Client.PlayerInfo
+			{
+				BrandId = brandId,
+				UserName = userName,
+				PlayerCode = playerCode
+			});
+		_ = fakePlayerPasswordValidateCommandService.GetAsync(Arg.Any<PlayerPasswordValidateCommand>())
+			.Returns(true);
+		_ = fakePlayerLoginRecordRepository.AddPlayerLoginRecordAsync(
+			Arg.Is(brandId),
+			Arg.Is(playerCode),
+			Arg.Is(TGS.Core.Models.Enums.PlatformType.Desktop),
+			Arg.Is("127.0.0.1"))
+			.Returns(new LoginRecordInfo(
+				Guid.NewGuid(),
+				playerCode,
+				TGS.Core.Models.Enums.LoginStatus.Enabled,
+				TGS.Core.Models.Enums.PlatformType.Desktop,
+				DateTimeOffset.Now,
+				DateTimeOffset.Now.AddDays(1D)));
+
+		await using var scope = web.Services.CreateAsyncScope();
+
+		var loginService = scope.ServiceProvider.GetRequiredService<IGetService<LoginCommand, LoginInfo>>();
+
+		var loginCommand = new LoginCommand(
+			brandId,
+			userName,
+			"test123",
+			"127.0.0.1",
+			"localhost",
+			TGS.Core.Models.Enums.PlatformType.Desktop,
+			"operator-api");
+
+		var loginResult = await loginService.GetAsync(loginCommand);
+
+		var brandPaymentId = Guid.NewGuid();
+		var amount = 1000m;
+
+		var brandPaymentInfo = new BrandPaymentInfo
+		{
+			Id = brandPaymentId,
+			ChannelId = Guid.NewGuid(),
+			ChannelName = "Usdt",
+			Enabled = true,
+			ExtendedData = """
+				{
+					"rate": 0.01,
+					"address": "usdt_address"
+				}
+				"""
+		};
+
+		_ = fakeGetBrandPaymentService.GetAsync(
+			Arg.Is<GetBrandPaymentQuery>(x => x.Id == brandPaymentId),
+			Arg.Any<CancellationToken>())
+			.Returns(brandPaymentInfo);
+
+		var expected = Guid.NewGuid();
+
+		_ = fakeCreateDepositFormService.GetAsync(
+			Arg.Is<CreateDepositFormCommand>(x =>
+					x.PlayerCode == playerCode
+					&& x.BrandId == brandId
+					&& x.BrandPaymentId == brandPaymentId),
+			Arg.Any<CancellationToken>())
+			.Returns(expected);
+
+		var isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "true" : "false";
+		var nodeModule = $$"""
+			const axiosConfigFactory = require('./models/axios-configuration.js').default;
+			const OperatorService = require('./services/op-service.js').default;
+
+			module.exports = async (brandToken, loginToken, amount, paymentId, promotionId, bankType) =>
+			{
+				let instance = axiosConfigFactory("{{channelName}}", {{isWindows}}, brandToken, loginToken);
+
+				let svc = new OperatorService(instance);
+
+				return await svc.submitManualDepositUsdt(amount, paymentId, promotionId, bankType);
+			};
+		""";
+
+		// Act
+		var actual = await StaticNodeJSService.InvokeFromStringAsync<SuccessResponse<string>>(
+			nodeModule,
+			args: [brandToken, loginResult.PlayerToken, amount, brandPaymentId, null, "usdt"]);
+
+		// Assert
+		Assert.Equal(expected, Guid.Parse(actual!.Data));
+	}
+
+	[Fact]
+	public async Task 手動存款Bank()
+	{
+		// Arrange
+		var channelName = Guid.NewGuid().ToString();
+
+		var fakeBrandCertClient = Substitute.For<IBrandCertificateClient>();
+		var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
+		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
+		var fakePlayerPasswordValidateCommandService = Substitute.For<IGetService<PlayerPasswordValidateCommand, bool>>();
+		var fakePlayerLoginRecordRepository = Substitute.For<IPlayerLoginRecordRepository>();
+		var fakeBrandRepository = Substitute.For<IBrandRepository>();
+		var fakeValidatePlayerLoginRecordCommandService = Substitute.For<ICommandService<ValidatePlayerLoginRecordCommand>>();
+
+		var fakeCreateDepositFormService = Substitute.For<IGetService<CreateDepositFormCommand, Guid>>();
+		var fakeGetBrandPaymentService = Substitute.For<IGetService<GetBrandPaymentQuery, BrandPaymentInfo>>();
+
+		_ = fakeBrandCertClient.GetSystemValidateSecurityKeyAsync(Arg.Any<CancellationToken>())
+			.Returns(TestOperatorApplication.TestSecurityKey);
+
+		var brandId = Guid.NewGuid();
+		var brandCode = "Test";
+		var brandToken = TestOperatorApplication.MakeTestBrandToken(brandId, brandCode);
+
+		_ = fakeBrandRepository.GetSecretKeyAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
+			.Returns("N2KAnljo5zbLCZDSoUBFJ70ONsy");
+
+		using var web = TestOperatorApplication.Builder
+			.UseTestChannelServer(channelName)
+			.ConfigureLogging(logging => logging.AddXUnit(_testOutputHelper))
+			.ConfigureServices(services => services
+				.AddSingleton(fakeBrandCertClient)
+				.AddSingleton(fakeBrandServiceClient)
+				.AddSingleton(fakePlayerServiceClient)
+				.AddSingleton(fakePlayerPasswordValidateCommandService)
+				.AddSingleton(fakePlayerLoginRecordRepository)
+				.AddSingleton(fakeBrandRepository)
+				.AddSingleton(fakeValidatePlayerLoginRecordCommandService)
+				.AddSingleton(fakeCreateDepositFormService)
+				.AddSingleton(fakeGetBrandPaymentService)
+				.AddSingleton<ManualDepositSerializer>())
+			.Build();
+
+		await web.StartAsync();
+
+		var playerCode = "test1";
+		var userName = "test";
+
+		_ = fakeBrandServiceClient.GetBrandStatusAsync(Arg.Is(brandId))
+			.Returns(BrandStatus.Active);
+		_ = fakePlayerServiceClient.GetPlayerInfoByUserNameAsync(Arg.Is(brandId), Arg.Is(userName))
+			.Returns(new Tgs.PlayerService.Client.PlayerInfo
+			{
+				BrandId = brandId,
+				UserName = userName,
+				PlayerCode = playerCode
+			});
+		_ = fakePlayerPasswordValidateCommandService.GetAsync(Arg.Any<PlayerPasswordValidateCommand>())
+			.Returns(true);
+		_ = fakePlayerLoginRecordRepository.AddPlayerLoginRecordAsync(
+				Arg.Is(brandId),
+				Arg.Is(playerCode),
+				Arg.Is(TGS.Core.Models.Enums.PlatformType.Desktop),
+				Arg.Is("127.0.0.1"))
+			.Returns(new LoginRecordInfo(
+				Guid.NewGuid(),
+				playerCode,
+				TGS.Core.Models.Enums.LoginStatus.Enabled,
+				TGS.Core.Models.Enums.PlatformType.Desktop,
+				DateTimeOffset.Now,
+				DateTimeOffset.Now.AddDays(1D)));
+
+		await using var scope = web.Services.CreateAsyncScope();
+
+		var loginService = scope.ServiceProvider.GetRequiredService<IGetService<LoginCommand, LoginInfo>>();
+
+		var loginCommand = new LoginCommand(
+			brandId,
+			userName,
+			"test123",
+			"127.0.0.1",
+			"localhost",
+			TGS.Core.Models.Enums.PlatformType.Desktop,
+			"operator-api");
+
+		var loginResult = await loginService.GetAsync(loginCommand);
+
+		var brandPaymentId = Guid.NewGuid();
+		var amount = 1000m;
+
+		var brandPaymentInfo = new BrandPaymentInfo
+		{
+			Id = brandPaymentId,
+			ChannelId = Guid.NewGuid(),
+			ChannelName = "Usdt",
+			Enabled = true,
+			ExtendedData = """
+				{
+					"name": "testName",
+					"bankAccount": "testBankAccount"
+				}
+				"""
+		};
+
+		_ = fakeGetBrandPaymentService.GetAsync(
+			Arg.Is<GetBrandPaymentQuery>(x => x.Id == brandPaymentId),
+			Arg.Any<CancellationToken>())
+			.Returns(brandPaymentInfo);
+
+		var expected = Guid.NewGuid();
+
+		_ = fakeCreateDepositFormService.GetAsync(
+			Arg.Is<CreateDepositFormCommand>(x =>
+					x.PlayerCode == playerCode
+					&& x.BrandId == brandId
+					&& x.BrandPaymentId == brandPaymentId),
+			Arg.Any<CancellationToken>())
+			.Returns(expected);
+
+		var isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "true" : "false";
+		var nodeModule = $$"""
+			const axiosConfigFactory = require('./models/axios-configuration.js').default;
+			const OperatorService = require('./services/op-service.js').default;
+
+			module.exports = async (brandToken, loginToken, amount, paymentId, promotionId, bankType, account, name, note, realname) =>
+			{
+				let instance = axiosConfigFactory("{{channelName}}", {{isWindows}}, brandToken, loginToken);
+
+				let svc = new OperatorService(instance);
+
+				return await svc.submitManualDepositBankRequest(amount, paymentId, promotionId, bankType, account, name, note, realname);
+			};
+			""";
+
+		// Act
+		var actual = await StaticNodeJSService.InvokeFromStringAsync<SuccessResponse<string>>(
+			nodeModule,
+			args: [brandToken, loginResult.PlayerToken, amount, brandPaymentId, null, "bank", "testAccount", "testBankName", "testNote", null]);
+
+		// Assert
+		Assert.Equal(expected, Guid.Parse(actual!.Data));
+	}
+
+	[Fact]
+	public async Task 手動存款Coinsph()
+	{
+		// Arrange
+		var channelName = Guid.NewGuid().ToString();
+
+		var fakeBrandCertClient = Substitute.For<IBrandCertificateClient>();
+		var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
+		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
+		var fakePlayerPasswordValidateCommandService = Substitute.For<IGetService<PlayerPasswordValidateCommand, bool>>();
+		var fakePlayerLoginRecordRepository = Substitute.For<IPlayerLoginRecordRepository>();
+		var fakeBrandRepository = Substitute.For<IBrandRepository>();
+		var fakeValidatePlayerLoginRecordCommandService = Substitute.For<ICommandService<ValidatePlayerLoginRecordCommand>>();
+
+		var fakeCreateDepositFormService = Substitute.For<IGetService<CreateDepositFormCommand, Guid>>();
+		var fakeGetBrandPaymentService = Substitute.For<IGetService<GetBrandPaymentQuery, BrandPaymentInfo>>();
+
+		_ = fakeBrandCertClient.GetSystemValidateSecurityKeyAsync(Arg.Any<CancellationToken>())
+			.Returns(TestOperatorApplication.TestSecurityKey);
+
+		var brandId = Guid.NewGuid();
+		var brandCode = "Test";
+		var brandToken = TestOperatorApplication.MakeTestBrandToken(brandId, brandCode);
+
+		_ = fakeBrandRepository.GetSecretKeyAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
+			.Returns("N2KAnljo5zbLCZDSoUBFJ70ONsy");
+
+		using var web = TestOperatorApplication.Builder
+			.UseTestChannelServer(channelName)
+			.ConfigureLogging(logging => logging.AddXUnit(_testOutputHelper))
+			.ConfigureServices(services => services
+				.AddSingleton(fakeBrandCertClient)
+				.AddSingleton(fakeBrandServiceClient)
+				.AddSingleton(fakePlayerServiceClient)
+				.AddSingleton(fakePlayerPasswordValidateCommandService)
+				.AddSingleton(fakePlayerLoginRecordRepository)
+				.AddSingleton(fakeBrandRepository)
+				.AddSingleton(fakeValidatePlayerLoginRecordCommandService)
+				.AddSingleton(fakeCreateDepositFormService)
+				.AddSingleton(fakeGetBrandPaymentService)
+				.AddSingleton<ManualDepositSerializer>())
+			.Build();
+
+		await web.StartAsync();
+
+		var playerCode = "test1";
+		var userName = "test";
+
+		_ = fakeBrandServiceClient.GetBrandStatusAsync(Arg.Is(brandId))
+			.Returns(BrandStatus.Active);
+		_ = fakePlayerServiceClient.GetPlayerInfoByUserNameAsync(Arg.Is(brandId), Arg.Is(userName))
+			.Returns(new Tgs.PlayerService.Client.PlayerInfo
+			{
+				BrandId = brandId,
+				UserName = userName,
+				PlayerCode = playerCode
+			});
+		_ = fakePlayerPasswordValidateCommandService.GetAsync(Arg.Any<PlayerPasswordValidateCommand>())
+			.Returns(true);
+		_ = fakePlayerLoginRecordRepository.AddPlayerLoginRecordAsync(
+				Arg.Is(brandId),
+				Arg.Is(playerCode),
+				Arg.Is(TGS.Core.Models.Enums.PlatformType.Desktop),
+				Arg.Is("127.0.0.1"))
+			.Returns(new LoginRecordInfo(
+				Guid.NewGuid(),
+				playerCode,
+				TGS.Core.Models.Enums.LoginStatus.Enabled,
+				TGS.Core.Models.Enums.PlatformType.Desktop,
+				DateTimeOffset.Now,
+				DateTimeOffset.Now.AddDays(1D)));
+
+		await using var scope = web.Services.CreateAsyncScope();
+
+		var loginService = scope.ServiceProvider.GetRequiredService<IGetService<LoginCommand, LoginInfo>>();
+
+		var loginCommand = new LoginCommand(
+			brandId,
+			userName,
+			"test123",
+			"127.0.0.1",
+			"localhost",
+			TGS.Core.Models.Enums.PlatformType.Desktop,
+			"operator-api");
+
+		var loginResult = await loginService.GetAsync(loginCommand);
+
+		var brandPaymentId = Guid.NewGuid();
+		var amount = 1000m;
+
+		var brandPaymentInfo = new BrandPaymentInfo
+		{
+			Id = brandPaymentId,
+			ChannelId = Guid.NewGuid(),
+			ChannelName = "Coinsph",
+			Enabled = true,
+			ExtendedData = """
+				{
+					"phone": "0912345678",
+					"name": "testName",
+					"qrCode": "testQrCode"
+				}
+				"""
+		};
+
+		_ = fakeGetBrandPaymentService.GetAsync(
+			Arg.Is<GetBrandPaymentQuery>(x => x.Id == brandPaymentId),
+			Arg.Any<CancellationToken>())
+			.Returns(brandPaymentInfo);
+
+		var expected = Guid.NewGuid();
+
+		_ = fakeCreateDepositFormService.GetAsync(
+			Arg.Is<CreateDepositFormCommand>(x =>
+					x.PlayerCode == playerCode
+					&& x.BrandId == brandId
+					&& x.BrandPaymentId == brandPaymentId),
+			Arg.Any<CancellationToken>())
+			.Returns(expected);
+
+		var isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "true" : "false";
+		var nodeModule = $$"""
+			const axiosConfigFactory = require('./models/axios-configuration.js').default;
+			const OperatorService = require('./services/op-service.js').default;
+
+			module.exports = async (brandToken, loginToken, amount, paymentId, promotionId, bankType, realname, phone, address) =>
+			{
+				let instance = axiosConfigFactory("{{channelName}}", {{isWindows}}, brandToken, loginToken);
+
+				let svc = new OperatorService(instance);
+
+				return await svc.submitManualDepositCoinsphRequest(amount, paymentId, promotionId, bankType, realname, phone, address);
+			};
+		""";
+
+		// Act
+		var actual = await StaticNodeJSService.InvokeFromStringAsync<SuccessResponse<string>>(
+			nodeModule,
+			args: [brandToken, loginResult.PlayerToken, amount, brandPaymentId, null, "coinsph", "testRealName", "0912345678", "T1123456789101112"]);
+
+		// Assert
+		Assert.Equal(expected, Guid.Parse(actual!.Data));
+	}
+
+	[Fact]
+	public async Task 手動存款EWallet()
+	{
+		// Arrange
+		var channelName = Guid.NewGuid().ToString();
+
+		var fakeBrandCertClient = Substitute.For<IBrandCertificateClient>();
+		var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
+		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
+		var fakePlayerPasswordValidateCommandService = Substitute.For<IGetService<PlayerPasswordValidateCommand, bool>>();
+		var fakePlayerLoginRecordRepository = Substitute.For<IPlayerLoginRecordRepository>();
+		var fakeBrandRepository = Substitute.For<IBrandRepository>();
+		var fakeValidatePlayerLoginRecordCommandService = Substitute.For<ICommandService<ValidatePlayerLoginRecordCommand>>();
+
+		var fakeCreateDepositFormService = Substitute.For<IGetService<CreateDepositFormCommand, Guid>>();
+		var fakeGetBrandPaymentService = Substitute.For<IGetService<GetBrandPaymentQuery, BrandPaymentInfo>>();
+
+		_ = fakeBrandCertClient.GetSystemValidateSecurityKeyAsync(Arg.Any<CancellationToken>())
+			.Returns(TestOperatorApplication.TestSecurityKey);
+
+		var brandId = Guid.NewGuid();
+		var brandCode = "Test";
+		var brandToken = TestOperatorApplication.MakeTestBrandToken(brandId, brandCode);
+
+		_ = fakeBrandRepository.GetSecretKeyAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
+			.Returns("N2KAnljo5zbLCZDSoUBFJ70ONsy");
+
+		using var web = TestOperatorApplication.Builder
+			.UseTestChannelServer(channelName)
+			.ConfigureLogging(logging => logging.AddXUnit(_testOutputHelper))
+			.ConfigureServices(services => services
+				.AddSingleton(fakeBrandCertClient)
+				.AddSingleton(fakeBrandServiceClient)
+				.AddSingleton(fakePlayerServiceClient)
+				.AddSingleton(fakePlayerPasswordValidateCommandService)
+				.AddSingleton(fakePlayerLoginRecordRepository)
+				.AddSingleton(fakeBrandRepository)
+				.AddSingleton(fakeValidatePlayerLoginRecordCommandService)
+				.AddSingleton(fakeCreateDepositFormService)
+				.AddSingleton(fakeGetBrandPaymentService)
+				.AddSingleton<ManualDepositSerializer>())
+			.Build();
+
+		await web.StartAsync();
+
+		var playerCode = "test1";
+		var userName = "test";
+
+		_ = fakeBrandServiceClient.GetBrandStatusAsync(Arg.Is(brandId))
+			.Returns(BrandStatus.Active);
+		_ = fakePlayerServiceClient.GetPlayerInfoByUserNameAsync(Arg.Is(brandId), Arg.Is(userName))
+			.Returns(new Tgs.PlayerService.Client.PlayerInfo
+			{
+				BrandId = brandId,
+				UserName = userName,
+				PlayerCode = playerCode
+			});
+		_ = fakePlayerPasswordValidateCommandService.GetAsync(Arg.Any<PlayerPasswordValidateCommand>())
+			.Returns(true);
+		_ = fakePlayerLoginRecordRepository.AddPlayerLoginRecordAsync(
+				Arg.Is(brandId),
+				Arg.Is(playerCode),
+				Arg.Is(TGS.Core.Models.Enums.PlatformType.Desktop),
+				Arg.Is("127.0.0.1"))
+			.Returns(new LoginRecordInfo(
+				Guid.NewGuid(),
+				playerCode,
+				TGS.Core.Models.Enums.LoginStatus.Enabled,
+				TGS.Core.Models.Enums.PlatformType.Desktop,
+				DateTimeOffset.Now,
+				DateTimeOffset.Now.AddDays(1D)));
+
+		await using var scope = web.Services.CreateAsyncScope();
+
+		var loginService = scope.ServiceProvider.GetRequiredService<IGetService<LoginCommand, LoginInfo>>();
+
+		var loginCommand = new LoginCommand(
+			brandId,
+			userName,
+			"test123",
+			"127.0.0.1",
+			"localhost",
+			TGS.Core.Models.Enums.PlatformType.Desktop,
+			"operator-api");
+
+		var loginResult = await loginService.GetAsync(loginCommand);
+
+		var brandPaymentId = Guid.NewGuid();
+		var amount = 1000m;
+
+		var brandPaymentInfo = new BrandPaymentInfo
+		{
+			Id = brandPaymentId,
+			ChannelId = Guid.NewGuid(),
+			ChannelName = "Usdt",
+			Enabled = true,
+			ExtendedData = """
+				{
+					"phone": "0912345678",
+					"eMoneyName": "testEMoneyName"
+				}
+				"""
+		};
+
+		_ = fakeGetBrandPaymentService.GetAsync(
+			Arg.Is<GetBrandPaymentQuery>(x => x.Id == brandPaymentId),
+			Arg.Any<CancellationToken>())
+			.Returns(brandPaymentInfo);
+
+		var expected = Guid.NewGuid();
+
+		_ = fakeCreateDepositFormService.GetAsync(
+			Arg.Is<CreateDepositFormCommand>(x =>
+					x.PlayerCode == playerCode
+					&& x.BrandId == brandId
+					&& x.BrandPaymentId == brandPaymentId),
+			Arg.Any<CancellationToken>())
+			.Returns(expected);
+
+		var isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "true" : "false";
+		var nodeModule = $$"""
+			const axiosConfigFactory = require('./models/axios-configuration.js').default;
+			const OperatorService = require('./services/op-service.js').default;
+
+			module.exports = async (brandToken, loginToken, amount, paymentId, promotionId, bankType, note, realname, phone) =>
+			{
+				let instance = axiosConfigFactory("{{channelName}}", {{isWindows}}, brandToken, loginToken);
+
+				let svc = new OperatorService(instance);
+
+				return await svc.submitManualDepositEWalletRequest(amount, paymentId, promotionId, bankType, note, realname, phone);
+			};
+		""";
+
+		// Act
+		var actual = await StaticNodeJSService.InvokeFromStringAsync<SuccessResponse<string>>(
+			nodeModule,
+			args: [brandToken, loginResult.PlayerToken, amount, brandPaymentId, null, "ewallet", "testNote", "testRealName", "0912345678"]);
+
+		// Assert
+		Assert.Equal(expected, Guid.Parse(actual!.Data));
+	}
+
+	[Fact]
+	public async Task 手動存款Pulsa()
+	{
+		// Arrange
+		var channelName = Guid.NewGuid().ToString();
+
+		var fakeBrandCertClient = Substitute.For<IBrandCertificateClient>();
+		var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
+		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
+		var fakePlayerPasswordValidateCommandService = Substitute.For<IGetService<PlayerPasswordValidateCommand, bool>>();
+		var fakePlayerLoginRecordRepository = Substitute.For<IPlayerLoginRecordRepository>();
+		var fakeBrandRepository = Substitute.For<IBrandRepository>();
+		var fakeValidatePlayerLoginRecordCommandService = Substitute.For<ICommandService<ValidatePlayerLoginRecordCommand>>();
+
+		var fakeCreateDepositFormService = Substitute.For<IGetService<CreateDepositFormCommand, Guid>>();
+		var fakeGetBrandPaymentService = Substitute.For<IGetService<GetBrandPaymentQuery, BrandPaymentInfo>>();
+
+		_ = fakeBrandCertClient.GetSystemValidateSecurityKeyAsync(Arg.Any<CancellationToken>())
+			.Returns(TestOperatorApplication.TestSecurityKey);
+
+		var brandId = Guid.NewGuid();
+		var brandCode = "Test";
+		var brandToken = TestOperatorApplication.MakeTestBrandToken(brandId, brandCode);
+
+		_ = fakeBrandRepository.GetSecretKeyAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
+			.Returns("N2KAnljo5zbLCZDSoUBFJ70ONsy");
+
+		using var web = TestOperatorApplication.Builder
+			.UseTestChannelServer(channelName)
+			.ConfigureLogging(logging => logging.AddXUnit(_testOutputHelper))
+			.ConfigureServices(services => services
+				.AddSingleton(fakeBrandCertClient)
+				.AddSingleton(fakeBrandServiceClient)
+				.AddSingleton(fakePlayerServiceClient)
+				.AddSingleton(fakePlayerPasswordValidateCommandService)
+				.AddSingleton(fakePlayerLoginRecordRepository)
+				.AddSingleton(fakeBrandRepository)
+				.AddSingleton(fakeValidatePlayerLoginRecordCommandService)
+				.AddSingleton(fakeCreateDepositFormService)
+				.AddSingleton(fakeGetBrandPaymentService)
+				.AddSingleton<ManualDepositSerializer>())
+			.Build();
+
+		await web.StartAsync();
+
+		var playerCode = "test1";
+		var userName = "test";
+
+		_ = fakeBrandServiceClient.GetBrandStatusAsync(Arg.Is(brandId))
+			.Returns(BrandStatus.Active);
+		_ = fakePlayerServiceClient.GetPlayerInfoByUserNameAsync(Arg.Is(brandId), Arg.Is(userName))
+			.Returns(new Tgs.PlayerService.Client.PlayerInfo
+			{
+				BrandId = brandId,
+				UserName = userName,
+				PlayerCode = playerCode
+			});
+		_ = fakePlayerPasswordValidateCommandService.GetAsync(Arg.Any<PlayerPasswordValidateCommand>())
+			.Returns(true);
+		_ = fakePlayerLoginRecordRepository.AddPlayerLoginRecordAsync(
+				Arg.Is(brandId),
+				Arg.Is(playerCode),
+				Arg.Is(TGS.Core.Models.Enums.PlatformType.Desktop),
+				Arg.Is("127.0.0.1"))
+			.Returns(new LoginRecordInfo(
+				Guid.NewGuid(),
+				playerCode,
+				TGS.Core.Models.Enums.LoginStatus.Enabled,
+				TGS.Core.Models.Enums.PlatformType.Desktop,
+				DateTimeOffset.Now,
+				DateTimeOffset.Now.AddDays(1D)));
+
+		await using var scope = web.Services.CreateAsyncScope();
+
+		var loginService = scope.ServiceProvider.GetRequiredService<IGetService<LoginCommand, LoginInfo>>();
+
+		var loginCommand = new LoginCommand(
+			brandId,
+			userName,
+			"test123",
+			"127.0.0.1",
+			"localhost",
+			TGS.Core.Models.Enums.PlatformType.Desktop,
+			"operator-api");
+
+		var loginResult = await loginService.GetAsync(loginCommand);
+
+		var brandPaymentId = Guid.NewGuid();
+		var amount = 1000m;
+
+		var brandPaymentInfo = new BrandPaymentInfo
+		{
+			Id = brandPaymentId,
+			ChannelId = Guid.NewGuid(),
+			ChannelName = "Usdt",
+			Enabled = true,
+			ExtendedData = """
+				{
+					"phone": "0912345678"
+				}
+				"""
+		};
+
+		_ = fakeGetBrandPaymentService.GetAsync(
+			Arg.Is<GetBrandPaymentQuery>(x => x.Id == brandPaymentId),
+			Arg.Any<CancellationToken>())
+			.Returns(brandPaymentInfo);
+
+		var expected = Guid.NewGuid();
+
+		_ = fakeCreateDepositFormService.GetAsync(
+			Arg.Is<CreateDepositFormCommand>(x =>
+					x.PlayerCode == playerCode
+					&& x.BrandId == brandId
+					&& x.BrandPaymentId == brandPaymentId),
+			Arg.Any<CancellationToken>())
+			.Returns(expected);
+
+		var isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "true" : "false";
+		var nodeModule = $$"""
+			const axiosConfigFactory = require('./models/axios-configuration.js').default;
+			const OperatorService = require('./services/op-service.js').default;
+
+			module.exports = async (brandToken, loginToken, amount, paymentId, promotionId, bankType, note, realname, phone) =>
+			{
+				let instance = axiosConfigFactory("{{channelName}}", {{isWindows}}, brandToken, loginToken);
+
+				let svc = new OperatorService(instance);
+
+				return await svc.submitManualDepositPulsaRequest(amount, paymentId, promotionId, bankType, note, realname, phone);
+			};
+		""";
+
+		// Act
+		var actual = await StaticNodeJSService.InvokeFromStringAsync<SuccessResponse<string>>(
+			nodeModule,
+			args: [brandToken, loginResult.PlayerToken, amount, brandPaymentId, null, "pulsa", "testNote", "testRealName", "0912345678"]);
+
+		// Assert
+		Assert.Equal(expected, Guid.Parse(actual!.Data));
 	}
 }

@@ -4,15 +4,10 @@ using TGS.Core.Models.Exceptions;
 
 namespace TGS.Services.Operator.ApplicationServices.Game;
 
-internal class GetSM01HtmlContentQueryService : IGetService<GetSM01HtmlContentQuery, SM01HtmlContentInfo>
+internal class GetSM01HtmlContentQueryService(
+	IGameProvidersOperatorPluggableClient client) : IGetService<GetSM01HtmlContentQuery, SM01HtmlContentInfo>
 {
-	private readonly IGameProvidersOperatorPluggableClient _client;
-
-	public GetSM01HtmlContentQueryService(
-		IGameProvidersOperatorPluggableClient client)
-	{
-		_client = client ?? throw new ArgumentNullException(nameof(client));
-	}
+	private readonly IGameProvidersOperatorPluggableClient _client = client ?? throw new ArgumentNullException(nameof(client));
 
 	public async ValueTask<SM01HtmlContentInfo> GetAsync(GetSM01HtmlContentQuery query, CancellationToken cancellationToken = default)
 	{
