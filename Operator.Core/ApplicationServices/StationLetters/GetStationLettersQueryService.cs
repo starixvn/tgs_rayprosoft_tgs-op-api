@@ -17,20 +17,8 @@ internal class GetStationLettersQueryService : IQueryService<GetStationLettersQu
 			throw new ArgumentNullException(nameof(stationLetterRepository));
 	}
 
-	public IAsyncEnumerable<StationLetter> QueryAsync(GetStationLettersQuery query,
+	public IAsyncEnumerable<StationLetter> QueryAsync(
+		GetStationLettersQuery query,
 		CancellationToken cancellationToken = default)
-	{
-		if (query.Paging.ShowAll)
-			return _stationLetterRepository.QueryStationLettersAsync(query.PlayerCode);
-
-		var paging = new Paging<StationLetter>
-		{
-			Page = query.Paging.Page,
-			RowCount = query.Paging.Rows
-		};
-
-		paging.SortByPropertyName(query.Paging.SortBy, query.Paging.IsDesc);
-
-		return _stationLetterRepository.QueryStationLettersAsync(query.PlayerCode, paging);
-	}
+		=> _stationLetterRepository.QueryStationLettersAsync(query.PlayerCode, query.Paging);
 }

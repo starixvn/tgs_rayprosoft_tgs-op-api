@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using NSubstitute;
 using NUnit.Framework;
+using NUnit.Framework.Legacy;
 using Tgs.BrandCertificate.Clients;
 using Tgs.Core.Infrastructures.Security;
 using Tgs.PlayerService.Client;
@@ -84,7 +85,7 @@ public class PlayerPasswordTests
 
 		var actual = await sut.GetAsync(query);
 
-		Assert.AreEqual(expected, actual.PlayerCode);
+		ClassicAssert.AreEqual(expected, actual.PlayerCode);
 
 		_ = fakePlayerRepository
 			.Received(1)

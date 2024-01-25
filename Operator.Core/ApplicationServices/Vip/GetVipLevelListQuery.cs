@@ -1,6 +1,6 @@
 ﻿using System;
-using TGS.Core.Models.Messages;
+using Tgs.Paging;
 
 namespace TGS.Services.Operator.ApplicationServices.Vip;
 
-public record GetVipLevelListQuery(Guid BrandId, PageableRequest Paging);
+public record GetVipLevelListQuery(Guid BrandId, Paging<VipRecord> Paging);

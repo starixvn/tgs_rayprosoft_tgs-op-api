@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using NSubstitute;
 using NUnit.Framework;
+using NUnit.Framework.Legacy;
 using TGS.Services.Operator;
 using TGS.Services.Operator.ApplicationServices.Banner;
 
@@ -52,6 +53,6 @@ public class BannerTests
 
 		var actual = await sut.QueryAsync(query).CountAsync();
 
-		Assert.AreEqual(10, actual);
+		ClassicAssert.AreEqual(10, actual);
 	}
 }

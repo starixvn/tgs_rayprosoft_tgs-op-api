@@ -289,7 +289,7 @@ public class PlayerTests
 				new Claim("platform_type", platformType.ToString())
 			});
 
-		var signature = Encoding.UTF8.GetBytes(secretKey);
+		var signature = Encoding.UTF8.GetBytes($"{secretKey}{secretKey}");
 
 		var tokenHandler = new JwtSecurityTokenHandler();
 		var key = new SymmetricSecurityKey(signature);
@@ -455,7 +455,7 @@ public class PlayerTests
 			.Received(1)
 			.PublishAsync(
 				Arg.Is("tgs.operator.player.logged_in"),
-				Arg.Any<ReadOnlyMemory<byte>>(),
+				Arg.Any<byte[]>(),
 				Arg.Any<CancellationToken>());
 	}
 

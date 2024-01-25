@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Moq;
 using NUnit.Framework;
+using NUnit.Framework.Legacy;
 using Tgs.Paging;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
@@ -29,7 +30,8 @@ public class StationLetterTests
 
 		var playerCode = "ThisIsPlayerCode";
 
-		var actual = sut.GetAsync(new GetStationLettersQuery(playerCode, new PageableRequest()));
+		var actual = sut.GetAsync(
+			new GetStationLettersQuery(playerCode, new Paging<Services.Operator.StationLetters.StationLetter>()));
 
 		moqStationLetterRepository.Verify(
 			fake => fake.QueryStationLettersTotalCountAsync(It.Is<string>(x => x == playerCode)),
@@ -91,7 +93,7 @@ public class StationLetterTests
 
 		var actual = await sut.QueryStationLettersAsync(playerCode, new Paging<TGS.Services.Operator.StationLetters.StationLetter>() { Page = 0, RowCount = 50 }).ToListAsync();
 
-		Assert.AreEqual(1, actual.Count);
+		ClassicAssert.AreEqual(1, actual.Count);
 	}
 
 	[Test]
@@ -103,7 +105,8 @@ public class StationLetterTests
 
 		var playerCode = "ThisIsPlayerCode";
 
-		var actual = sut.QueryAsync(new GetStationLettersQuery(playerCode, new PageableRequest()));
+		var actual = sut.QueryAsync(
+			new GetStationLettersQuery(playerCode, new Paging<Services.Operator.StationLetters.StationLetter>()));
 
 		moqStationLetterRepository.Verify(
 			fake => fake.QueryStationLettersAsync(It.Is<string>(x => x == playerCode), It.IsAny<Paging<TGS.Services.Operator.StationLetters.StationLetter>>()),
@@ -196,7 +199,7 @@ public class StationLetterTests
 
 		// assert
 		var actual = r.FirstOrDefault().CreateOn;
-		Assert.AreEqual(excepted, actual);
+		ClassicAssert.AreEqual(excepted, actual);
 	}
 
 	[Test]
@@ -237,7 +240,7 @@ public class StationLetterTests
 
 		await sut.SetStationLetterHaveReadAsync(playerCode, letterId);
 
-		Assert.IsTrue(targetPlayerLetter.IsRead);
-		Assert.IsNotNull(targetPlayerLetter.ReadOn);
+		ClassicAssert.IsTrue(targetPlayerLetter.IsRead);
+		ClassicAssert.IsNotNull(targetPlayerLetter.ReadOn);
 	}
 }

@@ -50,7 +50,7 @@ internal class PlayerTokenParserCommandService : IGetService<PlayerTokenParserCo
 				ValidIssuer = "operator-api",
 				ValidateAudience = false,
 				ValidateIssuerSigningKey = true,
-				IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey!)),
+				IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes($"{secretKey}{secretKey}")),
 				ValidateLifetime = true,
 				ClockSkew = TimeSpan.Zero
 			},

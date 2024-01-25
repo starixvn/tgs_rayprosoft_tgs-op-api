@@ -3,6 +3,7 @@
 using System.Collections.Immutable;
 using Moq;
 using NSubstitute;
+using NUnit.Framework.Legacy;
 using Tgs.PlayerService.Client;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Services.Operations;
@@ -34,7 +35,7 @@ public class PlayerInfoTests
 		var sut = new CheckPlayerBannedQueryService(fakePlayerServiceClient);
 		var actual = await sut.GetAsync(command);
 
-		Assert.IsFalse(actual);
+		ClassicAssert.IsFalse(actual);
 	}
 
 	[Test]
@@ -66,7 +67,7 @@ public class PlayerInfoTests
 		var sut = new CheckPlayerBannedQueryService(fakePlayerServiceClient);
 		var actual = await sut.GetAsync(command);
 
-		Assert.IsTrue(actual);
+		ClassicAssert.IsTrue(actual);
 	}
 
 	[Test]
@@ -107,7 +108,7 @@ public class PlayerInfoTests
 
 		var actual = await sut.GetAsync(query);
 
-		Assert.AreEqual(playerInfo, actual);
+		ClassicAssert.AreEqual(playerInfo, actual);
 	}
 
 	[Test]

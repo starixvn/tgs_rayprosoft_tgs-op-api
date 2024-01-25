@@ -41,7 +41,7 @@ public class PlayerReportController : ControllerBase
 			ClosedTo = null,
 			Page = request.Page,
 			Rows = request.Rows,
-			OrderBy = request.IsDesc ? (short)SortOrder.Descending : (short)SortOrder.Ascending,
+			OrderBy = (short)(request.IsDesc ? 1 : 0),
 			SortBy = request.SortBy,
 			ShowAll = request.ShowAll
 		};

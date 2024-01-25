@@ -44,7 +44,7 @@ public class WithdrawStatusChangedTests
 				Status = PaymentFlowState.Approved
 			});
 
-		await sut.HandleAsync(eventData.ToByteArray());
+		await sut.HandleAsync("test", eventData.ToByteArray(), null);
 
 		fakeNotifyEventPublisher.DidNotReceive()
 			.PublishEvent(
@@ -81,7 +81,7 @@ public class WithdrawStatusChangedTests
 				Status = PaymentFlowState.Paid
 			});
 
-		await sut.HandleAsync(eventData.ToByteArray());
+		await sut.HandleAsync("test", eventData.ToByteArray(), null);
 
 		fakeNotifyEventPublisher.Received(1)
 			.PublishEvent(
@@ -120,7 +120,7 @@ public class WithdrawStatusChangedTests
 				Status = PaymentFlowState.Reject
 			});
 
-		await sut.HandleAsync(eventData.ToByteArray());
+		await sut.HandleAsync("test", eventData.ToByteArray(), null);
 
 		fakeNotifyEventPublisher.Received(1)
 			.PublishEvent(
@@ -159,7 +159,7 @@ public class WithdrawStatusChangedTests
 				Status = PaymentFlowState.Approved
 			});
 
-		await sut.HandleAsync(eventData.ToByteArray());
+		await sut.HandleAsync("test", eventData.ToByteArray(), null);
 
 		fakeNotifyEventPublisher.Received(1)
 			.PublishEvent(

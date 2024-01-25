@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
 	<PropertyGroup>
-		<TargetFramework>net7.0</TargetFramework>
+		<TargetFramework>net8.0</TargetFramework>
 		<UserSecretsId>e0868ee3-eaa7-4a0e-885a-9ccf907086e0</UserSecretsId>
 		<DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
 		<AssemblyName>TGS.Apis.OperatorApi</AssemblyName>
@@ -42,32 +42,31 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="FluentdForward.OpenTelemetry.MessagePack" Version="0.3.1" />
+		<PackageReference Include="FluentdForward.OpenTelemetry.MessagePack" Version="0.3.7" />
 		<PackageReference Include="FluentValidation.AspNetCore" Version="11.3.0" />
-		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.13" />
-		<PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.19.5" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.1" />
+		<PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.19.6" />
 		<PackageReference Include="Microsoft.VisualStudio.SlowCheetah" Version="4.0.50">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
-		<PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="17.7.30">
+		<PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="17.8.14">
 		  <PrivateAssets>all</PrivateAssets>
 		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
-		<PackageReference Include="OpenTelemetry" Version="1.6.0" />
-		<PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.6.0" />
-		<PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.6.0" />
-		<PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.0.0-rc9" />
+		<PackageReference Include="OpenTelemetry" Version="1.7.0" />
+		<PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.7.0" />
+		<PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.7.0" />
+		<PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.7.0" />
 		<PackageReference Include="OpenTelemetry.Instrumentation.EntityFrameworkCore" Version="1.0.0-beta.7" />
-		<PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.0.0-rc9" />
-		<PackageReference Include="OpenTelemetry.Instrumentation.Runtime" Version="1.5.1" />
-		<PackageReference Include="PhoenixToolkits.MessageQueue.Nats" Version="1.0.6" />
-		<PackageReference Include="ProfileViewer.OpenTelemetry.Exporter" Version="0.2.1" />
+		<PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.7.0" />
+		<PackageReference Include="OpenTelemetry.Instrumentation.Runtime" Version="1.7.0" />
+		<PackageReference Include="PhoenixToolkits.MessageQueue.Nats" Version="2.1.1" />
+		<PackageReference Include="ProfileViewer.OpenTelemetry.Exporter" Version="0.3.1" />
 		<PackageReference Include="Scrutor" Version="4.2.2" />
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
 		<PackageReference Include="Tgs.Interceptors" Version="0.2.1" />
-		<PackageReference Include="Tgs.MessageQueue.Compatible" Version="0.0.2" />
-		<PackageReference Include="Tgs.Notification.Client" Version="0.0.3" />
+		<PackageReference Include="Tgs.Notification.Client" Version="0.1.0" />
 		<PackageReference Include="Tgs.Payment.AlfaPay.Client" Version="0.0.7" />
 		<PackageReference Include="Tgs.Payment.DibaoPay.Client" Version="0.0.2" />
 		<PackageReference Include="Tgs.Payment.FiveSevenPay.Client" Version="0.0.3" />
@@ -76,7 +75,7 @@
 		<PackageReference Include="Tgs.Payment.Help2Pay.Client" Version="0.0.6" />
 		<PackageReference Include="Tgs.Payment.LeePay.Client" Version="0.0.11" />
 		<PackageReference Include="Tgs.Payment.MalakiPay.Client" Version="0.0.5" />
-		<PackageReference Include="Tgs.Payment.ManualDeposit" Version="0.1.14" />
+		<PackageReference Include="Tgs.Payment.ManualDeposit" Version="0.2.0" />
 		<PackageReference Include="Tgs.Payment.MaticPay.Client" Version="0.0.6" />
 		<PackageReference Include="Tgs.Payment.MetaPay.Client" Version="0.0.8" />
 		<PackageReference Include="Tgs.Payment.PhpGoPay.Client" Version="0.0.4" />
@@ -89,8 +88,8 @@
 		<PackageReference Include="Tgs.Payment.UmPay.Client" Version="0.0.1" />
 		<PackageReference Include="Tgs.Payment.WandaPay.Client" Version="0.0.5" />
 		<PackageReference Include="Tgs.Payment.ZeroNineNinePay.Client" Version="0.0.7" />
-		<PackageReference Include="Tgs.Report.Client" Version="0.0.66" />
-		<PackageReference Include="Tgs.WebApi.Toolkits" Version="0.3.0" />
+		<PackageReference Include="Tgs.Report.Client" Version="0.0.68" />
+		<PackageReference Include="Tgs.WebApi.Toolkits" Version="0.4.0" />
 	</ItemGroup>
 
 	<ItemGroup>

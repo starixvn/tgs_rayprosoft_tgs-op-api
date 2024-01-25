@@ -1,4 +1,5 @@
 ﻿using NUnit.Framework;
+using NUnit.Framework.Legacy;
 using TGS.IdentityVerifiers;
 
 namespace TGS.Tests.OperatorApi.UnitTests;
@@ -15,7 +16,7 @@ public class ChineseIdentityTests
 
 		var actual = sut.Verify(id);
 
-		Assert.IsTrue(actual);
+		ClassicAssert.IsTrue(actual);
 	}
 
 	[Test]
@@ -27,6 +28,6 @@ public class ChineseIdentityTests
 
 		var actual = sut.Verify(id);
 
-		Assert.IsTrue(actual);
+		ClassicAssert.IsTrue(actual);
 	}
 }

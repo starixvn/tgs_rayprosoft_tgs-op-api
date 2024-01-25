@@ -5,6 +5,7 @@ using ExpectedObjects;
 using FluentValidation.TestHelper;
 using NSubstitute;
 using NUnit.Framework;
+using NUnit.Framework.Legacy;
 using Tgs.BrandCertificate.Clients;
 using Tgs.Core.Infrastructures.Security;
 using TGS.Apis.OperatorApi.Models.Messages;
@@ -259,7 +260,7 @@ public class PayPasswordTests
 			.SendAsync(Arg.Any<SendEmailRequest>());
 
 		expected.ShouldMatch(actual);
-		Assert.AreEqual(expectedSecurityKey, actualSecurityKey);
+		ClassicAssert.AreEqual(expectedSecurityKey, actualSecurityKey);
 	}
 
 	[Test]

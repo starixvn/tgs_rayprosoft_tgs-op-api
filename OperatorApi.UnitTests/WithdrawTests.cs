@@ -2,6 +2,7 @@
 using System.Text.Json;
 using ExpectedObjects;
 using NSubstitute;
+using NUnit.Framework.Legacy;
 using Tgs.BrandCertificate.Clients;
 using Tgs.Core.Infrastructures.Security;
 using Tgs.Payment.Clients;
@@ -32,7 +33,7 @@ public class WithdrawTests
 
 		var actual = await sut.GetAsync(query);
 
-		Assert.IsFalse(actual);
+		ClassicAssert.IsFalse(actual);
 	}
 
 	[Test]
@@ -63,7 +64,7 @@ public class WithdrawTests
 
 		var actual = await sut.GetAsync(query);
 
-		Assert.IsFalse(actual);
+		ClassicAssert.IsFalse(actual);
 	}
 
 	[Test]
@@ -104,7 +105,7 @@ public class WithdrawTests
 
 		var actual = await sut.GetAsync(query);
 
-		Assert.IsTrue(actual);
+		ClassicAssert.IsTrue(actual);
 	}
 
 	[Test]
@@ -243,7 +244,7 @@ public class WithdrawTests
 
 		var actual = await sut.GetAsync(new CheckPlayerIdentityCommand(brandId, playerCode));
 
-		Assert.IsFalse(actual);
+		ClassicAssert.IsFalse(actual);
 	}
 
 	[Test]
@@ -271,7 +272,7 @@ public class WithdrawTests
 		_ = fakePlayerServiceClient.Received(0)
 			.GetPlayerInfoAsync(Arg.Is(playerCode));
 
-		Assert.IsTrue(actual);
+		ClassicAssert.IsTrue(actual);
 	}
 
 	[Test]
@@ -306,7 +307,7 @@ public class WithdrawTests
 
 		var actual = await sut.GetAsync(new CheckPlayerIdentityCommand(brandId, playerCode));
 
-		Assert.IsTrue(actual);
+		ClassicAssert.IsTrue(actual);
 	}
 
 	[Test]
@@ -329,6 +330,6 @@ public class WithdrawTests
 
 		var actual = await command.ReturnSource.Task.ConfigureTimeout(TimeSpan.FromMilliseconds(500));
 
-		Assert.IsTrue(actual);
+		ClassicAssert.IsTrue(actual);
 	}
 }

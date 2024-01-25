@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
-using OpenTelemetry.Instrumentation.AspNetCore;
+using NATS.Client.Core;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
@@ -33,11 +33,9 @@ using TGS.Apis.OperatorApi.Filters.Swaggers;
 using TGS.Apis.OperatorApi.Models;
 using TGS.Apis.OperatorApi.SignalR;
 using TGS.Core.DataServices.Tgs.Extensions;
-using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.ErrorMappers;
 using TGS.Core.Infrastructures.Mail;
 using TGS.Core.Infrastructures.Redis;
-using TGS.Core.Infrastructures.Transactions;
 using TGS.Core.Infrastructures.WebApiServices;
 using TGS.Payment.ManualDeposit;
 using TGS.Services.Operations.Extensions;
@@ -90,7 +88,7 @@ builder.Services
 			(var ip, var range) = cidr.Split("/");
 
 			options.KnownNetworks.Add(
-				new IPNetwork(
+				new Microsoft.AspNetCore.HttpOverrides.IPNetwork(
 					IPAddress.Parse(ip),
 					string.IsNullOrEmpty(range)
 						? 32
@@ -161,11 +159,9 @@ builder.Services
 	.AddTgsRepository(builder.Configuration, "Tgs")
 	.AddMemoryCache()
 	.AddWebApiServices()
-	.AddTgsLog()
 	.AddSystemJsonSerializer()
 	.AddSecurity()
 	.AddOperations()
-	.AddApiClient()
 	.AddReportClient((options, sp) =>
 	{
 		var config = sp.GetRequiredService<IConfiguration>();
@@ -178,7 +174,6 @@ builder.Services
 
 		config.GetSection("Promotion").Bind(options);
 	})
-	.AddTransactions()
 	.AddBrandCertificateClient((options, sp) =>
 	{
 		var config = sp.GetRequiredService<IConfiguration>();
@@ -251,14 +246,15 @@ builder.Services
 	.AddErrorMapper<OperatorApiErrorMapper>();
 
 builder.Services
-	.AddPhoenixToolkitsMessageQueue()
-	.AddNatsMessageQueue(natsConfig => natsConfig
-		.ConfigQueueOptions((options, sp) =>
+	.AddKeyedSingleton(
+		"Nats",
+		(sp, _) => new NatsConnection(NatsOpts.Default with
 		{
-			var config = sp.GetRequiredService<IConfiguration>();
-
-			options.Url = config.GetValue<string>("NatsSetting:Urls")!;
-		})
+			Url = builder.Configuration.GetValue<string>("NatsSetting:Urls")
+		}))
+	.AddMessageQueue()
+	.AddNatsMessageQueue(natsConfig => natsConfig
+		.ConfigureResolveConnection(sp => sp.GetRequiredKeyedService<NatsConnection>("Nats"))
 		.AddHandler(
 			ProcessorTypes.BrandFrontendInfoChangedEventHandlerType,
 			"tgs.brand.frontendinfo.changed")
@@ -285,7 +281,14 @@ builder.Services
 		.AddSource("Tgs.*")
 		.AddSource("TGS.*")
 		.AddSource("Valhalla.*")
-		.AddAspNetCoreInstrumentation()
+		.AddAspNetCoreInstrumentation(options => options.Filter =
+			httpContext => !httpContext.Request.Path.HasValue
+				|| !httpContext.Request.Path.StartsWithSegments("/swagger")
+				&& !httpContext.Request.Path.StartsWithSegments("/health")
+				&& !httpContext.Request.Path.StartsWithSegments("/profiler/")
+				&& !httpContext.Request.Path.StartsWithSegments("/metrics")
+				&& !new[] { "html", "ico", "png", "jpg" }.Any(
+					ext => httpContext.Request.Path.Value.EndsWith($".{ext}")))
 		.AddHttpClientInstrumentation()
 		.AddEntityFrameworkCoreInstrumentation(options => options.SetDbStatementForText = true)
 		.AddProfileViewExporter()
@@ -297,14 +300,6 @@ builder.Services
 			.AddAspNetCoreInstrumentation()
 			.AddOtlpExporter())
 	.Services
-	.Configure<AspNetCoreInstrumentationOptions>(options => options.Filter =
-		httpContext => !httpContext.Request.Path.HasValue
-			|| !httpContext.Request.Path.StartsWithSegments("/swagger")
-			&& !httpContext.Request.Path.StartsWithSegments("/health")
-			&& !httpContext.Request.Path.StartsWithSegments("/profiler/")
-			&& !httpContext.Request.Path.StartsWithSegments("/metrics")
-			&& !new[] { "html", "ico", "png", "jpg" }.Any(
-				ext => httpContext.Request.Path.Value.EndsWith($".{ext}")))
 	.AddProfileViewer()
 	.AddInterceptionService()
 	.AddServiceUtiltiyInterceptors();

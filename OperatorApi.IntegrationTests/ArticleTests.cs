@@ -208,7 +208,7 @@ public class ArticleTests
 		var brandToken = TestOperatorApplication.MakeTestBrandToken(brandId, brandCode);
 
 		_ = fakeBrandRepository.GetSecretKeyAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
-			.Returns("N2KAnljo5zbLCZDSoUBFJ70ONsy");
+			.Returns("vPmTqqIpEhnYpI8FNYY33jHdvqJ");
 
 		var fakeArticleManagementClient = Substitute.For<IArticleManagementClient>();
 

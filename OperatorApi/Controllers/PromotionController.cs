@@ -156,7 +156,7 @@ public class PromotionController : ControllerBase
 			var task = Task.Run(async () =>
 			{
 				var data = await messageSender
-					.RequestAsync(subject, request.ToByteArray())
+					.RequestAsync<ReadOnlyMemory<byte>, ReadOnlyMemory<byte>>(subject, request.ToByteArray())
 					.ConfigureAwait(false);
 
 				var response = RouletteCountResponse.Parser.ParseFrom(data.Span);

@@ -9,6 +9,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.IdentityModel.Tokens;
 using NSubstitute;
 using NUnit.Framework;
+using NUnit.Framework.Legacy;
 using Tgs.Core.Infrastructures.Security;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Tokens;
@@ -68,7 +69,7 @@ internal class PlayerTokenParserTests
 
 		var actual = await sut.GetAsync(command);
 
-		Assert.NotNull(actual);
+		ClassicAssert.NotNull(actual);
 
 		expected.ToExpectedObject(ctx
 			=> ctx.Ignore(x => x.ExpiredOn)

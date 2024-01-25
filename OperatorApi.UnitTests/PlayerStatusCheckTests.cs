@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Routing;
 using NSubstitute;
 using NUnit.Framework;
+using NUnit.Framework.Legacy;
 using Tgs.PlayerService.Client;
 using Tgs.ServiceUtility;
 using TGS.Apis.OperatorApi.Attributes;
@@ -45,7 +46,7 @@ public class PlayerStatusCheckTests
 		};
 		await sut.OnAuthorizationAsync(context);
 
-		Assert.IsNull(context.Result);
+		ClassicAssert.IsNull(context.Result);
 	}
 
 	[Test]
@@ -75,7 +76,7 @@ public class PlayerStatusCheckTests
 		};
 		await sut.OnAuthorizationAsync(context);
 
-		Assert.IsNull(context.Result);
+		ClassicAssert.IsNull(context.Result);
 	}
 
 	[Test]
@@ -102,7 +103,7 @@ public class PlayerStatusCheckTests
 		};
 		await sut.OnAuthorizationAsync(context);
 
-		Assert.IsNull(context.Result);
+		ClassicAssert.IsNull(context.Result);
 	}
 
 	[Test]
@@ -129,7 +130,7 @@ public class PlayerStatusCheckTests
 		};
 		await sut.OnAuthorizationAsync(context);
 
-		Assert.IsNull(context.Result);
+		ClassicAssert.IsNull(context.Result);
 	}
 
 	[Test]
@@ -159,13 +160,13 @@ public class PlayerStatusCheckTests
 		};
 		await sut.OnAuthorizationAsync(context);
 
-		Assert.IsNotNull(context.Result);
+		ClassicAssert.IsNotNull(context.Result);
 
 		var result = (ObjectResult)context.Result;
 
-		Assert.AreEqual(StatusCodes.Status403Forbidden, result.StatusCode);
-		Assert.IsInstanceOf<FailResponse>(result.Value);
-		Assert.AreEqual("AccessDenied", ((FailResponse)result.Value).ErrorMessageKey);
+		ClassicAssert.AreEqual(StatusCodes.Status403Forbidden, result.StatusCode);
+		ClassicAssert.IsInstanceOf<FailResponse>(result.Value);
+		ClassicAssert.AreEqual("AccessDenied", ((FailResponse)result.Value).ErrorMessageKey);
 	}
 
 	[Test]
@@ -185,7 +186,7 @@ public class PlayerStatusCheckTests
 		var context = new AuthorizationFilterContext(actionContext, new List<IFilterMetadata> { });
 		await sut.OnAuthorizationAsync(context);
 
-		Assert.IsNull(context.Result);
+		ClassicAssert.IsNull(context.Result);
 	}
 
 	[Test]
@@ -226,7 +227,7 @@ public class PlayerStatusCheckTests
 
 		await sut.OnAuthorizationAsync(context);
 
-		Assert.IsNull(context.Result);
+		ClassicAssert.IsNull(context.Result);
 	}
 
 	[Test]
@@ -259,13 +260,13 @@ public class PlayerStatusCheckTests
 
 		await sut.OnAuthorizationAsync(context);
 
-		Assert.IsNotNull(context.Result);
+		ClassicAssert.IsNotNull(context.Result);
 
 		var result = (ObjectResult)context.Result;
 
-		Assert.AreEqual(StatusCodes.Status403Forbidden, result.StatusCode);
-		Assert.IsInstanceOf<FailResponse>(result.Value);
-		Assert.AreEqual("AccessDenied", ((FailResponse)result.Value).ErrorMessageKey);
+		ClassicAssert.AreEqual(StatusCodes.Status403Forbidden, result.StatusCode);
+		ClassicAssert.IsInstanceOf<FailResponse>(result.Value);
+		ClassicAssert.AreEqual("AccessDenied", ((FailResponse)result.Value).ErrorMessageKey);
 	}
 
 	[Test]
@@ -298,13 +299,13 @@ public class PlayerStatusCheckTests
 		};
 		await sut.OnAuthorizationAsync(context);
 
-		Assert.IsNotNull(context.Result);
+		ClassicAssert.IsNotNull(context.Result);
 
 		var result = (ObjectResult)context.Result;
 
-		Assert.AreEqual(StatusCodes.Status403Forbidden, result.StatusCode);
-		Assert.IsInstanceOf<FailResponse>(result.Value);
-		Assert.AreEqual("UserBlocked", ((FailResponse)result.Value).ErrorMessageKey);
+		ClassicAssert.AreEqual(StatusCodes.Status403Forbidden, result.StatusCode);
+		ClassicAssert.IsInstanceOf<FailResponse>(result.Value);
+		ClassicAssert.AreEqual("UserBlocked", ((FailResponse)result.Value).ErrorMessageKey);
 	}
 
 	[Test]
@@ -336,7 +337,7 @@ public class PlayerStatusCheckTests
 		};
 		await sut.OnAuthorizationAsync(context);
 
-		Assert.IsNull(context.Result);
+		ClassicAssert.IsNull(context.Result);
 	}
 
 	[Test]
@@ -368,6 +369,6 @@ public class PlayerStatusCheckTests
 		};
 
 		await sut.OnAuthorizationAsync(context);
-		Assert.IsNull(context.Result);
+		ClassicAssert.IsNull(context.Result);
 	}
 }

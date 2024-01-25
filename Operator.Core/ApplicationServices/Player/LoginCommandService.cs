@@ -41,9 +41,9 @@ internal class LoginCommandService : IGetService<LoginCommand, LoginInfo>
 
 	public async ValueTask<LoginInfo> GetAsync(LoginCommand command, CancellationToken cancellationToken = default)
 	{
-		var brandStatus = await _brandServiceClient
-			.GetBrandStatusAsync(command.BrandId, cancellationToken)
-			.ConfigureAwait(false);
+		var brandStatus = await _brandServiceClient.GetBrandStatusAsync(
+			command.BrandId,
+			cancellationToken).ConfigureAwait(false);
 
 		if (brandStatus != BrandStatus.Active)
 			throw new InvalidStatusException($"brand with id '{command.BrandId}' is not active");
@@ -82,9 +82,11 @@ internal class LoginCommandService : IGetService<LoginCommand, LoginInfo>
 			},
 			command.Site);
 
-		await _playerServiceClient
-			.RecordLoginIpAsync(playerInfo.PlayerCode, command.IpAddress, command.HostName, cancellationToken)
-			.ConfigureAwait(false);
+		await _playerServiceClient.RecordLoginIpAsync(
+			playerInfo.PlayerCode,
+			command.IpAddress,
+			command.HostName,
+			cancellationToken).ConfigureAwait(false);
 
 		return new LoginInfo(
 			token,
@@ -105,7 +107,7 @@ internal class LoginCommandService : IGetService<LoginCommand, LoginInfo>
 			});
 
 		var secretKey = await _brandRepository.GetSecretKeyAsync(brandId);
-		var signature = Encoding.UTF8.GetBytes(secretKey!);
+		var signature = Encoding.UTF8.GetBytes($"{secretKey}{secretKey}");
 
 		return _jwtTokenHandler.GenerateToken(
 			identity,

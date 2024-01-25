@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
 using NUnit.Framework;
+using NUnit.Framework.Legacy;
 using Tgs.GameProviders.Pluggable.Client;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.Models.Enums;
@@ -101,7 +102,7 @@ public class GameBalanceTests
 
 		var info = await sut.QueryAsync(query).ToArrayAsync();
 
-		Assert.IsTrue(info.Length >= 0);
+		ClassicAssert.IsTrue(info.Length >= 0);
 	}
 
 	[Test]

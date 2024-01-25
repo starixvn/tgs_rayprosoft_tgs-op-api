@@ -3,6 +3,7 @@
 using FluentValidation.TestHelper;
 using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
+using NUnit.Framework.Legacy;
 using Tgs.BrandCertificate.Clients;
 using Tgs.PlayerService.Client;
 using Tgs.VipLevelService.Clients;
@@ -47,7 +48,7 @@ public class PlayerCreateTests
 
 		var actual = await sut.GetAsync(query);
 
-		Assert.AreEqual("AAA", actual);
+		ClassicAssert.AreEqual("AAA", actual);
 	}
 
 	[Test]
@@ -206,7 +207,7 @@ public class PlayerCreateTests
 		var actual = await sut.GetAsync(command);
 
 		// assert
-		Assert.IsTrue(actual.IsNew);
+		ClassicAssert.IsTrue(actual.IsNew);
 
 		_ = fakeVipLevelServiceClient.Received(1)
 			.PlayerVipLevelRegisterAsync(
@@ -292,7 +293,7 @@ public class PlayerCreateTests
 		var actual = await sut.GetAsync(command);
 
 		// assert
-		Assert.IsTrue(actual.IsNew);
+		ClassicAssert.IsTrue(actual.IsNew);
 
 		_ = fakeVipLevelServiceClient.Received(1)
 			.PlayerVipLevelRegisterAsync(
@@ -371,7 +372,7 @@ public class PlayerCreateTests
 		var actual = await sut.GetAsync(command);
 
 		// assert
-		Assert.IsTrue(actual.IsNew);
+		ClassicAssert.IsTrue(actual.IsNew);
 
 		_ = fakeVipLevelServiceClient.Received(1)
 			.PlayerVipLevelRegisterAsync(

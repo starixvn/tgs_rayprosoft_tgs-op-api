@@ -1,6 +1,7 @@
 ﻿using System.Data.SqlClient;
 using System.Net.Mime;
 using Microsoft.AspNetCore.Mvc;
+using Tgs.Paging;
 using Tgs.ServiceUtility;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
@@ -24,16 +25,12 @@ public class VipController : ControllerBase
 	{
 		var brandId = HttpContext.Items.GetBrandId();
 
-		var paging = new PageableRequest();
-		if (pagingRequest.ShowAll)
-			paging.ShowAll = true;
-		else
+		var paging = new Paging<VipRecord>
 		{
-			paging.Page = pagingRequest.Page;
-			paging.Rows = pagingRequest.Rows;
-			paging.OrderBy = pagingRequest.IsDesc ? SortOrder.Descending : SortOrder.Ascending;
-			paging.SortBy = pagingRequest.SortBy;
-		}
+			Page = pagingRequest.Page,
+			RowCount = pagingRequest.Rows
+		};
+		paging.SortByPropertyName(pagingRequest.SortBy, pagingRequest.IsDesc);
 
 		var query = new GetVipLevelListQuery(brandId, paging);
 

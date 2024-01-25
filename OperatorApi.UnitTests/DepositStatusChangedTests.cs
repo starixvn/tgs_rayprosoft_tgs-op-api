@@ -45,7 +45,7 @@ public class DepositStatusChangedTests
 				Status = PaymentFlowState.Reject
 			});
 
-		await sut.HandleAsync(eventData.ToByteArray());
+		await sut.HandleAsync("test", eventData.ToByteArray(), null);
 
 		fakeNotifyEventPublisher.Received(1)
 			.PublishEvent(
@@ -84,7 +84,7 @@ public class DepositStatusChangedTests
 				Status = PaymentFlowState.Approved
 			});
 
-		await sut.HandleAsync(eventData.ToByteArray());
+		await sut.HandleAsync("test", eventData.ToByteArray(), null);
 
 		fakeNotifyEventPublisher.Received(1)
 			.PublishEvent(

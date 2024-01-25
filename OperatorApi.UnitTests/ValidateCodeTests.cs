@@ -1,5 +1,6 @@
 ﻿using System.Text.RegularExpressions;
 using NUnit.Framework;
+using NUnit.Framework.Legacy;
 using TGS.Services.Operator.ValidateCode;
 
 namespace TGS.Tests.OperatorApi.UnitTests;
@@ -15,7 +16,7 @@ public partial class ValidateCodeTests
 
 		var actual = sut.GenerateCode();
 
-		Assert.IsTrue(regex.IsMatch(actual));
+		ClassicAssert.IsTrue(regex.IsMatch(actual));
 	}
 
 	[GeneratedRegex("^\\d{6}$")]

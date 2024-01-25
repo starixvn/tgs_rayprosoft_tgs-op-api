@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using NUnit.Framework;
+using NUnit.Framework.Legacy;
 using TGS.Core.DataServices.Tgs;
 using TGS.Services.Operator.ApplicationServices.BrandLiveChat;
 using CoreModels = TGS.Core.DataServices.Tgs.Models;
@@ -36,6 +37,6 @@ public class BrandLiveChatTests
 
 		var info = await sut.GetAsync(query);
 
-		Assert.IsTrue(info.Setting != null);
+		ClassicAssert.IsTrue(info.Setting != null);
 	}
 }

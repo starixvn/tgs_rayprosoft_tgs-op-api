@@ -1,4 +1,5 @@
 ﻿using NSubstitute;
+using NUnit.Framework.Legacy;
 using Tgs.PlayerBucket.Client;
 using Tgs.Service.PlayerBuckets;
 using TGS.Services.Operator.ApplicationServices.Withdraw;
@@ -30,7 +31,7 @@ public class GetRequireBucketAmountQueryServiceTests
 
 		var actual = await sut.GetAsync(query);
 
-		Assert.AreEqual(12345M, actual);
+		ClassicAssert.AreEqual(12345M, actual);
 	}
 
 	[Test]
@@ -47,7 +48,7 @@ public class GetRequireBucketAmountQueryServiceTests
 
 		var actual = await sut.GetAsync(query);
 
-		Assert.AreEqual(0M, actual);
+		ClassicAssert.AreEqual(0M, actual);
 	}
 
 	[Test]
@@ -79,7 +80,7 @@ public class GetRequireBucketAmountQueryServiceTests
 
 		var actual = await sut.GetAsync(query);
 
-		Assert.AreEqual(1000M, actual);
+		ClassicAssert.AreEqual(1000M, actual);
 	}
 
 	[Test]

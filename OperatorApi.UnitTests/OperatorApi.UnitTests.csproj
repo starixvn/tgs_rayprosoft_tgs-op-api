@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>net7.0</TargetFramework>
+		<TargetFramework>net8.0</TargetFramework>
 		<IsPackable>false</IsPackable>
 		<RootNamespace>TGS.Tests.OperatorApi.UnitTests</RootNamespace>
 		<ImplicitUsings>enable</ImplicitUsings>
@@ -11,10 +11,10 @@
 	<ItemGroup>
 		<PackageReference Include="ExpectedObjects" Version="3.5.4" />
 		<PackageReference Include="JunitXml.TestLogger" Version="3.0.134" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="7.0.13" />
-		<PackageReference Include="Moq" Version="4.20.69" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="8.0.1" />
+		<PackageReference Include="Moq" Version="4.20.70" />
 		<PackageReference Include="NSubstitute" Version="5.1.0" />
-		<PackageReference Include="NUnit" Version="3.14.0" />
+		<PackageReference Include="NUnit" Version="4.0.1" />
 		<PackageReference Include="NUnit3TestAdapter" Version="4.5.0" />
 		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
 		<PackageReference Include="PhoenixToolkits.CodeAnalysis.Analyzers" Version="0.0.8">

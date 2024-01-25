@@ -22,12 +22,11 @@ public class VipTests
 
 		var query = new GetVipLevelListQuery(
 			Guid.NewGuid(),
-			new PageableRequest());
+			new Paging<VipRecord>());
 
 		_ = await sut.GetAsync(query);
 
-		_ = fakeVipLevelRepository
-			.Received(1)
+		_ = fakeVipLevelRepository.Received(1)
 			.QueryVipLevelsTotalCountAsync(query.BrandId);
 	}
 
@@ -40,7 +39,7 @@ public class VipTests
 
 		var query = new GetVipLevelListQuery(
 			Guid.NewGuid(),
-			new PageableRequest());
+			new Paging<VipRecord>());
 
 		_ = await sut.QueryAsync(query).ToArrayAsync();
 

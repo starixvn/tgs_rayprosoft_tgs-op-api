@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using NSubstitute;
 using NUnit.Framework;
+using NUnit.Framework.Legacy;
 using Tgs.GameProviders.Pluggable.Client;
 using Tgs.ServiceUtility;
 using TGS.Apis.OperatorApi.Controllers;
@@ -619,7 +620,7 @@ public class GameTests
 		var result = await sut.QueryAsync(query).ToArrayAsync();
 
 		// assert
-		Assert.AreEqual(games.Length, result.Length);
+		ClassicAssert.AreEqual(games.Length, result.Length);
 	}
 
 	[Test]
@@ -660,7 +661,7 @@ public class GameTests
 		var result = await sut.QueryAsync(query).ToArrayAsync();
 
 		// assert
-		Assert.AreEqual(1, result.Length);
+		ClassicAssert.AreEqual(1, result.Length);
 	}
 
 	[Test]
@@ -808,8 +809,8 @@ public class GameTests
 		// assert
 		var expected = games.Where(g => gameTypes.Contains(g.Type)).ToArray();
 
-		Assert.AreEqual(expected.Length, result.Length);
-		Assert.AreNotEqual(games.Length, result.Length);
+		ClassicAssert.AreEqual(expected.Length, result.Length);
+		ClassicAssert.AreNotEqual(games.Length, result.Length);
 	}
 
 	[Test]
@@ -826,7 +827,7 @@ public class GameTests
 
 		_ = fakeGameProvidersClient.Received(1).GetGameSM01PlatformLoginInfoAsync(playerCode);
 
-		Assert.IsFalse(string.IsNullOrEmpty(actual.Html));
+		ClassicAssert.IsFalse(string.IsNullOrEmpty(actual.Html));
 	}
 
 	[Test]
@@ -935,7 +936,7 @@ public class GameTests
 		var actual = await sut.GetAsync(query);
 
 		// assert
-		Assert.AreEqual(gameUrl, actual);
+		ClassicAssert.AreEqual(gameUrl, actual);
 	}
 
 	[Test]
@@ -1038,7 +1039,7 @@ public class GameTests
 		var actual = await sut.GetAsync(query);
 
 		// assert
-		Assert.AreEqual(gameUrl, actual);
+		ClassicAssert.AreEqual(gameUrl, actual);
 	}
 
 	[Test]

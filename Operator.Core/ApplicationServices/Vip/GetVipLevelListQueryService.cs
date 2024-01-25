@@ -19,18 +19,5 @@ internal class GetVipLevelListQueryService : IQueryService<GetVipLevelListQuery,
 	public IAsyncEnumerable<VipRecord> QueryAsync(
 		GetVipLevelListQuery query,
 		CancellationToken cancellationToken = default)
-	{
-		if (query.Paging.ShowAll)
-			return _vipLevelRepository.QueryVipLevelsAsync(query.BrandId);
-
-		var paging = new Paging<VipRecord>
-		{
-			Page = query.Paging.Page,
-			RowCount = query.Paging.Rows
-		};
-
-		paging.SortByPropertyName(query.Paging.SortBy, query.Paging.IsDesc);
-
-		return _vipLevelRepository.QueryVipLevelsAsync(query.BrandId, paging);
-	}
+		=> _vipLevelRepository.QueryVipLevelsAsync(query.BrandId, query.Paging);
 }

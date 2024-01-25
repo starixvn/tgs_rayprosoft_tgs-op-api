@@ -1,12 +1,8 @@
 ﻿#nullable enable
 
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 using NSubstitute;
-using NUnit.Framework;
+using NUnit.Framework.Legacy;
 using Tgs.DepositAccumulateRoulette.Clients;
-using Tgs.RouletteServices.Clients;
 using TGS.Services.Operator.ApplicationServices.Promotions;
 using RouletteResult = Tgs.DepositAccumulateRoulette.Clients.RouletteResult;
 
@@ -34,46 +30,12 @@ public class PromotionTests
 
 		var actual = await sut.GetAsync(command);
 
-		Assert.AreEqual(expected, actual);
+		ClassicAssert.AreEqual(expected, actual);
 
 		_ = fakeDepositAccumulateRouletteClient.Received(1)
 			.RouletteAsync(
 				Arg.Is(command.PromotionId),
 				Arg.Is(command.PlayerCode),
 				Arg.Any<CancellationToken>());
-	}
-
-	[Test]
-	public async Task Get_Roulette_Record()
-	{
-		var fakeRouletteSignInClient = Substitute.For<IRouletteSignInClient>();
-		var sut = new GetSignInRouletteRecordQueryService(fakeRouletteSignInClient);
-
-		var query = new GetSignInRouletteRecordQuery("player1", Guid.NewGuid());
-
-		_ = await sut.GetAsync(query);
-
-		_ = fakeRouletteSignInClient.Received(1)
-			.GetRouletteRecordAsync(
-				Arg.Is(query.PromotionId),
-				Arg.Is(query.PlayerCode),
-				Arg.Any<DateOnly>());
-	}
-
-	[Test]
-	public async Task Roulette_Should_Get_Result()
-	{
-		var fakeRouletteSignInClient = Substitute.For<IRouletteSignInClient>();
-		var sut = new SignInRouletteCommandService(fakeRouletteSignInClient);
-
-		var command = new SignInRouletteCommand("player1", Guid.NewGuid());
-
-		_ = await sut.GetAsync(command);
-
-		_ = fakeRouletteSignInClient.Received(1)
-			.RouletteAsync(
-				Arg.Is(command.PromotionId),
-				Arg.Is(command.PlayerCode),
-				Arg.Any<DateOnly>());
 	}
 }
