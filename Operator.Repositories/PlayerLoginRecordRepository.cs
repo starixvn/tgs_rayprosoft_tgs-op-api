@@ -2,7 +2,6 @@
 using System.Threading.Tasks;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
-using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models.Enums;
 using TGS.Services.Operator;
 
@@ -19,7 +18,7 @@ internal class PlayerLoginRecordRepository(
 
 		var loginRecord = new PlayerLoginRecord
 		{
-			Id = GuidExtensions.NewSequentialGuid(),
+			Id = Guid.NewGuid(),
 			PlayerCode = playerCode,
 			BrandId = brandId,
 			Status = LoginStatus.Enabled,

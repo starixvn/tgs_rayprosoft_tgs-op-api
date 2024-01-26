@@ -22,8 +22,7 @@ internal class StartSetPlayerPhoneCommandService(
 	private readonly IValidateCodeGenerator _codeGenerator = codeGenerator ?? throw new ArgumentNullException(nameof(codeGenerator));
 	private readonly IPlayerServiceClient _playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
 	private readonly ISmsServiceClient _smsServiceClient = smsServiceClient ?? throw new ArgumentNullException(nameof(smsServiceClient));
-	private readonly IValidateCodeOperator _validateCodeOperator =
-			validateCodeOperator ?? throw new ArgumentNullException(nameof(validateCodeOperator));
+	private readonly IValidateCodeOperator _validateCodeOperator = validateCodeOperator ?? throw new ArgumentNullException(nameof(validateCodeOperator));
 
 	public async ValueTask<string> GetAsync(
 		StartSetPlayerPhoneCommand command,
@@ -38,10 +37,13 @@ internal class StartSetPlayerPhoneCommandService(
 			.GetBrandInfoAsync(player.BrandId, cancellationToken)
 			.ConfigureAwait(false);
 
-		Func<string> generateCode = () => _codeGenerator.GenerateCode();
+		Func<string> generateCode = _codeGenerator.GenerateCode;
 
 		if (!command.SmsEnabled)
 			generateCode = () => "123456";
+
+		var areaCode = command.AreaCode.Trim();
+		var phone = command.Phone.Trim();
 
 		var saveResult = await Policy
 			.HandleResult<(bool Result, string ValidateCode, string SecurityKey)>(data => !data.Result)
@@ -52,8 +54,8 @@ internal class StartSetPlayerPhoneCommandService(
 				var token = _codeGenerator.GenerateSecurityKey();
 
 				var data = new PhoneValidateData(
-					command.AreaCode,
-					command.Phone,
+					areaCode,
+					phone,
 					command.PlayerCode);
 
 				var result = await _validateCodeOperator
@@ -74,9 +76,11 @@ internal class StartSetPlayerPhoneCommandService(
 				saveResult.ValidateCode);
 
 			await _smsServiceClient.SendShortMessageAsync(
-				$"{command.AreaCode}{command.Phone}",
+				$"{areaCode}{phone}",
 				shortMessage,
 				player.BrandId,
+				areaCode: areaCode,
+				phone: phone,
 				cancellationToken: cancellationToken).ConfigureAwait(false);
 		}
 

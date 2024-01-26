@@ -383,6 +383,7 @@ public class PlayerPhoneTests
 				It.Is<string>(x => x == expectedShortMessage),
 				It.IsAny<Guid>(),
 				It.IsAny<string>(),
+				It.IsAny<string>(),
 				It.IsAny<CancellationToken>()),
 			Times.Exactly(0));
 
