@@ -37,10 +37,6 @@ spec:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          ports:
-            - name: http
-              containerPort: 8080
-              protocol: TCP
           env:
             - name: OTEL_SERVICE_NAME
               value: Operator-Api({{ .Release.Namespace }})
@@ -70,16 +66,20 @@ spec:
                 secretKeyRef:
                   name: tgs-connections
                   key: nats
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
           livenessProbe:
             httpGet:
               path: /health
-              port: 80
+              port: http
             failureThreshold: 3
             periodSeconds: 5
           startupProbe:
             httpGet:
               path: /health
-              port: 80
+              port: http
             failureThreshold: 30
             periodSeconds: 2
           resources:
