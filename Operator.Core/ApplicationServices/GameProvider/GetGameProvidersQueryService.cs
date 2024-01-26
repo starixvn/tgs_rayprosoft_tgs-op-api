@@ -15,20 +15,13 @@ using TGS.Services.Operator.GameProviders;
 
 namespace TGS.Services.Operator.ApplicationServices.GameProvider;
 
-internal class GetGameProvidersQueryService : IQueryService<GetGameProvidersQuery, GameProviderInfo>
+internal class GetGameProvidersQueryService(
+	IPlayerOperations playerOperations,
+	IGameProviderRepository gameProviderRepository) : IQueryService<GetGameProvidersQuery, GameProviderInfo>
 {
-	private readonly IGameProviderRepository _gameProviderRepository;
-	private readonly IPlayerOperations _playerOperations;
-
-	public GetGameProvidersQueryService(
-		IPlayerOperations playerOperations,
-		IGameProviderRepository gameProviderRepository)
-	{
-		_playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
-
-		_gameProviderRepository =
+	private readonly IGameProviderRepository _gameProviderRepository =
 			gameProviderRepository ?? throw new ArgumentNullException(nameof(gameProviderRepository));
-	}
+	private readonly IPlayerOperations _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
 
 	public async IAsyncEnumerable<GameProviderInfo> QueryAsync(
 		GetGameProvidersQuery query,
@@ -99,7 +92,7 @@ internal class GetGameProvidersQueryService : IQueryService<GetGameProvidersQuer
 				IsTransferWallet = sgp.IsTransferWallet,
 				GameTypes = gameTypes,
 				Localization = string.IsNullOrEmpty(sgp.Localization)
-					? new Dictionary<string, JsonDocument>()
+					? []
 					: JsonSerializer.Deserialize<Dictionary<string, JsonDocument>>(
 						sgp.Localization)
 			};
@@ -114,23 +107,20 @@ internal class GetGameProvidersQueryService : IQueryService<GetGameProvidersQuer
 	private static GameStatus[] GetAvailableGameStatus(PlayerType playerType)
 		=> playerType switch
 		{
-			PlayerType.RealPlayer => new[]
-			{
+			PlayerType.RealPlayer => [
 				GameStatus.Active,
 				GameStatus.Maintenance
-			},
-			PlayerType.TestPlayer => new[]
-			{
+			],
+			PlayerType.TestPlayer => [
 				GameStatus.Active,
 				GameStatus.Maintenance,
 				GameStatus.Testing
-			},
-			PlayerType.All => new[]
-			{
+			],
+			PlayerType.All => [
 				GameStatus.Active,
 				GameStatus.Maintenance,
 				GameStatus.Testing
-			},
+			],
 			_ => Array.Empty<GameStatus>()
 		};
 
@@ -147,7 +137,7 @@ internal class GetGameProvidersQueryService : IQueryService<GetGameProvidersQuer
 			PlayerType.RealPlayer => statuses,
 			PlayerType.TestPlayer => statuses,
 			PlayerType.All => statuses,
-			_ => Array.Empty<Status>()
+			_ => []
 		};
 	}
 }

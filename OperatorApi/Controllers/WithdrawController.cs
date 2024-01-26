@@ -132,7 +132,7 @@ public class WithdrawController : ControllerBase
 	public async Task<PagedResponse<WithdrawFormViewModel>> GetWithdrawFormsAsync(
 		[FromServices] IGetService<WithdrawFormsQuery, Tgs.Payment.Clients.PagingResponse<WithdrawFormInfo>> getWithdrawFormsQueryService,
 		[FromQuery] GetWithdrawFormsRequest request,
-		[FromQuery] PageableRequest paging)
+		[FromQuery] PagingRequest paging)
 	{
 		var brandId = HttpContext.Items.GetBrandId();
 		var playerTokenData = HttpContext.Items.GetPlayerTokenData();
@@ -152,7 +152,14 @@ public class WithdrawController : ControllerBase
 			request.Status.ToPaymentFlowState(),
 			createOnRange,
 			updateOnRange,
-			paging);
+			new Paging
+			{
+				IsDesc = paging.IsDesc,
+				SortBy = paging.SortBy,
+				ShowAll = paging.ShowAll,
+				Rows = paging.Rows,
+				Page = paging.Page
+			});
 
 		var result = await getWithdrawFormsQueryService.GetAsync(query).ConfigureAwait(false);
 

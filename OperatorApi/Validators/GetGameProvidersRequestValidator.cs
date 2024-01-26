@@ -1,6 +1,5 @@
 ﻿using FluentValidation;
 using TGS.Apis.OperatorApi.Models.Messages;
-using TGS.Core.Infrastructures.Extensions;
 
 namespace TGS.Apis.OperatorApi.Validators;
 
@@ -9,22 +8,13 @@ public sealed class GetGameProvidersRequestValidator : AbstractValidator<GetGame
 	public GetGameProvidersRequestValidator()
 	{
 		_ = RuleFor(x => x.CurrencyCode)
-			.NotEmpty()
-			.WithName(x => x
-				.WithPropertyExpression(o => o.CurrencyCode)
-				.GetBindPropertyName(nameof(x.CurrencyCode)));
+			.NotEmpty();
 
 		_ = RuleFor(x => x.LanguageCode)
-			.NotEmpty()
-			.WithName(x => x
-				.WithPropertyExpression(o => o.LanguageCode)
-				.GetBindPropertyName(nameof(x.LanguageCode)));
+			.NotEmpty();
 
 		_ = RuleFor(x => x.PlatformType)
 			.IsInEnum()
-			.WithMessage(x => string.Format(
-				"{0} does not exist",
-				x.WithPropertyExpression(o => o.PlatformType)
-					.GetBindPropertyName(nameof(x.PlatformType))));
+			.WithMessage("value does not in enum");
 	}
 }

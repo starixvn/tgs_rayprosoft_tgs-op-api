@@ -11,34 +11,23 @@ public interface IBrandGameProviderOperations
 	Task<string> MapCultureAsync(Guid gameProviderId, Guid brandId, string cultureCode);
 }
 
-public sealed class BrandGameProviderOperations : IBrandGameProviderOperations
+public sealed class BrandGameProviderOperations(
+	IBrandOperations brandOperations,
+	IGameProviderOperations gameProviderOperations,
+	IGameProviderLanguageCodeMapper languageCodeMapper) : IBrandGameProviderOperations
 {
-	private readonly IBrandOperations _brandOperations;
-	private readonly IGameProviderOperations _gameProviderOperations;
-	private readonly IGameProviderLanguageCodeMapper _languageCodeMapper;
-
-	public BrandGameProviderOperations(
-		IBrandOperations brandOperations,
-		IGameProviderOperations gameProviderOperations,
-		IGameProviderLanguageCodeMapper languageCodeMapper)
-	{
-		_brandOperations = brandOperations;
-		_gameProviderOperations = gameProviderOperations;
-		_languageCodeMapper = languageCodeMapper;
-	}
-
 	async Task<string> IBrandGameProviderOperations.MapCultureAsync(Guid gameProviderId, Guid brandId,
 		string cultureCode)
 	{
-		var gameProviderLanguages = await _gameProviderOperations.GetGameProviderLanguagesAsync(gameProviderId);
+		var gameProviderLanguages = await gameProviderOperations.GetGameProviderLanguagesAsync(gameProviderId);
 
 		var internalCode = await GetSupportedLanguageAsync(gameProviderLanguages, cultureCode,
-			() => _brandOperations.GetBrandGameProviderConfigurationDefaultLanguageAsync(brandId, gameProviderId));
+			() => brandOperations.GetBrandGameProviderConfigurationDefaultLanguageAsync(brandId, gameProviderId));
 
 		internalCode = await GetSupportedLanguageAsync(gameProviderLanguages, internalCode,
 			() => Task.FromResult(Consts.DefaultCultureCode));
 
-		return await _languageCodeMapper.InternalToExternalAsync(internalCode, gameProviderId);
+		return await languageCodeMapper.InternalToExternalAsync(internalCode, gameProviderId);
 	}
 
 	private static async Task<string> GetSupportedLanguageAsync(string[] gameProviderLanguages,

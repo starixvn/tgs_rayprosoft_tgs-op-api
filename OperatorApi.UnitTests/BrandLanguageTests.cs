@@ -1,9 +1,6 @@
-﻿using System;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
-using NUnit.Framework;
+using NUnit.Framework.Legacy;
 using TGS.Core.DataServices.Tgs;
 using TGS.Services.Operator.ApplicationServices.BrandLanguage;
 using CoreModels = TGS.Core.DataServices.Tgs.Models;
@@ -20,7 +17,7 @@ public class BrandLanguageTests
 		_ = dbContextOptionsBuilder
 			.UseInMemoryDatabase(Guid.NewGuid().ToString())
 			.ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
-		ITgsRepository repository = new TgsRepository(dbContextOptionsBuilder.Options);
+		var repository = new TgsRepository(dbContextOptionsBuilder.Options);
 		var brandId = Guid.NewGuid();
 
 		_ = repository.Brands.Add(new CoreModels.Brand()
@@ -49,6 +46,6 @@ public class BrandLanguageTests
 		var query = new BrandLanguageQuery(brandId);
 		var actual = await sut.QueryAsync(query).ToArrayAsync();
 
-		Assert.IsTrue(actual.Length >= 1);
+		ClassicAssert.IsTrue(actual.Length >= 1);
 	}
 }

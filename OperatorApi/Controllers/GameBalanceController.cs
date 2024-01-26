@@ -119,7 +119,7 @@ public class GameBalanceController : ControllerBase
 	public async Task<PagedResponse<GameBalanceInfosViewModel>> GetGameBalanceInfosAsync(
 		[FromServices] IQueryService<GetGameBalanceInfosQuery, GameBalanceRecord> queryService,
 		[FromQuery] GetGameBalanceInfosRequest request,
-		[FromQuery] PageableRequest pageableRequest)
+		[FromQuery] PagingRequest pageableRequest)
 	{
 		var playerTokenData = HttpContext.Items.GetPlayerTokenData();
 		var brandId = HttpContext.Items.GetBrandId();

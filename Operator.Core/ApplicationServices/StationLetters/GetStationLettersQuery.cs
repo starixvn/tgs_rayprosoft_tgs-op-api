@@ -1,5 +1,6 @@
-﻿using TGS.Core.Models.Messages;
+﻿using Tgs.Paging;
+using TGS.Services.Operator.StationLetters;
 
 namespace TGS.Services.Operator.ApplicationServices.StationLetters;
 
-public record GetStationLettersQuery(string PlayerCode, PageableRequest Paging);
+public record GetStationLettersQuery(string PlayerCode, Paging<StationLetter> Paging);

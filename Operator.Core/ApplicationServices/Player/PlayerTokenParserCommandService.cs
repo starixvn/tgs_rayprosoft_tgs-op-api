@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
 using System.Text;
@@ -15,21 +13,14 @@ using TGS.Core.Models.Tokens;
 
 namespace TGS.Services.Operator.ApplicationServices.Player;
 
-internal class PlayerTokenParserCommandService : IGetService<PlayerTokenParserCommand, PlayerTokenData?>
+internal class PlayerTokenParserCommandService(
+	IJwtTokenHandler tokenHandler,
+	IBrandRepository brandRepository,
+	ILogger<PlayerTokenParserCommandService> logger) : IGetService<PlayerTokenParserCommand, PlayerTokenData?>
 {
-	private readonly IBrandRepository _brandRepository;
-	private readonly ILogger<PlayerTokenParserCommandService> _logger;
-	private readonly IJwtTokenHandler _tokenHandler;
-
-	public PlayerTokenParserCommandService(
-		IJwtTokenHandler tokenHandler,
-		IBrandRepository brandRepository,
-		ILogger<PlayerTokenParserCommandService> logger)
-	{
-		_tokenHandler = tokenHandler ?? throw new ArgumentNullException(nameof(tokenHandler));
-		_brandRepository = brandRepository ?? throw new ArgumentNullException(nameof(brandRepository));
-		_logger = logger ?? throw new ArgumentNullException(nameof(logger));
-	}
+	private readonly IBrandRepository _brandRepository = brandRepository ?? throw new ArgumentNullException(nameof(brandRepository));
+	private readonly ILogger<PlayerTokenParserCommandService> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+	private readonly IJwtTokenHandler _tokenHandler = tokenHandler ?? throw new ArgumentNullException(nameof(tokenHandler));
 
 	public async ValueTask<PlayerTokenData?> GetAsync(
 		PlayerTokenParserCommand command,
@@ -50,7 +41,7 @@ internal class PlayerTokenParserCommandService : IGetService<PlayerTokenParserCo
 				ValidIssuer = "operator-api",
 				ValidateAudience = false,
 				ValidateIssuerSigningKey = true,
-				IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey!)),
+				IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes($"{secretKey}{secretKey}")),
 				ValidateLifetime = true,
 				ClockSkew = TimeSpan.Zero
 			},

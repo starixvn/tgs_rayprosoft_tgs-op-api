@@ -10,18 +10,12 @@ using Tgs.ServiceUtility;
 
 namespace TGS.Services.Operator.ApplicationServices.Withdraw;
 
-internal class GetRequireBucketAmountQueryService
-	: IGetService<GetRequireBucketAmountQuery, decimal>
+internal class GetRequireBucketAmountQueryService(IPlayerBucketClient playerBucketClient, IPlayerBucketForTypesClient playerBucketForTypesClient)
+		: IGetService<GetRequireBucketAmountQuery, decimal>
 	, IQueryService<GetRequireBucketAmountQuery, TypeBucketResult>
 {
-	private readonly IPlayerBucketClient _playerBucketClient;
-	private readonly IPlayerBucketForTypesClient _playerBucketForTypesClient;
-
-	public GetRequireBucketAmountQueryService(IPlayerBucketClient playerBucketClient, IPlayerBucketForTypesClient playerBucketForTypesClient)
-	{
-		_playerBucketClient = playerBucketClient ?? throw new ArgumentNullException(nameof(playerBucketClient));
-		_playerBucketForTypesClient = playerBucketForTypesClient ?? throw new ArgumentNullException(nameof(playerBucketForTypesClient));
-	}
+	private readonly IPlayerBucketClient _playerBucketClient = playerBucketClient ?? throw new ArgumentNullException(nameof(playerBucketClient));
+	private readonly IPlayerBucketForTypesClient _playerBucketForTypesClient = playerBucketForTypesClient ?? throw new ArgumentNullException(nameof(playerBucketForTypesClient));
 
 	public ValueTask<decimal> GetAsync(GetRequireBucketAmountQuery query, CancellationToken cancellationToken = default)
 		=> QueryAsync(query, cancellationToken)

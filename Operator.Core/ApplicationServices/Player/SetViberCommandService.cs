@@ -8,14 +8,9 @@ using Tgs.ServiceUtility;
 
 namespace TGS.Services.Operator.ApplicationServices.Player;
 
-internal class SetViberCommandService : ICommandService<SetViberCommand>
+internal class SetViberCommandService(IPlayerServiceClient client) : ICommandService<SetViberCommand>
 {
-	private readonly IPlayerServiceClient _client;
-
-	public SetViberCommandService(IPlayerServiceClient client)
-	{
-		_client = client ?? throw new ArgumentNullException(nameof(client));
-	}
+	private readonly IPlayerServiceClient _client = client ?? throw new ArgumentNullException(nameof(client));
 
 	public ValueTask ExecuteAsync(SetViberCommand command, CancellationToken cancellationToken = default)
 	{

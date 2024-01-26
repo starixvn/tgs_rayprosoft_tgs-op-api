@@ -6,14 +6,9 @@ using Tgs.StationLetterService.Client;
 
 namespace TGS.Services.Operator.ApplicationServices.StationLetters;
 
-internal class SetHaveReadV2CommandService : ICommandService<SetHaveReadV2Command>
+internal class SetHaveReadV2CommandService(IStationLetterClient stationLetterClient) : ICommandService<SetHaveReadV2Command>
 {
-	private readonly IStationLetterClient _stationLetterClient;
-
-	public SetHaveReadV2CommandService(IStationLetterClient stationLetterClient)
-	{
-		_stationLetterClient = stationLetterClient ?? throw new ArgumentNullException(nameof(stationLetterClient));
-	}
+	private readonly IStationLetterClient _stationLetterClient = stationLetterClient ?? throw new ArgumentNullException(nameof(stationLetterClient));
 
 	public async ValueTask ExecuteAsync(SetHaveReadV2Command command, CancellationToken cancellationToken = default)
 	{

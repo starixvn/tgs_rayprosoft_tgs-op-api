@@ -6,14 +6,9 @@ using TGS.Services.Operator;
 
 namespace TGS.Operator.Repositories;
 
-internal class SysRepository : ISysRepository
+internal class SysRepository(ITgsRepository tgsRepository) : ISysRepository
 {
-	private readonly ITgsRepository _tgsRepository;
-
-	public SysRepository(ITgsRepository tgsRepository)
-	{
-		_tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
-	}
+	private readonly ITgsRepository _tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
 
 	public IAsyncEnumerable<KeyValuePair<string, string>> QueryAllLocalizationStringsAsync(string cultureCode)
 	{

@@ -4,14 +4,9 @@ using Tgs.ServiceUtility;
 
 namespace TGS.Services.Operator.ApplicationServices.BrandAllAgent;
 
-internal class GetBrandAllAgentTurnoverConditionsQueryService : IQueryService<GetBrandAllAgentTurnoverConditionsQuery, BrandAllAgentTurnover>
+internal class GetBrandAllAgentTurnoverConditionsQueryService(IBrandRepository brandRepository) : IQueryService<GetBrandAllAgentTurnoverConditionsQuery, BrandAllAgentTurnover>
 {
-	private readonly IBrandRepository _brandRepository;
-
-	public GetBrandAllAgentTurnoverConditionsQueryService(IBrandRepository brandRepository)
-	{
-		_brandRepository = brandRepository ?? throw new System.ArgumentNullException(nameof(brandRepository));
-	}
+	private readonly IBrandRepository _brandRepository = brandRepository ?? throw new System.ArgumentNullException(nameof(brandRepository));
 
 	public IAsyncEnumerable<BrandAllAgentTurnover> QueryAsync(
 		GetBrandAllAgentTurnoverConditionsQuery query,

@@ -28,19 +28,13 @@ using TGS.Services.Operator.ApplicationServices.Player;
 using TGS.Services.Operator.PlayerRegisterFlow;
 using Valhalla.MessageQueue;
 using Xunit.Abstractions;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 using BrandStatus = Tgs.BrandCertificate.BrandStatus;
 
 namespace OperatorApi.IntegrationTests;
 
-public class PlayerTests
+public class PlayerTests(ITestOutputHelper testOutputHelper)
 {
-	private readonly ITestOutputHelper _testOutputHelper;
-
-	public PlayerTests(ITestOutputHelper testOutputHelper)
-	{
-		_testOutputHelper = testOutputHelper ?? throw new ArgumentNullException(nameof(testOutputHelper));
-	}
+	private readonly ITestOutputHelper _testOutputHelper = testOutputHelper ?? throw new ArgumentNullException(nameof(testOutputHelper));
 
 	[Fact]
 	public async Task 玩家身分審核上傳()
@@ -187,7 +181,7 @@ public class PlayerTests
 		// Act
 		var actual = await StaticNodeJSService.InvokeFromStringAsync<string>(
 			nodeModule,
-			args: new object?[] { brandToken, loginResult.PlayerToken, request, filePath });
+			args: [brandToken, loginResult.PlayerToken, request, filePath]);
 
 		// Assert
 		_ = fakePlayerOperations
@@ -289,7 +283,7 @@ public class PlayerTests
 				new Claim("platform_type", platformType.ToString())
 			});
 
-		var signature = Encoding.UTF8.GetBytes(secretKey);
+		var signature = Encoding.UTF8.GetBytes($"{secretKey}{secretKey}");
 
 		var tokenHandler = new JwtSecurityTokenHandler();
 		var key = new SymmetricSecurityKey(signature);
@@ -335,7 +329,7 @@ public class PlayerTests
 		// Act
 		var actual = await StaticNodeJSService.InvokeFromStringAsync<LoginResponse>(
 			nodeModule,
-			args: new object?[] { brandToken, userName, password, (int)platformType });
+			args: [brandToken, userName, password, (int)platformType]);
 
 		// Assert
 		Assert.NotNull(actual);
@@ -448,14 +442,14 @@ public class PlayerTests
 		// Act
 		_ = await StaticNodeJSService.InvokeFromStringAsync<LoginResponse>(
 			nodeModule,
-			args: new object?[] { brandToken, userName, password, (int)platformType });
+			args: [brandToken, userName, password, (int)platformType]);
 
 		// Assert
 		_ = fakeMessageSender
 			.Received(1)
 			.PublishAsync(
 				Arg.Is("tgs.operator.player.logged_in"),
-				Arg.Any<ReadOnlyMemory<byte>>(),
+				Arg.Any<byte[]>(),
 				Arg.Any<CancellationToken>());
 	}
 
@@ -577,7 +571,7 @@ public class PlayerTests
 		// Act
 		var response = await StaticNodeJSService.InvokeFromStringAsync<string>(
 			nodeModule,
-			args: new object?[] { brandToken, request });
+			args: [brandToken, request]);
 
 		var actual = JsonSerializer.Deserialize<SuccessResponse<PlayerRegisterFlowResponseViewModel>>(
 			response!,
@@ -718,7 +712,7 @@ public class PlayerTests
 		// Act
 		var actual = await StaticNodeJSService.InvokeFromStringAsync<string>(
 			nodeModule,
-			args: new object?[] { brandToken, loginResult.PlayerToken, request });
+			args: [brandToken, loginResult.PlayerToken, request]);
 
 		// Assert
 		_ = fakePlayerServiceClient

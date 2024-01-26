@@ -1,6 +1,5 @@
 ﻿using FluentValidation;
 using TGS.Apis.OperatorApi.Models.Messages;
-using TGS.Core.Infrastructures.Extensions;
 
 namespace TGS.Apis.OperatorApi.Validators;
 
@@ -10,9 +9,6 @@ public sealed class SetPayPasswordRequestValidator : AbstractValidator<SetPayPas
 	{
 		_ = RuleFor(x => x.Password)
 			.NotEmpty()
-			.Length(6, 20)
-			.WithName(x => x
-				.WithPropertyExpression(o => o.Password)
-				.GetBindPropertyName(nameof(x.Password)));
+			.Length(6, 20);
 	}
 }

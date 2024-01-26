@@ -1,8 +1,6 @@
-﻿using System;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
-using NUnit.Framework;
+using NUnit.Framework.Legacy;
 using TGS.Core.DataServices.Tgs;
 using TGS.Services.Operator.ApplicationServices.BrandLiveChat;
 using CoreModels = TGS.Core.DataServices.Tgs.Models;
@@ -19,7 +17,7 @@ public class BrandLiveChatTests
 		_ = dbContextOptionsBuilder
 			.UseInMemoryDatabase(Guid.NewGuid().ToString())
 			.ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
-		ITgsRepository repository = new TgsRepository(dbContextOptionsBuilder.Options);
+		var repository = new TgsRepository(dbContextOptionsBuilder.Options);
 		var brandId = Guid.NewGuid();
 
 		_ = repository.BrandLiveChats.Add(new CoreModels.BrandLiveChat()
@@ -36,6 +34,6 @@ public class BrandLiveChatTests
 
 		var info = await sut.GetAsync(query);
 
-		Assert.IsTrue(info.Setting != null);
+		ClassicAssert.IsTrue(info.Setting != null);
 	}
 }

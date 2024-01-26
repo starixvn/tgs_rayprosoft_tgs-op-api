@@ -7,14 +7,9 @@ using TGS.Services.Operator.GameProviders;
 
 namespace TGS.Services.Operator.ApplicationServices.Game;
 
-internal class ListFavoriteGameIdsQueryService : IQueryService<ListFavoriteGameIdsQuery, FavoriteGameInfo>
+internal class ListFavoriteGameIdsQueryService(IGameProviderRepository gameProviderRepository) : IQueryService<ListFavoriteGameIdsQuery, FavoriteGameInfo>
 {
-	private readonly IGameProviderRepository _gameProviderRepository;
-
-	public ListFavoriteGameIdsQueryService(IGameProviderRepository gameProviderRepository)
-	{
-		_gameProviderRepository = gameProviderRepository ?? throw new ArgumentNullException(nameof(gameProviderRepository));
-	}
+	private readonly IGameProviderRepository _gameProviderRepository = gameProviderRepository ?? throw new ArgumentNullException(nameof(gameProviderRepository));
 
 	public IAsyncEnumerable<FavoriteGameInfo> QueryAsync(
 		ListFavoriteGameIdsQuery query,

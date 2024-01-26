@@ -6,14 +6,9 @@ using Tgs.ServiceUtility;
 
 namespace TGS.Services.Operator.ApplicationServices.Player;
 
-internal class CheckBrandEmailQueryService : IGetService<CheckBrandEmailQuery, bool>
+internal class CheckBrandEmailQueryService(IPlayerServiceClient playerServiceClient) : IGetService<CheckBrandEmailQuery, bool>
 {
-	private readonly IPlayerServiceClient _playerServiceClient;
-
-	public CheckBrandEmailQueryService(IPlayerServiceClient playerServiceClient)
-	{
-		_playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
-	}
+	private readonly IPlayerServiceClient _playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
 
 	public async ValueTask<bool> GetAsync(CheckBrandEmailQuery query, CancellationToken cancellationToken = default)
 	{

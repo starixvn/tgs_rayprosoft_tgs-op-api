@@ -6,14 +6,9 @@ using Tgs.ServiceUtility;
 
 namespace TGS.Services.Operator.ApplicationServices.Brand;
 
-internal class GetBrandQueryService : IGetService<BrandQuery, BrandInfo>
+internal class GetBrandQueryService(IBrandServiceClient brandServiceClient) : IGetService<BrandQuery, BrandInfo>
 {
-	private readonly IBrandServiceClient _brandServiceClient;
-
-	public GetBrandQueryService(IBrandServiceClient brandServiceClient)
-	{
-		_brandServiceClient = brandServiceClient ?? throw new ArgumentNullException(nameof(brandServiceClient));
-	}
+	private readonly IBrandServiceClient _brandServiceClient = brandServiceClient ?? throw new ArgumentNullException(nameof(brandServiceClient));
 
 	public async ValueTask<BrandInfo> GetAsync(
 		BrandQuery query,

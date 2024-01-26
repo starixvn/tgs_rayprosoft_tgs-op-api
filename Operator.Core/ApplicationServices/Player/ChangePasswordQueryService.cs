@@ -7,18 +7,12 @@ using TGS.Core.Models.Exceptions;
 
 namespace TGS.Services.Operator.ApplicationServices.Player;
 
-internal class ChangePasswordQueryService : IGetService<ChangePasswordQuery, ChangePasswordInfo>
+internal class ChangePasswordQueryService(
+	IPlayerRepository playerRepository,
+	IPasswordHandler passwordHandler) : IGetService<ChangePasswordQuery, ChangePasswordInfo>
 {
-	private readonly IPasswordHandler _passwordHandler;
-	private readonly IPlayerRepository _playerRepository;
-
-	public ChangePasswordQueryService(
-		IPlayerRepository playerRepository,
-		IPasswordHandler passwordHandler)
-	{
-		_playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
-		_passwordHandler = passwordHandler ?? throw new ArgumentNullException(nameof(passwordHandler));
-	}
+	private readonly IPasswordHandler _passwordHandler = passwordHandler ?? throw new ArgumentNullException(nameof(passwordHandler));
+	private readonly IPlayerRepository _playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
 
 	public async ValueTask<ChangePasswordInfo> GetAsync(
 		ChangePasswordQuery query, CancellationToken cancellationToken = default)

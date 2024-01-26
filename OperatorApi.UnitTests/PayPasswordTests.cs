@@ -1,10 +1,8 @@
-﻿using System;
-using System.Globalization;
-using System.Threading.Tasks;
+﻿using System.Globalization;
 using ExpectedObjects;
 using FluentValidation.TestHelper;
 using NSubstitute;
-using NUnit.Framework;
+using NUnit.Framework.Legacy;
 using Tgs.BrandCertificate.Clients;
 using Tgs.Core.Infrastructures.Security;
 using TGS.Apis.OperatorApi.Models.Messages;
@@ -133,12 +131,11 @@ public class PayPasswordTests
 			{
 				PlayerCode = playerCode,
 				Username = "Tester",
-				WithdrawPassword = new byte[]
-				{
+				WithdrawPassword = [
 					1,
 					2,
 					3
-				}
+				]
 			});
 
 		_ = Assert.ThrowsAsync<PayPasswordAlreadySetException>(async () => await sut.ExecuteAsync(command));
@@ -164,7 +161,7 @@ public class PayPasswordTests
 			{
 				PlayerCode = playerCode,
 				Username = "Tester",
-				WithdrawPassword = Array.Empty<byte>()
+				WithdrawPassword = []
 			});
 
 		await sut.ExecuteAsync(command);
@@ -259,7 +256,7 @@ public class PayPasswordTests
 			.SendAsync(Arg.Any<SendEmailRequest>());
 
 		expected.ShouldMatch(actual);
-		Assert.AreEqual(expectedSecurityKey, actualSecurityKey);
+		ClassicAssert.AreEqual(expectedSecurityKey, actualSecurityKey);
 	}
 
 	[Test]

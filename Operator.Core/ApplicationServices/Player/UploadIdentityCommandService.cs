@@ -8,14 +8,9 @@ using TGS.Core.Infrastructures.Utility;
 
 namespace TGS.Services.Operator.ApplicationServices.Player;
 
-internal class UploadIdentityCommandService : IGetService<UploadIdentityCommand, string>
+internal class UploadIdentityCommandService(IFileServiceClient fileServiceClient) : IGetService<UploadIdentityCommand, string>
 {
-	private readonly IFileServiceClient _fileServiceClient;
-
-	public UploadIdentityCommandService(IFileServiceClient fileServiceClient)
-	{
-		_fileServiceClient = fileServiceClient ?? throw new ArgumentNullException(nameof(fileServiceClient));
-	}
+	private readonly IFileServiceClient _fileServiceClient = fileServiceClient ?? throw new ArgumentNullException(nameof(fileServiceClient));
 
 	public async ValueTask<string> GetAsync(UploadIdentityCommand command, CancellationToken cancellationToken = default)
 	{

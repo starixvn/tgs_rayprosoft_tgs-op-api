@@ -20,14 +20,9 @@ using TransactionLogResponseViewMode = TGS.Apis.OperatorApi.Models.Messages.Pagi
 
 namespace OperatorApi.IntegrationTests;
 
-public class TransactionLogTests
+public class TransactionLogTests(ITestOutputHelper testOutputHelper)
 {
-	private readonly ITestOutputHelper _testOutputHelper;
-
-	public TransactionLogTests(ITestOutputHelper testOutputHelper)
-	{
-		_testOutputHelper = testOutputHelper ?? throw new ArgumentNullException(nameof(testOutputHelper));
-	}
+	private readonly ITestOutputHelper _testOutputHelper = testOutputHelper ?? throw new ArgumentNullException(nameof(testOutputHelper));
 
 	[Fact]
 	public async Task 查詢玩家的帳變紀錄()
@@ -188,7 +183,7 @@ public class TransactionLogTests
 		// Act
 		var actual = await StaticNodeJSService.InvokeFromStringAsync<SuccessResponse<TransactionLogResponseViewMode>>(
 			nodeModule,
-			args: new object?[] { brandToken, loginResult.PlayerToken, from, to, 1, 10 });
+			args: [brandToken, loginResult.PlayerToken, from, to, 1, 10]);
 
 		// Assert
 		Assert.Equal(expected.TotalCount, actual?.Data.TotalCount);

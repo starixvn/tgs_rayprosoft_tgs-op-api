@@ -8,18 +8,12 @@ using TGS.Core.Models.Enums;
 
 namespace TGS.Services.Operator.ApplicationServices.Withdraw;
 
-internal class CreateInitBankInfoCommandService : ICommandService<CreateInitBankInfoCommand>
+internal class CreateInitBankInfoCommandService(
+	IPaymentServiceClient paymentServiceClient,
+	IRedisCacheManager cacheManager) : ICommandService<CreateInitBankInfoCommand>
 {
-	private readonly IRedisCacheManager _cacheManager;
-	private readonly IPaymentServiceClient _paymentServiceClient;
-
-	public CreateInitBankInfoCommandService(
-		IPaymentServiceClient paymentServiceClient,
-		IRedisCacheManager cacheManager)
-	{
-		_paymentServiceClient = paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
-		_cacheManager = cacheManager ?? throw new ArgumentNullException(nameof(cacheManager));
-	}
+	private readonly IRedisCacheManager _cacheManager = cacheManager ?? throw new ArgumentNullException(nameof(cacheManager));
+	private readonly IPaymentServiceClient _paymentServiceClient = paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
 
 	public async ValueTask ExecuteAsync(
 		CreateInitBankInfoCommand command,

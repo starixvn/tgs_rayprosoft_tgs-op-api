@@ -1,7 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
-using NSubstitute;
-using NUnit.Framework;
+﻿using NSubstitute;
 using TGS.Services.Operator;
 using TGS.Services.Operator.ApplicationServices.BrandAllAgent;
 

@@ -1,11 +1,10 @@
-﻿using System.Data.SqlClient;
-using System.Text.Json;
+﻿using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
+using Tgs.Paging;
 using Tgs.ServiceUtility;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models.Messages;
-using TGS.Core.Models.Messages;
 using TGS.Services.Operator.ApplicationServices.StationLetters;
 using TGS.Services.Operator.StationLetters;
 
@@ -33,16 +32,12 @@ public class StationLetterController : ControllerBase
 	{
 		var playerTokenData = HttpContext.Items.GetPlayerTokenData();
 
-		var paging = new PageableRequest();
-		if (request.ShowAll)
-			paging.ShowAll = true;
-		else
+		var paging = new Paging<StationLetter>
 		{
-			paging.Page = request.Page;
-			paging.Rows = request.Rows;
-			paging.OrderBy = request.IsDesc ? SortOrder.Descending : SortOrder.Ascending;
-			paging.SortBy = request.SortBy;
-		}
+			Page = request.Page,
+			RowCount = request.Rows
+		};
+		paging.SortByPropertyName(request.SortBy, request.IsDesc);
 
 		var query = new GetStationLettersQuery(playerTokenData.PlayerCode, paging);
 

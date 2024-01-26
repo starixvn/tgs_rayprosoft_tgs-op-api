@@ -7,18 +7,12 @@ using Tgs.ServiceUtility;
 
 namespace TGS.Services.Operator.ApplicationServices.Withdraw;
 
-internal class CheckPlayerIdentityCommandService : IGetService<CheckPlayerIdentityCommand, bool>
+internal class CheckPlayerIdentityCommandService(
+	IBrandServiceClient brandServiceClient,
+	IPlayerServiceClient playerServiceClient) : IGetService<CheckPlayerIdentityCommand, bool>
 {
-	private readonly IBrandServiceClient _brandServiceClient;
-	private readonly IPlayerServiceClient _playerServiceClient;
-
-	public CheckPlayerIdentityCommandService(
-		IBrandServiceClient brandServiceClient,
-		IPlayerServiceClient playerServiceClient)
-	{
-		_brandServiceClient = brandServiceClient ?? throw new ArgumentNullException(nameof(brandServiceClient));
-		_playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
-	}
+	private readonly IBrandServiceClient _brandServiceClient = brandServiceClient ?? throw new ArgumentNullException(nameof(brandServiceClient));
+	private readonly IPlayerServiceClient _playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
 
 	public async ValueTask<bool> GetAsync(CheckPlayerIdentityCommand command, CancellationToken cancellationToken = default)
 	{

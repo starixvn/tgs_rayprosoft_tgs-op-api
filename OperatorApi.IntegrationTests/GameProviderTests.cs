@@ -12,14 +12,9 @@ using Xunit.Abstractions;
 
 namespace OperatorApi.IntegrationTests;
 
-public class GameProviderTests
+public class GameProviderTests(ITestOutputHelper testOutputHelper)
 {
-	private readonly ITestOutputHelper _testOutputHelper;
-
-	public GameProviderTests(ITestOutputHelper testOutputHelper)
-	{
-		_testOutputHelper = testOutputHelper ?? throw new ArgumentNullException(nameof(testOutputHelper));
-	}
+	private readonly ITestOutputHelper _testOutputHelper = testOutputHelper ?? throw new ArgumentNullException(nameof(testOutputHelper));
 
 	[Fact]
 	public async Task 取得在維護的GP列表()
@@ -78,7 +73,7 @@ public class GameProviderTests
 		// Act
 		var actual = await StaticNodeJSService.InvokeFromStringAsync<SuccessResponse<GameProviderStatus[]>>(
 			nodeModule,
-			args: new object?[] { brandToken });
+			args: [brandToken]);
 
 		// Assert
 		Assert.Equal(expectedSubGameProviders, actual?.Data);

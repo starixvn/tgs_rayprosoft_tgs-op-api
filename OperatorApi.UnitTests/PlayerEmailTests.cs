@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Immutable;
+﻿using System.Collections.Immutable;
 using System.Globalization;
-using System.Threading.Tasks;
 using ExpectedObjects;
 using NSubstitute;
-using NUnit.Framework;
+using NUnit.Framework.Legacy;
 using Tgs.BrandCertificate.Clients;
 using Tgs.PlayerService.Client;
 using Tgs.ServiceUtility;
@@ -287,7 +285,7 @@ public class PlayerEmailTests
 
 		var actual = await sut.GetAsync(query);
 
-		Assert.IsFalse(actual);
+		ClassicAssert.IsFalse(actual);
 	}
 
 	[Test]
@@ -314,7 +312,7 @@ public class PlayerEmailTests
 
 		var actual = await sut.GetAsync(query);
 
-		Assert.IsTrue(actual);
+		ClassicAssert.IsTrue(actual);
 	}
 
 	[Test]
@@ -384,7 +382,7 @@ public class PlayerEmailTests
 		_ = fakeValidateCodeGenerator
 			.Received(0).GenerateCode();
 
-		Assert.AreEqual(expectedSecurityKey, actualSecurityKey);
+		ClassicAssert.AreEqual(expectedSecurityKey, actualSecurityKey);
 	}
 
 	[Test]
@@ -431,6 +429,6 @@ public class PlayerEmailTests
 			.SendAsync(Arg.Any<SendEmailRequest>());
 
 		expected.ShouldMatch(actual);
-		Assert.AreEqual(expectedSecurityKey, actualSecurityKey);
+		ClassicAssert.AreEqual(expectedSecurityKey, actualSecurityKey);
 	}
 }

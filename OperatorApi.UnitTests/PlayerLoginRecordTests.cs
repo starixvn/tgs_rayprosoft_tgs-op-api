@@ -1,8 +1,6 @@
 ﻿#nullable enable
 
-using System;
 using NSubstitute;
-using NUnit.Framework;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
 using TGS.Services.Operator;

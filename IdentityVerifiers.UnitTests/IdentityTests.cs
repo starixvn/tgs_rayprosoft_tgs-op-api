@@ -1,4 +1,5 @@
 ﻿using NUnit.Framework;
+using NUnit.Framework.Legacy;
 using TGS.IdentityVerifiers;
 
 namespace TGS.Tests.IdentityVerifiers.UnitTests;
@@ -15,7 +16,7 @@ public class IdentityTests
 
 		var actual = sut.GetIdentityVerifier(currency);
 
-		Assert.IsInstanceOf<ChineseIdentityVerifier>(actual);
+		ClassicAssert.IsInstanceOf<ChineseIdentityVerifier>(actual);
 	}
 
 	[Test]
@@ -27,6 +28,6 @@ public class IdentityTests
 
 		var actual = sut.GetIdentityVerifier(currency);
 
-		Assert.IsInstanceOf<SoutheastAsiaIdentityVerifier>(actual);
+		ClassicAssert.IsInstanceOf<SoutheastAsiaIdentityVerifier>(actual);
 	}
 }

@@ -11,25 +11,17 @@ using TGS.Services.Operator.ApplicationServices.BrandPayments;
 
 namespace TGS.Services.Operator.ApplicationServices.Deposit;
 
-internal class SubmitBankDepositFormCommandService : ICommandService<SubmitBankDepositFormCommand>
+internal class SubmitBankDepositFormCommandService(
+	IPaymentServiceClient paymentServiceClient,
+	IFileServiceClient fileServiceClient,
+	IQueryService<BrandPaymentsQuery, BrandPaymentInfo> brandPaymentsQueryService,
+	IGetService<GetPaymentQuery, PaymentInfo> getPaymentService) : ICommandService<SubmitBankDepositFormCommand>
 {
-	private readonly IQueryService<BrandPaymentsQuery, BrandPaymentInfo> _brandPaymentsQueryService;
-	private readonly IFileServiceClient _fileServiceClient;
-	private readonly IGetService<GetPaymentQuery, PaymentInfo> _getPaymentService;
-	private readonly IPaymentServiceClient _paymentServiceClient;
-
-	public SubmitBankDepositFormCommandService(
-		IPaymentServiceClient paymentServiceClient,
-		IFileServiceClient fileServiceClient,
-		IQueryService<BrandPaymentsQuery, BrandPaymentInfo> brandPaymentsQueryService,
-		IGetService<GetPaymentQuery, PaymentInfo> getPaymentService)
-	{
-		_paymentServiceClient =
+	private readonly IQueryService<BrandPaymentsQuery, BrandPaymentInfo> _brandPaymentsQueryService = brandPaymentsQueryService ?? throw new ArgumentNullException(nameof(brandPaymentsQueryService));
+	private readonly IFileServiceClient _fileServiceClient = fileServiceClient ?? throw new ArgumentNullException(nameof(fileServiceClient));
+	private readonly IGetService<GetPaymentQuery, PaymentInfo> _getPaymentService = getPaymentService ?? throw new ArgumentNullException(nameof(getPaymentService));
+	private readonly IPaymentServiceClient _paymentServiceClient =
 			paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
-		_fileServiceClient = fileServiceClient ?? throw new ArgumentNullException(nameof(fileServiceClient));
-		_brandPaymentsQueryService = brandPaymentsQueryService ?? throw new ArgumentNullException(nameof(brandPaymentsQueryService));
-		_getPaymentService = getPaymentService ?? throw new ArgumentNullException(nameof(getPaymentService));
-	}
 
 	public async ValueTask ExecuteAsync(SubmitBankDepositFormCommand command,
 		CancellationToken cancellationToken = default)

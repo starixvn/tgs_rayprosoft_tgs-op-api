@@ -14,18 +14,12 @@ public interface IGameProviderCurrencyCodeMapper : ICodeMapper
 {
 }
 
-public sealed class GameProviderCurrencyCodeMapper : BaseCodeMapper, IGameProviderCurrencyCodeMapper
+public sealed class GameProviderCurrencyCodeMapper(
+	IRedisCacheManager cacheManager,
+	IJsonSerializationProvider json,
+	IGameProviderQueries gameProviderQueries) : BaseCodeMapper(cacheManager, json), IGameProviderCurrencyCodeMapper
 {
 	private const int CacheForMinutes = 30;
-	private readonly IGameProviderQueries _gameProviderQueries;
-
-	public GameProviderCurrencyCodeMapper(
-		IRedisCacheManager cacheManager,
-		IJsonSerializationProvider json,
-		IGameProviderQueries gameProviderQueries) : base(cacheManager, json)
-	{
-		_gameProviderQueries = gameProviderQueries;
-	}
 
 	async Task<string> ICodeMapper.ExternalToInternalAsync(string externalCode, Guid gameProviderId)
 	{
@@ -36,7 +30,7 @@ public sealed class GameProviderCurrencyCodeMapper : BaseCodeMapper, IGameProvid
 			Consts.CachePrefix.GameProviderToTgsMap,
 			"currency",
 			CacheForMinutes,
-			id => _gameProviderQueries.GetGameProviderCurrenciesByExternalCodeAsync(id));
+			id => gameProviderQueries.GetGameProviderCurrenciesByExternalCodeAsync(id));
 
 		return !found
 			? throw new InvalidOperationException(
@@ -51,7 +45,7 @@ public sealed class GameProviderCurrencyCodeMapper : BaseCodeMapper, IGameProvid
 			RedisCacheType.Currencies,
 			Consts.CachePrefix.GameProviderToTgsMap,
 			CacheForMinutes,
-			id => _gameProviderQueries.GetGameProviderCurrenciesByExternalCodeAsync(id));
+			id => gameProviderQueries.GetGameProviderCurrenciesByExternalCodeAsync(id));
 
 	Task<Dictionary<string, string>> ICodeMapper.GetMapByInternalCodeAsync(Guid gameProviderId) =>
 		GetMappedCodesAsync(
@@ -59,7 +53,7 @@ public sealed class GameProviderCurrencyCodeMapper : BaseCodeMapper, IGameProvid
 			RedisCacheType.Currencies,
 			Consts.CachePrefix.TgsToGameProviderMap,
 			CacheForMinutes,
-			id => _gameProviderQueries.GetGameProviderCurrenciesByInternalCodeAsync(id));
+			id => gameProviderQueries.GetGameProviderCurrenciesByInternalCodeAsync(id));
 
 	async Task<string> ICodeMapper.InternalToExternalAsync(string internalCode, Guid gameProviderId)
 	{
@@ -70,7 +64,7 @@ public sealed class GameProviderCurrencyCodeMapper : BaseCodeMapper, IGameProvid
 			Consts.CachePrefix.TgsToGameProviderMap,
 			"currency",
 			CacheForMinutes,
-			id => _gameProviderQueries.GetGameProviderCurrenciesByInternalCodeAsync(id));
+			id => gameProviderQueries.GetGameProviderCurrenciesByInternalCodeAsync(id));
 
 		return !found
 			? throw new InvalidOperationException(

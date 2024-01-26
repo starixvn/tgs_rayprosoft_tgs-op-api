@@ -8,16 +8,11 @@ using TGS.Core.Models.Exceptions;
 
 namespace TGS.Services.Operator.ApplicationServices.Game;
 
-public class GetBetConstructHtmlContentQueryService : IGetService<GetBetConstructHtmlContentQuery, BetConstructHtmlContentInfo>
+public class GetBetConstructHtmlContentQueryService(
+	IGameProvidersOperatorPluggableClient pluggableClient
+		) : IGetService<GetBetConstructHtmlContentQuery, BetConstructHtmlContentInfo>
 {
-	private readonly IGameProvidersOperatorPluggableClient _pluggableClient;
-
-	public GetBetConstructHtmlContentQueryService(
-		IGameProvidersOperatorPluggableClient pluggableClient
-		)
-	{
-		_pluggableClient = pluggableClient ?? throw new ArgumentNullException(nameof(pluggableClient));
-	}
+	private readonly IGameProvidersOperatorPluggableClient _pluggableClient = pluggableClient ?? throw new ArgumentNullException(nameof(pluggableClient));
 
 	public async ValueTask<BetConstructHtmlContentInfo> GetAsync(GetBetConstructHtmlContentQuery query, CancellationToken cancellationToken = default)
 	{

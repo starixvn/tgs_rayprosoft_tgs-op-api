@@ -9,28 +9,21 @@ using TGS.Services.Operator.ValidateCode;
 
 namespace TGS.Services.Operator.ApplicationServices.Player;
 
-internal class ForgotPasswordByMailCommandService : IGetService<ForgotPasswordByMailCommand, string>
+internal class ForgotPasswordByMailCommandService(
+	ITgsRepository tgsRepository,
+	IValidateCodeGenerator codeGenerator,
+	IValidateCodeOperator validateCodeOperator) : IGetService<ForgotPasswordByMailCommand, string>
 {
-	private readonly IValidateCodeGenerator _codeGenerator;
-	private readonly ITgsRepository _tgsRepository;
-	private readonly IValidateCodeOperator _validateCodeOperator;
-
-	public ForgotPasswordByMailCommandService(
-		ITgsRepository tgsRepository,
-		IValidateCodeGenerator codeGenerator,
-		IValidateCodeOperator validateCodeOperator)
-	{
-		_tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
-		_codeGenerator = codeGenerator ?? throw new ArgumentNullException(nameof(codeGenerator));
-		_validateCodeOperator = validateCodeOperator ?? throw new ArgumentNullException(nameof(validateCodeOperator));
-	}
+	private readonly IValidateCodeGenerator _codeGenerator = codeGenerator ?? throw new ArgumentNullException(nameof(codeGenerator));
+	private readonly ITgsRepository _tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
+	private readonly IValidateCodeOperator _validateCodeOperator = validateCodeOperator ?? throw new ArgumentNullException(nameof(validateCodeOperator));
 
 	public async ValueTask<string> GetAsync(ForgotPasswordByMailCommand command, CancellationToken cancellationToken = default)
 	{
 		var player = _tgsRepository.Players.AsQueryable()
 			.Where(player => player.BrandId == command.BrandId
 				&& player.Email == command.Email)
-			.FirstOrDefault() 
+			.FirstOrDefault()
 			?? throw new PlayerNotFoundException($"The email ({command.Email}) can't find the player info.");
 
 		var saveResult = await Policy.HandleResult<(bool Result, string ValidateCode, string Token)>(data => !data.Result)

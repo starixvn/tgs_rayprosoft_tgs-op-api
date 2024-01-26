@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel;
-using System.Data.SqlClient;
 using System.Net.Mime;
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
@@ -15,11 +14,8 @@ namespace TGS.Apis.OperatorApi.Controllers;
 [Route("api/[controller]")]
 [ApiController]
 [Produces(MediaTypeNames.Application.Json)]
-public class PlayerPromotionController : ControllerBase
+public class PlayerPromotionController(IPromotionClient client) : ControllerBase
 {
-	private readonly IPromotionClient _client;
-
-	public PlayerPromotionController(IPromotionClient client) => _client = client;
 
 	/// <summary>
 	/// Get promotions that the player has already joined in.
@@ -40,12 +36,12 @@ public class PlayerPromotionController : ControllerBase
 			To = request.To,
 			Page = request.Page,
 			Rows = request.Rows,
-			OrderBy = request.IsDesc ? (short)SortOrder.Descending : (short)SortOrder.Ascending,
+			OrderBy = (short)(request.IsDesc ? 1 : 0),
 			SortBy = request.SortBy,
 			ShowAll = request.ShowAll
 		};
 
-		var response = await _client.GetJoinedPromotionsAsync(joinedPromotionRequest);
+		var response = await client.GetJoinedPromotionsAsync(joinedPromotionRequest);
 
 		return new PagingResponse<JoinedPromotionsResponse>
 		{
@@ -76,12 +72,12 @@ public class PlayerPromotionController : ControllerBase
 			PlayerCode = playerTokenData.PlayerCode,
 			Page = request.Page,
 			Rows = request.Rows,
-			OrderBy = request.IsDesc ? (short)SortOrder.Descending : (short)SortOrder.Ascending,
+			OrderBy = (short)(request.IsDesc ? 1 : 0),
 			SortBy = request.SortBy,
 			ShowAll = request.ShowAll
 		};
 
-		var response = await _client.GetValidPromotionsAsync(promotionsRequest);
+		var response = await client.GetValidPromotionsAsync(promotionsRequest);
 
 		return new PagingResponse<PromotionResponse>
 		{

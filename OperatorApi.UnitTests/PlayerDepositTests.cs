@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using NSubstitute;
-using NUnit.Framework;
+﻿using NSubstitute;
+using NUnit.Framework.Legacy;
 using Tgs.Payment.Clients;
-using TGS.Core.Models.Messages;
 using TGS.Services.Operator.ApplicationServices.Deposit;
 
 namespace TGS.Tests.OperatorApi.UnitTests;
@@ -25,7 +21,7 @@ public class PlayerDepositTests
 			new List<PaymentFlowState>(),
 			CreateOnRange: null,
 			UpdateOnRange: null,
-			new PageableRequest());
+			new Paging());
 
 		_ = await sut.GetAsync(query, default);
 
@@ -33,7 +29,7 @@ public class PlayerDepositTests
 			.Received(1)
 			.QueryDepositFormsAsync(
 				Arg.Any<DepositFormQueryConditions>(),
-				Arg.Any<Tgs.Payment.Clients.Paging>());
+				Arg.Any<Paging>());
 	}
 
 	[Test]
@@ -49,7 +45,7 @@ public class PlayerDepositTests
 			new List<PaymentFlowState>(),
 			CreateOnRange: null,
 			UpdateOnRange: null,
-			new PageableRequest());
+			new Paging());
 
 		_ = await sut.GetAsync(query, default);
 
@@ -70,7 +66,7 @@ public class PlayerDepositTests
 		var actual = Math.Floor(sendUsdt / rate * 100) / 100;
 
 		var expected = 4347.82M;
-		Assert.AreEqual(expected, actual);
+		ClassicAssert.AreEqual(expected, actual);
 	}
 
 	[Test]
@@ -95,7 +91,7 @@ public class PlayerDepositTests
 			}
 		}
 
-		Assert.IsTrue(flag);
+		ClassicAssert.IsTrue(flag);
 	}
 
 	[Test]
@@ -120,7 +116,7 @@ public class PlayerDepositTests
 			}
 		}
 
-		Assert.IsFalse(flag);
+		ClassicAssert.IsFalse(flag);
 	}
 
 	[Test]
@@ -145,6 +141,6 @@ public class PlayerDepositTests
 			}
 		}
 
-		Assert.IsFalse(flag);
+		ClassicAssert.IsFalse(flag);
 	}
 }

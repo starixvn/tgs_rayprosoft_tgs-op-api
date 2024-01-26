@@ -8,14 +8,9 @@ using Tgs.ServiceUtility;
 
 namespace TGS.Services.Operator.ApplicationServices.Player;
 
-internal class SetTelegramCommandService : ICommandService<SetTelegramCommand>
+internal class SetTelegramCommandService(IPlayerServiceClient client) : ICommandService<SetTelegramCommand>
 {
-	private readonly IPlayerServiceClient _client;
-
-	public SetTelegramCommandService(IPlayerServiceClient client)
-	{
-		_client = client ?? throw new ArgumentNullException(nameof(client));
-	}
+	private readonly IPlayerServiceClient _client = client ?? throw new ArgumentNullException(nameof(client));
 
 	public ValueTask ExecuteAsync(SetTelegramCommand command, CancellationToken cancellationToken = default)
 	{

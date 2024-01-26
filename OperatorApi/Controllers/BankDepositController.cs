@@ -6,7 +6,6 @@ using Tgs.Payment.DibaoPay.Client;
 using Tgs.Payment.Help2Pay;
 using Tgs.Payment.MaticPay;
 using Tgs.Payment.MetaPay.Client;
-using Tgs.Payment.PhpGoPay.Client;
 using Tgs.Payment.PrimePay;
 using Tgs.Payment.SBPay.Client;
 using Tgs.Payment.SkyPay;
@@ -29,15 +28,10 @@ namespace TGS.Apis.OperatorApi.Controllers;
 
 [Route("api/deposit/bank")]
 [ApiController]
-public class BankDepositController : ControllerBase
+public class BankDepositController(ILogger<BankDepositController> loger) : ControllerBase
 {
 	private static readonly Random _Random = new();
-	private readonly ILogger<BankDepositController> _loger;
-
-	public BankDepositController(ILogger<BankDepositController> loger)
-	{
-		_loger = loger ?? throw new ArgumentNullException(nameof(loger));
-	}
+	private readonly ILogger<BankDepositController> _loger = loger ?? throw new ArgumentNullException(nameof(loger));
 
 	[HttpGet("help2pay/pay/{identityId}")]
 	[AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = false)]

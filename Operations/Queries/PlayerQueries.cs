@@ -32,40 +32,33 @@ public interface IPlayerQueries
 	Task<(byte[] Salt, byte[] Password)> GetSaltAndPasswordByPlayerCodeAsync(string playerCode);
 }
 
-public sealed class PlayerQueries : IPlayerQueries
+public sealed class PlayerQueries(ITgsRepository repository) : IPlayerQueries
 {
-	private readonly ITgsRepository _repository;
-
-	public PlayerQueries(ITgsRepository repository)
-	{
-		_repository = repository;
-	}
-
 	public Task<CachedPlayer> GetCachedPlayerAsync(string playerCode)
 	{
 		const string spName = "dbo.player_get_player_for_cache";
-		return _repository.SqlQuerySingleAsync<CachedPlayer>(spName,
+		return repository.SqlQuerySingleAsync<CachedPlayer>(spName,
 			parameters: new Dictionary<string, object> { { ":player_code", playerCode } });
 	}
 
 	public Task<(byte[] Salt, byte[] Password)> GetPaySaltAndPasswordByPlayerCodeAsync(string playerCode)
-		=> _repository.Players.Where(p => p.PlayerCode == playerCode)
+		=> repository.Players.Where(p => p.PlayerCode == playerCode)
 			.Select(p => new ValueTuple<byte[], byte[]>(p.WithdrawSalt, p.WithdrawPassword))
 			.FirstOrDefaultAsync();
 
 	public Task<Player> GetPlayerByCodeAsync(string playerCode) =>
-		_repository.Players
+		repository.Players
 			.FirstOrDefaultAsync(p => p.PlayerCode == playerCode);
 
 	public Task<string> GetPlayerCodeByUsernameAsync(Guid brandId, string username) =>
-		_repository.Players
+		repository.Players
 			.Where(p => p.BrandId == brandId &&
 				p.Username.ToLower().Equals(username.ToLower()))
 			.Select(p => p.PlayerCode)
 			.FirstOrDefaultAsync();
 
 	public Task<CachedPlayerLoginRecord> GetPlayerLoginRecordAsync(Guid loginRecordId) =>
-		_repository.PlayerLoginRecords.Where(r => r.Id == loginRecordId)
+		repository.PlayerLoginRecords.Where(r => r.Id == loginRecordId)
 			.Select(r => new CachedPlayerLoginRecord
 			{
 				PlayerCode = r.PlayerCode,
@@ -79,7 +72,7 @@ public sealed class PlayerQueries : IPlayerQueries
 		LoginStatus[] statuses)
 	{
 		const string spName = "dbo.player_get_player_login_records";
-		var results = await _repository
+		var results = await repository
 			.SqlQueryMultipleAsync<GetPlayerLoginRecordResult>(spName, parameters:
 				new Dictionary<string, object>
 				{
@@ -92,7 +85,7 @@ public sealed class PlayerQueries : IPlayerQueries
 	}
 
 	public Task<(byte[] Salt, byte[] Password)> GetSaltAndPasswordByPlayerCodeAsync(string playerCode) =>
-		_repository.Players.Where(p => p.PlayerCode == playerCode)
+		repository.Players.Where(p => p.PlayerCode == playerCode)
 			.Select(p => new ValueTuple<byte[], byte[]>(p.Salt, p.Password))
 			.FirstOrDefaultAsync();
 }

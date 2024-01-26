@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel;
-using System.Data.SqlClient;
 using System.Net.Mime;
 using Microsoft.AspNetCore.Mvc;
 using Tgs.Report.Client;
@@ -12,11 +11,8 @@ namespace TGS.Apis.OperatorApi.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class PlayerReportController : ControllerBase
+public class PlayerReportController(IReportClient client) : ControllerBase
 {
-	private readonly IReportClient _client;
-
-	public PlayerReportController(IReportClient client) => _client = client;
 
 	/// <summary>
 	/// Get player round report
@@ -41,17 +37,17 @@ public class PlayerReportController : ControllerBase
 			ClosedTo = null,
 			Page = request.Page,
 			Rows = request.Rows,
-			OrderBy = request.IsDesc ? (short)SortOrder.Descending : (short)SortOrder.Ascending,
+			OrderBy = (short)(request.IsDesc ? 1 : 0),
 			SortBy = request.SortBy,
 			ShowAll = request.ShowAll
 		};
 
-		var response = await _client.GetRoundsAsync(roundsRequest);
+		var response = await client.GetRoundsAsync(roundsRequest);
 
 		return new PagingResponse<RoundModel>
 		{
 			TotalCount = response.TotalCount,
-			Items = response.Items ?? Array.Empty<RoundModel>()
+			Items = response.Items ?? []
 		};
 	}
 
@@ -80,7 +76,7 @@ public class PlayerReportController : ControllerBase
 			ClosedTo = null
 		};
 
-		var response = await _client.GetRoundsTotalAsync(roundsRequest);
+		var response = await client.GetRoundsTotalAsync(roundsRequest);
 
 		return new RoundTotalModel
 		{

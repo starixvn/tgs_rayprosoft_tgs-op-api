@@ -8,14 +8,9 @@ using TGS.Core.DataServices.Tgs;
 
 namespace TGS.Services.Operator.ApplicationServices.Player;
 
-internal class CheckBrandPhoneQueryService : IGetService<CheckBrandPhoneQuery, bool>
+internal class CheckBrandPhoneQueryService(ITgsRepository tgsRepository) : IGetService<CheckBrandPhoneQuery, bool>
 {
-	private readonly ITgsRepository _tgsRepository;
-
-	public CheckBrandPhoneQueryService(ITgsRepository tgsRepository)
-	{
-		_tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
-	}
+	private readonly ITgsRepository _tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
 
 	public async ValueTask<bool> GetAsync(CheckBrandPhoneQuery query, CancellationToken cancellationToken = default)
 	{

@@ -137,7 +137,7 @@ public class StationLetterV2Tests
 
 		var command = new SendStationLetterCommand(
 			"test1",
-			new[] { "receiver1" },
+			["receiver1"],
 			"abc",
 			"asdfgh",
 			  "player1");

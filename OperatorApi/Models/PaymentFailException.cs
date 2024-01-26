@@ -1,8 +1,5 @@
 ﻿namespace TGS.Apis.OperatorApi.Models;
 
-public class PaymentFailException : Exception
+public class PaymentFailException(string message) : Exception(message)
 {
-	public PaymentFailException(string message) : base(message)
-	{
-	}
 }

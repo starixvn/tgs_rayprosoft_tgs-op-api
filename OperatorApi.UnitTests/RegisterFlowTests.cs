@@ -1,15 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Linq;
+﻿using System.Collections.Immutable;
 using System.Reflection;
 using System.Text.Json;
-using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
-using NUnit.Framework;
+using NUnit.Framework.Legacy;
 using Tgs.BrandCertificate.Clients;
 using Tgs.Payment.Clients;
 using Tgs.PlayerService.Client;
@@ -39,11 +35,11 @@ public class RegisterFlowTests
 			.GetField("_stepDefinitions", BindingFlags.NonPublic | BindingFlags.Instance)
 			.GetValue(sut) as List<IRegisterFlowStep>;
 
-		Assert.AreEqual(0, privateList.Count);
+		ClassicAssert.AreEqual(0, privateList.Count);
 
 		sut.AddStep(new StubRegisterFlowStep());
 
-		Assert.AreEqual(1, privateList.Count);
+		ClassicAssert.AreEqual(1, privateList.Count);
 	}
 
 	[Test]
@@ -68,8 +64,8 @@ public class RegisterFlowTests
 			.GetField("_flowSteps", BindingFlags.NonPublic | BindingFlags.Instance)
 			.GetValue(sut) as Queue<IRegisterFlowStep>;
 
-		Assert.IsFalse(actual);
-		Assert.AreEqual(2, privateStack.Count);
+		ClassicAssert.IsFalse(actual);
+		ClassicAssert.AreEqual(2, privateStack.Count);
 	}
 
 	[Test]
@@ -85,7 +81,7 @@ public class RegisterFlowTests
 			.GetField("_flowSteps", BindingFlags.NonPublic | BindingFlags.Instance)
 			.GetValue(actual) as Queue<IRegisterFlowStep>;
 
-		Assert.AreEqual(1, privateStack.Count);
+		ClassicAssert.AreEqual(1, privateStack.Count);
 	}
 
 	[Test]
@@ -119,8 +115,8 @@ public class RegisterFlowTests
 			.GetField("_stepDefinitions", BindingFlags.NonPublic | BindingFlags.Instance)
 			.GetValue(actual) as List<IRegisterFlowStep>;
 
-		Assert.IsNotNull(privateList);
-		Assert.AreEqual(3, privateList.Count);
+		ClassicAssert.IsNotNull(privateList);
+		ClassicAssert.AreEqual(3, privateList.Count);
 	}
 
 	[Test]
@@ -146,7 +142,7 @@ public class RegisterFlowTests
 
 		var actual = await sut.ConfirmCompletedAsync(playerCode);
 
-		Assert.IsTrue(actual);
+		ClassicAssert.IsTrue(actual);
 	}
 
 	[Test]
@@ -202,7 +198,7 @@ public class RegisterFlowTests
 			JsonSerializer.SerializeToDocument(input),
 			locationInfo);
 
-		Assert.IsTrue(actual.IsCompleted);
+		ClassicAssert.IsTrue(actual.IsCompleted);
 
 		_ = fakePlayerServiceClient.Received(1)
 			.SetPlayerStatusAsync(Arg.Is("test"), Arg.Is(PlayerStatus.RegisterUndone));
@@ -260,7 +256,7 @@ public class RegisterFlowTests
 			JsonSerializer.SerializeToDocument(input),
 			locationInfo);
 
-		Assert.IsTrue(actual.IsCompleted);
+		ClassicAssert.IsTrue(actual.IsCompleted);
 
 		_ = fakePlayerServiceClient.Received(1)
 			.SetPlayerStatusAsync(Arg.Is("test"), Arg.Is(PlayerStatus.RegisterUndone));
@@ -319,7 +315,7 @@ public class RegisterFlowTests
 			JsonSerializer.SerializeToDocument(input),
 			locationInfo);
 
-		Assert.IsTrue(actual.IsCompleted);
+		ClassicAssert.IsTrue(actual.IsCompleted);
 
 		_ = fakePlayerServiceClient.Received(1)
 			.SetPlayerStatusAsync(Arg.Is("test"), Arg.Is(PlayerStatus.RegisterUndone));
@@ -376,7 +372,7 @@ public class RegisterFlowTests
 			JsonSerializer.SerializeToDocument(input),
 			locationInfo);
 
-		Assert.IsTrue(actual.IsCompleted);
+		ClassicAssert.IsTrue(actual.IsCompleted);
 
 		_ = fakePlayerServiceClient.Received(1)
 			.SetPlayerStatusAsync(Arg.Is("test"), Arg.Is(PlayerStatus.RegisterUndone));
@@ -459,8 +455,8 @@ public class RegisterFlowTests
 			JsonSerializer.SerializeToDocument(inputData),
 			locationInfo);
 
-		Assert.IsTrue(actual.IsCompleted);
-		Assert.IsNull(actual.NextStepType);
+		ClassicAssert.IsTrue(actual.IsCompleted);
+		ClassicAssert.IsNull(actual.NextStepType);
 
 		_ = fakePlayerServiceClient2.Received(1)
 			.SetPlayerStatusAsync(Arg.Is(expectedResponse.PlayerCode), Arg.Is(PlayerStatus.Enabled));
@@ -502,7 +498,7 @@ public class RegisterFlowTests
 
 		var actual = await sut.GetAsync(command);
 
-		Assert.IsTrue(actual.IsCompleted);
+		ClassicAssert.IsTrue(actual.IsCompleted);
 	}
 
 	[Test]
@@ -550,7 +546,7 @@ public class RegisterFlowTests
 
 		var actual = await sut.ConfirmCompletedAsync(playerCode);
 
-		Assert.IsFalse(actual);
+		ClassicAssert.IsFalse(actual);
 	}
 
 	[Test]
@@ -572,7 +568,7 @@ public class RegisterFlowTests
 
 		var actual = await sut.ProcessInputAsync(brandId, input, locationInfo);
 
-		Assert.IsTrue(actual.IsCompleted);
+		ClassicAssert.IsTrue(actual.IsCompleted);
 
 		_ = fakePlayerSericeClient.Received(1)
 			.SetPlayerStatusAsync(
@@ -593,7 +589,7 @@ public class RegisterFlowTests
 
 		var actual = await sut.ConfirmCompletedAsync(null);
 
-		Assert.IsTrue(actual);
+		ClassicAssert.IsTrue(actual);
 	}
 
 	[Test]
@@ -683,8 +679,8 @@ public class RegisterFlowTests
 			JsonSerializer.SerializeToDocument(inputData),
 			locationInfo);
 
-		Assert.IsTrue(actual.IsCompleted);
-		Assert.IsNull(actual.NextStepType);
+		ClassicAssert.IsTrue(actual.IsCompleted);
+		ClassicAssert.IsNull(actual.NextStepType);
 	}
 
 	[Test]
@@ -765,8 +761,8 @@ public class RegisterFlowTests
 			JsonSerializer.SerializeToDocument(inputData),
 			locationInfo);
 
-		Assert.IsFalse(actual.IsCompleted);
-		Assert.AreEqual("SetPhoneDontCareDuplicate", actual.NextStepType);
+		ClassicAssert.IsFalse(actual.IsCompleted);
+		ClassicAssert.AreEqual("SetPhoneDontCareDuplicate", actual.NextStepType);
 	}
 
 	[Test]
@@ -881,9 +877,9 @@ public class RegisterFlowTests
 			JsonSerializer.SerializeToDocument(inputData),
 			locationInfo);
 
-		Assert.IsFalse(actual.IsCompleted);
-		Assert.AreEqual("InitMail", actual.NextStepType);
-		Assert.AreEqual(expected, actual.StepResponse.Deserialize<string>());
+		ClassicAssert.IsFalse(actual.IsCompleted);
+		ClassicAssert.AreEqual("InitMail", actual.NextStepType);
+		ClassicAssert.AreEqual(expected, actual.StepResponse.Deserialize<string>());
 	}
 
 	[Test]
@@ -999,9 +995,9 @@ public class RegisterFlowTests
 			JsonSerializer.SerializeToDocument(inputData),
 			locationInfo);
 
-		Assert.IsFalse(actual.IsCompleted);
-		Assert.AreEqual("InitPhone", actual.NextStepType);
-		Assert.AreEqual(expected, actual.StepResponse.Deserialize<string>());
+		ClassicAssert.IsFalse(actual.IsCompleted);
+		ClassicAssert.AreEqual("InitPhone", actual.NextStepType);
+		ClassicAssert.AreEqual(expected, actual.StepResponse.Deserialize<string>());
 	}
 
 	[Test]
@@ -1125,8 +1121,8 @@ public class RegisterFlowTests
 			JsonSerializer.SerializeToDocument(inputData),
 			locationInfo);
 
-		Assert.IsTrue(actual.IsCompleted);
-		Assert.IsNull(actual.NextStepType);
+		ClassicAssert.IsTrue(actual.IsCompleted);
+		ClassicAssert.IsNull(actual.NextStepType);
 
 		_ = fakeCreateBankInfoService.Received(1)
 			.ExecuteAsync(Arg.Is<CreateInitBankInfoCommand>(
@@ -1240,9 +1236,9 @@ public class RegisterFlowTests
 			JsonSerializer.SerializeToDocument(inputData),
 			locationInfo);
 
-		Assert.IsFalse(actual.IsCompleted);
-		Assert.AreEqual("InitPhone", actual.NextStepType);
-		Assert.AreEqual(expectedResponse, actual.StepResponse.Deserialize<CreatePlayerResponse>());
+		ClassicAssert.IsFalse(actual.IsCompleted);
+		ClassicAssert.AreEqual("InitPhone", actual.NextStepType);
+		ClassicAssert.AreEqual(expectedResponse, actual.StepResponse.Deserialize<CreatePlayerResponse>());
 	}
 
 	[Test]
@@ -1375,8 +1371,8 @@ public class RegisterFlowTests
 			JsonSerializer.SerializeToDocument(inputData),
 			locationInfo);
 
-		Assert.IsFalse(actual.IsCompleted);
-		Assert.AreEqual("SetWithdrawBankInfo", actual.NextStepType);
+		ClassicAssert.IsFalse(actual.IsCompleted);
+		ClassicAssert.AreEqual("SetWithdrawBankInfo", actual.NextStepType);
 	}
 
 	[Test]
@@ -1507,8 +1503,8 @@ public class RegisterFlowTests
 			JsonSerializer.SerializeToDocument(inputData),
 			locationInfo);
 
-		Assert.IsFalse(actual.IsCompleted);
-		Assert.AreEqual("InitMail", actual.NextStepType);
+		ClassicAssert.IsFalse(actual.IsCompleted);
+		ClassicAssert.AreEqual("InitMail", actual.NextStepType);
 	}
 
 	[Test]
@@ -1541,9 +1537,9 @@ public class RegisterFlowTests
 
 		var actual = await sut.ProcessInputAsync(brandId, JsonDocument.Parse("{}"), locationInfo);
 
-		Assert.IsFalse(actual.IsCompleted);
-		Assert.AreEqual("Step1", actual.NextStepType);
-		Assert.AreEqual(stepResponse, actual.StepResponse);
+		ClassicAssert.IsFalse(actual.IsCompleted);
+		ClassicAssert.AreEqual("Step1", actual.NextStepType);
+		ClassicAssert.AreEqual(stepResponse, actual.StepResponse);
 	}
 
 	[Test]
@@ -1575,8 +1571,8 @@ public class RegisterFlowTests
 
 		var actual = await sut.ProcessInputAsync(brandId, JsonDocument.Parse("{}"), locationInfo);
 
-		Assert.IsFalse(actual.IsCompleted);
-		Assert.AreEqual("Step2", actual.NextStepType);
+		ClassicAssert.IsFalse(actual.IsCompleted);
+		ClassicAssert.AreEqual("Step2", actual.NextStepType);
 	}
 
 	[Test]
@@ -1611,8 +1607,8 @@ public class RegisterFlowTests
 			.GetField("_flowSteps", BindingFlags.NonPublic | BindingFlags.Instance)
 			.GetValue(sut) as Queue<IRegisterFlowStep>;
 
-		Assert.IsFalse(actual);
-		Assert.AreEqual("Step2", sut.CurrentStep);
+		ClassicAssert.IsFalse(actual);
+		ClassicAssert.AreEqual("Step2", sut.CurrentStep);
 	}
 
 	[Test]
@@ -1655,8 +1651,8 @@ public class RegisterFlowTests
 
 		var actual = await sut.ProcessInputAsync(brandId, JsonDocument.Parse("{}"), locationInfo);
 
-		Assert.IsTrue(actual.IsCompleted);
-		Assert.IsNull(actual.NextStepType);
+		ClassicAssert.IsTrue(actual.IsCompleted);
+		ClassicAssert.IsNull(actual.NextStepType);
 	}
 
 	[Test]
@@ -1689,8 +1685,8 @@ public class RegisterFlowTests
 
 		var actual = await sut.ProcessInputAsync(brandId, JsonDocument.Parse("{}"), locationInfo);
 
-		Assert.IsTrue(actual.IsCompleted);
-		Assert.IsNull(actual.NextStepType);
+		ClassicAssert.IsTrue(actual.IsCompleted);
+		ClassicAssert.IsNull(actual.NextStepType);
 	}
 
 	[Test]
@@ -1721,7 +1717,7 @@ public class RegisterFlowTests
 			JsonSerializer.SerializeToDocument(inputData),
 			locationInfo);
 
-		Assert.IsTrue(actual.IsCompleted);
+		ClassicAssert.IsTrue(actual.IsCompleted);
 		_ = fakePlayerServiceClient.Received(1)
 			.SetPlayerPropertiesAsync(
 				Arg.Is(locationInfo.PlayerCode),
@@ -1764,7 +1760,7 @@ public class RegisterFlowTests
 			JsonSerializer.SerializeToDocument(inputData),
 			locationInfo);
 
-		Assert.IsTrue(actual.IsCompleted);
+		ClassicAssert.IsTrue(actual.IsCompleted);
 	}
 
 	[Test]
@@ -1805,7 +1801,7 @@ public class RegisterFlowTests
 
 		var actual = await sut.ProcessInputAsync(brandId, JsonSerializer.SerializeToDocument(inputData), locationInfo);
 
-		Assert.IsTrue(actual.IsCompleted);
+		ClassicAssert.IsTrue(actual.IsCompleted);
 	}
 
 	[Test]
@@ -1833,7 +1829,7 @@ public class RegisterFlowTests
 
 		var actual = await sut.ConfirmCompletedAsync(playerCode);
 
-		Assert.IsTrue(actual);
+		ClassicAssert.IsTrue(actual);
 	}
 
 	[Test]
@@ -1879,8 +1875,8 @@ public class RegisterFlowTests
 			JsonSerializer.SerializeToDocument(inputData),
 			locationInfo);
 
-		Assert.IsFalse(actual.IsCompleted);
-		Assert.NotNull(actual.StepResponse);
+		ClassicAssert.IsFalse(actual.IsCompleted);
+		ClassicAssert.NotNull(actual.StepResponse);
 	}
 
 	[Test]
@@ -1931,7 +1927,7 @@ public class RegisterFlowTests
 			JsonSerializer.SerializeToDocument(inputData),
 			locationInfo);
 
-		Assert.IsTrue(actual.IsCompleted);
+		ClassicAssert.IsTrue(actual.IsCompleted);
 	}
 
 	[Test]
@@ -1972,7 +1968,7 @@ public class RegisterFlowTests
 
 		var actual = await sut.ProcessInputAsync(brandId, JsonSerializer.SerializeToDocument(phoneData), locationInfo);
 
-		Assert.IsTrue(actual.IsCompleted);
+		ClassicAssert.IsTrue(actual.IsCompleted);
 	}
 
 	[Test]
@@ -2000,7 +1996,7 @@ public class RegisterFlowTests
 
 		var actual = await sut.ConfirmCompletedAsync(playerCode);
 
-		Assert.IsTrue(actual);
+		ClassicAssert.IsTrue(actual);
 	}
 
 	[Test]
@@ -2050,8 +2046,8 @@ public class RegisterFlowTests
 			JsonSerializer.SerializeToDocument(inputData),
 			locationInfo);
 
-		Assert.IsFalse(actual.IsCompleted);
-		Assert.NotNull(actual.StepResponse);
+		ClassicAssert.IsFalse(actual.IsCompleted);
+		ClassicAssert.NotNull(actual.StepResponse);
 	}
 
 	[Test]
@@ -2093,7 +2089,7 @@ public class RegisterFlowTests
 			JsonSerializer.SerializeToDocument(inputData),
 			locationInfo);
 
-		Assert.IsTrue(actual.IsCompleted);
+		ClassicAssert.IsTrue(actual.IsCompleted);
 	}
 
 	[Test]
@@ -2134,7 +2130,7 @@ public class RegisterFlowTests
 			JsonSerializer.SerializeToDocument(inputData),
 			locationInfo);
 
-		Assert.IsTrue(actual.IsCompleted);
+		ClassicAssert.IsTrue(actual.IsCompleted);
 	}
 
 	[Test]
@@ -2165,7 +2161,7 @@ public class RegisterFlowTests
 
 		var actual = await sut.ConfirmCompletedAsync(playerCode);
 
-		Assert.IsTrue(actual);
+		ClassicAssert.IsTrue(actual);
 	}
 
 	[Test]
@@ -2197,7 +2193,7 @@ public class RegisterFlowTests
 			JsonSerializer.SerializeToDocument(inputData),
 			locationInfo);
 
-		Assert.IsTrue(actual.IsCompleted);
+		ClassicAssert.IsTrue(actual.IsCompleted);
 	}
 
 	[Test]
@@ -2211,6 +2207,6 @@ public class RegisterFlowTests
 
 		var actual = await sut.ConfirmCompletedAsync(playerCode);
 
-		Assert.IsFalse(actual);
+		ClassicAssert.IsFalse(actual);
 	}
 }

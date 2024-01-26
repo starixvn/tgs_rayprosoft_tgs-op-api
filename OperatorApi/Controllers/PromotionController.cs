@@ -16,14 +16,9 @@ namespace TGS.Apis.OperatorApi.Controllers;
 [Route("api/[controller]")]
 [ApiController]
 [Produces(MediaTypeNames.Application.Json)]
-public class PromotionController : ControllerBase
+public class PromotionController(IPromotionClient promotionClient) : ControllerBase
 {
-	private readonly IPromotionClient _promotionClient;
-
-	public PromotionController(IPromotionClient promotionClient)
-	{
-		_promotionClient = promotionClient ?? throw new ArgumentNullException(nameof(promotionClient));
-	}
+	private readonly IPromotionClient _promotionClient = promotionClient ?? throw new ArgumentNullException(nameof(promotionClient));
 
 	//[HttpGet("{language}", Name = "GetPromotions")]
 	//[Description("Get promotions")]
@@ -156,7 +151,7 @@ public class PromotionController : ControllerBase
 			var task = Task.Run(async () =>
 			{
 				var data = await messageSender
-					.RequestAsync(subject, request.ToByteArray())
+					.RequestAsync<ReadOnlyMemory<byte>, ReadOnlyMemory<byte>>(subject, request.ToByteArray())
 					.ConfigureAwait(false);
 
 				var response = RouletteCountResponse.Parser.ParseFrom(data.Span);

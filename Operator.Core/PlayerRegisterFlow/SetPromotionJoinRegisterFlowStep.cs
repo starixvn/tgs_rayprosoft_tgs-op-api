@@ -8,23 +8,17 @@ using Tgs.Promotion.Clients.Models.Promotion;
 
 namespace TGS.Services.Operator.PlayerRegisterFlow;
 
-internal class SetPromotionJoinRegisterFlowStep : IRegisterFlowStep
+internal class SetPromotionJoinRegisterFlowStep(
+	IPromotionClient promotionClient,
+	ILogger<SetPromotionJoinRegisterFlowStep> logger) : IRegisterFlowStep
 {
-	private readonly ILogger<SetPromotionJoinRegisterFlowStep> _logger;
-	private readonly IPromotionClient _promotionClient;
+	private readonly ILogger<SetPromotionJoinRegisterFlowStep> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+	private readonly IPromotionClient _promotionClient = promotionClient ?? throw new ArgumentNullException(nameof(promotionClient));
 	private Guid[]? _promotionIds;
 
 	public bool IsAuto => true;
 
 	public string Type => "JoinPromotion";
-
-	public SetPromotionJoinRegisterFlowStep(
-		IPromotionClient promotionClient,
-		ILogger<SetPromotionJoinRegisterFlowStep> logger)
-	{
-		_promotionClient = promotionClient ?? throw new ArgumentNullException(nameof(promotionClient));
-		_logger = logger ?? throw new ArgumentNullException(nameof(logger));
-	}
 
 	public ValueTask<bool> ConfirmCompletedAsync(string? playerCode, CancellationToken cancellationToken = default)
 	{
@@ -64,6 +58,6 @@ internal class SetPromotionJoinRegisterFlowStep : IRegisterFlowStep
 			_promotionIds = JsonSerializer.Deserialize<Guid[]>(prop.GetRawText())!;
 		}
 		else
-			_promotionIds = Array.Empty<Guid>();
+			_promotionIds = [];
 	}
 }

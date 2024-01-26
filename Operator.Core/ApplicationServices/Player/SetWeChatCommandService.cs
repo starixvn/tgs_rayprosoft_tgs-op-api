@@ -6,14 +6,9 @@ using TGS.Services.Operations;
 
 namespace TGS.Services.Operator.ApplicationServices.Player;
 
-internal class SetWeChatCommandService : ICommandService<SetWeChatCommand>
+internal class SetWeChatCommandService(IPlayerOperations playerOperations) : ICommandService<SetWeChatCommand>
 {
-	private readonly IPlayerOperations _playerOperations;
-
-	public SetWeChatCommandService(IPlayerOperations playerOperations)
-	{
-		_playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
-	}
+	private readonly IPlayerOperations _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
 
 	public async ValueTask ExecuteAsync(SetWeChatCommand command, CancellationToken cancellationToken = default)
 	{

@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Immutable;
+﻿using System.Collections.Immutable;
 using System.Globalization;
-using System.Threading.Tasks;
 using Moq;
 using NSubstitute;
-using NUnit.Framework;
+using NUnit.Framework.Legacy;
 using Tgs.BrandCertificate.Clients;
 using Tgs.PlayerService.Client;
 using Tgs.ServiceUtility;
@@ -44,7 +42,7 @@ public class PlayerPhoneTests
 
 		var actual = await sut.GetAsync(query);
 
-		Assert.IsTrue(actual);
+		ClassicAssert.IsTrue(actual);
 	}
 
 	[Test]
@@ -283,7 +281,7 @@ public class PlayerPhoneTests
 
 		var actual = await sut.GetAsync(query);
 
-		Assert.IsFalse(actual);
+		ClassicAssert.IsFalse(actual);
 	}
 
 	[Test]
@@ -311,7 +309,7 @@ public class PlayerPhoneTests
 
 		var actual = await sut.GetAsync(query);
 
-		Assert.IsTrue(actual);
+		ClassicAssert.IsTrue(actual);
 	}
 
 	[Test]
@@ -383,9 +381,12 @@ public class PlayerPhoneTests
 			smsClient => smsClient.SendShortMessageAsync(
 				It.Is<string>(x => x == $"{areaCode}{phone}"),
 				It.Is<string>(x => x == expectedShortMessage),
-				It.IsAny<Guid>()),
+				It.IsAny<Guid>(),
+				It.IsAny<string>(),
+				It.IsAny<string>(),
+				It.IsAny<CancellationToken>()),
 			Times.Exactly(0));
 
-		Assert.AreEqual(expectedSecurityKey, actualSecurityKey);
+		ClassicAssert.AreEqual(expectedSecurityKey, actualSecurityKey);
 	}
 }

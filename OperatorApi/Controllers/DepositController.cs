@@ -114,7 +114,7 @@ public class DepositController : ControllerBase
 		[FromServices] IQueryService<BrandPaymentsQuery, BrandPaymentInfo> brandPaymentsQueryService,
 		[FromServices] IGetService<GetPaymentQuery, PaymentInfo> getPaymentService,
 		[FromQuery] GetDepositFormsRequest request,
-		[FromQuery] PageableRequest paging)
+		[FromQuery] PagingRequest paging)
 	{
 		var brandId = HttpContext.Items.GetBrandId();
 		var playerTokenData = HttpContext.Items.GetPlayerTokenData();
@@ -134,7 +134,14 @@ public class DepositController : ControllerBase
 			request.Status.ToPaymentFlowState(),
 			createOnRange,
 			updateOnRange,
-			paging);
+			new Paging
+			{
+				IsDesc = paging.IsDesc,
+				Page = paging.Page,
+				Rows = paging.Rows,
+				ShowAll = paging.ShowAll,
+				SortBy = paging.SortBy
+			});
 
 		var result = await getDepositFormsQueryService.GetAsync(query).ConfigureAwait(false);
 

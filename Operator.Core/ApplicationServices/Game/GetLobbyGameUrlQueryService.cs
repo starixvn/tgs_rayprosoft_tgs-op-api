@@ -8,18 +8,12 @@ using TGS.Services.Operator.GameProviders;
 
 namespace TGS.Services.Operator.ApplicationServices.Game;
 
-internal class GetLobbyGameUrlQueryService : IGetService<GetLobbyGameUrlQuery, Uri?>
+internal class GetLobbyGameUrlQueryService(
+	IGameProviderRepository gameProviderRepository,
+	IGetService<GetGameUrlQuery, Uri?> getGameUrlQueryService) : IGetService<GetLobbyGameUrlQuery, Uri?>
 {
-	private readonly IGameProviderRepository _gameProviderRepository;
-	private readonly IGetService<GetGameUrlQuery, Uri?> _getGameUrlQueryService;
-
-	public GetLobbyGameUrlQueryService(
-		IGameProviderRepository gameProviderRepository,
-		IGetService<GetGameUrlQuery, Uri?> getGameUrlQueryService)
-	{
-		_gameProviderRepository = gameProviderRepository ?? throw new ArgumentNullException(nameof(gameProviderRepository));
-		_getGameUrlQueryService = getGameUrlQueryService ?? throw new ArgumentNullException(nameof(getGameUrlQueryService));
-	}
+	private readonly IGameProviderRepository _gameProviderRepository = gameProviderRepository ?? throw new ArgumentNullException(nameof(gameProviderRepository));
+	private readonly IGetService<GetGameUrlQuery, Uri?> _getGameUrlQueryService = getGameUrlQueryService ?? throw new ArgumentNullException(nameof(getGameUrlQueryService));
 
 	public async ValueTask<Uri?> GetAsync(GetLobbyGameUrlQuery query, CancellationToken cancellationToken = default)
 	{

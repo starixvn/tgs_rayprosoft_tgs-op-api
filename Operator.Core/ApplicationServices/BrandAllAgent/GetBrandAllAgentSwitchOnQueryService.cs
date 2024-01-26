@@ -4,14 +4,9 @@ using Tgs.ServiceUtility;
 
 namespace TGS.Services.Operator.ApplicationServices.BrandAllAgent;
 
-internal class GetBrandAllAgentSwitchOnQueryService : IGetService<GetBrandAllAgentSwitchOnQuery, bool>
+internal class GetBrandAllAgentSwitchOnQueryService(IBrandRepository brandRepository) : IGetService<GetBrandAllAgentSwitchOnQuery, bool>
 {
-	private readonly IBrandRepository _brandRepository;
-
-	public GetBrandAllAgentSwitchOnQueryService(IBrandRepository brandRepository)
-	{
-		_brandRepository = brandRepository ?? throw new System.ArgumentNullException(nameof(brandRepository));
-	}
+	private readonly IBrandRepository _brandRepository = brandRepository ?? throw new System.ArgumentNullException(nameof(brandRepository));
 
 	public ValueTask<bool> GetAsync(
 		GetBrandAllAgentSwitchOnQuery query,

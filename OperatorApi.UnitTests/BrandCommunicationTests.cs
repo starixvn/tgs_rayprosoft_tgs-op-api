@@ -1,8 +1,5 @@
-﻿using System;
-using System.Linq;
-using System.Threading.Tasks;
-using NSubstitute;
-using NUnit.Framework;
+﻿using NSubstitute;
+using NUnit.Framework.Legacy;
 using TGS.Core.DataServices.Tgs;
 using TGS.Services.Operator.ApplicationServices.BrandCommunication;
 
@@ -20,6 +17,6 @@ public class BrandCommunicationTests
 		var query = new BrandCommunicationQuery(BrandId: Guid.NewGuid());
 		var info = await sut.QueryAsync(query).ToArrayAsync().ConfigureAwait(false);
 
-		Assert.IsTrue(info.Length >= 0);
+		ClassicAssert.IsTrue(info.Length >= 0);
 	}
 }

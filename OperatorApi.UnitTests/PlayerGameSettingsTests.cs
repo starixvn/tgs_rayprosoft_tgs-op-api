@@ -1,6 +1,5 @@
-﻿using System.Threading.Tasks;
-using NSubstitute;
-using NUnit.Framework;
+﻿using NSubstitute;
+using NUnit.Framework.Legacy;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Services.Operator;
 using TGS.Services.Operator.ApplicationServices.Player;
@@ -24,7 +23,7 @@ public class PlayerGameSettingsTests
 
 		var actual = await sut.GetAsync(query);
 
-		Assert.IsTrue(actual);
+		ClassicAssert.IsTrue(actual);
 	}
 
 	[Test]
@@ -49,6 +48,6 @@ public class PlayerGameSettingsTests
 
 		var actual = sut?.IsAutoTransferToGame ?? true;
 
-		Assert.IsTrue(actual);
+		ClassicAssert.IsTrue(actual);
 	}
 }

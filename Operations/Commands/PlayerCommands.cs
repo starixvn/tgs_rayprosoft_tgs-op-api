@@ -5,21 +5,15 @@ using System.Threading.Tasks;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
-using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models.Enums;
 using TGS.Services.Operations.Models.Services;
 
 namespace TGS.Services.Operations.Commands;
 
-public sealed class PlayerCommands : IPlayerCommands
+public sealed class PlayerCommands(
+	ITgsRepository repository) : IPlayerCommands
 {
-	private readonly ITgsRepository _repository;
-
-	public PlayerCommands(
-		ITgsRepository repository)
-	{
-		_repository = repository ?? throw new ArgumentNullException(nameof(repository));
-	}
+	private readonly ITgsRepository _repository = repository ?? throw new ArgumentNullException(nameof(repository));
 
 	public async Task ChangePlayerPasswordAsync(ChangePlayerPasswordData data)
 	{
@@ -71,7 +65,7 @@ public sealed class PlayerCommands : IPlayerCommands
 	{
 		var loginRecord = new PlayerLoginRecord
 		{
-			Id = GuidExtensions.NewSequentialGuid(),
+			Id = Guid.NewGuid(),
 			PlayerCode = data.PlayerCode,
 			BrandId = data.BrandId,
 			Status = LoginStatus.Enabled,

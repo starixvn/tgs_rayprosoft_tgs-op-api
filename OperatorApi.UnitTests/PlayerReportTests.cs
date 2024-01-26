@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using NSubstitute;
-using NUnit.Framework;
 using Tgs.Report.Client;
 using Tgs.Report.Client.Models;
 using Tgs.Report.Client.Models.Round;
@@ -42,7 +38,7 @@ public class PlayerReportTests
 
 		var roundList = new List<RoundModel>
 		{
-			new RoundModel()
+			new()
 		};
 
 		var rounds = roundList.ToArray();

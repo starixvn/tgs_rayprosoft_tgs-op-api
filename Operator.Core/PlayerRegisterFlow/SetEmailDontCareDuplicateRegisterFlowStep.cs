@@ -11,20 +11,14 @@ using TGS.Core.Models.Enums;
 
 namespace TGS.Services.Operator.PlayerRegisterFlow;
 
-internal class SetEmailDontCareDuplicateRegisterFlowStep : IRegisterFlowStep
+internal class SetEmailDontCareDuplicateRegisterFlowStep(
+	IPlayerServiceClient playerServiceClient,
+	IRedisCacheManager cacheManager) : IRegisterFlowStep
 {
-	private readonly IRedisCacheManager _cacheManager;
-	private readonly IPlayerServiceClient _playerServiceClient;
+	private readonly IRedisCacheManager _cacheManager = cacheManager ?? throw new ArgumentNullException(nameof(cacheManager));
+	private readonly IPlayerServiceClient _playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
 
 	public string Type => "SetEmailDontCareDuplicate";
-
-	public SetEmailDontCareDuplicateRegisterFlowStep(
-		IPlayerServiceClient playerServiceClient,
-		IRedisCacheManager cacheManager)
-	{
-		_playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
-		_cacheManager = cacheManager ?? throw new ArgumentNullException(nameof(cacheManager));
-	}
 
 	public async ValueTask<bool> ConfirmCompletedAsync(string? playerCode, CancellationToken cancellationToken = default)
 	{

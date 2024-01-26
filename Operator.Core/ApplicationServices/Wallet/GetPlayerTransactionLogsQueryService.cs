@@ -7,18 +7,12 @@ using Tgs.ServiceUtility;
 
 namespace TGS.Services.Operator.ApplicationServices.Wallet;
 
-internal class GetPlayerTransactionLogsQueryService : IGetService<GetPlayerTransactionLogsQuery, PagingResponse<TransactionLog>>
+internal class GetPlayerTransactionLogsQueryService(
+	IPlayerServiceClient playerServiceClient,
+	ICashServiceClient cashServiceClient) : IGetService<GetPlayerTransactionLogsQuery, PagingResponse<TransactionLog>>
 {
-	private readonly ICashServiceClient _cashServiceClient;
-	private readonly IPlayerServiceClient _playerServiceClient;
-
-	public GetPlayerTransactionLogsQueryService(
-		IPlayerServiceClient playerServiceClient,
-		ICashServiceClient cashServiceClient)
-	{
-		_playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
-		_cashServiceClient = cashServiceClient ?? throw new ArgumentNullException(nameof(cashServiceClient));
-	}
+	private readonly ICashServiceClient _cashServiceClient = cashServiceClient ?? throw new ArgumentNullException(nameof(cashServiceClient));
+	private readonly IPlayerServiceClient _playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
 
 	public async ValueTask<PagingResponse<TransactionLog>> GetAsync(
 		GetPlayerTransactionLogsQuery query,
@@ -36,7 +30,7 @@ internal class GetPlayerTransactionLogsQueryService : IGetService<GetPlayerTrans
 			walletId,
 			query.From,
 			query.To,
-			new[] { 6, 4100, 3800, 3850, 3860, 4, 6500 },
+			[6, 4100, 3800, 3850, 3860, 4, 6500],
 			paging,
 			cancellationToken).ConfigureAwait(false);
 	}

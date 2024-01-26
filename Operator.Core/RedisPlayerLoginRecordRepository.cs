@@ -6,7 +6,9 @@ using TGS.Core.Models.Enums;
 
 namespace TGS.Services.Operator;
 
-internal class RedisPlayerLoginRecordRepository : IPlayerLoginRecordRepository
+internal class RedisPlayerLoginRecordRepository(
+	IPlayerLoginRecordRepository loginRecordRepository,
+	IDatabase redisDatabase) : IPlayerLoginRecordRepository
 {
 	private static readonly TimeSpan _Expiry = TimeSpan.FromHours(1D);
 
@@ -16,16 +18,8 @@ internal class RedisPlayerLoginRecordRepository : IPlayerLoginRecordRepository
 		PropertyNamingPolicy = JsonNamingPolicy.CamelCase
 	};
 
-	private readonly IPlayerLoginRecordRepository _loginRecordRepository;
-	private readonly IDatabase _redisDatabase;
-
-	public RedisPlayerLoginRecordRepository(
-		IPlayerLoginRecordRepository loginRecordRepository,
-		IDatabase redisDatabase)
-	{
-		_loginRecordRepository = loginRecordRepository ?? throw new ArgumentNullException(nameof(loginRecordRepository));
-		_redisDatabase = redisDatabase ?? throw new ArgumentNullException(nameof(redisDatabase));
-	}
+	private readonly IPlayerLoginRecordRepository _loginRecordRepository = loginRecordRepository ?? throw new ArgumentNullException(nameof(loginRecordRepository));
+	private readonly IDatabase _redisDatabase = redisDatabase ?? throw new ArgumentNullException(nameof(redisDatabase));
 
 	public async ValueTask<LoginRecordInfo> AddPlayerLoginRecordAsync(
 		Guid brandId,

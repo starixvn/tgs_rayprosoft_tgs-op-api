@@ -1,11 +1,8 @@
-﻿using System;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
-using NUnit.Framework;
+using NUnit.Framework.Legacy;
 using Tgs.GameProviders.Pluggable.Client;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.Models.Enums;
@@ -76,7 +73,7 @@ public class GameBalanceTests
 		_ = dbContextOptionsBuilder
 			.UseInMemoryDatabase(Guid.NewGuid().ToString())
 			.ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
-		ITgsRepository repository = new TgsRepository(dbContextOptionsBuilder.Options);
+		var repository = new TgsRepository(dbContextOptionsBuilder.Options);
 		var brandId = Guid.NewGuid();
 
 		_ = repository.Brands.Add(new CoreModesl.Brand()
@@ -101,7 +98,7 @@ public class GameBalanceTests
 
 		var info = await sut.QueryAsync(query).ToArrayAsync();
 
-		Assert.IsTrue(info.Length >= 0);
+		ClassicAssert.IsTrue(info.Length >= 0);
 	}
 
 	[Test]

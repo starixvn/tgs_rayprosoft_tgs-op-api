@@ -6,22 +6,15 @@ using TGS.Services.Operator.ApplicationServices.Wallet;
 
 namespace TGS.Services.Operator.ApplicationServices.GameBalance;
 
-internal class FundOutBeforeEnterGameCommandService : ICommandService<FundOutBeforeEnterGameCommand>
+internal class FundOutBeforeEnterGameCommandService(
+	IPlayerRepository playerRepository,
+	IGetService<GetBalanceQuery, BalanceInfo> getPlayerBalanceService,
+	ICommandService<FundOutGameBalanceCommand> fundInService) : ICommandService<FundOutBeforeEnterGameCommand>
 {
-	private readonly ICommandService<FundOutGameBalanceCommand> _fundOutService;
-	private readonly IGetService<GetBalanceQuery, BalanceInfo> _getPlayerBalanceService;
-	private readonly IPlayerRepository _playerRepository;
-
-	public FundOutBeforeEnterGameCommandService(
-		IPlayerRepository playerRepository,
-		IGetService<GetBalanceQuery, BalanceInfo> getPlayerBalanceService,
-		ICommandService<FundOutGameBalanceCommand> fundInService)
-	{
-		_playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
-		_getPlayerBalanceService = getPlayerBalanceService ??
+	private readonly ICommandService<FundOutGameBalanceCommand> _fundOutService = fundInService ?? throw new ArgumentNullException(nameof(fundInService));
+	private readonly IGetService<GetBalanceQuery, BalanceInfo> _getPlayerBalanceService = getPlayerBalanceService ??
 			throw new ArgumentNullException(nameof(getPlayerBalanceService));
-		_fundOutService = fundInService ?? throw new ArgumentNullException(nameof(fundInService));
-	}
+	private readonly IPlayerRepository _playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
 
 	public async ValueTask ExecuteAsync(FundOutBeforeEnterGameCommand command,
 		CancellationToken cancellationToken = default)

@@ -6,14 +6,9 @@ using TGS.Services.Operator.PlayerRegisterFlow;
 
 namespace TGS.Services.Operator.ApplicationServices.Player;
 
-internal class GetCurrentPlayerRegisterFlowStepQueryService : IGetService<GetCurrentPlayerRegisterFlowStepQuery, string?>
+internal class GetCurrentPlayerRegisterFlowStepQueryService(IBrandRegisterFlowDefinitionManager brandRegisterFlowDefinitionManager) : IGetService<GetCurrentPlayerRegisterFlowStepQuery, string?>
 {
-	private readonly IBrandRegisterFlowDefinitionManager _brandRegisterFlowDefinitionManager;
-
-	public GetCurrentPlayerRegisterFlowStepQueryService(IBrandRegisterFlowDefinitionManager brandRegisterFlowDefinitionManager)
-	{
-		_brandRegisterFlowDefinitionManager = brandRegisterFlowDefinitionManager ?? throw new ArgumentNullException(nameof(brandRegisterFlowDefinitionManager));
-	}
+	private readonly IBrandRegisterFlowDefinitionManager _brandRegisterFlowDefinitionManager = brandRegisterFlowDefinitionManager ?? throw new ArgumentNullException(nameof(brandRegisterFlowDefinitionManager));
 
 	public async ValueTask<string?> GetAsync(GetCurrentPlayerRegisterFlowStepQuery query, CancellationToken cancellationToken = default)
 	{

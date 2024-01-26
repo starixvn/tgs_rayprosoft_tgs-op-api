@@ -1,10 +1,5 @@
-﻿using System;
-using System.Linq;
-using System.Threading.Tasks;
-using NSubstitute;
-using NUnit.Framework;
+﻿using NSubstitute;
 using Tgs.Paging;
-using TGS.Core.Models.Messages;
 using TGS.Services.Operator;
 using TGS.Services.Operator.ApplicationServices.Vip;
 
@@ -22,12 +17,11 @@ public class VipTests
 
 		var query = new GetVipLevelListQuery(
 			Guid.NewGuid(),
-			new PageableRequest());
+			new Paging<VipRecord>());
 
 		_ = await sut.GetAsync(query);
 
-		_ = fakeVipLevelRepository
-			.Received(1)
+		_ = fakeVipLevelRepository.Received(1)
 			.QueryVipLevelsTotalCountAsync(query.BrandId);
 	}
 
@@ -40,7 +34,7 @@ public class VipTests
 
 		var query = new GetVipLevelListQuery(
 			Guid.NewGuid(),
-			new PageableRequest());
+			new Paging<VipRecord>());
 
 		_ = await sut.QueryAsync(query).ToArrayAsync();
 

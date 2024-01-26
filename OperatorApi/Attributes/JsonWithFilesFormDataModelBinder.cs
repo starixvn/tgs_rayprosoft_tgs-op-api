@@ -5,19 +5,13 @@ using Microsoft.Extensions.Options;
 
 namespace TGS.Apis.OperatorApi.Attributes;
 
-public class JsonWithFilesFormDataModelBinder : IModelBinder
+public class JsonWithFilesFormDataModelBinder(IOptions<JsonOptions> jsonOptionsAccessor) : IModelBinder
 {
-	private readonly JsonSerializerOptions _serializerOptions;
-
-	public JsonWithFilesFormDataModelBinder(IOptions<JsonOptions> jsonOptionsAccessor)
-	{
-		_serializerOptions = jsonOptionsAccessor.Value.JsonSerializerOptions;
-	}
+	private readonly JsonSerializerOptions _serializerOptions = jsonOptionsAccessor.Value.JsonSerializerOptions;
 
 	public async Task BindModelAsync(ModelBindingContext bindingContext)
 	{
-		if (bindingContext == null)
-			throw new ArgumentNullException(nameof(bindingContext));
+		ArgumentNullException.ThrowIfNull(bindingContext);
 
 		var valueResult = bindingContext.ValueProvider.GetValue(bindingContext.FieldName);
 		if (valueResult == ValueProviderResult.None)

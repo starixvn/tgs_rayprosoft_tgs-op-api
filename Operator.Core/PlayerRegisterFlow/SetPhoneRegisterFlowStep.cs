@@ -12,25 +12,17 @@ using TGS.Services.Operator.ApplicationServices.Player;
 
 namespace TGS.Services.Operator.PlayerRegisterFlow;
 
-internal class SetPhoneRegisterFlowStep : IRegisterFlowStep
+internal class SetPhoneRegisterFlowStep(
+	IBrandServiceClient brandServiceClient,
+	IGetService<StartSetPlayerPhoneCommand, string> startSetPlayerPhoneService,
+	ICommandService<CommitInitPlayerPhoneCommand> commitPlayerInitPhoneService,
+	IPlayerServiceClient playerServiceClient) : IRegisterFlowStep
 {
-	private readonly IBrandServiceClient _brandServiceClient;
-	private readonly ICommandService<CommitInitPlayerPhoneCommand> _commitPlayerInitPhoneService;
-	private readonly IPlayerServiceClient _playerServiceClient;
-	private readonly IGetService<StartSetPlayerPhoneCommand, string> _startSetPlayerPhoneService;
+	private readonly IBrandServiceClient _brandServiceClient = brandServiceClient ?? throw new ArgumentNullException(nameof(brandServiceClient));
+	private readonly ICommandService<CommitInitPlayerPhoneCommand> _commitPlayerInitPhoneService = commitPlayerInitPhoneService ?? throw new ArgumentNullException(nameof(commitPlayerInitPhoneService));
+	private readonly IPlayerServiceClient _playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
+	private readonly IGetService<StartSetPlayerPhoneCommand, string> _startSetPlayerPhoneService = startSetPlayerPhoneService ?? throw new ArgumentNullException(nameof(startSetPlayerPhoneService));
 	public string Type => "InitPhone";
-
-	public SetPhoneRegisterFlowStep(
-		IBrandServiceClient brandServiceClient,
-		IGetService<StartSetPlayerPhoneCommand, string> startSetPlayerPhoneService,
-		ICommandService<CommitInitPlayerPhoneCommand> commitPlayerInitPhoneService,
-		IPlayerServiceClient playerServiceClient)
-	{
-		_brandServiceClient = brandServiceClient ?? throw new ArgumentNullException(nameof(brandServiceClient));
-		_startSetPlayerPhoneService = startSetPlayerPhoneService ?? throw new ArgumentNullException(nameof(startSetPlayerPhoneService));
-		_commitPlayerInitPhoneService = commitPlayerInitPhoneService ?? throw new ArgumentNullException(nameof(commitPlayerInitPhoneService));
-		_playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
-	}
 
 	public async ValueTask<bool> ConfirmCompletedAsync(string? playerCode, CancellationToken cancellationToken = default)
 	{

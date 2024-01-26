@@ -9,14 +9,9 @@ using TGS.Services.Operator.ApplicationServices.Player;
 
 namespace TGS.Operator.Repositories;
 
-internal class PlayerRepository : IPlayerRepository
+internal class PlayerRepository(ITgsRepository tgsRepository) : IPlayerRepository
 {
-	private readonly ITgsRepository _tgsRepository;
-
-	public PlayerRepository(ITgsRepository tgsRepository)
-	{
-		_tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
-	}
+	private readonly ITgsRepository _tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
 
 	public async ValueTask<Guid> CreatePlayerAuthenticationFormAsync(Guid brandId, string playerCode, string data)
 	{

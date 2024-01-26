@@ -6,16 +6,10 @@ using Microsoft.Extensions.Logging;
 
 namespace TGS.Services.Operator.PlayerRegisterFlow;
 
-internal class RegisterFlowBuilder
+internal class RegisterFlowBuilder(IServiceProvider serviceProvider, IImmutableDictionary<string, Type> registerFlowStepTypes)
 {
-	private readonly IImmutableDictionary<string, Type> _registerFlowStepTypes;
-	private readonly IServiceProvider _serviceProvider;
-
-	public RegisterFlowBuilder(IServiceProvider serviceProvider, IImmutableDictionary<string, Type> registerFlowStepTypes)
-	{
-		_serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
-		_registerFlowStepTypes = registerFlowStepTypes ?? throw new ArgumentNullException(nameof(registerFlowStepTypes));
-	}
+	private readonly IImmutableDictionary<string, Type> _registerFlowStepTypes = registerFlowStepTypes ?? throw new ArgumentNullException(nameof(registerFlowStepTypes));
+	private readonly IServiceProvider _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
 
 	public RegisterFlowDefinition LoadSettings(JsonDocument settingsJson)
 	{

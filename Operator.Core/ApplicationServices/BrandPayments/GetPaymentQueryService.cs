@@ -6,14 +6,9 @@ using Tgs.ServiceUtility;
 
 namespace TGS.Services.Operator.ApplicationServices.BrandPayments;
 
-internal class GetPaymentQueryService : IGetService<GetPaymentQuery, PaymentInfo>
+internal class GetPaymentQueryService(IPaymentServiceClient paymentServiceClient) : IGetService<GetPaymentQuery, PaymentInfo>
 {
-	private readonly IPaymentServiceClient _paymentServiceClient;
-
-	public GetPaymentQueryService(IPaymentServiceClient paymentServiceClient)
-	{
-		_paymentServiceClient = paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
-	}
+	private readonly IPaymentServiceClient _paymentServiceClient = paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
 
 	public ValueTask<PaymentInfo> GetAsync(GetPaymentQuery query, CancellationToken cancellationToken = default)
 		=> _paymentServiceClient.GetPaymentByIdAsync(query.PaymentId, cancellationToken)!;

@@ -11,27 +11,18 @@ using TGS.SmsService.Client;
 
 namespace TGS.Services.Operator.ApplicationServices.Player;
 
-internal class ForgotPasswordBySmsCommandService : IGetService<ForgotPasswordBySmsCommand, string>
+internal class ForgotPasswordBySmsCommandService(
+	IPlayerServiceClient playerServiceClient,
+	IValidateCodeGenerator codeGenerator,
+	IValidateCodeOperator validateCodeOperator,
+	IBrandServiceClient brandServiceClient,
+	ISmsServiceClient smsServiceClient) : IGetService<ForgotPasswordBySmsCommand, string>
 {
-	private readonly IBrandServiceClient _brandServiceClient;
-	private readonly IValidateCodeGenerator _codeGenerator;
-	private readonly IPlayerServiceClient _playerServiceClient;
-	private readonly ISmsServiceClient _smsServiceClient;
-	private readonly IValidateCodeOperator _validateCodeOperator;
-
-	public ForgotPasswordBySmsCommandService(
-		IPlayerServiceClient playerServiceClient,
-		IValidateCodeGenerator codeGenerator,
-		IValidateCodeOperator validateCodeOperator,
-		IBrandServiceClient brandServiceClient,
-		ISmsServiceClient smsServiceClient)
-	{
-		_playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
-		_codeGenerator = codeGenerator ?? throw new ArgumentNullException(nameof(codeGenerator));
-		_validateCodeOperator = validateCodeOperator ?? throw new ArgumentNullException(nameof(validateCodeOperator));
-		_brandServiceClient = brandServiceClient ?? throw new ArgumentNullException(nameof(brandServiceClient));
-		_smsServiceClient = smsServiceClient ?? throw new ArgumentNullException(nameof(smsServiceClient));
-	}
+	private readonly IBrandServiceClient _brandServiceClient = brandServiceClient ?? throw new ArgumentNullException(nameof(brandServiceClient));
+	private readonly IValidateCodeGenerator _codeGenerator = codeGenerator ?? throw new ArgumentNullException(nameof(codeGenerator));
+	private readonly IPlayerServiceClient _playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
+	private readonly ISmsServiceClient _smsServiceClient = smsServiceClient ?? throw new ArgumentNullException(nameof(smsServiceClient));
+	private readonly IValidateCodeOperator _validateCodeOperator = validateCodeOperator ?? throw new ArgumentNullException(nameof(validateCodeOperator));
 
 	public async ValueTask<string> GetAsync(ForgotPasswordBySmsCommand command, CancellationToken cancellationToken = default)
 	{
@@ -76,7 +67,8 @@ internal class ForgotPasswordBySmsCommandService : IGetService<ForgotPasswordByS
 			string.Format(
 				Resources.ResourceManager.GetString(nameof(Resources.ValidateCodeMailBody), command.CultureInfo)!,
 				saveResult.ValidateCode),
-			player.BrandId).ConfigureAwait(false);
+			player.BrandId,
+			cancellationToken: cancellationToken).ConfigureAwait(false);
 
 		return saveResult.Token;
 	}

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Tgs.BrandCertificate.Clients;
@@ -8,30 +7,21 @@ using Tgs.ServiceUtility;
 using Tgs.VipLevelService.Clients;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
-using TGS.Services.Operations;
 using PlayerType = Tgs.PlayerService.Client.PlayerType;
 
 namespace TGS.Services.Operator.ApplicationServices.Player;
 
-internal class CreateAgentInvitationPlayerCommandService
-	: IGetService<CreatePlayerWithAgentInvitationCodeCommand, CreatePlayerInfo>
+internal class CreateAgentInvitationPlayerCommandService(
+	IAgentRepository agentRepository,
+	IPlayerServiceClient playerServiceClient,
+	IBrandServiceClient brandServiceClient,
+	IVipLevelServiceClient vipLevelServiceClient)
+		: IGetService<CreatePlayerWithAgentInvitationCodeCommand, CreatePlayerInfo>
 {
-	private readonly IAgentRepository _agentRepository;
-	private readonly IBrandServiceClient _brandServiceClient;
-	private readonly IVipLevelServiceClient _vipLevelServiceClient;
-	private readonly IPlayerServiceClient _playerServiceClient;
-
-	public CreateAgentInvitationPlayerCommandService(
-		IAgentRepository agentRepository,
-		IPlayerServiceClient playerServiceClient,
-		IBrandServiceClient brandServiceClient,
-		IVipLevelServiceClient vipLevelServiceClient)
-	{
-		_agentRepository = agentRepository ?? throw new ArgumentNullException(nameof(agentRepository));
-		_playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
-		_brandServiceClient = brandServiceClient ?? throw new ArgumentNullException(nameof(brandServiceClient));
-		_vipLevelServiceClient = vipLevelServiceClient ?? throw new ArgumentNullException(nameof(vipLevelServiceClient));
-	}
+	private readonly IAgentRepository _agentRepository = agentRepository ?? throw new ArgumentNullException(nameof(agentRepository));
+	private readonly IBrandServiceClient _brandServiceClient = brandServiceClient ?? throw new ArgumentNullException(nameof(brandServiceClient));
+	private readonly IVipLevelServiceClient _vipLevelServiceClient = vipLevelServiceClient ?? throw new ArgumentNullException(nameof(vipLevelServiceClient));
+	private readonly IPlayerServiceClient _playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
 
 	public async ValueTask<CreatePlayerInfo> GetAsync(
 		CreatePlayerWithAgentInvitationCodeCommand command,

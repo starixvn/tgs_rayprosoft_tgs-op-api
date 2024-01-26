@@ -2,10 +2,6 @@
 
 namespace TGS.Services.Operator;
 
-public class PlayerNotFoundException : Exception
+public class PlayerNotFoundException(string message) : Exception(message)
 {
-	public PlayerNotFoundException(string message)
-		: base(message)
-	{
-	}
 }

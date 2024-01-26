@@ -11,28 +11,18 @@ using TGS.SmsService.Client;
 
 namespace TGS.Services.Operator.ApplicationServices.Player;
 
-internal class StartSetPlayerPhoneCommandService : IGetService<StartSetPlayerPhoneCommand, string>
+internal class StartSetPlayerPhoneCommandService(
+	IPlayerServiceClient playerServiceClient,
+	IBrandServiceClient brandServiceClient,
+	IValidateCodeGenerator codeGenerator,
+	IValidateCodeOperator validateCodeOperator,
+	ISmsServiceClient smsServiceClient) : IGetService<StartSetPlayerPhoneCommand, string>
 {
-	private readonly IBrandServiceClient _brandServiceClient;
-	private readonly IValidateCodeGenerator _codeGenerator;
-	private readonly IPlayerServiceClient _playerServiceClient;
-	private readonly ISmsServiceClient _smsServiceClient;
-	private readonly IValidateCodeOperator _validateCodeOperator;
-
-	public StartSetPlayerPhoneCommandService(
-		IPlayerServiceClient playerServiceClient,
-		IBrandServiceClient brandServiceClient,
-		IValidateCodeGenerator codeGenerator,
-		IValidateCodeOperator validateCodeOperator,
-		ISmsServiceClient smsServiceClient)
-	{
-		_playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
-		_brandServiceClient = brandServiceClient ?? throw new ArgumentNullException(nameof(brandServiceClient));
-		_codeGenerator = codeGenerator ?? throw new ArgumentNullException(nameof(codeGenerator));
-		_smsServiceClient = smsServiceClient ?? throw new ArgumentNullException(nameof(smsServiceClient));
-		_validateCodeOperator =
-			validateCodeOperator ?? throw new ArgumentNullException(nameof(validateCodeOperator));
-	}
+	private readonly IBrandServiceClient _brandServiceClient = brandServiceClient ?? throw new ArgumentNullException(nameof(brandServiceClient));
+	private readonly IValidateCodeGenerator _codeGenerator = codeGenerator ?? throw new ArgumentNullException(nameof(codeGenerator));
+	private readonly IPlayerServiceClient _playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
+	private readonly ISmsServiceClient _smsServiceClient = smsServiceClient ?? throw new ArgumentNullException(nameof(smsServiceClient));
+	private readonly IValidateCodeOperator _validateCodeOperator = validateCodeOperator ?? throw new ArgumentNullException(nameof(validateCodeOperator));
 
 	public async ValueTask<string> GetAsync(
 		StartSetPlayerPhoneCommand command,
@@ -40,17 +30,20 @@ internal class StartSetPlayerPhoneCommandService : IGetService<StartSetPlayerPho
 	{
 		var player = await _playerServiceClient
 			.GetPlayerInfoAsync(command.PlayerCode, cancellationToken)
-			.ConfigureAwait(false) 
+			.ConfigureAwait(false)
 			?? throw new PlayerNotFoundException(command.PlayerCode);
 
 		var brand = await _brandServiceClient
 			.GetBrandInfoAsync(player.BrandId, cancellationToken)
 			.ConfigureAwait(false);
 
-		Func<string> generateCode = () => _codeGenerator.GenerateCode();
+		Func<string> generateCode = _codeGenerator.GenerateCode;
 
 		if (!command.SmsEnabled)
 			generateCode = () => "123456";
+
+		var areaCode = command.AreaCode.Trim();
+		var phone = command.Phone.Trim();
 
 		var saveResult = await Policy
 			.HandleResult<(bool Result, string ValidateCode, string SecurityKey)>(data => !data.Result)
@@ -61,8 +54,8 @@ internal class StartSetPlayerPhoneCommandService : IGetService<StartSetPlayerPho
 				var token = _codeGenerator.GenerateSecurityKey();
 
 				var data = new PhoneValidateData(
-					command.AreaCode,
-					command.Phone,
+					areaCode,
+					phone,
 					command.PlayerCode);
 
 				var result = await _validateCodeOperator
@@ -82,9 +75,13 @@ internal class StartSetPlayerPhoneCommandService : IGetService<StartSetPlayerPho
 				Resources.ResourceManager.GetString(nameof(Resources.ValidateCodeMailBody), command.CultureInfo)!,
 				saveResult.ValidateCode);
 
-			await _smsServiceClient
-				.SendShortMessageAsync($"{command.AreaCode}{command.Phone}", shortMessage, player.BrandId)
-				.ConfigureAwait(false);
+			await _smsServiceClient.SendShortMessageAsync(
+				$"{areaCode}{phone}",
+				shortMessage,
+				player.BrandId,
+				areaCode: areaCode,
+				phone: phone,
+				cancellationToken: cancellationToken).ConfigureAwait(false);
 		}
 
 		return saveResult.SecurityKey;

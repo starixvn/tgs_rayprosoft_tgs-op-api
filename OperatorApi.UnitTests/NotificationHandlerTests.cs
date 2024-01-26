@@ -23,7 +23,7 @@ public class NotificationHandlerTests
 			Payload = "{}"
 		};
 
-		await sut.HandleAsync(request.ToByteArray());
+		await sut.HandleAsync("test", request.ToByteArray(), null);
 
 		fakeNotifyEventPublisher.Received(1)
 			.PublishEvent(Arg.Any<NotifyEvent>());

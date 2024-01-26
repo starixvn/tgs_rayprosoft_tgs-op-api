@@ -11,25 +11,17 @@ using TGS.Services.Operator.ApplicationServices.Player;
 
 namespace TGS.Services.Operator.PlayerRegisterFlow;
 
-internal class SetEmailRegisterFlowStep : IRegisterFlowStep
+internal class SetEmailRegisterFlowStep(
+	IBrandServiceClient brandServiceClient,
+	IGetService<StartSetPlayerEmailCommand, string> setPlayerEmailService,
+	ICommandService<CommitInitPlayerEmailCommand> commitPlayerEmailService,
+	IPlayerServiceClient playerServiceClient) : IRegisterFlowStep
 {
-	private readonly IBrandServiceClient _brandServiceClient;
-	private readonly ICommandService<CommitInitPlayerEmailCommand> _commitPlayerEmailService;
-	private readonly IPlayerServiceClient _playerServiceClient;
-	private readonly IGetService<StartSetPlayerEmailCommand, string> _setPlayerEmailService;
+	private readonly IBrandServiceClient _brandServiceClient = brandServiceClient ?? throw new ArgumentNullException(nameof(brandServiceClient));
+	private readonly ICommandService<CommitInitPlayerEmailCommand> _commitPlayerEmailService = commitPlayerEmailService ?? throw new ArgumentNullException(nameof(commitPlayerEmailService));
+	private readonly IPlayerServiceClient _playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
+	private readonly IGetService<StartSetPlayerEmailCommand, string> _setPlayerEmailService = setPlayerEmailService ?? throw new ArgumentNullException(nameof(setPlayerEmailService));
 	public string Type => "InitMail";
-
-	public SetEmailRegisterFlowStep(
-		IBrandServiceClient brandServiceClient,
-		IGetService<StartSetPlayerEmailCommand, string> setPlayerEmailService,
-		ICommandService<CommitInitPlayerEmailCommand> commitPlayerEmailService,
-		IPlayerServiceClient playerServiceClient)
-	{
-		_brandServiceClient = brandServiceClient ?? throw new ArgumentNullException(nameof(brandServiceClient));
-		_setPlayerEmailService = setPlayerEmailService ?? throw new ArgumentNullException(nameof(setPlayerEmailService));
-		_commitPlayerEmailService = commitPlayerEmailService ?? throw new ArgumentNullException(nameof(commitPlayerEmailService));
-		_playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
-	}
 
 	public async ValueTask<bool> ConfirmCompletedAsync(string? playerCode, CancellationToken cancellationToken = default)
 	{

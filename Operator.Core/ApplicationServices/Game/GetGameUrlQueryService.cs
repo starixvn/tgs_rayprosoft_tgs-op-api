@@ -10,18 +10,12 @@ using TGS.Services.Operator.GameProviders;
 
 namespace TGS.Services.Operator.ApplicationServices.Game;
 
-internal class GetGameUrlQueryService : IGetService<GetGameUrlQuery, Uri?>
+internal class GetGameUrlQueryService(
+	IGameProvidersOperatorPluggableClient pluggableClient,
+	IGameProviderRepository gameProviderRepository) : IGetService<GetGameUrlQuery, Uri?>
 {
-	private readonly IGameProviderRepository _gameProviderRepository;
-	private readonly IGameProvidersOperatorPluggableClient _pluggableClient;
-
-	public GetGameUrlQueryService(
-		IGameProvidersOperatorPluggableClient pluggableClient,
-		IGameProviderRepository gameProviderRepository)
-	{
-		_pluggableClient = pluggableClient ?? throw new ArgumentNullException(nameof(pluggableClient));
-		_gameProviderRepository = gameProviderRepository ?? throw new ArgumentNullException(nameof(gameProviderRepository));
-	}
+	private readonly IGameProviderRepository _gameProviderRepository = gameProviderRepository ?? throw new ArgumentNullException(nameof(gameProviderRepository));
+	private readonly IGameProvidersOperatorPluggableClient _pluggableClient = pluggableClient ?? throw new ArgumentNullException(nameof(pluggableClient));
 
 	public async ValueTask<Uri?> GetAsync(
 		GetGameUrlQuery query,

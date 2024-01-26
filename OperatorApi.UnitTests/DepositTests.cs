@@ -1,13 +1,7 @@
-﻿using System;
-using System.IO;
-using System.Linq;
-using System.Net.Http.Headers;
-using System.Threading;
-using System.Threading.Tasks;
+﻿using System.Net.Http.Headers;
 using ExpectedObjects;
 using Moq;
 using NSubstitute;
-using NUnit.Framework;
 using Tgs.BrandCertificate.Clients;
 using Tgs.FileService.Clients;
 using Tgs.Payment.Clients;

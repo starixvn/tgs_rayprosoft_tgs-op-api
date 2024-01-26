@@ -8,14 +8,9 @@ using Tgs.ServiceUtility;
 
 namespace TGS.Services.Operator.ApplicationServices.Player;
 
-public class SetLineCommandService : ICommandService<SetLineCommand>
+public class SetLineCommandService(IPlayerServiceClient client) : ICommandService<SetLineCommand>
 {
-	private readonly IPlayerServiceClient _client;
-
-	public SetLineCommandService(IPlayerServiceClient client)
-	{
-		_client = client ?? throw new ArgumentNullException(nameof(client));
-	}
+	private readonly IPlayerServiceClient _client = client ?? throw new ArgumentNullException(nameof(client));
 
 	public ValueTask ExecuteAsync(SetLineCommand command, CancellationToken cancellationToken = default)
 	{

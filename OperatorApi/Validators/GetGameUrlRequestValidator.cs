@@ -1,6 +1,5 @@
 ﻿using FluentValidation;
 using TGS.Apis.OperatorApi.Models.Messages;
-using TGS.Core.Infrastructures.Extensions;
 
 namespace TGS.Apis.OperatorApi.Validators;
 
@@ -9,15 +8,9 @@ public sealed class GetGameUrlRequestValidator : AbstractValidator<GetGameUrlReq
 	public GetGameUrlRequestValidator()
 	{
 		_ = RuleFor(x => x.SubGameProviderCode)
-			.NotEmpty()
-			.WithName(x => x
-				.WithPropertyExpression(o => o.SubGameProviderCode)
-				.GetBindPropertyName(nameof(x.SubGameProviderCode)));
+			.NotEmpty();
 
 		_ = RuleFor(x => x.LanguageCode)
-			.NotEmpty()
-			.WithName(x => x
-				.WithPropertyExpression(o => o.LanguageCode)
-				.GetBindPropertyName(nameof(x.LanguageCode)));
+			.NotEmpty();
 	}
 }

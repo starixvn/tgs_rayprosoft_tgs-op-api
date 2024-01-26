@@ -28,14 +28,9 @@ namespace TGS.Apis.OperatorApi.Controllers;
 [Route("api/[controller]")]
 [ApiController]
 [Produces(MediaTypeNames.Application.Json)]
-public class PlayerController : ControllerBase
+public class PlayerController(ILogger<PlayerController> logger) : ControllerBase
 {
-	private readonly ILogger<PlayerController> _logger;
-
-	public PlayerController(ILogger<PlayerController> logger)
-	{
-		_logger = logger ?? throw new ArgumentNullException(nameof(logger));
-	}
+	private readonly ILogger<PlayerController> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
 	/// <summary>
 	/// Player changes password, player login is needed when use this

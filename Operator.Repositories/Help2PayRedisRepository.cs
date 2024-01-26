@@ -5,17 +5,12 @@ using TGS.Services.Operator;
 
 namespace TGS.Operator.Repositories;
 
-internal class Help2PayRedisRepository : IHelp2PayRepository
+internal class Help2PayRedisRepository(IDatabase database) : IHelp2PayRepository
 {
 	private static readonly TimeSpan _Expire = TimeSpan.FromHours(1);
 	private static readonly string _KeyPrefix = "Help2Pay:DepositHtml";
 
-	private readonly IDatabase _database;
-
-	public Help2PayRedisRepository(IDatabase database)
-	{
-		_database = database ?? throw new ArgumentNullException(nameof(database));
-	}
+	private readonly IDatabase _database = database ?? throw new ArgumentNullException(nameof(database));
 
 	public async ValueTask<string?> GetDepositHtmlAsync(Guid identityId)
 	{

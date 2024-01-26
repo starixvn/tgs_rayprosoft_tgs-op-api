@@ -8,14 +8,9 @@ using Tgs.ServiceUtility;
 
 namespace TGS.Services.Operator.ApplicationServices.Player;
 
-internal class SetWhatsAppCommandService : ICommandService<SetWhatsAppCommand>
+internal class SetWhatsAppCommandService(IPlayerServiceClient client) : ICommandService<SetWhatsAppCommand>
 {
-	private readonly IPlayerServiceClient _client;
-
-	public SetWhatsAppCommandService(IPlayerServiceClient client)
-	{
-		_client = client ?? throw new ArgumentNullException(nameof(client));
-	}
+	private readonly IPlayerServiceClient _client = client ?? throw new ArgumentNullException(nameof(client));
 
 	public ValueTask ExecuteAsync(SetWhatsAppCommand command, CancellationToken cancellationToken = default)
 	{

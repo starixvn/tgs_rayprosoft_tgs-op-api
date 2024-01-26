@@ -1,10 +1,7 @@
-﻿using System;
-using System.Threading.Tasks;
-using Google.Protobuf;
+﻿using Google.Protobuf;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using NSubstitute;
-using NUnit.Framework;
 using Tgs.Payment.Clients;
 using Tgs.Payment.Protos;
 using TGS.Services.Operator.MessageQueue;
@@ -44,7 +41,7 @@ public class WithdrawStatusChangedTests
 				Status = PaymentFlowState.Approved
 			});
 
-		await sut.HandleAsync(eventData.ToByteArray());
+		await sut.HandleAsync("test", eventData.ToByteArray(), null);
 
 		fakeNotifyEventPublisher.DidNotReceive()
 			.PublishEvent(
@@ -81,7 +78,7 @@ public class WithdrawStatusChangedTests
 				Status = PaymentFlowState.Paid
 			});
 
-		await sut.HandleAsync(eventData.ToByteArray());
+		await sut.HandleAsync("test", eventData.ToByteArray(), null);
 
 		fakeNotifyEventPublisher.Received(1)
 			.PublishEvent(
@@ -120,7 +117,7 @@ public class WithdrawStatusChangedTests
 				Status = PaymentFlowState.Reject
 			});
 
-		await sut.HandleAsync(eventData.ToByteArray());
+		await sut.HandleAsync("test", eventData.ToByteArray(), null);
 
 		fakeNotifyEventPublisher.Received(1)
 			.PublishEvent(
@@ -159,7 +156,7 @@ public class WithdrawStatusChangedTests
 				Status = PaymentFlowState.Approved
 			});
 
-		await sut.HandleAsync(eventData.ToByteArray());
+		await sut.HandleAsync("test", eventData.ToByteArray(), null);
 
 		fakeNotifyEventPublisher.Received(1)
 			.PublishEvent(

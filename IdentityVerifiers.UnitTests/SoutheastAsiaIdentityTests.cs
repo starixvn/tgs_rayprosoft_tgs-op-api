@@ -1,4 +1,5 @@
 ﻿using NUnit.Framework;
+using NUnit.Framework.Legacy;
 using TGS.IdentityVerifiers;
 
 namespace TGS.Tests.OperatorApi.UnitTests;
@@ -15,6 +16,6 @@ public class SoutheastAsiaIdentityTests
 
 		var actual = sut.Verify(id);
 
-		Assert.IsTrue(actual);
+		ClassicAssert.IsTrue(actual);
 	}
 }

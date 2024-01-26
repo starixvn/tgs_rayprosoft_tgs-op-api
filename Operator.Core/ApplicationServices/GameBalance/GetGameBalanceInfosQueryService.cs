@@ -13,14 +13,9 @@ using TGS.Core.Models.Enums;
 
 namespace TGS.Services.Operator.ApplicationServices.GameBalance;
 
-internal class GetGameBalanceInfosQueryService : IQueryService<GetGameBalanceInfosQuery, GameBalanceRecord>
+internal class GetGameBalanceInfosQueryService(ITgsRepository tgsRepository) : IQueryService<GetGameBalanceInfosQuery, GameBalanceRecord>
 {
-	private readonly ITgsRepository _tgsRepository;
-
-	public GetGameBalanceInfosQueryService(ITgsRepository tgsRepository)
-	{
-		_tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
-	}
+	private readonly ITgsRepository _tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
 
 	public async IAsyncEnumerable<GameBalanceRecord> QueryAsync(GetGameBalanceInfosQuery query,
 		[EnumeratorCancellation] CancellationToken cancellationToken = default)

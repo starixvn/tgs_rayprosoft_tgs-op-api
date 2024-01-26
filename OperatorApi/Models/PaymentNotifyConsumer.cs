@@ -24,8 +24,7 @@ public class PaymentNotifyConsumer : BackgroundService
 		IOptions<JsonOptions> jsonOptionsAccessor,
 		ILogger<PaymentNotifyConsumer> logger)
 	{
-		if (jsonOptionsAccessor is null)
-			throw new ArgumentNullException(nameof(jsonOptionsAccessor));
+		ArgumentNullException.ThrowIfNull(jsonOptionsAccessor);
 		_eventObservable = eventObservable ?? throw new ArgumentNullException(nameof(eventObservable));
 		_hubContext = hubContext ?? throw new ArgumentNullException(nameof(hubContext));
 		_logger = logger ?? throw new ArgumentNullException(nameof(logger));

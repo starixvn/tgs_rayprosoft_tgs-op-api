@@ -7,15 +7,10 @@ using TGS.Services.Operator.GameProviders;
 
 namespace TGS.Services.Operator.ApplicationServices.Game;
 
-internal class SetFavoriteGameCommandService : ICommandService<SetFavoriteGameCommand>
+internal class SetFavoriteGameCommandService(
+	IGameProviderRepository gameProviderRepository) : ICommandService<SetFavoriteGameCommand>
 {
-	private readonly IGameProviderRepository _gameProviderRepository;
-
-	public SetFavoriteGameCommandService(
-		IGameProviderRepository gameProviderRepository)
-	{
-		_gameProviderRepository = gameProviderRepository ?? throw new ArgumentNullException(nameof(gameProviderRepository));
-	}
+	private readonly IGameProviderRepository _gameProviderRepository = gameProviderRepository ?? throw new ArgumentNullException(nameof(gameProviderRepository));
 
 	public async ValueTask ExecuteAsync(SetFavoriteGameCommand command, CancellationToken cancellationToken = default)
 	{

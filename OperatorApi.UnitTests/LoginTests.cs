@@ -1,15 +1,11 @@
 ﻿#nullable enable
 
-using System;
-using System.Linq;
 using System.Security.Claims;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using ExpectedObjects;
 using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
-using NUnit.Framework;
+using NUnit.Framework.Legacy;
 using Tgs.BrandCertificate.Clients;
 using Tgs.Core.Infrastructures.Security;
 using Tgs.PlayerService.Client;
@@ -207,9 +203,9 @@ internal class LoginTests
 		var securityToken = tokenHandler.ReadToken(loginInfo.PlayerToken);
 		var actual = securityToken.Claims.ToDictionary(c => c.Type, c => c.Value);
 
-		Assert.AreEqual(loginRecordInfo.PlayerCode, actual["sub"]);
-		Assert.AreEqual(loginRecordInfo.PlatformType.ToString(), actual["platform_type"]);
-		Assert.AreEqual(loginRecordInfo.Id.ToString(), actual["login_id"]);
+		ClassicAssert.AreEqual(loginRecordInfo.PlayerCode, actual["sub"]);
+		ClassicAssert.AreEqual(loginRecordInfo.PlatformType.ToString(), actual["platform_type"]);
+		ClassicAssert.AreEqual(loginRecordInfo.Id.ToString(), actual["login_id"]);
 	}
 
 	[Test]
@@ -389,11 +385,10 @@ internal class LoginTests
 
 		await sut.ExecuteAsync(command);
 
-		_ = fakeMessageSender
-			.Received(1)
+		_ = fakeMessageSender.Received(1)
 			.PublishAsync(
 				Arg.Is("tgs.operator.player.logged_in"),
-				Arg.Any<ReadOnlyMemory<byte>>(),
+				Arg.Any<byte[]>(),
 				Arg.Any<CancellationToken>());
 	}
 }

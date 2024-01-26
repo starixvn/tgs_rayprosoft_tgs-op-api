@@ -1,8 +1,5 @@
-﻿using System;
-using System.Linq;
-using System.Threading.Tasks;
-using NSubstitute;
-using NUnit.Framework;
+﻿using NSubstitute;
+using NUnit.Framework.Legacy;
 using TGS.Core.Models.Enums;
 using TGS.Services.Operations;
 using TGS.Services.Operator;
@@ -45,7 +42,7 @@ public class GameProviderTests
 
 		var actual = await sut.GetAsync(query);
 
-		Assert.AreEqual(expected, actual.GpCode);
+		ClassicAssert.AreEqual(expected, actual.GpCode);
 	}
 
 	[Test]
@@ -186,7 +183,7 @@ public class GameProviderTests
 		// act
 		var actual = await sut.QueryAsync(query).ToArrayAsync();
 
-		Assert.AreEqual(actual.Length, subGameProviders.Length);
+		ClassicAssert.AreEqual(actual.Length, subGameProviders.Length);
 	}
 
 	[Test]
@@ -330,7 +327,7 @@ public class GameProviderTests
 		// assert
 		var expected = subGameProviders.Where(gp => gp.Status == Status.Active).ToArray();
 
-		Assert.AreEqual(expected.Length, actual.Length);
+		ClassicAssert.AreEqual(expected.Length, actual.Length);
 	}
 
 	[Test]
@@ -475,12 +472,12 @@ public class GameProviderTests
 		var expected = subGameProviders.Where(gp => gp.Status == Status.Maintenance).ToArray();
 		var maintenanceGps = actual.Where(gp => gp.Status == Status.Maintenance).ToArray();
 
-		Assert.AreEqual(expected.Length, maintenanceGps.Length);
+		ClassicAssert.AreEqual(expected.Length, maintenanceGps.Length);
 
 		foreach (var sgp in expected)
 		{
 			var exists = maintenanceGps.Any(gp => gp.Code == sgp.Code);
-			Assert.True(exists);
+			ClassicAssert.True(exists);
 		}
 	}
 

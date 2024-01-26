@@ -6,18 +6,12 @@ using Microsoft.Extensions.Caching.Memory;
 
 namespace TGS.Services.Operator;
 
-internal class MemoryCachedBrandRepository : IBrandRepository
+internal class MemoryCachedBrandRepository(
+	IMemoryCache memoryCache,
+	IBrandRepository brandRepository) : IBrandRepository
 {
-	private readonly IBrandRepository _brandRepository;
-	private readonly IMemoryCache _memoryCache;
-
-	public MemoryCachedBrandRepository(
-		IMemoryCache memoryCache,
-		IBrandRepository brandRepository)
-	{
-		_memoryCache = memoryCache ?? throw new ArgumentNullException(nameof(memoryCache));
-		_brandRepository = brandRepository ?? throw new ArgumentNullException(nameof(brandRepository));
-	}
+	private readonly IBrandRepository _brandRepository = brandRepository ?? throw new ArgumentNullException(nameof(brandRepository));
+	private readonly IMemoryCache _memoryCache = memoryCache ?? throw new ArgumentNullException(nameof(memoryCache));
 
 	public async ValueTask<string?> GetSecretKeyAsync(
 		Guid brandId,
@@ -47,6 +41,6 @@ internal class MemoryCachedBrandRepository : IBrandRepository
 	public ValueTask<bool> CheckHaveAllAgentAsync(Guid brandId, CancellationToken cancellationToken = default)
 		=> _brandRepository.CheckHaveAllAgentAsync(brandId, cancellationToken);
 
-	public IAsyncEnumerable<BrandAllAgentTurnover> GetBrandAllAgentTurnoverConditionsAsync(Guid brandId, CancellationToken cancellationToken = default) 
+	public IAsyncEnumerable<BrandAllAgentTurnover> GetBrandAllAgentTurnoverConditionsAsync(Guid brandId, CancellationToken cancellationToken = default)
 		=> _brandRepository.GetBrandAllAgentTurnoverConditionsAsync(brandId, cancellationToken);
 }

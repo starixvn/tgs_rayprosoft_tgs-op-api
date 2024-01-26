@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net7.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <RootNamespace>TGS.Services.Operator</RootNamespace>
     <Nullable>enable</Nullable>
     <NeutralLanguage>en-US</NeutralLanguage>
@@ -13,39 +13,38 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Grpc.Tools" Version="2.59.0">
+    <PackageReference Include="Grpc.Tools" Version="2.60.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="17.7.30">
+    <PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="17.8.14">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="PhoenixToolkits.MessageQueue" Version="1.0.3" />
+    <PackageReference Include="PhoenixToolkits.MessageQueue" Version="2.1.0" />
     <PackageReference Include="PhoenixToolkits.Protobuf.ExtendTypes" Version="0.0.6" />
-    <PackageReference Include="Polly" Version="8.1.0" />
+    <PackageReference Include="Polly" Version="8.2.1" />
     <PackageReference Include="Scrutor" Version="4.2.2" />
     <PackageReference Include="System.Linq.Async" Version="6.0.1" />
     <PackageReference Include="System.Reactive" Version="6.0.0" />
     <PackageReference Include="Tgs.ArticleManagementClient" Version="0.0.4" />
     <PackageReference Include="Tgs.BrandCertificateClient" Version="0.0.29" />
-    <PackageReference Include="Tgs.CashService.Client" Version="0.2.7" />
+    <PackageReference Include="Tgs.CashService.Client" Version="0.2.9" />
     <PackageReference Include="TGS.Core.Infrastructures.Mail" Version="0.0.6" />
     <PackageReference Include="Tgs.Core.Infrastructures.Security" Version="0.0.2" />
-    <PackageReference Include="Tgs.DepositAccumulateRoulette.Client" Version="0.0.7" />
+    <PackageReference Include="Tgs.DepositAccumulateRoulette.Client" Version="0.1.0" />
     <PackageReference Include="TGS.FileService.Client" Version="0.0.5" />
-    <PackageReference Include="Tgs.GameProviders.Pluggable.Client" Version="0.0.33" />
-    <PackageReference Include="Tgs.Notification.Client" Version="0.0.3" />
+    <PackageReference Include="Tgs.GameProviders.Pluggable.Client" Version="0.0.34" />
+    <PackageReference Include="Tgs.Notification.Client" Version="0.1.0" />
     <PackageReference Include="Tgs.Paging.AsyncEnumerable" Version="1.2.1" />
-    <PackageReference Include="Tgs.Payment.Client" Version="0.5.0" />
-    <PackageReference Include="Tgs.PaymentService.Client" Version="0.7.4" />
-    <PackageReference Include="Tgs.PlayerBucket.Client" Version="1.0.0" />
-    <PackageReference Include="Tgs.PlayerBucketType.Client" Version="0.0.10" />
+    <PackageReference Include="Tgs.Payment.Client" Version="0.6.1" />
+    <PackageReference Include="Tgs.PaymentService.Client" Version="0.8.0" />
+    <PackageReference Include="Tgs.PlayerBucket.Client" Version="1.1.0" />
+    <PackageReference Include="Tgs.PlayerBucketType.Client" Version="0.1.0" />
     <PackageReference Include="Tgs.PlayerService.Client" Version="0.2.1" />
-    <PackageReference Include="Tgs.Promotion.Client" Version="1.0.44" />  
-    <PackageReference Include="Tgs.RouletteSignInClient" Version="0.0.3" />
+    <PackageReference Include="Tgs.Promotion.Client" Version="1.0.47" />
     <PackageReference Include="TGS.ServiceUtility" Version="0.2.0" />
-    <PackageReference Include="TGS.SmsServiceClient" Version="0.0.8" />
+    <PackageReference Include="TGS.SmsServiceClient" Version="0.1.1" />
     <PackageReference Include="Tgs.StationLetter.Client" Version="0.0.7" />
     <PackageReference Include="Tgs.ValidateCode.Client" Version="1.1.0" />
     <PackageReference Include="Tgs.VipLevelService.Client" Version="0.0.14" />

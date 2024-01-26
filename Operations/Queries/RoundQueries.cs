@@ -25,19 +25,12 @@ public interface IRoundQueries
 		GameType? gameType = null);
 }
 
-public sealed class RoundQueries : IRoundQueries
+public sealed class RoundQueries(ITgsRepository repository) : IRoundQueries
 {
-	private readonly ITgsRepository _repository;
-
-	public RoundQueries(ITgsRepository repository)
-	{
-		_repository = repository;
-	}
-
 	async ValueTask<Round> IRoundQueries.GetRoundByRoundIdAsync(Guid roundId, bool includeGameActions,
 		bool includeRoundDetail)
 	{
-		IQueryable<Round> query = _repository.Rounds.Include(r => r.RoundDetail);
+		IQueryable<Round> query = repository.Rounds.Include(r => r.RoundDetail);
 
 		if (includeGameActions)
 		{
@@ -59,7 +52,7 @@ public sealed class RoundQueries : IRoundQueries
 		string externalRoundId,
 		string externalTransactionId)
 	{
-		var data = await (from ga in _repository.GameActions
+		var data = await (from ga in repository.GameActions
 						  let r = ga.Round
 						  where r.GameProviderId == gameProviderId &&
 							  r.PlayerCode == playerCode &&
@@ -76,7 +69,7 @@ public sealed class RoundQueries : IRoundQueries
 
 	async ValueTask<RoundStatus?> IRoundQueries.GetRoundStatusAsync(Guid gameProviderId, string playerCode,
 		string externalRoundId, int gameId) =>
-		await (from round in _repository.Rounds
+		await (from round in repository.Rounds
 			   where round.GameProviderId == gameProviderId &&
 				   round.PlayerCode == playerCode &&
 				   round.ExternalRoundId == externalRoundId &&
@@ -87,12 +80,12 @@ public sealed class RoundQueries : IRoundQueries
 	async ValueTask<RoundWithGameActionExternalIds[]> IRoundQueries.GetRoundWithGameActionExternalIdsAsync(
 				Guid gameProviderId, DateTimeOffset start, DateTimeOffset end, RoundStatus? roundStatus, GameType? gameType)
 	{
-		var query = _repository.Rounds
+		var query = repository.Rounds
 			.Where(r => r.GameProviderId == gameProviderId &&
 				r.CreatedOn >= start && r.CreatedOn <= end &&
 				r.Status == roundStatus)
 			.Include(r => r.GameActions)
-			.Join(_repository.Games, r => r.GameId, g => g.Id, (r, g) => new
+			.Join(repository.Games, r => r.GameId, g => g.Id, (r, g) => new
 			{
 				Round = r,
 				Game = g

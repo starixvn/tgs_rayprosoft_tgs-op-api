@@ -8,14 +8,9 @@ using TGS.Core.DataServices.Tgs;
 
 namespace TGS.Services.Operator.ApplicationServices.BrandLiveChat;
 
-internal class GetBrandLiveChatQueryService : IGetService<BrandLiveChatQuery, BrandLiveChatInfo?>
+internal class GetBrandLiveChatQueryService(ITgsRepository tgsRepository) : IGetService<BrandLiveChatQuery, BrandLiveChatInfo?>
 {
-	private readonly ITgsRepository _tgsRepository;
-
-	public GetBrandLiveChatQueryService(ITgsRepository tgsRepository)
-	{
-		_tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
-	}
+	private readonly ITgsRepository _tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
 
 	public async ValueTask<BrandLiveChatInfo?> GetAsync(
 		BrandLiveChatQuery query,

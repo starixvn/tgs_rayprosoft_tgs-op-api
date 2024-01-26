@@ -14,19 +14,12 @@ public interface IBrandLanguageCodeMapper : ICodeMapper
 {
 }
 
-public sealed class BrandLanguageCodeMapper : BaseCodeMapper, IBrandLanguageCodeMapper
+public sealed class BrandLanguageCodeMapper(
+	IRedisCacheManager cacheManager,
+	IJsonSerializationProvider json,
+	IBrandQueries brandQueries) : BaseCodeMapper(cacheManager, json), IBrandLanguageCodeMapper
 {
 	private const int CacheForMinutes = 30;
-	private readonly IBrandQueries _brandQueries;
-
-	public BrandLanguageCodeMapper(
-		IRedisCacheManager cacheManager,
-		IJsonSerializationProvider json,
-		IBrandQueries brandQueries)
-		: base(cacheManager, json)
-	{
-		_brandQueries = brandQueries;
-	}
 
 	async Task<string> ICodeMapper.ExternalToInternalAsync(string externalCode, Guid brandId)
 	{
@@ -37,7 +30,7 @@ public sealed class BrandLanguageCodeMapper : BaseCodeMapper, IBrandLanguageCode
 			Consts.CachePrefix.BrandToTgsMap,
 			"language",
 			CacheForMinutes,
-			id => _brandQueries.GetBrandLanguagesByExternalCodeAsync(id));
+			id => brandQueries.GetBrandLanguagesByExternalCodeAsync(id));
 
 		return !found
 			? throw new InvalidOperationException(
@@ -49,12 +42,12 @@ public sealed class BrandLanguageCodeMapper : BaseCodeMapper, IBrandLanguageCode
 	Task<Dictionary<string, string>> ICodeMapper.GetMapByExternalCodeAsync(Guid brandId) =>
 		GetMappedCodesAsync(brandId, RedisCacheType.Languages,
 			Consts.CachePrefix.BrandToTgsMap, CacheForMinutes,
-			id => _brandQueries.GetBrandLanguagesByExternalCodeAsync(id));
+			id => brandQueries.GetBrandLanguagesByExternalCodeAsync(id));
 
 	Task<Dictionary<string, string>> ICodeMapper.GetMapByInternalCodeAsync(Guid brandId) =>
 		GetMappedCodesAsync(brandId, RedisCacheType.Languages,
 			Consts.CachePrefix.TgsToBrandMap, CacheForMinutes,
-			id => _brandQueries.GetBrandLanguagesByInternalCodeAsync(id));
+			id => brandQueries.GetBrandLanguagesByInternalCodeAsync(id));
 
 	async Task<string> ICodeMapper.InternalToExternalAsync(string internalCode, Guid brandId)
 	{
@@ -65,7 +58,7 @@ public sealed class BrandLanguageCodeMapper : BaseCodeMapper, IBrandLanguageCode
 			Consts.CachePrefix.TgsToBrandMap,
 			"language",
 			CacheForMinutes,
-			id => _brandQueries.GetBrandLanguagesByInternalCodeAsync(id));
+			id => brandQueries.GetBrandLanguagesByInternalCodeAsync(id));
 
 		return !found
 			? throw new InvalidOperationException(

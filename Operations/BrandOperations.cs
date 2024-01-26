@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
-using Tgs.Logging;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Models;
@@ -12,78 +12,30 @@ using TGS.Services.Operations.Queries;
 
 namespace TGS.Services.Operations;
 
-public interface IBrandOperations
-{
-	Task<string> GetBrandCodeByIdAsync(Guid brandId);
-
-	[Obsolete("淘汰")]
-	Task<int> GetBrandDefaultBetLimitAsync(Guid brandId, string currencyCode);
-
-	Task<CachedBrandGame> GetBrandGameAsync(Guid brandId, Guid gameProviderId, int gameId);
-
-	Task<CachedBrandGameProvider> GetBrandGameProviderAsync(Guid brandId, Guid gameProviderId);
-
-	Task<CachedBrandGameProviderConfiguration> GetBrandGameProviderConfigurationAsync(
-		Guid brandId,
-		Guid gameProviderId);
-
-	Task<string> GetBrandGameProviderConfigurationDefaultLanguageAsync(Guid brandId, Guid gameProviderId);
-
-	Task<Guid> GetBrandGameProviderConfigurationIdAsync(Guid brandId, Guid gameProviderId);
-
-	Task<CachedBrandGameProvider[]> GetBrandGameProvidersAsync(Guid brandId);
-
-	Task<Status?> GetBrandGameProviderStatusAsync(Guid brandId, Guid gameProviderId);
-
-	Task<CachedBrandGame[]> GetBrandGamesAsync(Guid brandId, GamePlatformType[] platformTypes = null);
-
-	Task<CachedBrandGame[]> GetBrandGamesAsync(
-		Guid brandId, Guid gameProviderId,
-		GamePlatformType[] platformTypes = null);
-
-	Task<GameStatus?> GetBrandGameStatusAsync(Guid brandId, Guid gameProviderId, int gameId);
-
-	Task<Guid> GetBrandIdByApiKeyAsync(string apiKey);
-
-	Task<Guid> GetBrandIdByClientIdAsync(string clientId);
-
-	Task<Guid> GetBrandIdByCodeAsync(string brandCode);
-
-	Task<string> GetBrandSecretKeyAsync(Guid brandId);
-
-	Task<Status?> GetBrandStatusAsync(Guid brandId);
-
-	Task<CachedBrand> GetCachedBrandAsync(Guid brandId);
-
-	Task<CachedAnnouncement[]> GetEffectiveAnnouncementsAsync(Guid brandId);
-
-	Task<string> GetTimeZoneByBrandIdAsync(Guid brandId);
-}
-
 public sealed class BrandOperations : IBrandOperations
 {
 	private readonly IBrandQueries _brandQueries;
 	private readonly IRedisCacheManager _cacheManager;
 	private readonly IBrandOperations _interface;
 	private readonly IJsonSerializationProvider _json;
-	private readonly ITgsLog _log;
+	private readonly ILogger<BrandOperations> _logger;
 
 	public BrandOperations(
 		IRedisCacheManager cacheManager,
 		IBrandQueries brandQueries,
 		IJsonSerializationProvider json,
-		ITgsLog log)
+		ILogger<BrandOperations> logger)
 	{
 		_cacheManager = cacheManager;
 		_brandQueries = brandQueries;
 		_json = json;
-		_log = log;
+		_logger = logger;
 
 		_interface = this;
 	}
 
-	Task<string> IBrandOperations.GetBrandCodeByIdAsync(Guid brandId) =>
-		GetCachedBrandValueAsync(brandId,
+	Task<string> IBrandOperations.GetBrandCodeByIdAsync(Guid brandId)
+		=> GetCachedBrandValueAsync(brandId,
 			CachedBrandFields.BrandCode,
 			v => (string)v,
 			brand => brand?.Code);
@@ -108,10 +60,9 @@ public sealed class BrandOperations : IBrandOperations
 
 		await _cacheManager.SafeCacheHashSetAsync(type,
 			brandId,
-			new HashEntry[]
-			{
+			[
 				new(currencyCode, betLimitId.Value)
-			},
+			],
 			TimeSpan.FromHours(2));
 
 		return betLimitId.Value;
@@ -314,7 +265,7 @@ public sealed class BrandOperations : IBrandOperations
 		}
 		catch (Exception e)
 		{
-			_log.LogError($"Failed to cache brand for brandId: {brandId}", e);
+			_logger.LogError(e, "Failed to cache brand for brandId: {brandId}", brandId);
 		}
 	}
 
@@ -337,7 +288,7 @@ public sealed class BrandOperations : IBrandOperations
 		}
 		catch (Exception e)
 		{
-			_log.LogError($"Failed to cache brand game provider configuration for brandId: {brandId}", e);
+			_logger.LogError(e, "Failed to cache brand game provider configuration for brandId: {brandId}", brandId);
 		}
 	}
 
@@ -363,8 +314,8 @@ public sealed class BrandOperations : IBrandOperations
 		}
 		catch (Exception e)
 		{
-			_log.LogError($"Failed to get cached brand game provider configuration for brandId: {brandId}",
-				e);
+			_logger.LogError(e, "Failed to get cached brand game provider configuration for brandId: {brandId}",
+				brandId);
 		}
 
 		return null;
@@ -376,8 +327,7 @@ public sealed class BrandOperations : IBrandOperations
 		{
 			var values = await _cacheManager.SafeGetHashSetAsync(RedisCacheType.Brand,
 				brandId,
-				new RedisValue[]
-				{
+				[
 					CachedBrandFields.BrandCode,
 					CachedBrandFields.BrandName,
 					CachedBrandFields.TimeZoneId,
@@ -388,7 +338,7 @@ public sealed class BrandOperations : IBrandOperations
 					CachedBrandFields.LicenseeCode,
 					CachedBrandFields.ClientId,
 					CachedBrandFields.SecretKey
-				});
+				]);
 
 			if (values.All(a => !a.IsNull))
 			{
@@ -409,7 +359,7 @@ public sealed class BrandOperations : IBrandOperations
 		}
 		catch (Exception e)
 		{
-			_log.LogError($"Failed to get cached brand for brandId: {brandId}", e);
+			_logger.LogError(e, "Failed to get cached brand for brandId: {brandId}", brandId);
 		}
 
 		return null;

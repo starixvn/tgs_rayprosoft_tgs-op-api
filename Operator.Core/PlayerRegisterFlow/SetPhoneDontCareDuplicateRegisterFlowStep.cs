@@ -10,17 +10,12 @@ using static TGS.Services.Operator.PlayerRegisterFlow.SetPhoneRegisterFlowStep;
 
 namespace TGS.Services.Operator.PlayerRegisterFlow;
 
-internal class SetPhoneDontCareDuplicateRegisterFlowStep : IRegisterFlowStep
+internal class SetPhoneDontCareDuplicateRegisterFlowStep(IPlayerServiceClient playerServiceClient) : IRegisterFlowStep
 {
-	private readonly IPlayerServiceClient _playerServiceClient;
+	private readonly IPlayerServiceClient _playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
 	private bool _compatible;
 
 	public string Type => "SetPhoneDontCareDuplicate";
-
-	public SetPhoneDontCareDuplicateRegisterFlowStep(IPlayerServiceClient playerServiceClient)
-	{
-		_playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
-	}
 
 	public async ValueTask<bool> ConfirmCompletedAsync(string? playerCode, CancellationToken cancellationToken = default)
 	{

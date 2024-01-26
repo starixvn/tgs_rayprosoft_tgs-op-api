@@ -7,14 +7,9 @@ using TGS.Services.Operator.GameProviders;
 
 namespace TGS.Services.Operator.ApplicationServices.Game;
 
-internal class CountPlayerFavoriteGameQueryService : IGetService<CountPlayerFavoriteGameQuery, int>
+internal class CountPlayerFavoriteGameQueryService(IGameProviderRepository gameProviderRepository) : IGetService<CountPlayerFavoriteGameQuery, int>
 {
-	private readonly IGameProviderRepository _gameProviderRepository;
-
-	public CountPlayerFavoriteGameQueryService(IGameProviderRepository gameProviderRepository)
-	{
-		_gameProviderRepository = gameProviderRepository ?? throw new ArgumentNullException(nameof(gameProviderRepository));
-	}
+	private readonly IGameProviderRepository _gameProviderRepository = gameProviderRepository ?? throw new ArgumentNullException(nameof(gameProviderRepository));
 
 	public ValueTask<int> GetAsync(CountPlayerFavoriteGameQuery query, CancellationToken cancellationToken = default)
 		=> _gameProviderRepository

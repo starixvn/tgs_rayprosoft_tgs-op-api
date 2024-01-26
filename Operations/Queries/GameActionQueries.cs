@@ -35,25 +35,18 @@ public interface IGameActionQueries
 		string externalRoundId, string externalTransactionId);
 }
 
-public sealed class GameActionQueries : IGameActionQueries
+public sealed class GameActionQueries(ITgsRepository repository) : IGameActionQueries
 {
-	private readonly ITgsRepository _repository;
-
-	public GameActionQueries(ITgsRepository repository)
-	{
-		_repository = repository;
-	}
-
 	async ValueTask<GameActionExternalIds> IGameActionQueries.GetGameActionExternalIdAsync(
 		Guid gameProviderId,
 		string playerCode,
 		string externalTransactionId)
 	{
 		var gameActionData =
-			await (from round in _repository.Rounds.AsQueryable()
-				   join gameAction in _repository.GameActions.AsQueryable()
+			await (from round in repository.Rounds.AsQueryable()
+				   join gameAction in repository.GameActions.AsQueryable()
 				   on round.Id equals gameAction.RoundId
-				   join game in _repository.Games.AsQueryable()
+				   join game in repository.Games.AsQueryable()
 				   on round.GameId equals game.Id
 				   where round.GameProviderId == gameProviderId
 				   && round.PlayerCode == playerCode
@@ -81,7 +74,7 @@ public sealed class GameActionQueries : IGameActionQueries
 
 		if (gameActionData.ReferencedGameActionId.HasValue)
 		{
-			externalReferencedTransactionId = await _repository.GameActions.AsQueryable()
+			externalReferencedTransactionId = await repository.GameActions.AsQueryable()
 			   .Where(x => x.Id == gameActionData.ReferencedGameActionId.Value)
 			   .Select(x => x.ExternalTransactionId).FirstOrDefaultAsync();
 		}
@@ -104,7 +97,7 @@ public sealed class GameActionQueries : IGameActionQueries
 		string playerCode, string externalRoundId, int gameId, GameActionType[] gameActionTypes)
 	{
 		const string spName = "bet.game_action_get_game_action_external_ids";
-		var r = await _repository.SqlQueryMultipleAsync<GameActionExternalIds>(spName, parameters:
+		var r = await repository.SqlQueryMultipleAsync<GameActionExternalIds>(spName, parameters:
 			new Dictionary<string, object>
 			{
 				{":game_provider_id", gameProviderId},
@@ -122,7 +115,7 @@ public sealed class GameActionQueries : IGameActionQueries
 			Guid gameProviderId, string playerCode, string externalGameActionGroupId)
 	{
 		const string spName = "bet.game_action_get_game_actions_by_external_group_id";
-		var r = await _repository.SqlQueryMultipleAsync<GameActionExternalIds>(spName, parameters:
+		var r = await repository.SqlQueryMultipleAsync<GameActionExternalIds>(spName, parameters:
 			new Dictionary<string, object>
 			{
 				{":game_provider_id", gameProviderId},
@@ -136,7 +129,7 @@ public sealed class GameActionQueries : IGameActionQueries
 	async ValueTask<string[]> IGameActionQueries.GetGameActionExternalIdsByExternalGameActionGroupIdAsync(
 		Guid gameProviderId, string playerCode, string externalRoundId, int gameId,
 		string externalGameActionGroupId) =>
-		await (from ga in _repository.GameActions
+		await (from ga in repository.GameActions
 			   let round = ga.Round
 			   where round.ExternalRoundId == externalRoundId &&
 				   round.GameProviderId == gameProviderId &&
@@ -150,7 +143,7 @@ public sealed class GameActionQueries : IGameActionQueries
 		string playerCode, string externalRoundId, int gameId)
 	{
 		const string spName = "bet.game_action_get_game_actions_by_external_round_id";
-		var r = await _repository.SqlQueryMultipleAsync<GameActionResult>(spName, parameters:
+		var r = await repository.SqlQueryMultipleAsync<GameActionResult>(spName, parameters:
 			new Dictionary<string, object>
 			{
 				{":game_provider_id", gameProviderId},
@@ -207,7 +200,7 @@ public sealed class GameActionQueries : IGameActionQueries
 							Guid gameProviderId, string playerCode, string externalRoundId, int gameId, bool onlyPlacements)
 	{
 		const string spName = "bet.game_action_get_valid_game_action_external_ids";
-		var r = await _repository.SqlQueryMultipleAsync<GameActionExternalIds>(spName,
+		var r = await repository.SqlQueryMultipleAsync<GameActionExternalIds>(spName,
 			parameters: new Dictionary<string, object>
 			{
 				{":game_provider_id", gameProviderId},
@@ -224,7 +217,7 @@ public sealed class GameActionQueries : IGameActionQueries
 		string externalRoundId, string externalTransactionId)
 	{
 		const string spName = "bet.game_action_referenced_game_action_exists";
-		return await _repository.SqlQuerySingleAsync<bool>(spName, parameters:
+		return await repository.SqlQuerySingleAsync<bool>(spName, parameters:
 			new Dictionary<string, object>
 			{
 				{":game_provider_id", gameProviderId},

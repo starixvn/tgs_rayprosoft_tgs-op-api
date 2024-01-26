@@ -6,15 +6,10 @@ using TGS.Services.Operator;
 
 namespace TGS.Operator.Repositories;
 
-internal class PlayerOnlineRepository : IPlayerOnlineRepository
+internal class PlayerOnlineRepository(IDatabase database) : IPlayerOnlineRepository
 {
 	private const string PlayerOnlineKey = "playeronline";
-	private readonly IDatabase _database;
-
-	public PlayerOnlineRepository(IDatabase database)
-	{
-		_database = database ?? throw new ArgumentNullException(nameof(database));
-	}
+	private readonly IDatabase _database = database ?? throw new ArgumentNullException(nameof(database));
 
 	public Task SetAsync(Guid brandId, string playerCode)
 		=> _database.StringSetAsync(

@@ -9,16 +9,15 @@ using Valhalla.MessageQueue;
 
 namespace TGS.Services.Operator.MessageQueue;
 
-internal class NotificationHandler : IMessageHandler
+internal class NotificationHandler(INotifyEventPublisher notifyEventPublisher) : IMessageHandler<ReadOnlyMemory<byte>>
 {
-	private readonly INotifyEventPublisher _notifyEventPublisher;
+	private readonly INotifyEventPublisher _notifyEventPublisher = notifyEventPublisher ?? throw new ArgumentNullException(nameof(notifyEventPublisher));
 
-	public NotificationHandler(INotifyEventPublisher notifyEventPublisher)
-	{
-		_notifyEventPublisher = notifyEventPublisher ?? throw new ArgumentNullException(nameof(notifyEventPublisher));
-	}
-
-	public ValueTask HandleAsync(ReadOnlyMemory<byte> data, CancellationToken cancellationToken = default)
+	public ValueTask HandleAsync(
+		string subject,
+		ReadOnlyMemory<byte> data,
+		IEnumerable<MessageHeaderValue>? headerValues,
+		CancellationToken cancellationToken = default)
 	{
 		var request = BroadcastNotificationRequest.Parser.ParseFrom(data.Span);
 

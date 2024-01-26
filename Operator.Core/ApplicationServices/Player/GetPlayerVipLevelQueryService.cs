@@ -5,15 +5,10 @@ using Tgs.ServiceUtility;
 
 namespace TGS.Services.Operator.ApplicationServices.Player;
 
-internal class GetPlayerVipLevelQueryService : IGetService<GetPlayerVipLevelQuery, int>
+internal class GetPlayerVipLevelQueryService(
+	IVipLevelRepository vipLevelRepository) : IGetService<GetPlayerVipLevelQuery, int>
 {
-	private readonly IVipLevelRepository _vipLevelRepository;
-
-	public GetPlayerVipLevelQueryService(
-		IVipLevelRepository vipLevelRepository)
-	{
-		_vipLevelRepository = vipLevelRepository ?? throw new ArgumentNullException(nameof(vipLevelRepository));
-	}
+	private readonly IVipLevelRepository _vipLevelRepository = vipLevelRepository ?? throw new ArgumentNullException(nameof(vipLevelRepository));
 
 	public async ValueTask<int> GetAsync(GetPlayerVipLevelQuery query, CancellationToken cancellationToken = default)
 	{

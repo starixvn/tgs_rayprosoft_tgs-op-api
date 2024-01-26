@@ -6,18 +6,12 @@ using Tgs.ServiceUtility;
 
 namespace TGS.Services.Operator.ApplicationServices.Player;
 
-internal class GetLogoutQueryService : IGetService<GetLogoutQuery, LogoutInfo>
+internal class GetLogoutQueryService(
+	IPlayerServiceClient playerServiceClient,
+	IPlayerLoginRecordRepository loginRecordRepository) : IGetService<GetLogoutQuery, LogoutInfo>
 {
-	private readonly IPlayerLoginRecordRepository _loginRecordRepository;
-	private readonly IPlayerServiceClient _playerServiceClient;
-
-	public GetLogoutQueryService(
-		IPlayerServiceClient playerServiceClient,
-		IPlayerLoginRecordRepository loginRecordRepository)
-	{
-		_playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
-		_loginRecordRepository = loginRecordRepository ?? throw new ArgumentNullException(nameof(loginRecordRepository));
-	}
+	private readonly IPlayerLoginRecordRepository _loginRecordRepository = loginRecordRepository ?? throw new ArgumentNullException(nameof(loginRecordRepository));
+	private readonly IPlayerServiceClient _playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
 
 	public async ValueTask<LogoutInfo> GetAsync(GetLogoutQuery query, CancellationToken cancellationToken = default)
 	{

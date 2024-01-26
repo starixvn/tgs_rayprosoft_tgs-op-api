@@ -1,16 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Moq;
-using NUnit.Framework;
+using NUnit.Framework.Legacy;
 using Tgs.Paging;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Models.Enums;
-using TGS.Core.Models.Messages;
 using TGS.Operator.Repositories;
 using TGS.Services.Operator.ApplicationServices.StationLetters;
 using TGS.Services.Operator.StationLetters;
@@ -29,7 +24,8 @@ public class StationLetterTests
 
 		var playerCode = "ThisIsPlayerCode";
 
-		var actual = sut.GetAsync(new GetStationLettersQuery(playerCode, new PageableRequest()));
+		var actual = sut.GetAsync(
+			new GetStationLettersQuery(playerCode, new Paging<Services.Operator.StationLetters.StationLetter>()));
 
 		moqStationLetterRepository.Verify(
 			fake => fake.QueryStationLettersTotalCountAsync(It.Is<string>(x => x == playerCode)),
@@ -43,13 +39,13 @@ public class StationLetterTests
 		_ = dbContextOptionsBuilder
 			.UseInMemoryDatabase(Guid.NewGuid().ToString())
 			.ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
-		ITgsRepository repository = new TgsRepository(dbContextOptionsBuilder.Options);
+		var repository = new TgsRepository(dbContextOptionsBuilder.Options);
 
 		var playerCode = "playerCode";
 
 		var stationLetterPlayers = new List<StationLetterPlayer>
 		{
-			new StationLetterPlayer()
+			new()
 			{
 				PlayerCode = playerCode,
 				StationLetter = new Core.DataServices.Tgs.Models.StationLetter()
@@ -60,7 +56,7 @@ public class StationLetterTests
 					UpdatedByUsername = "System"
 				}
 			},
-			new StationLetterPlayer()
+			new()
 			{
 				PlayerCode = playerCode,
 				StationLetter = new Core.DataServices.Tgs.Models.StationLetter()
@@ -71,7 +67,7 @@ public class StationLetterTests
 					UpdatedByUsername = "System"
 				}
 			},
-			new StationLetterPlayer()
+			new()
 			{
 				PlayerCode = playerCode,
 				StationLetter = new Core.DataServices.Tgs.Models.StationLetter()
@@ -91,7 +87,7 @@ public class StationLetterTests
 
 		var actual = await sut.QueryStationLettersAsync(playerCode, new Paging<TGS.Services.Operator.StationLetters.StationLetter>() { Page = 0, RowCount = 50 }).ToListAsync();
 
-		Assert.AreEqual(1, actual.Count);
+		ClassicAssert.AreEqual(1, actual.Count);
 	}
 
 	[Test]
@@ -103,7 +99,8 @@ public class StationLetterTests
 
 		var playerCode = "ThisIsPlayerCode";
 
-		var actual = sut.QueryAsync(new GetStationLettersQuery(playerCode, new PageableRequest()));
+		var actual = sut.QueryAsync(
+			new GetStationLettersQuery(playerCode, new Paging<Services.Operator.StationLetters.StationLetter>()));
 
 		moqStationLetterRepository.Verify(
 			fake => fake.QueryStationLettersAsync(It.Is<string>(x => x == playerCode), It.IsAny<Paging<TGS.Services.Operator.StationLetters.StationLetter>>()),
@@ -196,7 +193,7 @@ public class StationLetterTests
 
 		// assert
 		var actual = r.FirstOrDefault().CreateOn;
-		Assert.AreEqual(excepted, actual);
+		ClassicAssert.AreEqual(excepted, actual);
 	}
 
 	[Test]
@@ -237,7 +234,7 @@ public class StationLetterTests
 
 		await sut.SetStationLetterHaveReadAsync(playerCode, letterId);
 
-		Assert.IsTrue(targetPlayerLetter.IsRead);
-		Assert.IsNotNull(targetPlayerLetter.ReadOn);
+		ClassicAssert.IsTrue(targetPlayerLetter.IsRead);
+		ClassicAssert.IsNotNull(targetPlayerLetter.ReadOn);
 	}
 }

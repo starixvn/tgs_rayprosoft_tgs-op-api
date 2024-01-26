@@ -13,7 +13,7 @@ using Valhalla.MessageQueue;
 
 namespace TGS.Services.Operator.MessageQueue;
 
-internal class DepositFormStatusChangedHandler : IMessageHandler
+internal class DepositFormStatusChangedHandler : IMessageHandler<ReadOnlyMemory<byte>>
 {
 	private readonly ILogger<DepositFormStatusChangedHandler> _logger;
 	private readonly INotifyEventPublisher _notifyEventPublisher;
@@ -26,15 +26,18 @@ internal class DepositFormStatusChangedHandler : IMessageHandler
 		IOptions<JsonOptions> jsonOptionsAccessor,
 		ILogger<DepositFormStatusChangedHandler> logger)
 	{
-		if (jsonOptionsAccessor is null)
-			throw new ArgumentNullException(nameof(jsonOptionsAccessor));
+		ArgumentNullException.ThrowIfNull(jsonOptionsAccessor);
 		_paymentServiceClient = paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
 		_notifyEventPublisher = notifyEventPublisher ?? throw new ArgumentNullException(nameof(notifyEventPublisher));
 		_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 		_serializerOptions = jsonOptionsAccessor.Value.JsonSerializerOptions;
 	}
 
-	public async ValueTask HandleAsync(ReadOnlyMemory<byte> data, CancellationToken cancellationToken = default)
+	public async ValueTask HandleAsync(
+		string subject,
+		ReadOnlyMemory<byte> data,
+		IEnumerable<MessageHeaderValue>? headerValues,
+		CancellationToken cancellationToken = default)
 	{
 		var formEvent = FormEventEx.Parser.ParseFrom(data.Span);
 		var previousStatus = Enum.Parse<PaymentFlowState>(formEvent.Status);

@@ -7,16 +7,10 @@ using TGS.Core.Models.Messages;
 
 namespace TGS.Apis.OperatorApi.Filters;
 
-public class ErrorMessageMapperFilter : IAsyncExceptionFilter
+public class ErrorMessageMapperFilter(IErrorMapper errorMapper, ILogger<ErrorMessageMapperFilter> logger) : IAsyncExceptionFilter
 {
-	private readonly IErrorMapper _errorMapper;
-	private readonly ILogger<ErrorMessageMapperFilter> _logger;
-
-	public ErrorMessageMapperFilter(IErrorMapper errorMapper, ILogger<ErrorMessageMapperFilter> logger)
-	{
-		_errorMapper = errorMapper ?? throw new System.ArgumentNullException(nameof(errorMapper));
-		_logger = logger ?? throw new System.ArgumentNullException(nameof(logger));
-	}
+	private readonly IErrorMapper _errorMapper = errorMapper ?? throw new System.ArgumentNullException(nameof(errorMapper));
+	private readonly ILogger<ErrorMessageMapperFilter> _logger = logger ?? throw new System.ArgumentNullException(nameof(logger));
 
 	public Task OnExceptionAsync(ExceptionContext context)
 	{

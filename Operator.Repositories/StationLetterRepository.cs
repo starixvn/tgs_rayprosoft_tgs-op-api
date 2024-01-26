@@ -11,14 +11,9 @@ using TGS.Services.Operator.StationLetters;
 
 namespace TGS.Operator.Repositories;
 
-internal class StationLetterRepository : IStationLetterRepository
+internal class StationLetterRepository(ITgsRepository tgsRepository) : IStationLetterRepository
 {
-	private readonly ITgsRepository _tgsRepository;
-
-	public StationLetterRepository(ITgsRepository tgsRepository)
-	{
-		_tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
-	}
+	private readonly ITgsRepository _tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
 
 	public IAsyncEnumerable<StationLetter> QueryStationLettersAsync(string playerCode, Paging<StationLetter> paging)
 	{

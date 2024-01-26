@@ -1,9 +1,7 @@
-﻿using System;
-using System.IdentityModel.Tokens.Jwt;
+﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using System.Threading.Tasks;
 using NSubstitute;
-using NUnit.Framework;
+using NUnit.Framework.Legacy;
 using Tgs.Core.Infrastructures.Security;
 using TGS.Services.Operations;
 using TGS.Services.Operator.ApplicationServices.Auth;
@@ -31,7 +29,7 @@ public class AuthTests
 		_ = fakeBrandOperations.Received(1)
 			.GetBrandIdByApiKeyAsync(Arg.Is(apiKey));
 
-		Assert.IsNotNull(actual);
+		ClassicAssert.IsNotNull(actual);
 	}
 
 	[Test]
@@ -56,6 +54,6 @@ public class AuthTests
 
 		var actual = await sut.GetAsync(command);
 
-		Assert.IsNotNull(actual);
+		ClassicAssert.IsNotNull(actual);
 	}
 }

@@ -7,18 +7,12 @@ using Tgs.ServiceUtility;
 
 namespace TGS.Services.Operator.ApplicationServices.GameBalance;
 
-internal class FundOutGameBalanceCommandService : ICommandService<FundOutGameBalanceCommand>
+internal class FundOutGameBalanceCommandService(
+	IGameProvidersOperatorPluggableClient gameProvidersOperatorPluggableClient,
+	ILogger<FundOutGameBalanceCommandService> logger) : ICommandService<FundOutGameBalanceCommand>
 {
-	private readonly IGameProvidersOperatorPluggableClient _gameProvidersOperatorPluggableClient;
-	private readonly ILogger<FundOutGameBalanceCommandService> _logger;
-
-	public FundOutGameBalanceCommandService(
-		IGameProvidersOperatorPluggableClient gameProvidersOperatorPluggableClient,
-		ILogger<FundOutGameBalanceCommandService> logger)
-	{
-		_gameProvidersOperatorPluggableClient = gameProvidersOperatorPluggableClient ?? throw new ArgumentNullException(nameof(gameProvidersOperatorPluggableClient));
-		_logger = logger ?? throw new ArgumentNullException(nameof(logger));
-	}
+	private readonly IGameProvidersOperatorPluggableClient _gameProvidersOperatorPluggableClient = gameProvidersOperatorPluggableClient ?? throw new ArgumentNullException(nameof(gameProvidersOperatorPluggableClient));
+	private readonly ILogger<FundOutGameBalanceCommandService> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
 	public async ValueTask ExecuteAsync(FundOutGameBalanceCommand command, CancellationToken cancellationToken = default)
 	{

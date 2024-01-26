@@ -6,20 +6,14 @@ using TGS.Core.Models.Messages;
 
 namespace TGS.Apis.OperatorApi.Middlewares;
 
-public sealed class VerifyCredentialsMiddleware
+public sealed class VerifyCredentialsMiddleware(
+	RequestDelegate next,
+	ILogger<VerifyCredentialsMiddleware> logger)
 {
 	private static readonly ActivitySource _VerifyCredentialsMiddlewareSource = new($"TGS.Apis.OperatorApi.Middlewares.{nameof(VerifyCredentialsMiddleware)}");
 
-	private readonly ILogger<VerifyCredentialsMiddleware> _logger;
-	private readonly RequestDelegate _next;
-
-	public VerifyCredentialsMiddleware(
-		RequestDelegate next,
-		ILogger<VerifyCredentialsMiddleware> logger)
-	{
-		_next = next ?? throw new ArgumentNullException(nameof(next));
-		_logger = logger ?? throw new ArgumentNullException(nameof(logger));
-	}
+	private readonly ILogger<VerifyCredentialsMiddleware> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+	private readonly RequestDelegate _next = next ?? throw new ArgumentNullException(nameof(next));
 
 	public async Task InvokeAsync(
 		HttpContext context,

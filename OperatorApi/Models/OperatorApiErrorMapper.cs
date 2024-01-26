@@ -12,8 +12,8 @@ namespace TGS.Apis.OperatorApi.Models;
 
 public class OperatorApiErrorMapper : IErrorMapper
 {
-	private static readonly IReadOnlyDictionary<OpApiError, string> _ErrorCodeMessageIdMap =
-		new Dictionary<OpApiError, string>
+	private static readonly Dictionary<OpApiError, string> _ErrorCodeMessageIdMap =
+		new()
 		{
 			[OpApiError.InvalidCredentials] = "InvalidCredentials",
 			[OpApiError.InvalidOrExpiredPlayerToken] = "InvalidOrExpiredPlayerToken",
@@ -58,8 +58,8 @@ public class OperatorApiErrorMapper : IErrorMapper
 			[OpApiError.BankInfoCountLimitExceed] = "BankInfoCountLimitExceed"
 		};
 
-	private static readonly IReadOnlyDictionary<OpApiError, int> _HttpCodeByException =
-		new Dictionary<OpApiError, int>
+	private static readonly Dictionary<OpApiError, int> _HttpCodeByException =
+		new()
 		{
 			[OpApiError.InvalidCredentials] = StatusCodes.Status401Unauthorized,
 			[OpApiError.InvalidOrExpiredPlayerToken] = StatusCodes.Status401Unauthorized,
@@ -104,8 +104,8 @@ public class OperatorApiErrorMapper : IErrorMapper
 			[OpApiError.BankInfoCountLimitExceed] = StatusCodes.Status400BadRequest
 		};
 
-	private static readonly IReadOnlyDictionary<Type, OpApiError> _OpApiErrorByException =
-		new Dictionary<Type, OpApiError>
+	private static readonly Dictionary<Type, OpApiError> _OpApiErrorByException =
+		new()
 		{
 			[typeof(InvalidCredentialsException)] = OpApiError.InvalidCredentials,
 			[typeof(MissingTokenException)] = OpApiError.InvalidOrExpiredPlayerToken,

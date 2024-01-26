@@ -1,6 +1,4 @@
-﻿using System.Threading.Tasks;
-using NSubstitute;
-using NUnit.Framework;
+﻿using NSubstitute;
 using Tgs.Payment.Clients;
 using Tgs.Payment.UmPay;
 using TGS.Services.Operator.ApplicationServices.Deposit;

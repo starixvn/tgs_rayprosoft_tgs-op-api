@@ -1,8 +1,5 @@
-﻿using System;
-using System.Text.Json;
-using System.Threading.Tasks;
+﻿using System.Text.Json;
 using NSubstitute;
-using NUnit.Framework;
 using Tgs.Payment.Clients;
 using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Models.Enums;

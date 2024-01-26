@@ -387,7 +387,7 @@ public class ManualDepositController : ControllerBase
 
 		var brandPaymentBankInfo = JsonDocument.Parse(brandPayment.ExtendedData);
 
-		var qrCode = JsonElementExtenstion.GetPropertyValue(brandPaymentBankInfo.RootElement, "qrCode");		
+		var qrCode = JsonElementExtenstion.GetPropertyValue(brandPaymentBankInfo.RootElement, "qrCode");
 
 		var command = new CreateDepositFormCommand(
 			playerTokenData.PlayerCode,

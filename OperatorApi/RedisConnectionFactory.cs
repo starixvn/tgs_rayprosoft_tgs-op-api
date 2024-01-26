@@ -6,7 +6,7 @@ namespace TGS.Apis.OperatorApi;
 
 internal class RedisConnectionFactory : IRedisConnectionFactory, IDisposable
 {
-	private readonly IConnectionMultiplexer _connectionMultiplexer;
+	private readonly ConnectionMultiplexer _connectionMultiplexer;
 	private bool _disposedValue;
 
 	public RedisConnectionFactory(
