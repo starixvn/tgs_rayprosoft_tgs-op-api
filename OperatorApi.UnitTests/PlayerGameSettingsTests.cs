@@ -1,6 +1,4 @@
-﻿using System.Threading.Tasks;
-using NSubstitute;
-using NUnit.Framework;
+﻿using NSubstitute;
 using NUnit.Framework.Legacy;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Services.Operator;

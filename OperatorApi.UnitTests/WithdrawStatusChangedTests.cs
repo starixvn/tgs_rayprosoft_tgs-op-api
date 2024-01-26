@@ -1,10 +1,7 @@
-﻿using System;
-using System.Threading.Tasks;
-using Google.Protobuf;
+﻿using Google.Protobuf;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using NSubstitute;
-using NUnit.Framework;
 using Tgs.Payment.Clients;
 using Tgs.Payment.Protos;
 using TGS.Services.Operator.MessageQueue;

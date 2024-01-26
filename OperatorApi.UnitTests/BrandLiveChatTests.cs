@@ -1,8 +1,5 @@
-﻿using System;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
-using NUnit.Framework;
 using NUnit.Framework.Legacy;
 using TGS.Core.DataServices.Tgs;
 using TGS.Services.Operator.ApplicationServices.BrandLiveChat;

@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel;
-using System.Data.SqlClient;
 using System.Net.Mime;
 using Microsoft.AspNetCore.Mvc;
 using Tgs.Report.Client;

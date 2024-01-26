@@ -28,7 +28,6 @@ using TGS.Services.Operator.ApplicationServices.Player;
 using TGS.Services.Operator.PlayerRegisterFlow;
 using Valhalla.MessageQueue;
 using Xunit.Abstractions;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 using BrandStatus = Tgs.BrandCertificate.BrandStatus;
 
 namespace OperatorApi.IntegrationTests;

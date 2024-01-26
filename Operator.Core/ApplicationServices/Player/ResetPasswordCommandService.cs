@@ -21,7 +21,7 @@ internal class ResetPasswordCommandService(
 	{
 		var result = await _validateCodeOperator
 			.GetValidateCodeDataAsync<ValidateCodeData>(command.ValidateCode, command.SecurityKey)
-			.ConfigureAwait(false) 
+			.ConfigureAwait(false)
 			?? throw new ValidateCodeNotVerifyException();
 
 		var (newSalt, newPassword) = _passwordHandler.GenerateCredential(command.NewPassword);

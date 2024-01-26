@@ -1,7 +1,6 @@
 ﻿using FluentValidation;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models.Messages;
-using TGS.Core.Infrastructures.Extensions;
 using TGS.IdentityVerifiers;
 using TGS.Services.Operations;
 
@@ -16,10 +15,7 @@ public class SetPlayerIdentityRequestValidator : AbstractValidator<SetPlayerIden
 	{
 		_ = RuleFor(x => x.RealName)
 			.NotNull()
-			.NotEmpty()
-			.WithName(x => x
-				.WithPropertyExpression(o => o.RealName)
-				.GetJsonPropertyName(nameof(x.RealName)));
+			.NotEmpty();
 
 		_ = RuleFor(x => x.Identity)
 			.Must(id =>
@@ -37,9 +33,6 @@ public class SetPlayerIdentityRequestValidator : AbstractValidator<SetPlayerIden
 				var identityVerifier = identityVerifierSelector.GetIdentityVerifier(playerCurrency);
 
 				return identityVerifier.Verify(id);
-			})
-			.WithName(x => x
-				.WithPropertyExpression(o => o.Identity)
-				.GetJsonPropertyName(nameof(x.Identity)));
+			});
 	}
 }

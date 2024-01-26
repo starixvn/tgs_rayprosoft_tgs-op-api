@@ -1,9 +1,6 @@
-﻿using System;
-using System.IdentityModel.Tokens.Jwt;
+﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using System.Threading.Tasks;
 using NSubstitute;
-using NUnit.Framework;
 using NUnit.Framework.Legacy;
 using Tgs.Core.Infrastructures.Security;
 using TGS.Services.Operations;

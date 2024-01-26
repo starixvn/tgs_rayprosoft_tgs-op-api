@@ -1,8 +1,4 @@
-﻿using System;
-using System.Linq;
-using System.Threading.Tasks;
-using NSubstitute;
-using NUnit.Framework;
+﻿using NSubstitute;
 using NUnit.Framework.Legacy;
 using TGS.Services.Operator;
 using TGS.Services.Operator.ApplicationServices.Banner;

@@ -1,8 +1,5 @@
-﻿using System;
-using System.Threading.Tasks;
-using Moq;
+﻿using Moq;
 using NSubstitute;
-using NUnit.Framework;
 using Tgs.BrandCertificate.Clients;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Services.Operations;

@@ -1,12 +1,10 @@
-﻿using System.Data.SqlClient;
-using System.Text.Json;
+﻿using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Tgs.Paging;
 using Tgs.ServiceUtility;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models.Messages;
-using TGS.Core.Models.Messages;
 using TGS.Services.Operator.ApplicationServices.StationLetters;
 using TGS.Services.Operator.StationLetters;
 

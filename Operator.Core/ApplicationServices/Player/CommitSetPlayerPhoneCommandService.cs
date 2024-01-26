@@ -23,7 +23,7 @@ internal class CommitSetPlayerPhoneCommandService(
 	{
 		var result = await _validateCodeOperator
 			.GetValidateCodeDataAsync<PhoneValidateData>(command.ValidateCode, command.SecurityKey)
-			.ConfigureAwait(false) 
+			.ConfigureAwait(false)
 			?? throw new ValidateCodeNotVerifyException();
 
 		var checkQuery = new CheckBrandPhoneCanUseQuery(

@@ -16,7 +16,7 @@ internal class ValidatePlayerLoginRecordCommandService(
 	{
 		var loginRecord = await _loginRecordRepository
 			.GetPlayerLoginRecordAsync(command.LoginRecordId)
-			.ConfigureAwait(false) 
+			.ConfigureAwait(false)
 			?? throw new PlayerLoginExpiredException(command.PlayerCode);
 
 		if (loginRecord.PlayerCode != command.PlayerCode)

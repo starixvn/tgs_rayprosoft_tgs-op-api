@@ -6,7 +6,6 @@ using Tgs.Payment.DibaoPay.Client;
 using Tgs.Payment.Help2Pay;
 using Tgs.Payment.MaticPay;
 using Tgs.Payment.MetaPay.Client;
-using Tgs.Payment.PhpGoPay.Client;
 using Tgs.Payment.PrimePay;
 using Tgs.Payment.SBPay.Client;
 using Tgs.Payment.SkyPay;

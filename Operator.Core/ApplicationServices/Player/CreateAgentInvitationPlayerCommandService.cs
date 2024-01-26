@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Tgs.BrandCertificate.Clients;
@@ -8,7 +7,6 @@ using Tgs.ServiceUtility;
 using Tgs.VipLevelService.Clients;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
-using TGS.Services.Operations;
 using PlayerType = Tgs.PlayerService.Client.PlayerType;
 
 namespace TGS.Services.Operator.ApplicationServices.Player;

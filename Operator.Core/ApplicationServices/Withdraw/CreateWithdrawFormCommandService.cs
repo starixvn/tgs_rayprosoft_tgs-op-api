@@ -3,9 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Tgs.Payment.Clients;
 using Tgs.PlayerService.Client;
-using Tgs.Service.PlayerBuckets;
 using Tgs.ServiceUtility;
-using TGS.Services.Operator.BrandPayment;
 
 namespace TGS.Services.Operator.ApplicationServices.Withdraw;
 

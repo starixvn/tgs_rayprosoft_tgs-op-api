@@ -26,7 +26,7 @@ public class CommitInitPlayerPhoneCommandService(
 	{
 		var result = await _validateCodeOperator
 			.GetValidateCodeDataAsync<PhoneValidateData>(command.ValidateCode, command.SecurityKey)
-			.ConfigureAwait(false) 
+			.ConfigureAwait(false)
 			?? throw new ValidateCodeNotVerifyException();
 
 		var playerCode = result.PlayerCode;

@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using NSubstitute;
-using NUnit.Framework;
+﻿using NSubstitute;
 using NUnit.Framework.Legacy;
 using Tgs.Payment.Clients;
-using TGS.Core.Models.Messages;
 using TGS.Services.Operator.ApplicationServices.Deposit;
 
 namespace TGS.Tests.OperatorApi.UnitTests;

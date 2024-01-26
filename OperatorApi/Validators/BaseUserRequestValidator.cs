@@ -1,6 +1,8 @@
-﻿using FluentValidation;
+﻿using System.Linq.Expressions;
+using System.Reflection;
+using System.Text.Json.Serialization;
+using FluentValidation;
 using TGS.Apis.OperatorApi.Models.Messages;
-using TGS.Core.Infrastructures.Extensions;
 
 namespace TGS.Apis.OperatorApi.Validators;
 
@@ -10,9 +12,22 @@ public abstract class BaseUserRequestValidator<T> : AbstractValidator<T> where T
 	{
 		_ = RuleFor(x => x.Username)
 			.NotEmpty()
-			.Length(6, 32)
-			.WithName(x => x
-				.WithPropertyExpression(o => o.Username)
-				.GetJsonPropertyName(nameof(x.Username)));
+			.Length(6, 32);
 	}
+
+	protected override void OnRuleAdded(IValidationRule<T> rule)
+	{
+		rule.PropertyName = GetJsonPropertyName(rule.Expression, rule.PropertyName);
+		base.OnRuleAdded(rule);
+	}
+
+	private static TAttribute GetAttribute<TAttribute>(LambdaExpression expression) where TAttribute : Attribute
+	{
+		MemberExpression memberExpression = expression.Body as MemberExpression;
+
+		return (memberExpression.Member is PropertyInfo element) ? element.GetCustomAttribute<TAttribute>() : null;
+	}
+
+	private static string GetJsonPropertyName(LambdaExpression expression, string defaultPropertyName)
+		=> GetAttribute<JsonPropertyNameAttribute>(expression)?.Name ?? defaultPropertyName;
 }

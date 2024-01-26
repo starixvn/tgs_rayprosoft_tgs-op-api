@@ -1,8 +1,4 @@
-﻿using System;
-using System.Linq;
-using System.Threading.Tasks;
-using NSubstitute;
-using NUnit.Framework;
+﻿using NSubstitute;
 using NUnit.Framework.Legacy;
 using TGS.Core.Models.Enums;
 using TGS.Services.Operations;

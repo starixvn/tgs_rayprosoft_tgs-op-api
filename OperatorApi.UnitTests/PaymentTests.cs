@@ -1,11 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using Moq;
+﻿using Moq;
 using NSubstitute;
-using NUnit.Framework;
 using Tgs.Payment.Clients;
 using Tgs.PlayerService.Client;
 using TGS.Services.Operator.ApplicationServices.BrandPayments;

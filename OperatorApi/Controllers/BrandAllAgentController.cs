@@ -1,10 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Tgs.ServiceUtility;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
-using Tgs.ServiceUtility;
-using TGS.Services.Operator.ApplicationServices.BrandAllAgent;
 using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Services.Operator;
+using TGS.Services.Operator.ApplicationServices.BrandAllAgent;
 
 namespace TGS.Apis.OperatorApi.Controllers;
 

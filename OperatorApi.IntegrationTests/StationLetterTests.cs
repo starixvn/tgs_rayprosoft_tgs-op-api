@@ -19,11 +19,10 @@ using TGS.Services.Operator;
 using TGS.Services.Operator.ApplicationServices.Player;
 using Xunit.Abstractions;
 
+using PagingDeliveryLetterListView = TGS.Apis.OperatorApi.Models.Messages.PagingResponse<TGS.Apis.OperatorApi.Models.Messages.DeliveryLetterListItemViewModel>;
+using PagingStationLetterListView = TGS.Apis.OperatorApi.Models.Messages.PagingResponse<TGS.Apis.OperatorApi.Models.Messages.StationLetterListItemViewModel>;
+
 namespace OperatorApi.IntegrationTests;
-
-using PagingDeliveryLetterListView = TGS.Apis.OperatorApi.Models.Messages.PagingResponse<DeliveryLetterListItemViewModel>;
-using PagingStationLetterListView = TGS.Apis.OperatorApi.Models.Messages.PagingResponse<StationLetterListItemViewModel>;
-
 public class StationLetterTests(ITestOutputHelper testOutputHelper)
 {
 	private readonly ITestOutputHelper _testOutputHelper = testOutputHelper ?? throw new ArgumentNullException(nameof(testOutputHelper));

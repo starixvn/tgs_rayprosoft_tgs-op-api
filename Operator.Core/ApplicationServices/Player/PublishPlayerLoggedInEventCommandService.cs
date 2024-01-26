@@ -25,7 +25,7 @@ internal class PublishPlayerLoggedInEventCommandService(
 		{
 			var loggedInRequest = new LoggedInEvent
 			{
-				PlayerCode = command.PlayerCode, 
+				PlayerCode = command.PlayerCode,
 				LoggedInTime = command.LoggedInTime.ToTimestamp()
 			};
 
