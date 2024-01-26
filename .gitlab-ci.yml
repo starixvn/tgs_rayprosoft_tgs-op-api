@@ -22,12 +22,12 @@ build-code:
   script:
     - npm ci --prefix op_client
     - npm run build --prefix op_client
+    - dotnet clean
     - dotnet build -c $BuildConfiguration
 
 unit-test:
   extends: .unit-test-template
-  variables: 
-    Framework: net7.0
+  
 push-nuget:
   stage: publish
   needs:
