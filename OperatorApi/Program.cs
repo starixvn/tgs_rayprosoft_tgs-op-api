@@ -218,6 +218,11 @@ builder.Services
 	.AddVipLevelServiceClient(httpBuilder => httpBuilder
 		.ConfigureHttpClient(httpClient => httpClient.BaseAddress =
 			builder.Configuration.GetValue<Uri>("Operator:VipLevelServiceBaseUrl")!))
+	.AddBrandGameCreditsClient((options, sp) =>
+	{
+		var config = sp.GetRequiredService<IConfiguration>();
+		options.BaseUrl = config.GetValue<Uri>("Operator:BrandGameCreditsBaseUrl");
+	})
 	.AddHttpClient<IEmailClient, EmailClient>((sp, c) =>
 	{
 		var url = builder.Configuration.GetSection("Email:Url");

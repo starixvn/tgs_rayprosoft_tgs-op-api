@@ -14,6 +14,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using NSubstitute;
 using Tgs.BrandCertificate.Clients;
+using Tgs.BrandGameCredits.Common;
 using Tgs.Core.Infrastructures.Security;
 using Tgs.FileService.Clients;
 using Tgs.PlayerService.Client;
@@ -24,6 +25,7 @@ using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Core.Models.Enums;
 using TGS.Services.Operations;
 using TGS.Services.Operator;
+using TGS.Services.Operator.ApplicationServices.Brand;
 using TGS.Services.Operator.ApplicationServices.Player;
 using TGS.Services.Operator.PlayerRegisterFlow;
 using Valhalla.MessageQueue;
@@ -48,6 +50,7 @@ public class PlayerTests(ITestOutputHelper testOutputHelper)
 		var fakePlayerLoginRecordRepository = Substitute.For<IPlayerLoginRecordRepository>();
 		var fakeBrandRepository = Substitute.For<IBrandRepository>();
 		var fakeValidatePlayerLoginRecordCommandService = Substitute.For<ICommandService<ValidatePlayerLoginRecordCommand>>();
+		var fakeBrandCreditQueryService = Substitute.For<IGetService<BrandCreditQuery, BrandGameCreditRiskTypes>>();
 		var fakeFileServiceClient = Substitute.For<IFileServiceClient>();
 		var fakePlayerOperations = Substitute.For<IPlayerOperations>();
 
@@ -75,6 +78,7 @@ public class PlayerTests(ITestOutputHelper testOutputHelper)
 				.AddSingleton(fakePlayerLoginRecordRepository)
 				.AddSingleton(fakeBrandRepository)
 				.AddSingleton(fakeValidatePlayerLoginRecordCommandService)
+				.AddSingleton(fakeBrandCreditQueryService)
 				.AddSingleton(fakeFileServiceClient)
 				.AddSingleton(fakePlayerOperations))
 			.Build();
@@ -201,6 +205,7 @@ public class PlayerTests(ITestOutputHelper testOutputHelper)
 		var fakePlayerLoginRecordRepository = Substitute.For<IPlayerLoginRecordRepository>();
 		var fakeBrandRepository = Substitute.For<IBrandRepository>();
 		var fakeValidatePlayerLoginRecordCommandService = Substitute.For<ICommandService<ValidatePlayerLoginRecordCommand>>();
+		var fakeBrandCreditQueryService = Substitute.For<IGetService<BrandCreditQuery, BrandGameCreditRiskTypes>>();
 		var fakeTokenHandler = Substitute.For<IJwtTokenHandler>();
 
 		_ = fakeBrandCertClient.GetSystemValidateSecurityKeyAsync(Arg.Any<CancellationToken>())
@@ -227,6 +232,7 @@ public class PlayerTests(ITestOutputHelper testOutputHelper)
 				.AddSingleton(fakePlayerLoginRecordRepository)
 				.AddSingleton(fakeBrandRepository)
 				.AddSingleton(fakeValidatePlayerLoginRecordCommandService)
+				.AddSingleton(fakeBrandCreditQueryService)
 				.AddSingleton(fakeTokenHandler))
 			.Build();
 
@@ -348,6 +354,7 @@ public class PlayerTests(ITestOutputHelper testOutputHelper)
 		var fakePlayerLoginRecordRepository = Substitute.For<IPlayerLoginRecordRepository>();
 		var fakeBrandRepository = Substitute.For<IBrandRepository>();
 		var fakeValidatePlayerLoginRecordCommandService = Substitute.For<ICommandService<ValidatePlayerLoginRecordCommand>>();
+		var fakeBrandCreditQueryService = Substitute.For<IGetService<BrandCreditQuery, BrandGameCreditRiskTypes>>();
 
 		var fakeMessageSender = Substitute.For<IMessageSender>();
 
@@ -375,6 +382,7 @@ public class PlayerTests(ITestOutputHelper testOutputHelper)
 				.AddSingleton(fakePlayerLoginRecordRepository)
 				.AddSingleton(fakeBrandRepository)
 				.AddSingleton(fakeValidatePlayerLoginRecordCommandService)
+				.AddSingleton(fakeBrandCreditQueryService)
 				.AddSingleton(fakeMessageSender))
 			.Build();
 
@@ -463,6 +471,7 @@ public class PlayerTests(ITestOutputHelper testOutputHelper)
 		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
 		var fakeBrandRepository = Substitute.For<IBrandRepository>();
 		var fakeVipServiceClient = Substitute.For<IVipLevelServiceClient>();
+		var fakeBrandCreditQueryService = Substitute.For<IGetService<BrandCreditQuery, BrandGameCreditRiskTypes>>();
 
 		_ = fakeBrandCertClient.GetSystemValidateSecurityKeyAsync(Arg.Any<CancellationToken>())
 			.Returns(TestOperatorApplication.TestSecurityKey);
@@ -485,7 +494,8 @@ public class PlayerTests(ITestOutputHelper testOutputHelper)
 				.AddSingleton(fakeBrandServiceClient)
 				.AddSingleton(fakePlayerServiceClient)
 				.AddSingleton(fakeBrandRepository)
-				.AddSingleton(fakeVipServiceClient))
+				.AddSingleton(fakeVipServiceClient)
+				.AddSingleton(fakeBrandCreditQueryService))
 			.Build();
 
 		await web.StartAsync();
@@ -593,6 +603,7 @@ public class PlayerTests(ITestOutputHelper testOutputHelper)
 		var fakePlayerLoginRecordRepository = Substitute.For<IPlayerLoginRecordRepository>();
 		var fakeBrandRepository = Substitute.For<IBrandRepository>();
 		var fakeValidatePlayerLoginRecordCommandService = Substitute.For<ICommandService<ValidatePlayerLoginRecordCommand>>();
+		var fakeBrandCreditQueryService = Substitute.For<IGetService<BrandCreditQuery, BrandGameCreditRiskTypes>>();
 
 		_ = fakeBrandCertClient.GetSystemValidateSecurityKeyAsync(Arg.Any<CancellationToken>())
 			.Returns(TestOperatorApplication.TestSecurityKey);
@@ -617,7 +628,8 @@ public class PlayerTests(ITestOutputHelper testOutputHelper)
 				.AddSingleton(fakePlayerPasswordValidateCommandService)
 				.AddSingleton(fakePlayerLoginRecordRepository)
 				.AddSingleton(fakeBrandRepository)
-				.AddSingleton(fakeValidatePlayerLoginRecordCommandService))
+				.AddSingleton(fakeValidatePlayerLoginRecordCommandService)
+				.AddSingleton(fakeBrandCreditQueryService))
 			.Build();
 
 		await web.StartAsync();

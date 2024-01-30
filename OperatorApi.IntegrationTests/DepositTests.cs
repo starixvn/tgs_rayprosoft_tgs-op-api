@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Tgs.BrandCertificate;
 using Tgs.BrandCertificate.Clients;
+using Tgs.BrandGameCredits.Common;
 using Tgs.Payment.Clients;
 using Tgs.Payment.DibaoPay.Client;
 using Tgs.Payment.FiveSevenPay.Client;
@@ -24,6 +25,7 @@ using TGS.Apis.OperatorApi.Models;
 using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Payment.ManualDeposit;
 using TGS.Services.Operator;
+using TGS.Services.Operator.ApplicationServices.Brand;
 using TGS.Services.Operator.ApplicationServices.Deposit;
 using TGS.Services.Operator.ApplicationServices.Player;
 using Xunit.Abstractions;
@@ -47,6 +49,7 @@ public class DepositTests(ITestOutputHelper testOutputHelper)
 		var fakePlayerLoginRecordRepository = Substitute.For<IPlayerLoginRecordRepository>();
 		var fakeBrandRepository = Substitute.For<IBrandRepository>();
 		var fakeValidatePlayerLoginRecordCommandService = Substitute.For<ICommandService<ValidatePlayerLoginRecordCommand>>();
+		var fakeBrandCreditQueryService = Substitute.For<IGetService<BrandCreditQuery, BrandGameCreditRiskTypes>>();
 
 		_ = fakeBrandCertClient.GetSystemValidateSecurityKeyAsync(Arg.Any<CancellationToken>())
 			.Returns(TestOperatorApplication.TestSecurityKey);
@@ -73,7 +76,8 @@ public class DepositTests(ITestOutputHelper testOutputHelper)
 				.AddSingleton(fakeBrandRepository)
 				.AddSingleton(fakeValidatePlayerLoginRecordCommandService)
 				.AddSingleton(fakePaymentServiceClient)
-				.AddSingleton(fakePromotionClient))
+				.AddSingleton(fakePromotionClient)
+				.AddSingleton(fakeBrandCreditQueryService))
 			.Build();
 
 		await web.StartAsync();
@@ -245,6 +249,7 @@ public class DepositTests(ITestOutputHelper testOutputHelper)
 		var fakePlayerLoginRecordRepository = Substitute.For<IPlayerLoginRecordRepository>();
 		var fakeBrandRepository = Substitute.For<IBrandRepository>();
 		var fakeValidatePlayerLoginRecordCommandService = Substitute.For<ICommandService<ValidatePlayerLoginRecordCommand>>();
+		var fakeBrandCreditQueryService = Substitute.For<IGetService<BrandCreditQuery, BrandGameCreditRiskTypes>>();
 
 		_ = fakeBrandCertClient.GetSystemValidateSecurityKeyAsync(Arg.Any<CancellationToken>())
 			.Returns(TestOperatorApplication.TestSecurityKey);
@@ -271,7 +276,8 @@ public class DepositTests(ITestOutputHelper testOutputHelper)
 				.AddSingleton(fakeBrandRepository)
 				.AddSingleton(fakeValidatePlayerLoginRecordCommandService)
 				.AddSingleton(fakePaymentServiceClient)
-				.AddSingleton(fakePromotionClient))
+				.AddSingleton(fakePromotionClient)
+				.AddSingleton(fakeBrandCreditQueryService))
 			.Build();
 
 		await web.StartAsync();
@@ -442,6 +448,7 @@ public class DepositTests(ITestOutputHelper testOutputHelper)
 		var fakePlayerLoginRecordRepository = Substitute.For<IPlayerLoginRecordRepository>();
 		var fakeBrandRepository = Substitute.For<IBrandRepository>();
 		var fakeValidatePlayerLoginRecordCommandService = Substitute.For<ICommandService<ValidatePlayerLoginRecordCommand>>();
+		var fakeBrandCreditQueryService = Substitute.For<IGetService<BrandCreditQuery, BrandGameCreditRiskTypes>>();
 
 		_ = fakeBrandCertClient.GetSystemValidateSecurityKeyAsync(Arg.Any<CancellationToken>())
 			.Returns(TestOperatorApplication.TestSecurityKey);
@@ -468,7 +475,8 @@ public class DepositTests(ITestOutputHelper testOutputHelper)
 				.AddSingleton(fakeBrandRepository)
 				.AddSingleton(fakeValidatePlayerLoginRecordCommandService)
 				.AddSingleton(fakePaymentServiceClient)
-				.AddSingleton(fakePromotionClient))
+				.AddSingleton(fakePromotionClient)
+				.AddSingleton(fakeBrandCreditQueryService))
 			.Build();
 
 		await web.StartAsync();
@@ -639,6 +647,7 @@ public class DepositTests(ITestOutputHelper testOutputHelper)
 		var fakePlayerLoginRecordRepository = Substitute.For<IPlayerLoginRecordRepository>();
 		var fakeBrandRepository = Substitute.For<IBrandRepository>();
 		var fakeValidatePlayerLoginRecordCommandService = Substitute.For<ICommandService<ValidatePlayerLoginRecordCommand>>();
+		var fakeBrandCreditQueryService = Substitute.For<IGetService<BrandCreditQuery, BrandGameCreditRiskTypes>>();
 
 		_ = fakeBrandCertClient.GetSystemValidateSecurityKeyAsync(Arg.Any<CancellationToken>())
 			.Returns(TestOperatorApplication.TestSecurityKey);
@@ -665,7 +674,8 @@ public class DepositTests(ITestOutputHelper testOutputHelper)
 				.AddSingleton(fakeBrandRepository)
 				.AddSingleton(fakeValidatePlayerLoginRecordCommandService)
 				.AddSingleton(fakePaymentServiceClient)
-				.AddSingleton(fakePromotionClient))
+				.AddSingleton(fakePromotionClient)
+				.AddSingleton(fakeBrandCreditQueryService))
 			.Build();
 
 		await web.StartAsync();
@@ -836,6 +846,7 @@ public class DepositTests(ITestOutputHelper testOutputHelper)
 		var fakePlayerLoginRecordRepository = Substitute.For<IPlayerLoginRecordRepository>();
 		var fakeBrandRepository = Substitute.For<IBrandRepository>();
 		var fakeValidatePlayerLoginRecordCommandService = Substitute.For<ICommandService<ValidatePlayerLoginRecordCommand>>();
+		var fakeBrandCreditQueryService = Substitute.For<IGetService<BrandCreditQuery, BrandGameCreditRiskTypes>>();
 
 		_ = fakeBrandCertClient.GetSystemValidateSecurityKeyAsync(Arg.Any<CancellationToken>())
 			.Returns(TestOperatorApplication.TestSecurityKey);
@@ -862,7 +873,8 @@ public class DepositTests(ITestOutputHelper testOutputHelper)
 				.AddSingleton(fakeBrandRepository)
 				.AddSingleton(fakeValidatePlayerLoginRecordCommandService)
 				.AddSingleton(fakePaymentServiceClient)
-				.AddSingleton(fakePromotionClient))
+				.AddSingleton(fakePromotionClient)
+				.AddSingleton(fakeBrandCreditQueryService))
 			.Build();
 
 		await web.StartAsync();
@@ -1033,6 +1045,7 @@ public class DepositTests(ITestOutputHelper testOutputHelper)
 		var fakePlayerLoginRecordRepository = Substitute.For<IPlayerLoginRecordRepository>();
 		var fakeBrandRepository = Substitute.For<IBrandRepository>();
 		var fakeValidatePlayerLoginRecordCommandService = Substitute.For<ICommandService<ValidatePlayerLoginRecordCommand>>();
+		var fakeBrandCreditQueryService = Substitute.For<IGetService<BrandCreditQuery, BrandGameCreditRiskTypes>>();
 
 		_ = fakeBrandCertClient.GetSystemValidateSecurityKeyAsync(Arg.Any<CancellationToken>())
 			.Returns(TestOperatorApplication.TestSecurityKey);
@@ -1059,7 +1072,8 @@ public class DepositTests(ITestOutputHelper testOutputHelper)
 				.AddSingleton(fakeBrandRepository)
 				.AddSingleton(fakeValidatePlayerLoginRecordCommandService)
 				.AddSingleton(fakePaymentServiceClient)
-				.AddSingleton(fakePromotionClient))
+				.AddSingleton(fakePromotionClient)
+				.AddSingleton(fakeBrandCreditQueryService))
 			.Build();
 
 		await web.StartAsync();
@@ -1231,6 +1245,7 @@ public class DepositTests(ITestOutputHelper testOutputHelper)
 		var fakePlayerLoginRecordRepository = Substitute.For<IPlayerLoginRecordRepository>();
 		var fakeBrandRepository = Substitute.For<IBrandRepository>();
 		var fakeValidatePlayerLoginRecordCommandService = Substitute.For<ICommandService<ValidatePlayerLoginRecordCommand>>();
+		var fakeBrandCreditQueryService = Substitute.For<IGetService<BrandCreditQuery, BrandGameCreditRiskTypes>>();
 
 		_ = fakeBrandCertClient.GetSystemValidateSecurityKeyAsync(Arg.Any<CancellationToken>())
 			.Returns(TestOperatorApplication.TestSecurityKey);
@@ -1257,7 +1272,8 @@ public class DepositTests(ITestOutputHelper testOutputHelper)
 				.AddSingleton(fakeBrandRepository)
 				.AddSingleton(fakeValidatePlayerLoginRecordCommandService)
 				.AddSingleton(fakePaymentServiceClient)
-				.AddSingleton(fakePromotionClient))
+				.AddSingleton(fakePromotionClient)
+				.AddSingleton(fakeBrandCreditQueryService))
 			.Build();
 
 		await web.StartAsync();
@@ -1431,6 +1447,7 @@ public class DepositTests(ITestOutputHelper testOutputHelper)
 		var fakePlayerLoginRecordRepository = Substitute.For<IPlayerLoginRecordRepository>();
 		var fakeBrandRepository = Substitute.For<IBrandRepository>();
 		var fakeValidatePlayerLoginRecordCommandService = Substitute.For<ICommandService<ValidatePlayerLoginRecordCommand>>();
+		var fakeBrandCreditQueryService = Substitute.For<IGetService<BrandCreditQuery, BrandGameCreditRiskTypes>>();
 
 		_ = fakeBrandCertClient.GetSystemValidateSecurityKeyAsync(Arg.Any<CancellationToken>())
 			.Returns(TestOperatorApplication.TestSecurityKey);
@@ -1457,7 +1474,8 @@ public class DepositTests(ITestOutputHelper testOutputHelper)
 				.AddSingleton(fakeBrandRepository)
 				.AddSingleton(fakeValidatePlayerLoginRecordCommandService)
 				.AddSingleton(fakePaymentServiceClient)
-				.AddSingleton(fakePromotionClient))
+				.AddSingleton(fakePromotionClient)
+				.AddSingleton(fakeBrandCreditQueryService))
 			.Build();
 
 		await web.StartAsync();
@@ -1627,6 +1645,7 @@ public class DepositTests(ITestOutputHelper testOutputHelper)
 		var fakePlayerLoginRecordRepository = Substitute.For<IPlayerLoginRecordRepository>();
 		var fakeBrandRepository = Substitute.For<IBrandRepository>();
 		var fakeValidatePlayerLoginRecordCommandService = Substitute.For<ICommandService<ValidatePlayerLoginRecordCommand>>();
+		var fakeBrandCreditQueryService = Substitute.For<IGetService<BrandCreditQuery, BrandGameCreditRiskTypes>>();
 
 		_ = fakeBrandCertClient.GetSystemValidateSecurityKeyAsync(Arg.Any<CancellationToken>())
 			.Returns(TestOperatorApplication.TestSecurityKey);
@@ -1653,7 +1672,8 @@ public class DepositTests(ITestOutputHelper testOutputHelper)
 				.AddSingleton(fakeBrandRepository)
 				.AddSingleton(fakeValidatePlayerLoginRecordCommandService)
 				.AddSingleton(fakePaymentServiceClient)
-				.AddSingleton(fakePromotionClient))
+				.AddSingleton(fakePromotionClient)
+				.AddSingleton(fakeBrandCreditQueryService))
 			.Build();
 
 		await web.StartAsync();
@@ -1821,6 +1841,7 @@ public class DepositTests(ITestOutputHelper testOutputHelper)
 		var fakePlayerLoginRecordRepository = Substitute.For<IPlayerLoginRecordRepository>();
 		var fakeBrandRepository = Substitute.For<IBrandRepository>();
 		var fakeValidatePlayerLoginRecordCommandService = Substitute.For<ICommandService<ValidatePlayerLoginRecordCommand>>();
+		var fakeBrandCreditQueryService = Substitute.For<IGetService<BrandCreditQuery, BrandGameCreditRiskTypes>>();
 
 		_ = fakeBrandCertClient.GetSystemValidateSecurityKeyAsync(Arg.Any<CancellationToken>())
 			.Returns(TestOperatorApplication.TestSecurityKey);
@@ -1847,7 +1868,8 @@ public class DepositTests(ITestOutputHelper testOutputHelper)
 				.AddSingleton(fakeBrandRepository)
 				.AddSingleton(fakeValidatePlayerLoginRecordCommandService)
 				.AddSingleton(fakePaymentServiceClient)
-				.AddSingleton(fakePromotionClient))
+				.AddSingleton(fakePromotionClient)
+				.AddSingleton(fakeBrandCreditQueryService))
 			.Build();
 
 		await web.StartAsync();
@@ -2015,6 +2037,7 @@ public class DepositTests(ITestOutputHelper testOutputHelper)
 		var fakePlayerLoginRecordRepository = Substitute.For<IPlayerLoginRecordRepository>();
 		var fakeBrandRepository = Substitute.For<IBrandRepository>();
 		var fakeValidatePlayerLoginRecordCommandService = Substitute.For<ICommandService<ValidatePlayerLoginRecordCommand>>();
+		var fakeBrandCreditQueryService = Substitute.For<IGetService<BrandCreditQuery, BrandGameCreditRiskTypes>>();
 
 		_ = fakeBrandCertClient.GetSystemValidateSecurityKeyAsync(Arg.Any<CancellationToken>())
 			.Returns(TestOperatorApplication.TestSecurityKey);
@@ -2041,7 +2064,8 @@ public class DepositTests(ITestOutputHelper testOutputHelper)
 				.AddSingleton(fakeBrandRepository)
 				.AddSingleton(fakeValidatePlayerLoginRecordCommandService)
 				.AddSingleton(fakePaymentServiceClient)
-				.AddSingleton(fakePromotionClient))
+				.AddSingleton(fakePromotionClient)
+				.AddSingleton(fakeBrandCreditQueryService))
 			.Build();
 
 		await web.StartAsync();
@@ -2213,6 +2237,7 @@ public class DepositTests(ITestOutputHelper testOutputHelper)
 		var fakePlayerLoginRecordRepository = Substitute.For<IPlayerLoginRecordRepository>();
 		var fakeBrandRepository = Substitute.For<IBrandRepository>();
 		var fakeValidatePlayerLoginRecordCommandService = Substitute.For<ICommandService<ValidatePlayerLoginRecordCommand>>();
+		var fakeBrandCreditQueryService = Substitute.For<IGetService<BrandCreditQuery, BrandGameCreditRiskTypes>>();
 
 		_ = fakeBrandCertClient.GetSystemValidateSecurityKeyAsync(Arg.Any<CancellationToken>())
 			.Returns(TestOperatorApplication.TestSecurityKey);
@@ -2239,7 +2264,8 @@ public class DepositTests(ITestOutputHelper testOutputHelper)
 				.AddSingleton(fakeBrandRepository)
 				.AddSingleton(fakeValidatePlayerLoginRecordCommandService)
 				.AddSingleton(fakePaymentServiceClient)
-				.AddSingleton(fakePromotionClient))
+				.AddSingleton(fakePromotionClient)
+				.AddSingleton(fakeBrandCreditQueryService))
 			.Build();
 
 		await web.StartAsync();
@@ -2412,6 +2438,7 @@ public class DepositTests(ITestOutputHelper testOutputHelper)
 		var fakePlayerLoginRecordRepository = Substitute.For<IPlayerLoginRecordRepository>();
 		var fakeBrandRepository = Substitute.For<IBrandRepository>();
 		var fakeValidatePlayerLoginRecordCommandService = Substitute.For<ICommandService<ValidatePlayerLoginRecordCommand>>();
+		var fakeBrandCreditQueryService = Substitute.For<IGetService<BrandCreditQuery, BrandGameCreditRiskTypes>>();
 
 		_ = fakeBrandCertClient.GetSystemValidateSecurityKeyAsync(Arg.Any<CancellationToken>())
 			.Returns(TestOperatorApplication.TestSecurityKey);
@@ -2438,7 +2465,8 @@ public class DepositTests(ITestOutputHelper testOutputHelper)
 				.AddSingleton(fakeBrandRepository)
 				.AddSingleton(fakeValidatePlayerLoginRecordCommandService)
 				.AddSingleton(fakePaymentServiceClient)
-				.AddSingleton(fakePromotionClient))
+				.AddSingleton(fakePromotionClient)
+				.AddSingleton(fakeBrandCreditQueryService))
 			.Build();
 
 		await web.StartAsync();
@@ -2611,6 +2639,7 @@ public class DepositTests(ITestOutputHelper testOutputHelper)
 		var fakePlayerLoginRecordRepository = Substitute.For<IPlayerLoginRecordRepository>();
 		var fakeBrandRepository = Substitute.For<IBrandRepository>();
 		var fakeValidatePlayerLoginRecordCommandService = Substitute.For<ICommandService<ValidatePlayerLoginRecordCommand>>();
+		var fakeBrandCreditQueryService = Substitute.For<IGetService<BrandCreditQuery, BrandGameCreditRiskTypes>>();
 
 		_ = fakeBrandCertClient.GetSystemValidateSecurityKeyAsync(Arg.Any<CancellationToken>())
 			.Returns(TestOperatorApplication.TestSecurityKey);
@@ -2637,7 +2666,8 @@ public class DepositTests(ITestOutputHelper testOutputHelper)
 				.AddSingleton(fakeBrandRepository)
 				.AddSingleton(fakeValidatePlayerLoginRecordCommandService)
 				.AddSingleton(fakePaymentServiceClient)
-				.AddSingleton(fakePromotionClient))
+				.AddSingleton(fakePromotionClient)
+				.AddSingleton(fakeBrandCreditQueryService))
 			.Build();
 
 		await web.StartAsync();
@@ -2809,6 +2839,7 @@ public class DepositTests(ITestOutputHelper testOutputHelper)
 		var fakePlayerLoginRecordRepository = Substitute.For<IPlayerLoginRecordRepository>();
 		var fakeBrandRepository = Substitute.For<IBrandRepository>();
 		var fakeValidatePlayerLoginRecordCommandService = Substitute.For<ICommandService<ValidatePlayerLoginRecordCommand>>();
+		var fakeBrandCreditQueryService = Substitute.For<IGetService<BrandCreditQuery, BrandGameCreditRiskTypes>>();
 
 		_ = fakeBrandCertClient.GetSystemValidateSecurityKeyAsync(Arg.Any<CancellationToken>())
 			.Returns(TestOperatorApplication.TestSecurityKey);
@@ -2835,7 +2866,8 @@ public class DepositTests(ITestOutputHelper testOutputHelper)
 				.AddSingleton(fakeBrandRepository)
 				.AddSingleton(fakeValidatePlayerLoginRecordCommandService)
 				.AddSingleton(fakePaymentServiceClient)
-				.AddSingleton(fakePromotionClient))
+				.AddSingleton(fakePromotionClient)
+				.AddSingleton(fakeBrandCreditQueryService))
 			.Build();
 
 		await web.StartAsync();
@@ -3004,6 +3036,7 @@ public class DepositTests(ITestOutputHelper testOutputHelper)
 		var fakePlayerLoginRecordRepository = Substitute.For<IPlayerLoginRecordRepository>();
 		var fakeBrandRepository = Substitute.For<IBrandRepository>();
 		var fakeValidatePlayerLoginRecordCommandService = Substitute.For<ICommandService<ValidatePlayerLoginRecordCommand>>();
+		var fakeBrandCreditQueryService = Substitute.For<IGetService<BrandCreditQuery, BrandGameCreditRiskTypes>>();
 
 		_ = fakeBrandCertClient.GetSystemValidateSecurityKeyAsync(Arg.Any<CancellationToken>())
 			.Returns(TestOperatorApplication.TestSecurityKey);
@@ -3030,7 +3063,8 @@ public class DepositTests(ITestOutputHelper testOutputHelper)
 				.AddSingleton(fakeBrandRepository)
 				.AddSingleton(fakeValidatePlayerLoginRecordCommandService)
 				.AddSingleton(fakePaymentServiceClient)
-				.AddSingleton(fakePromotionClient))
+				.AddSingleton(fakePromotionClient)
+				.AddSingleton(fakeBrandCreditQueryService))
 			.Build();
 
 		await web.StartAsync();
@@ -3199,6 +3233,7 @@ public class DepositTests(ITestOutputHelper testOutputHelper)
 		var fakePlayerLoginRecordRepository = Substitute.For<IPlayerLoginRecordRepository>();
 		var fakeBrandRepository = Substitute.For<IBrandRepository>();
 		var fakeValidatePlayerLoginRecordCommandService = Substitute.For<ICommandService<ValidatePlayerLoginRecordCommand>>();
+		var fakeBrandCreditQueryService = Substitute.For<IGetService<BrandCreditQuery, BrandGameCreditRiskTypes>>();
 
 		_ = fakeBrandCertClient.GetSystemValidateSecurityKeyAsync(Arg.Any<CancellationToken>())
 			.Returns(TestOperatorApplication.TestSecurityKey);
@@ -3225,7 +3260,8 @@ public class DepositTests(ITestOutputHelper testOutputHelper)
 				.AddSingleton(fakeBrandRepository)
 				.AddSingleton(fakeValidatePlayerLoginRecordCommandService)
 				.AddSingleton(fakePaymentServiceClient)
-				.AddSingleton(fakePromotionClient))
+				.AddSingleton(fakePromotionClient)
+				.AddSingleton(fakeBrandCreditQueryService))
 			.Build();
 
 		await web.StartAsync();
@@ -3394,6 +3430,7 @@ public class DepositTests(ITestOutputHelper testOutputHelper)
 		var fakePlayerLoginRecordRepository = Substitute.For<IPlayerLoginRecordRepository>();
 		var fakeBrandRepository = Substitute.For<IBrandRepository>();
 		var fakeValidatePlayerLoginRecordCommandService = Substitute.For<ICommandService<ValidatePlayerLoginRecordCommand>>();
+		var fakeBrandCreditQueryService = Substitute.For<IGetService<BrandCreditQuery, BrandGameCreditRiskTypes>>();
 
 		_ = fakeBrandCertClient.GetSystemValidateSecurityKeyAsync(Arg.Any<CancellationToken>())
 			.Returns(TestOperatorApplication.TestSecurityKey);
@@ -3420,7 +3457,8 @@ public class DepositTests(ITestOutputHelper testOutputHelper)
 				.AddSingleton(fakeBrandRepository)
 				.AddSingleton(fakeValidatePlayerLoginRecordCommandService)
 				.AddSingleton(fakePaymentServiceClient)
-				.AddSingleton(fakePromotionClient))
+				.AddSingleton(fakePromotionClient)
+				.AddSingleton(fakeBrandCreditQueryService))
 			.Build();
 
 		await web.StartAsync();
@@ -3590,6 +3628,7 @@ public class DepositTests(ITestOutputHelper testOutputHelper)
 		var fakePlayerLoginRecordRepository = Substitute.For<IPlayerLoginRecordRepository>();
 		var fakeBrandRepository = Substitute.For<IBrandRepository>();
 		var fakeValidatePlayerLoginRecordCommandService = Substitute.For<ICommandService<ValidatePlayerLoginRecordCommand>>();
+		var fakeBrandCreditQueryService = Substitute.For<IGetService<BrandCreditQuery, BrandGameCreditRiskTypes>>();
 
 		_ = fakeBrandCertClient.GetSystemValidateSecurityKeyAsync(Arg.Any<CancellationToken>())
 			.Returns(TestOperatorApplication.TestSecurityKey);
@@ -3616,7 +3655,8 @@ public class DepositTests(ITestOutputHelper testOutputHelper)
 				.AddSingleton(fakeBrandRepository)
 				.AddSingleton(fakeValidatePlayerLoginRecordCommandService)
 				.AddSingleton(fakePaymentServiceClient)
-				.AddSingleton(fakePromotionClient))
+				.AddSingleton(fakePromotionClient)
+				.AddSingleton(fakeBrandCreditQueryService))
 			.Build();
 
 		await web.StartAsync();
@@ -3789,6 +3829,7 @@ public class DepositTests(ITestOutputHelper testOutputHelper)
 		var fakePlayerLoginRecordRepository = Substitute.For<IPlayerLoginRecordRepository>();
 		var fakeBrandRepository = Substitute.For<IBrandRepository>();
 		var fakeValidatePlayerLoginRecordCommandService = Substitute.For<ICommandService<ValidatePlayerLoginRecordCommand>>();
+		var fakeBrandCreditQueryService = Substitute.For<IGetService<BrandCreditQuery, BrandGameCreditRiskTypes>>();
 
 		_ = fakeBrandCertClient.GetSystemValidateSecurityKeyAsync(Arg.Any<CancellationToken>())
 			.Returns(TestOperatorApplication.TestSecurityKey);
@@ -3815,7 +3856,8 @@ public class DepositTests(ITestOutputHelper testOutputHelper)
 				.AddSingleton(fakeBrandRepository)
 				.AddSingleton(fakeValidatePlayerLoginRecordCommandService)
 				.AddSingleton(fakePaymentServiceClient)
-				.AddSingleton(fakePromotionClient))
+				.AddSingleton(fakePromotionClient)
+				.AddSingleton(fakeBrandCreditQueryService))
 			.Build();
 
 		await web.StartAsync();
@@ -3988,6 +4030,7 @@ public class DepositTests(ITestOutputHelper testOutputHelper)
 		var fakePlayerLoginRecordRepository = Substitute.For<IPlayerLoginRecordRepository>();
 		var fakeBrandRepository = Substitute.For<IBrandRepository>();
 		var fakeValidatePlayerLoginRecordCommandService = Substitute.For<ICommandService<ValidatePlayerLoginRecordCommand>>();
+		var fakeBrandCreditQueryService = Substitute.For<IGetService<BrandCreditQuery, BrandGameCreditRiskTypes>>();
 
 		_ = fakeBrandCertClient.GetSystemValidateSecurityKeyAsync(Arg.Any<CancellationToken>())
 			.Returns(TestOperatorApplication.TestSecurityKey);
@@ -4014,7 +4057,8 @@ public class DepositTests(ITestOutputHelper testOutputHelper)
 				.AddSingleton(fakeBrandRepository)
 				.AddSingleton(fakeValidatePlayerLoginRecordCommandService)
 				.AddSingleton(fakePaymentServiceClient)
-				.AddSingleton(fakePromotionClient))
+				.AddSingleton(fakePromotionClient)
+				.AddSingleton(fakeBrandCreditQueryService))
 			.Build();
 
 		await web.StartAsync();
@@ -4187,6 +4231,7 @@ public class DepositTests(ITestOutputHelper testOutputHelper)
 		var fakePlayerLoginRecordRepository = Substitute.For<IPlayerLoginRecordRepository>();
 		var fakeBrandRepository = Substitute.For<IBrandRepository>();
 		var fakeValidatePlayerLoginRecordCommandService = Substitute.For<ICommandService<ValidatePlayerLoginRecordCommand>>();
+		var fakeBrandCreditQueryService = Substitute.For<IGetService<BrandCreditQuery, BrandGameCreditRiskTypes>>();
 
 		_ = fakeBrandCertClient.GetSystemValidateSecurityKeyAsync(Arg.Any<CancellationToken>())
 			.Returns(TestOperatorApplication.TestSecurityKey);
@@ -4213,7 +4258,8 @@ public class DepositTests(ITestOutputHelper testOutputHelper)
 				.AddSingleton(fakeBrandRepository)
 				.AddSingleton(fakeValidatePlayerLoginRecordCommandService)
 				.AddSingleton(fakePaymentServiceClient)
-				.AddSingleton(fakePromotionClient))
+				.AddSingleton(fakePromotionClient)
+				.AddSingleton(fakeBrandCreditQueryService))
 			.Build();
 
 		await web.StartAsync();
@@ -4387,6 +4433,7 @@ public class DepositTests(ITestOutputHelper testOutputHelper)
 		var fakePlayerLoginRecordRepository = Substitute.For<IPlayerLoginRecordRepository>();
 		var fakeBrandRepository = Substitute.For<IBrandRepository>();
 		var fakeValidatePlayerLoginRecordCommandService = Substitute.For<ICommandService<ValidatePlayerLoginRecordCommand>>();
+		var fakeBrandCreditQueryService = Substitute.For<IGetService<BrandCreditQuery, BrandGameCreditRiskTypes>>();
 
 		_ = fakeBrandCertClient.GetSystemValidateSecurityKeyAsync(Arg.Any<CancellationToken>())
 			.Returns(TestOperatorApplication.TestSecurityKey);
@@ -4413,7 +4460,8 @@ public class DepositTests(ITestOutputHelper testOutputHelper)
 				.AddSingleton(fakeBrandRepository)
 				.AddSingleton(fakeValidatePlayerLoginRecordCommandService)
 				.AddSingleton(fakePaymentServiceClient)
-				.AddSingleton(fakePromotionClient))
+				.AddSingleton(fakePromotionClient)
+				.AddSingleton(fakeBrandCreditQueryService))
 			.Build();
 
 		await web.StartAsync();
@@ -4582,6 +4630,7 @@ public class DepositTests(ITestOutputHelper testOutputHelper)
 		var fakePlayerLoginRecordRepository = Substitute.For<IPlayerLoginRecordRepository>();
 		var fakeBrandRepository = Substitute.For<IBrandRepository>();
 		var fakeValidatePlayerLoginRecordCommandService = Substitute.For<ICommandService<ValidatePlayerLoginRecordCommand>>();
+		var fakeBrandCreditQueryService = Substitute.For<IGetService<BrandCreditQuery, BrandGameCreditRiskTypes>>();
 
 		_ = fakeBrandCertClient.GetSystemValidateSecurityKeyAsync(Arg.Any<CancellationToken>())
 			.Returns(TestOperatorApplication.TestSecurityKey);
@@ -4608,7 +4657,8 @@ public class DepositTests(ITestOutputHelper testOutputHelper)
 				.AddSingleton(fakeBrandRepository)
 				.AddSingleton(fakeValidatePlayerLoginRecordCommandService)
 				.AddSingleton(fakePaymentServiceClient)
-				.AddSingleton(fakePaymentClient))
+				.AddSingleton(fakePaymentClient)
+				.AddSingleton(fakeBrandCreditQueryService))
 			.Build();
 
 		await web.StartAsync();
@@ -4753,6 +4803,7 @@ public class DepositTests(ITestOutputHelper testOutputHelper)
 		var fakePlayerLoginRecordRepository = Substitute.For<IPlayerLoginRecordRepository>();
 		var fakeBrandRepository = Substitute.For<IBrandRepository>();
 		var fakeValidatePlayerLoginRecordCommandService = Substitute.For<ICommandService<ValidatePlayerLoginRecordCommand>>();
+		var fakeBrandCreditQueryService = Substitute.For<IGetService<BrandCreditQuery, BrandGameCreditRiskTypes>>();
 
 		_ = fakeBrandCertClient.GetSystemValidateSecurityKeyAsync(Arg.Any<CancellationToken>())
 			.Returns(TestOperatorApplication.TestSecurityKey);
@@ -4779,7 +4830,8 @@ public class DepositTests(ITestOutputHelper testOutputHelper)
 				.AddSingleton(fakeBrandRepository)
 				.AddSingleton(fakeValidatePlayerLoginRecordCommandService)
 				.AddSingleton(fakePaymentServiceClient)
-				.AddSingleton(fakePromotionClient))
+				.AddSingleton(fakePromotionClient)
+				.AddSingleton(fakeBrandCreditQueryService))
 			.Build();
 
 		await web.StartAsync();
@@ -4951,6 +5003,7 @@ public class DepositTests(ITestOutputHelper testOutputHelper)
 		var fakePlayerLoginRecordRepository = Substitute.For<IPlayerLoginRecordRepository>();
 		var fakeBrandRepository = Substitute.For<IBrandRepository>();
 		var fakeValidatePlayerLoginRecordCommandService = Substitute.For<ICommandService<ValidatePlayerLoginRecordCommand>>();
+		var fakeBrandCreditQueryService = Substitute.For<IGetService<BrandCreditQuery, BrandGameCreditRiskTypes>>();
 
 		var fakeCreateDepositFormService = Substitute.For<IGetService<CreateDepositFormCommand, Guid>>();
 		var fakeGetBrandPaymentService = Substitute.For<IGetService<GetBrandPaymentQuery, BrandPaymentInfo>>();
@@ -4976,6 +5029,7 @@ public class DepositTests(ITestOutputHelper testOutputHelper)
 				.AddSingleton(fakePlayerLoginRecordRepository)
 				.AddSingleton(fakeBrandRepository)
 				.AddSingleton(fakeValidatePlayerLoginRecordCommandService)
+				.AddSingleton(fakeBrandCreditQueryService)
 				.AddSingleton(fakeCreateDepositFormService)
 				.AddSingleton(fakeGetBrandPaymentService)
 				.AddSingleton<ManualDepositSerializer>())
@@ -5094,6 +5148,8 @@ public class DepositTests(ITestOutputHelper testOutputHelper)
 		var fakePlayerLoginRecordRepository = Substitute.For<IPlayerLoginRecordRepository>();
 		var fakeBrandRepository = Substitute.For<IBrandRepository>();
 		var fakeValidatePlayerLoginRecordCommandService = Substitute.For<ICommandService<ValidatePlayerLoginRecordCommand>>();
+		var fakeBrandCreditQueryService = Substitute.For<IGetService<BrandCreditQuery, BrandGameCreditRiskTypes>>();
+
 
 		var fakeCreateDepositFormService = Substitute.For<IGetService<CreateDepositFormCommand, Guid>>();
 		var fakeGetBrandPaymentService = Substitute.For<IGetService<GetBrandPaymentQuery, BrandPaymentInfo>>();
@@ -5119,6 +5175,7 @@ public class DepositTests(ITestOutputHelper testOutputHelper)
 				.AddSingleton(fakePlayerLoginRecordRepository)
 				.AddSingleton(fakeBrandRepository)
 				.AddSingleton(fakeValidatePlayerLoginRecordCommandService)
+				.AddSingleton(fakeBrandCreditQueryService)
 				.AddSingleton(fakeCreateDepositFormService)
 				.AddSingleton(fakeGetBrandPaymentService)
 				.AddSingleton<ManualDepositSerializer>())
@@ -5237,6 +5294,7 @@ public class DepositTests(ITestOutputHelper testOutputHelper)
 		var fakePlayerLoginRecordRepository = Substitute.For<IPlayerLoginRecordRepository>();
 		var fakeBrandRepository = Substitute.For<IBrandRepository>();
 		var fakeValidatePlayerLoginRecordCommandService = Substitute.For<ICommandService<ValidatePlayerLoginRecordCommand>>();
+		var fakeBrandCreditQueryService = Substitute.For<IGetService<BrandCreditQuery, BrandGameCreditRiskTypes>>();
 
 		var fakeCreateDepositFormService = Substitute.For<IGetService<CreateDepositFormCommand, Guid>>();
 		var fakeGetBrandPaymentService = Substitute.For<IGetService<GetBrandPaymentQuery, BrandPaymentInfo>>();
@@ -5262,6 +5320,7 @@ public class DepositTests(ITestOutputHelper testOutputHelper)
 				.AddSingleton(fakePlayerLoginRecordRepository)
 				.AddSingleton(fakeBrandRepository)
 				.AddSingleton(fakeValidatePlayerLoginRecordCommandService)
+				.AddSingleton(fakeBrandCreditQueryService)
 				.AddSingleton(fakeCreateDepositFormService)
 				.AddSingleton(fakeGetBrandPaymentService)
 				.AddSingleton<ManualDepositSerializer>())
@@ -5381,6 +5440,7 @@ public class DepositTests(ITestOutputHelper testOutputHelper)
 		var fakePlayerLoginRecordRepository = Substitute.For<IPlayerLoginRecordRepository>();
 		var fakeBrandRepository = Substitute.For<IBrandRepository>();
 		var fakeValidatePlayerLoginRecordCommandService = Substitute.For<ICommandService<ValidatePlayerLoginRecordCommand>>();
+		var fakeBrandCreditQueryService = Substitute.For<IGetService<BrandCreditQuery, BrandGameCreditRiskTypes>>();
 
 		var fakeCreateDepositFormService = Substitute.For<IGetService<CreateDepositFormCommand, Guid>>();
 		var fakeGetBrandPaymentService = Substitute.For<IGetService<GetBrandPaymentQuery, BrandPaymentInfo>>();
@@ -5406,6 +5466,7 @@ public class DepositTests(ITestOutputHelper testOutputHelper)
 				.AddSingleton(fakePlayerLoginRecordRepository)
 				.AddSingleton(fakeBrandRepository)
 				.AddSingleton(fakeValidatePlayerLoginRecordCommandService)
+				.AddSingleton(fakeBrandCreditQueryService)
 				.AddSingleton(fakeCreateDepositFormService)
 				.AddSingleton(fakeGetBrandPaymentService)
 				.AddSingleton<ManualDepositSerializer>())
@@ -5524,6 +5585,7 @@ public class DepositTests(ITestOutputHelper testOutputHelper)
 		var fakePlayerLoginRecordRepository = Substitute.For<IPlayerLoginRecordRepository>();
 		var fakeBrandRepository = Substitute.For<IBrandRepository>();
 		var fakeValidatePlayerLoginRecordCommandService = Substitute.For<ICommandService<ValidatePlayerLoginRecordCommand>>();
+		var fakeBrandCreditQueryService = Substitute.For<IGetService<BrandCreditQuery, BrandGameCreditRiskTypes>>();
 
 		var fakeCreateDepositFormService = Substitute.For<IGetService<CreateDepositFormCommand, Guid>>();
 		var fakeGetBrandPaymentService = Substitute.For<IGetService<GetBrandPaymentQuery, BrandPaymentInfo>>();
@@ -5549,6 +5611,7 @@ public class DepositTests(ITestOutputHelper testOutputHelper)
 				.AddSingleton(fakePlayerLoginRecordRepository)
 				.AddSingleton(fakeBrandRepository)
 				.AddSingleton(fakeValidatePlayerLoginRecordCommandService)
+				.AddSingleton(fakeBrandCreditQueryService)
 				.AddSingleton(fakeCreateDepositFormService)
 				.AddSingleton(fakeGetBrandPaymentService)
 				.AddSingleton<ManualDepositSerializer>())

@@ -5,8 +5,11 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Tgs.BrandCertificate.Clients;
+using Tgs.BrandGameCredits.Common;
+using Tgs.ServiceUtility;
 using TGS.Apis.OperatorApi.Models;
 using TGS.Services.Operator;
+using TGS.Services.Operator.ApplicationServices.Brand;
 using TGS.Services.Operator.GameProviders;
 using Xunit.Abstractions;
 
@@ -25,6 +28,7 @@ public class GameProviderTests(ITestOutputHelper testOutputHelper)
 		var fakeBrandCertClient = Substitute.For<IBrandCertificateClient>();
 		var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
 		var fakeGameProviderRepository = Substitute.For<IGameProviderRepository>();
+		var fakeBrandCreditQueryService = Substitute.For<IGetService<BrandCreditQuery, BrandGameCreditRiskTypes>>();
 
 		_ = fakeBrandCertClient.GetSystemValidateSecurityKeyAsync(Arg.Any<CancellationToken>())
 			.Returns(TestOperatorApplication.TestSecurityKey);
@@ -39,6 +43,7 @@ public class GameProviderTests(ITestOutputHelper testOutputHelper)
 			.ConfigureServices(services => services
 				.AddSingleton(fakeBrandCertClient)
 				.AddSingleton(fakeBrandServiceClient)
+				.AddSingleton(fakeBrandCreditQueryService)
 				.AddSingleton(fakeGameProviderRepository))
 			.Build();
 

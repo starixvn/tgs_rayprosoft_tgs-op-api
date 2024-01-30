@@ -29,6 +29,7 @@
     <PackageReference Include="System.Reactive" Version="6.0.0" />
     <PackageReference Include="Tgs.ArticleManagementClient" Version="0.0.4" />
     <PackageReference Include="Tgs.BrandCertificateClient" Version="0.0.29" />
+    <PackageReference Include="Tgs.BrandGameCredits.Client" Version="0.0.9" />
     <PackageReference Include="Tgs.CashService.Client" Version="0.2.9" />
     <PackageReference Include="TGS.Core.Infrastructures.Mail" Version="0.0.6" />
     <PackageReference Include="Tgs.Core.Infrastructures.Security" Version="0.0.2" />

@@ -8,6 +8,7 @@ using NSubstitute;
 using NSubstitute.ExceptionExtensions;
 using Tgs.BrandCertificate;
 using Tgs.BrandCertificate.Clients;
+using Tgs.BrandGameCredits.Common;
 using Tgs.Payment.Clients;
 using Tgs.PlayerService.Client;
 using Tgs.Service.PlayerBuckets;
@@ -15,6 +16,7 @@ using Tgs.ServiceUtility;
 using TGS.Apis.OperatorApi.Models;
 using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Services.Operator;
+using TGS.Services.Operator.ApplicationServices.Brand;
 using TGS.Services.Operator.ApplicationServices.BrandPayments;
 using TGS.Services.Operator.ApplicationServices.Player;
 using TGS.Services.Operator.ApplicationServices.Withdraw;
@@ -39,6 +41,7 @@ public class WithdrawTests(ITestOutputHelper testOutputHelper)
 		var fakePlayerLoginRecordRepository = Substitute.For<IPlayerLoginRecordRepository>();
 		var fakeBrandRepository = Substitute.For<IBrandRepository>();
 		var fakeValidatePlayerLoginRecordCommandService = Substitute.For<ICommandService<ValidatePlayerLoginRecordCommand>>();
+		var fakeBrandCreditQueryService = Substitute.For<IGetService<BrandCreditQuery, BrandGameCreditRiskTypes>>();
 
 		_ = fakeBrandCertClient.GetSystemValidateSecurityKeyAsync(Arg.Any<CancellationToken>())
 			.Returns(TestOperatorApplication.TestSecurityKey);
@@ -63,6 +66,7 @@ public class WithdrawTests(ITestOutputHelper testOutputHelper)
 				.AddSingleton(fakePlayerLoginRecordRepository)
 				.AddSingleton(fakeBrandRepository)
 				.AddSingleton(fakeValidatePlayerLoginRecordCommandService)
+				.AddSingleton(fakeBrandCreditQueryService)
 				.AddSingleton(fakePlayerBucketClient))
 			.Build();
 
@@ -163,6 +167,7 @@ public class WithdrawTests(ITestOutputHelper testOutputHelper)
 		var fakePlayerLoginRecordRepository = Substitute.For<IPlayerLoginRecordRepository>();
 		var fakeBrandRepository = Substitute.For<IBrandRepository>();
 		var fakeValidatePlayerLoginRecordCommandService = Substitute.For<ICommandService<ValidatePlayerLoginRecordCommand>>();
+		var fakeBrandCreditQueryService = Substitute.For<IGetService<BrandCreditQuery, BrandGameCreditRiskTypes>>();
 
 		_ = fakeBrandCertClient.GetSystemValidateSecurityKeyAsync(Arg.Any<CancellationToken>())
 			.Returns(TestOperatorApplication.TestSecurityKey);
@@ -190,6 +195,7 @@ public class WithdrawTests(ITestOutputHelper testOutputHelper)
 				.AddSingleton(fakePlayerLoginRecordRepository)
 				.AddSingleton(fakeBrandRepository)
 				.AddSingleton(fakeValidatePlayerLoginRecordCommandService)
+				.AddSingleton(fakeBrandCreditQueryService)
 				.AddSingleton(fakePlayerBucketClient)
 				.AddSingleton(fakeCheckIdentityService)
 				.AddSingleton(fakeCheckCanCreateService)
@@ -345,6 +351,7 @@ public class WithdrawTests(ITestOutputHelper testOutputHelper)
 		var fakePlayerLoginRecordRepository = Substitute.For<IPlayerLoginRecordRepository>();
 		var fakeBrandRepository = Substitute.For<IBrandRepository>();
 		var fakeValidatePlayerLoginRecordCommandService = Substitute.For<ICommandService<ValidatePlayerLoginRecordCommand>>();
+		var fakeBrandCreditQueryService = Substitute.For<IGetService<BrandCreditQuery, BrandGameCreditRiskTypes>>();
 
 		_ = fakeBrandCertClient.GetSystemValidateSecurityKeyAsync(Arg.Any<CancellationToken>())
 			.Returns(TestOperatorApplication.TestSecurityKey);
@@ -372,6 +379,7 @@ public class WithdrawTests(ITestOutputHelper testOutputHelper)
 				.AddSingleton(fakePlayerLoginRecordRepository)
 				.AddSingleton(fakeBrandRepository)
 				.AddSingleton(fakeValidatePlayerLoginRecordCommandService)
+				.AddSingleton(fakeBrandCreditQueryService)
 				.AddSingleton(fakePlayerBucketClient)
 				.AddSingleton(fakeCheckIdentityService)
 				.AddSingleton(fakeCheckCanCreateService)
@@ -523,6 +531,7 @@ public class WithdrawTests(ITestOutputHelper testOutputHelper)
 		var fakePlayerLoginRecordRepository = Substitute.For<IPlayerLoginRecordRepository>();
 		var fakeBrandRepository = Substitute.For<IBrandRepository>();
 		var fakeValidatePlayerLoginRecordCommandService = Substitute.For<ICommandService<ValidatePlayerLoginRecordCommand>>();
+		var fakeBrandCreditQueryService = Substitute.For<IGetService<BrandCreditQuery, BrandGameCreditRiskTypes>>();
 
 		_ = fakeBrandCertClient.GetSystemValidateSecurityKeyAsync(Arg.Any<CancellationToken>())
 			.Returns(TestOperatorApplication.TestSecurityKey);
@@ -550,6 +559,7 @@ public class WithdrawTests(ITestOutputHelper testOutputHelper)
 				.AddSingleton(fakePlayerLoginRecordRepository)
 				.AddSingleton(fakeBrandRepository)
 				.AddSingleton(fakeValidatePlayerLoginRecordCommandService)
+				.AddSingleton(fakeBrandCreditQueryService)
 				.AddSingleton(fakePlayerBucketClient)
 				.AddSingleton(fakeCheckIdentityService)
 				.AddSingleton(fakeCheckCanCreateService)
@@ -701,6 +711,7 @@ public class WithdrawTests(ITestOutputHelper testOutputHelper)
 		var fakePlayerLoginRecordRepository = Substitute.For<IPlayerLoginRecordRepository>();
 		var fakeBrandRepository = Substitute.For<IBrandRepository>();
 		var fakeValidatePlayerLoginRecordCommandService = Substitute.For<ICommandService<ValidatePlayerLoginRecordCommand>>();
+		var fakeBrandCreditQueryService = Substitute.For<IGetService<BrandCreditQuery, BrandGameCreditRiskTypes>>();
 
 		_ = fakeBrandCertClient.GetSystemValidateSecurityKeyAsync(Arg.Any<CancellationToken>())
 			.Returns(TestOperatorApplication.TestSecurityKey);
@@ -728,6 +739,7 @@ public class WithdrawTests(ITestOutputHelper testOutputHelper)
 				.AddSingleton(fakePlayerLoginRecordRepository)
 				.AddSingleton(fakeBrandRepository)
 				.AddSingleton(fakeValidatePlayerLoginRecordCommandService)
+				.AddSingleton(fakeBrandCreditQueryService)
 				.AddSingleton(fakePlayerBucketClient)
 				.AddSingleton(fakeCheckIdentityService)
 				.AddSingleton(fakeCheckCanCreateService)
@@ -879,6 +891,7 @@ public class WithdrawTests(ITestOutputHelper testOutputHelper)
 		var fakePlayerLoginRecordRepository = Substitute.For<IPlayerLoginRecordRepository>();
 		var fakeBrandRepository = Substitute.For<IBrandRepository>();
 		var fakeValidatePlayerLoginRecordCommandService = Substitute.For<ICommandService<ValidatePlayerLoginRecordCommand>>();
+		var fakeBrandCreditQueryService = Substitute.For<IGetService<BrandCreditQuery, BrandGameCreditRiskTypes>>();
 
 		_ = fakeBrandCertClient.GetSystemValidateSecurityKeyAsync(Arg.Any<CancellationToken>())
 			.Returns(TestOperatorApplication.TestSecurityKey);
@@ -905,6 +918,7 @@ public class WithdrawTests(ITestOutputHelper testOutputHelper)
 				.AddSingleton(fakePlayerLoginRecordRepository)
 				.AddSingleton(fakeBrandRepository)
 				.AddSingleton(fakeValidatePlayerLoginRecordCommandService)
+				.AddSingleton(fakeBrandCreditQueryService)
 				.AddSingleton(fakeBrandPaymentsQueryService)
 				.AddSingleton(fakeGetAllPaymentMethodService)
 				.AddSingleton(fakeGetPaymentService))

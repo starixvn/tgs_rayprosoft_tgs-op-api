@@ -9,6 +9,7 @@ using NSubstitute;
 using NSubstitute.ReceivedExtensions;
 using Tgs.BrandCertificate;
 using Tgs.BrandCertificate.Clients;
+using Tgs.BrandGameCredits.Common;
 using Tgs.PlayerService.Client;
 using Tgs.ServiceUtility;
 using Tgs.StationLetterService;
@@ -16,6 +17,7 @@ using Tgs.StationLetterService.Client;
 using TGS.Apis.OperatorApi.Models;
 using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Services.Operator;
+using TGS.Services.Operator.ApplicationServices.Brand;
 using TGS.Services.Operator.ApplicationServices.Player;
 using Xunit.Abstractions;
 
@@ -40,6 +42,7 @@ public class StationLetterTests(ITestOutputHelper testOutputHelper)
 		var fakePlayerLoginRecordRepository = Substitute.For<IPlayerLoginRecordRepository>();
 		var fakeBrandRepository = Substitute.For<IBrandRepository>();
 		var fakeValidatePlayerLoginRecordCommandService = Substitute.For<ICommandService<ValidatePlayerLoginRecordCommand>>();
+		var fakeBrandCreditQueryService = Substitute.For<IGetService<BrandCreditQuery, BrandGameCreditRiskTypes>>();
 		var fakeStationLetterClient = Substitute.For<IStationLetterClient>();
 
 		_ = fakeBrandCertClient.GetSystemValidateSecurityKeyAsync(Arg.Any<CancellationToken>())
@@ -63,6 +66,7 @@ public class StationLetterTests(ITestOutputHelper testOutputHelper)
 				.AddSingleton(fakePlayerLoginRecordRepository)
 				.AddSingleton(fakeBrandRepository)
 				.AddSingleton(fakeValidatePlayerLoginRecordCommandService)
+				.AddSingleton(fakeBrandCreditQueryService)
 				.AddSingleton(fakeStationLetterClient))
 			.Build();
 
@@ -190,6 +194,7 @@ public class StationLetterTests(ITestOutputHelper testOutputHelper)
 		var fakePlayerLoginRecordRepository = Substitute.For<IPlayerLoginRecordRepository>();
 		var fakeBrandRepository = Substitute.For<IBrandRepository>();
 		var fakeValidatePlayerLoginRecordCommandService = Substitute.For<ICommandService<ValidatePlayerLoginRecordCommand>>();
+		var fakeBrandCreditQueryService = Substitute.For<IGetService<BrandCreditQuery, BrandGameCreditRiskTypes>>();
 		var fakeStationLetterClient = Substitute.For<IStationLetterClient>();
 
 		_ = fakeBrandCertClient.GetSystemValidateSecurityKeyAsync(Arg.Any<CancellationToken>())
@@ -213,6 +218,7 @@ public class StationLetterTests(ITestOutputHelper testOutputHelper)
 				.AddSingleton(fakePlayerLoginRecordRepository)
 				.AddSingleton(fakeBrandRepository)
 				.AddSingleton(fakeValidatePlayerLoginRecordCommandService)
+				.AddSingleton(fakeBrandCreditQueryService)
 				.AddSingleton(fakeStationLetterClient))
 			.Build();
 
@@ -348,6 +354,7 @@ public class StationLetterTests(ITestOutputHelper testOutputHelper)
 		var fakePlayerLoginRecordRepository = Substitute.For<IPlayerLoginRecordRepository>();
 		var fakeBrandRepository = Substitute.For<IBrandRepository>();
 		var fakeValidatePlayerLoginRecordCommandService = Substitute.For<ICommandService<ValidatePlayerLoginRecordCommand>>();
+		var fakeBrandCreditQueryService = Substitute.For<IGetService<BrandCreditQuery, BrandGameCreditRiskTypes>>();
 		var fakeStationLetterClient = Substitute.For<IStationLetterClient>();
 
 		_ = fakeBrandCertClient.GetSystemValidateSecurityKeyAsync(Arg.Any<CancellationToken>())
@@ -371,6 +378,7 @@ public class StationLetterTests(ITestOutputHelper testOutputHelper)
 				.AddSingleton(fakePlayerLoginRecordRepository)
 				.AddSingleton(fakeBrandRepository)
 				.AddSingleton(fakeValidatePlayerLoginRecordCommandService)
+				.AddSingleton(fakeBrandCreditQueryService)
 				.AddSingleton(fakeStationLetterClient))
 			.Build();
 
@@ -498,6 +506,7 @@ public class StationLetterTests(ITestOutputHelper testOutputHelper)
 		var fakePlayerLoginRecordRepository = Substitute.For<IPlayerLoginRecordRepository>();
 		var fakeBrandRepository = Substitute.For<IBrandRepository>();
 		var fakeValidatePlayerLoginRecordCommandService = Substitute.For<ICommandService<ValidatePlayerLoginRecordCommand>>();
+		var fakeBrandCreditQueryService = Substitute.For<IGetService<BrandCreditQuery, BrandGameCreditRiskTypes>>();
 		var fakeStationLetterClient = Substitute.For<IStationLetterClient>();
 
 		_ = fakeBrandCertClient.GetSystemValidateSecurityKeyAsync(Arg.Any<CancellationToken>())
@@ -521,6 +530,7 @@ public class StationLetterTests(ITestOutputHelper testOutputHelper)
 				.AddSingleton(fakePlayerLoginRecordRepository)
 				.AddSingleton(fakeBrandRepository)
 				.AddSingleton(fakeValidatePlayerLoginRecordCommandService)
+				.AddSingleton(fakeBrandCreditQueryService)
 				.AddSingleton(fakeStationLetterClient))
 			.Build();
 
@@ -643,6 +653,7 @@ public class StationLetterTests(ITestOutputHelper testOutputHelper)
 		var fakePlayerLoginRecordRepository = Substitute.For<IPlayerLoginRecordRepository>();
 		var fakeBrandRepository = Substitute.For<IBrandRepository>();
 		var fakeValidatePlayerLoginRecordCommandService = Substitute.For<ICommandService<ValidatePlayerLoginRecordCommand>>();
+		var fakeBrandCreditQueryService = Substitute.For<IGetService<BrandCreditQuery, BrandGameCreditRiskTypes>>();
 		var fakeStationLetterClient = Substitute.For<IStationLetterClient>();
 
 		_ = fakeBrandCertClient.GetSystemValidateSecurityKeyAsync(Arg.Any<CancellationToken>())
@@ -666,6 +677,7 @@ public class StationLetterTests(ITestOutputHelper testOutputHelper)
 				.AddSingleton(fakePlayerLoginRecordRepository)
 				.AddSingleton(fakeBrandRepository)
 				.AddSingleton(fakeValidatePlayerLoginRecordCommandService)
+				.AddSingleton(fakeBrandCreditQueryService)
 				.AddSingleton(fakeStationLetterClient))
 			.Build();
 
@@ -789,6 +801,7 @@ public class StationLetterTests(ITestOutputHelper testOutputHelper)
 		var fakePlayerLoginRecordRepository = Substitute.For<IPlayerLoginRecordRepository>();
 		var fakeBrandRepository = Substitute.For<IBrandRepository>();
 		var fakeValidatePlayerLoginRecordCommandService = Substitute.For<ICommandService<ValidatePlayerLoginRecordCommand>>();
+		var fakeBrandCreditQueryService = Substitute.For<IGetService<BrandCreditQuery, BrandGameCreditRiskTypes>>();
 		var fakeStationLetterClient = Substitute.For<IStationLetterClient>();
 
 		_ = fakeBrandCertClient.GetSystemValidateSecurityKeyAsync(Arg.Any<CancellationToken>())
@@ -812,6 +825,7 @@ public class StationLetterTests(ITestOutputHelper testOutputHelper)
 				.AddSingleton(fakePlayerLoginRecordRepository)
 				.AddSingleton(fakeBrandRepository)
 				.AddSingleton(fakeValidatePlayerLoginRecordCommandService)
+				.AddSingleton(fakeBrandCreditQueryService)
 				.AddSingleton(fakeStationLetterClient))
 			.Build();
 
@@ -931,6 +945,7 @@ public class StationLetterTests(ITestOutputHelper testOutputHelper)
 		var fakePlayerLoginRecordRepository = Substitute.For<IPlayerLoginRecordRepository>();
 		var fakeBrandRepository = Substitute.For<IBrandRepository>();
 		var fakeValidatePlayerLoginRecordCommandService = Substitute.For<ICommandService<ValidatePlayerLoginRecordCommand>>();
+		var fakeBrandCreditQueryService = Substitute.For<IGetService<BrandCreditQuery, BrandGameCreditRiskTypes>>();
 		var fakeStationLetterClient = Substitute.For<IStationLetterClient>();
 
 		_ = fakeBrandCertClient.GetSystemValidateSecurityKeyAsync(Arg.Any<CancellationToken>())
@@ -954,6 +969,7 @@ public class StationLetterTests(ITestOutputHelper testOutputHelper)
 				.AddSingleton(fakePlayerLoginRecordRepository)
 				.AddSingleton(fakeBrandRepository)
 				.AddSingleton(fakeValidatePlayerLoginRecordCommandService)
+				.AddSingleton(fakeBrandCreditQueryService)
 				.AddSingleton(fakeStationLetterClient))
 			.Build();
 

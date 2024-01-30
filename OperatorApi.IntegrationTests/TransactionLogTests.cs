@@ -8,12 +8,14 @@ using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Tgs.BrandCertificate;
 using Tgs.BrandCertificate.Clients;
+using Tgs.BrandGameCredits.Common;
 using Tgs.CashService.Client;
 using Tgs.PlayerService.Client;
 using Tgs.ServiceUtility;
 using TGS.Apis.OperatorApi.Models;
 using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Services.Operator;
+using TGS.Services.Operator.ApplicationServices.Brand;
 using TGS.Services.Operator.ApplicationServices.Player;
 using Xunit.Abstractions;
 using TransactionLogResponseViewMode = TGS.Apis.OperatorApi.Models.Messages.PagingResponse<TGS.Apis.OperatorApi.Models.Messages.TransactionLogViewModel>;
@@ -37,6 +39,7 @@ public class TransactionLogTests(ITestOutputHelper testOutputHelper)
 		var fakePlayerLoginRecordRepository = Substitute.For<IPlayerLoginRecordRepository>();
 		var fakeBrandRepository = Substitute.For<IBrandRepository>();
 		var fakeValidatePlayerLoginRecordCommandService = Substitute.For<ICommandService<ValidatePlayerLoginRecordCommand>>();
+		var fakeBrandCreditQueryService = Substitute.For<IGetService<BrandCreditQuery, BrandGameCreditRiskTypes>>();
 		var fakeCashServiceClient = Substitute.For<ICashServiceClient>();
 
 		_ = fakeBrandCertClient.GetSystemValidateSecurityKeyAsync(Arg.Any<CancellationToken>())
@@ -60,6 +63,7 @@ public class TransactionLogTests(ITestOutputHelper testOutputHelper)
 				.AddSingleton(fakePlayerLoginRecordRepository)
 				.AddSingleton(fakeBrandRepository)
 				.AddSingleton(fakeValidatePlayerLoginRecordCommandService)
+				.AddSingleton(fakeBrandCreditQueryService)
 				.AddSingleton(fakeCashServiceClient))
 			.Build();
 
