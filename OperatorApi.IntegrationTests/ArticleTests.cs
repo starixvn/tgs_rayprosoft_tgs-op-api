@@ -9,11 +9,13 @@ using Tgs.ArticleManagement;
 using Tgs.ArticleManagement.Clients;
 using Tgs.BrandCertificate;
 using Tgs.BrandCertificate.Clients;
+using Tgs.BrandGameCredits.Common;
 using Tgs.PlayerService.Client;
 using Tgs.ServiceUtility;
 using TGS.Apis.OperatorApi.Models;
 using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Services.Operator;
+using TGS.Services.Operator.ApplicationServices.Brand;
 using TGS.Services.Operator.ApplicationServices.Player;
 using Xunit.Abstractions;
 
@@ -193,7 +195,7 @@ public class ArticleTests(ITestOutputHelper testOutputHelper)
 		var fakePlayerPasswordValidateCommandService = Substitute.For<IGetService<PlayerPasswordValidateCommand, bool>>();
 		var fakePlayerLoginRecordRepository = Substitute.For<IPlayerLoginRecordRepository>();
 		var fakeBrandRepository = Substitute.For<IBrandRepository>();
-		var fakeValidatePlayerLoginRecordCommandService = Substitute.For<ICommandService<ValidatePlayerLoginRecordCommand>>();
+		var fakeValidatePlayerLoginRecordCommandService = Substitute.For<ICommandService<ValidatePlayerLoginRecordCommand>>();		
 
 		_ = fakeBrandCertClient.GetSystemValidateSecurityKeyAsync(Arg.Any<CancellationToken>())
 			.Returns(TestOperatorApplication.TestSecurityKey);
@@ -217,7 +219,7 @@ public class ArticleTests(ITestOutputHelper testOutputHelper)
 				.AddSingleton(fakePlayerPasswordValidateCommandService)
 				.AddSingleton(fakePlayerLoginRecordRepository)
 				.AddSingleton(fakeBrandRepository)
-				.AddSingleton(fakeValidatePlayerLoginRecordCommandService)
+				.AddSingleton(fakeValidatePlayerLoginRecordCommandService)				
 				.AddSingleton(fakeArticleManagementClient))
 			.Build();
 

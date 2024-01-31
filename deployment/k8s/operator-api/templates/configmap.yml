@@ -23,7 +23,8 @@ data:
         "StationLetterBaseUrl": "http://tgs-station-letter",
         "PlayerBucketBaseUrl": "http://tgs-playerbucket-service",
         "VipLevelServiceBaseUrl": "http://tgs-viplevel",
-        "ArticleManagementBaseUrl": "http://tgs-article-management"
+        "ArticleManagementBaseUrl": "http://tgs-article-management",
+        "BrandGameCreditsBaseUrl": "http://brand-gamecredits"
       },
       "ConnectionStrings": {
         "Tgs": "{{ .Values.connectionStrings.tgs }}",
@@ -74,6 +75,9 @@ data:
           "ko-KR",
           "vi-VN"
         ]
+      },
+      "Switch":{
+        "BrandOperation": false
       }
     }
   yarp-settings.json: |
