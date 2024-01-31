@@ -86,7 +86,14 @@ deploy-dev:
     - |
       cat << EOF | deploy_k8s $TgsSettingKey $HelmTemplateFolderName $namespace
         {
-          "brandOperation": false
+          "env": [
+            {
+              "name": "FeatureManagement",
+              "value": {
+                "BrandOperation": false
+              }
+            }
+          ]
         }
       EOF
 
@@ -108,7 +115,14 @@ deploy-staging:
     - |
       cat << EOF | deploy_k8s $TgsSettingKey $HelmTemplateFolderName $namespace
         {
-          "brandOperation": false
+          "env": [
+            {
+              "name": "FeatureManagement",
+              "value": {
+                "BrandOperation": false
+              }
+            }
+          ]
         }
       EOF
 
@@ -131,6 +145,13 @@ deploy-prod:
     - |
       cat << EOF | deploy_k8s $TgsSettingKey $HelmTemplateFolderName $namespace
         {
-          "brandOperation": false
+          "env": [
+            {
+              "name": "FeatureManagement",
+              "value": {
+                "BrandOperation": false
+              }
+            }
+          ]
         }
       EOF
