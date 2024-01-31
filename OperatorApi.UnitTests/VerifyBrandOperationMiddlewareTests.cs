@@ -102,7 +102,7 @@ public class VerifyBrandOperationMiddlewareTests
 	}
 
 	[Test]
-	public async Task 若平台已用額度為ModerateRisk且BrandOperation開關為true時會回應StatusCode503使玩家無法進入遊戲()
+	public async Task 若平台已用額度為ModerateRisk且BrandOperation開關為true時會回應StatusCode402使玩家無法進入遊戲()
 	{
 		var fakeRequestDelegate = Substitute.For<RequestDelegate>();
 
@@ -145,14 +145,14 @@ public class VerifyBrandOperationMiddlewareTests
 
 		await sut.InvokeAsync(fakeHttpContext, fakeBrandServiceClient, fakeMaintenanceRedisRepository, fakeBrandCreditQueryService, fakeFeatureManager);
 
-		ClassicAssert.AreEqual(503, fakeHttpContext.Response.StatusCode);
+		ClassicAssert.AreEqual(402, fakeHttpContext.Response.StatusCode);
 
 		responseBodyStream.Position = 0;
 		var body = JsonSerializer.Deserialize<TgsResponse>(new StreamReader(fakeHttpContext.Response.Body).ReadToEnd());
 
 		ClassicAssert.AreEqual(403, body.Error);
 		ClassicAssert.AreEqual("UnderMaintenance", body.ErrorMessage);
-		ClassicAssert.AreEqual("UnderMaintenance", body.ErrorMessageKey);
+		ClassicAssert.AreEqual("GameMaintenance", body.ErrorMessageKey);
 	}
 
 	[Test]
