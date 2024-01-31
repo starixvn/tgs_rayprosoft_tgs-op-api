@@ -88,10 +88,8 @@ deploy-dev:
         {
           "env": [
             {
-              "name": "FeatureManagement",
-              "value": {
-                "BrandOperation": "false"
-              }
+              "name": "FeatureManagement__BrandOperation",
+              "value": "false"              
             }
           ]
         }
@@ -117,10 +115,8 @@ deploy-staging:
         {
           "env": [
             {
-              "name": "FeatureManagement",
-              "value": {
-                "BrandOperation": "false"
-              }
+              "name": "FeatureManagement__BrandOperation",
+              "value": "false"              
             }
           ]
         }
@@ -147,10 +143,8 @@ deploy-prod:
         {
           "env": [
             {
-              "name": "FeatureManagement",
-              "value": {
-                "BrandOperation": "false"
-              }
+              "name": "FeatureManagement__BrandOperation",
+              "value": "false"              
             }
           ]
         }
