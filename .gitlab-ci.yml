@@ -82,6 +82,13 @@ deploy-dev:
   only:
     - main
   when: always
+  script:
+    - |
+      cat << EOF | deploy_k8s $TgsSettingKey $HelmTemplateFolderName $namespace
+        {
+          "brandOperation": false
+        }
+      EOF
 
 deploy-staging:
   extends: .deploy-template
@@ -97,6 +104,13 @@ deploy-staging:
       artifacts: true
   only:
     - main
+  script:
+    - |
+      cat << EOF | deploy_k8s $TgsSettingKey $HelmTemplateFolderName $namespace
+        {
+          "brandOperation": false
+        }
+      EOF
 
 deploy-prod:
   extends: .deploy-template
@@ -113,3 +127,10 @@ deploy-prod:
   only:
     - main
   when: manual
+  script:
+    - |
+      cat << EOF | deploy_k8s $TgsSettingKey $HelmTemplateFolderName $namespace
+        {
+          "brandOperation": false
+        }
+      EOF

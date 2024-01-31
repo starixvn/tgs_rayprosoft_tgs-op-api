@@ -75,10 +75,7 @@ data:
           "ko-KR",
           "vi-VN"
         ]
-      },
-      "Switch":{
-        "BrandOperation": false
-      }
+      }      
     }
   yarp-settings.json: |
     {

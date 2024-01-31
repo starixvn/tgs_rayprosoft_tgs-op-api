@@ -69,7 +69,7 @@ public sealed class VerifyBrandOperationMiddleware(
 			.GetAsync(new BrandCreditQuery(brandId.Value))
 			.ConfigureAwait(false);
 
-		var brandOperationSwitch = configuration.GetValue<bool>("Switch:BrandOperation");
+		var brandOperationSwitch = configuration.GetValue<bool>("brandOperation");
 
 		if (brandOperationSwitch is true && brandRiskType is BrandGameCreditRiskTypes.ModerateRisk)
 		{
