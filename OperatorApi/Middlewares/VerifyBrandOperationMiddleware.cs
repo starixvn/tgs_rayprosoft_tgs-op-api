@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.FeatureManagement;
 using Tgs.BrandCertificate;
 using Tgs.BrandCertificate.Clients;
 using Tgs.BrandGameCredits.Common;
@@ -24,7 +25,7 @@ public sealed class VerifyBrandOperationMiddleware(
 		IBrandServiceClient brandServiceClient,
 		IMaintenanceRedisRepository maintenanceRedisService,
 		IGetService<BrandCreditQuery, BrandGameCreditRiskTypes> brandCreditService,
-		IConfiguration configuration)
+		IFeatureManager featureManager)
 	{
 		using var activity = _VerifyCredentialsMiddlewareSource.StartActivity(nameof(VerifyBrandOperationMiddleware));
 
@@ -69,7 +70,9 @@ public sealed class VerifyBrandOperationMiddleware(
 			.GetAsync(new BrandCreditQuery(brandId.Value))
 			.ConfigureAwait(false);
 
-		var brandOperationSwitch = configuration.GetValue<bool>("brandOperation");
+		var brandOperationSwitch = await featureManager
+			.IsEnabledAsync("BrandOperation")
+			.ConfigureAwait(false);
 
 		if (brandOperationSwitch is true && brandRiskType is BrandGameCreditRiskTypes.ModerateRisk)
 		{

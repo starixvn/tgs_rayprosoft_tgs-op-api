@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.HttpLogging;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using Microsoft.FeatureManagement;
 using Microsoft.OpenApi.Models;
 using NATS.Client.Core;
 using OpenTelemetry.Metrics;
@@ -103,6 +104,8 @@ builder.Services
 	.AddHttpContextAccessor()
 	.AddRouting(options => options.LowercaseUrls = true)
 	.AddSignalR()
+	.Services
+	.AddFeatureManagement()
 	.Services
 	.AddControllers(options =>
 	{
@@ -236,7 +239,7 @@ builder.Services
 	.Decorate<IValidateCodeGenerator, ConstValidateCodeGenerator>()
 	.AddHostedService<PaymentNotifyConsumer>()
 	.AddHostedService<PushNotifyfConsumer>()
-	.AddNotificationClient();
+	.AddNotificationClient();	
 
 builder.Services
 	.AddRedis((options, sp) =>
