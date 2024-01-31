@@ -17,8 +17,11 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using NSubstitute;
 using OpenTelemetry.Exporter;
+using Tgs.BrandGameCredits.Common;
+using Tgs.ServiceUtility;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.Infrastructures.Redis;
+using TGS.Services.Operator.ApplicationServices.Brand;
 
 namespace OperatorApi.IntegrationTests;
 
@@ -40,6 +43,7 @@ internal static class TestOperatorApplication
 				sp => new ConfigureNamedOptions<OtlpExporterOptions>(
 					Options.DefaultName,
 					exporterOptions => exporterOptions.TimeoutMilliseconds = 0))
+			.AddSingleton(Substitute.For<IGetService<BrandCreditQuery, BrandGameCreditRiskTypes>>())
 			.Replace(ServiceDescriptor.Singleton(sp =>
 			{
 				var dbContextOptionsBuilder = new DbContextOptionsBuilder<TgsRepository>();

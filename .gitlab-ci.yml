@@ -82,6 +82,20 @@ deploy-dev:
   only:
     - main
   when: always
+  script:
+    - |
+      cat << EOF | deploy_k8s $TgsSettingKey $HelmTemplateFolderName $namespace
+        {
+          "env": [
+            {
+              "name": "FeatureManagement",
+              "value": {
+                "BrandOperation": false
+              }
+            }
+          ]
+        }
+      EOF
 
 deploy-staging:
   extends: .deploy-template
@@ -97,6 +111,20 @@ deploy-staging:
       artifacts: true
   only:
     - main
+  script:
+    - |
+      cat << EOF | deploy_k8s $TgsSettingKey $HelmTemplateFolderName $namespace
+        {
+          "env": [
+            {
+              "name": "FeatureManagement",
+              "value": {
+                "BrandOperation": false
+              }
+            }
+          ]
+        }
+      EOF
 
 deploy-prod:
   extends: .deploy-template
@@ -113,3 +141,17 @@ deploy-prod:
   only:
     - main
   when: manual
+  script:
+    - |
+      cat << EOF | deploy_k8s $TgsSettingKey $HelmTemplateFolderName $namespace
+        {
+          "env": [
+            {
+              "name": "FeatureManagement",
+              "value": {
+                "BrandOperation": false
+              }
+            }
+          ]
+        }
+      EOF
