@@ -85,13 +85,13 @@ public sealed class VerifyBrandOperationMiddleware(
 			};
 			if (openGameApiUrls.Contains(context.Request.Path))
 			{
-				context.Response.StatusCode = StatusCodes.Status503ServiceUnavailable;
+				context.Response.StatusCode = StatusCodes.Status402PaymentRequired;
 
 				await context.Response.WriteAsJsonAsync(new TgsResponse
 				{
 					Error = 403,
 					ErrorMessage = "UnderMaintenance",
-					ErrorMessageKey = "UnderMaintenance"
+					ErrorMessageKey = "GameMaintenance"
 				}).ConfigureAwait(false);
 
 				return;
