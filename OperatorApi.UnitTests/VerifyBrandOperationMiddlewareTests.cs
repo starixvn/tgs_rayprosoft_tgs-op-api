@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
 using NUnit.Framework.Legacy;
@@ -33,7 +32,7 @@ public class VerifyBrandOperationMiddlewareTests
 
 		var dict = new Dictionary<string, string>
 		{
-		   {"Switch:BrandOperation", false.ToString()},
+		   {"brandOperation", false.ToString()},
 		};
 
 		var fakeConfiguration = new ConfigurationBuilder()
@@ -64,7 +63,7 @@ public class VerifyBrandOperationMiddlewareTests
 
 		var dict = new Dictionary<string, string>
 		{
-		   {"Switch:BrandOperation", false.ToString()},
+		   {"brandOperation", false.ToString()},
 		};
 
 		var fakeConfiguration = new ConfigurationBuilder()
@@ -116,7 +115,7 @@ public class VerifyBrandOperationMiddlewareTests
 		var fakeBrandCreditQueryService = Substitute.For<IGetService<BrandCreditQuery, BrandGameCreditRiskTypes>>();
 		var dict = new Dictionary<string, string>
 		{
-		   {"Switch:BrandOperation", true.ToString()},
+		   {"brandOperation", true.ToString()},
 		};
 
 		var fakeConfiguration = new ConfigurationBuilder()
@@ -173,7 +172,7 @@ public class VerifyBrandOperationMiddlewareTests
 		var fakeBrandCreditQueryService = Substitute.For<IGetService<BrandCreditQuery, BrandGameCreditRiskTypes>>();
 		var dict = new Dictionary<string, string>
 		{
-		   {"Switch:BrandOperation", false.ToString()},
+		   {"brandOperation", false.ToString()},
 		};
 
 		var fakeConfiguration = new ConfigurationBuilder()
@@ -223,7 +222,7 @@ public class VerifyBrandOperationMiddlewareTests
 		var fakeBrandCreditQueryService = Substitute.For<IGetService<BrandCreditQuery, BrandGameCreditRiskTypes>>();
 		var dict = new Dictionary<string, string>
 		{
-		   {"Switch:BrandOperation", false.ToString()},
+		   {"brandOperation", false.ToString()},
 		};
 
 		var fakeConfiguration = new ConfigurationBuilder()
@@ -273,7 +272,7 @@ public class VerifyBrandOperationMiddlewareTests
 		var fakeBrandCreditQueryService = Substitute.For<IGetService<BrandCreditQuery, BrandGameCreditRiskTypes>>();
 		var dict = new Dictionary<string, string>
 		{
-		   {"Switch:BrandOperation", true.ToString()},
+		   {"brandOperation", true.ToString()},
 		};
 
 		var fakeConfiguration = new ConfigurationBuilder()
@@ -323,7 +322,7 @@ public class VerifyBrandOperationMiddlewareTests
 		var fakeBrandCreditQueryService = Substitute.For<IGetService<BrandCreditQuery, BrandGameCreditRiskTypes>>();
 		var dict = new Dictionary<string, string>
 		{
-		   {"Switch:BrandOperation", false.ToString()},
+		   {"brandOperation", false.ToString()},
 		};
 
 		var fakeConfiguration = new ConfigurationBuilder()
@@ -366,7 +365,7 @@ public class VerifyBrandOperationMiddlewareTests
 		var fakeBrandCreditQueryService = Substitute.For<IGetService<BrandCreditQuery, BrandGameCreditRiskTypes>>();
 		var dict = new Dictionary<string, string>
 		{
-		   {"Switch:BrandOperation", false.ToString()},
+		   {"brandOperation", false.ToString()},
 		};
 
 		var fakeConfiguration = new ConfigurationBuilder()
@@ -406,7 +405,7 @@ public class VerifyBrandOperationMiddlewareTests
 		var fakeBrandCreditQueryService = Substitute.For<IGetService<BrandCreditQuery, BrandGameCreditRiskTypes>>();
 		var dict = new Dictionary<string, string>
 		{
-		   {"Switch:BrandOperation", false.ToString()},
+		   {"brandOperation", false.ToString()},
 		};
 
 		var fakeConfiguration = new ConfigurationBuilder()
