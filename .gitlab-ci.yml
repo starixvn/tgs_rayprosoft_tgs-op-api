@@ -90,7 +90,7 @@ deploy-dev:
             {
               "name": "FeatureManagement",
               "value": {
-                "BrandOperation": false
+                "BrandOperation": "false"
               }
             }
           ]
@@ -119,7 +119,7 @@ deploy-staging:
             {
               "name": "FeatureManagement",
               "value": {
-                "BrandOperation": false
+                "BrandOperation": "false"
               }
             }
           ]
@@ -149,7 +149,7 @@ deploy-prod:
             {
               "name": "FeatureManagement",
               "value": {
-                "BrandOperation": false
+                "BrandOperation": "false"
               }
             }
           ]
