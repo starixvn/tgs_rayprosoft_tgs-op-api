@@ -24,4 +24,7 @@ public record WithdrawFormViewModel
 
 	[JsonPropertyName("orderno")]
 	public string OrderNo { get; init; }
+
+	[JsonPropertyName("remark")]
+	public string Remark { get; init; }
 }
