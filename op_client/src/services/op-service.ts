@@ -447,5 +447,18 @@ export default class OperatorService {
             .then(res => res.data);
     }
 
+    public getWithdrawForms(
+        request: GetWithdrawFormsRequest,
+        paging: PagingRequest): Promise<PagingResponse<WithdrawFormViewModel>>{
+            return this.http
+                .get("/api/withdraw/player/list",{
+                    params: {
+                        ...request,
+                        ...paging
+                    }
+                })
+                .then(res => res.data);
+        }
+
     // #endregion Public Methods (50)
 }

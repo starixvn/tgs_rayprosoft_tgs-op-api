@@ -176,7 +176,8 @@ public class WithdrawController : ControllerBase
 					BrandPaymentId = form.BrandPaymentId,
 					CreatedOn = form.CreatedOn,
 					UpdatedOn = form.UpdatedOn,
-					OrderNo = form.OrderNo
+					OrderNo = form.OrderNo,
+					Remark = form.PlayerRemark,
 				})
 				.ToArray()
 		};
