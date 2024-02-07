@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.FeatureManagement;
+using Polly;
 using Tgs.BrandCertificate;
 using Tgs.BrandCertificate.Clients;
 using Tgs.BrandGameCredits.Common;
@@ -15,10 +16,14 @@ public sealed class VerifyBrandOperationMiddleware(
 	RequestDelegate next,
 	ILogger<VerifyBrandOperationMiddleware> logger)
 {
-	private static readonly ActivitySource _VerifyCredentialsMiddlewareSource = new($"TGS.Apis.OperatorApi.Middlewares.{nameof(VerifyBrandOperationMiddleware)}");
+	private static readonly ActivitySource _VerifyCredentialsMiddlewareSource = new(
+		$"TGS.Apis.OperatorApi.Middlewares.{nameof(VerifyBrandOperationMiddleware)}");
 
-	private readonly ILogger<VerifyBrandOperationMiddleware> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-	private readonly RequestDelegate _next = next ?? throw new ArgumentNullException(nameof(next));
+	private static readonly PathString[] _OpenGameApiUrls = [
+		new("/api/game/lobby/geturl"),
+		new("/api/game/geturl"),
+		new("/api/game/sm01"),
+		new("/api/game/bc")];
 
 	public async Task InvokeAsync(
 		HttpContext context,
@@ -31,9 +36,41 @@ public sealed class VerifyBrandOperationMiddleware(
 
 		var brandId = context.GetBrandId();
 
+		if (!await CheckBrandIdNotNullAsync(
+			context,
+			brandId).ConfigureAwait(false))
+			return;
+
+		if (!await CheckBrandStatusAsync(
+			context,
+			brandId.Value,
+			brandServiceClient).ConfigureAwait(false))
+			return;
+
+		if (!await CheckRiskAsync(
+			context,
+			brandId.Value,
+			featureManager,
+			brandServiceClient,
+			brandCreditService).ConfigureAwait(false))
+			return;
+
+		if (!await CheckMaintenanceAsync(
+			context,
+			brandId.Value,
+			maintenanceRedisService).ConfigureAwait(false))
+			return;
+
+		context.Items.Add(Core.Models.Consts.ContextItems.BrandId, brandId);
+
+		await next(context);
+	}
+
+	private async ValueTask<bool> CheckBrandIdNotNullAsync(HttpContext context, Guid? brandId)
+	{
 		if (brandId is null)
 		{
-			_logger.LogDebug("Missing Brand Token");
+			logger.LogDebug("Missing Brand Token");
 
 			context.Response.StatusCode = StatusCodes.Status401Unauthorized;
 
@@ -44,14 +81,24 @@ public sealed class VerifyBrandOperationMiddleware(
 				ErrorMessageKey = "InvalidCredentials"
 			}).ConfigureAwait(false);
 
-			return;
+			return false;
 		}
 
-		var brandStatus = await brandServiceClient.GetBrandStatusAsync(brandId.Value);
+		return true;
+	}
+
+	private async ValueTask<bool> CheckBrandStatusAsync(
+		HttpContext context,
+		Guid brandId,
+		IBrandServiceClient brandServiceClient)
+	{
+		var brandStatus = await brandServiceClient.GetBrandStatusAsync(
+			brandId,
+			context.RequestAborted).ConfigureAwait(false);
 
 		if (brandStatus is not (BrandStatus.Active or BrandStatus.Maintenance))
 		{
-			_logger.LogDebug("Brand is inactive");
+			logger.LogDebug("Brand is inactive");
 
 			context.Response.StatusCode = StatusCodes.Status401Unauthorized;
 
@@ -62,27 +109,41 @@ public sealed class VerifyBrandOperationMiddleware(
 				ErrorMessageKey = "InvalidStatus"
 			}).ConfigureAwait(false);
 
-			return;
+			return false;
 		}
 
-		var brandRiskType = await brandCreditService
-			.GetAsync(new BrandCreditQuery(brandId.Value))
-			.ConfigureAwait(false);
+		return true;
+	}
 
+	private static async ValueTask<bool> CheckRiskAsync(
+		HttpContext context,
+		Guid brandId,
+		IFeatureManager featureManager,
+		IBrandServiceClient brandServiceClient,
+		IGetService<BrandCreditQuery, BrandGameCreditRiskTypes> brandCreditService)
+	{
 		var brandOperationSwitch = await featureManager
 			.IsEnabledAsync("BrandOperation")
 			.ConfigureAwait(false);
 
-		if (brandOperationSwitch is true && brandRiskType is BrandGameCreditRiskTypes.ModerateRisk)
+		if (!brandOperationSwitch)
+			return true;
+
+		var checkPlatformAccountFundIsEnabled = await brandServiceClient.GetBrandPlatformAccountFundAsync(
+			brandId,
+			context.RequestAborted).ConfigureAwait(false)
+			?? false;
+
+		if (!checkPlatformAccountFundIsEnabled)
+			return true;
+
+		var brandRiskType = await brandCreditService.GetAsync(
+			new BrandCreditQuery(brandId),
+			context.RequestAborted).ConfigureAwait(false);
+
+		if (brandRiskType is BrandGameCreditRiskTypes.ModerateRisk)
 		{
-			var openGameApiUrls = new PathString[]
-			{
-				new("/api/game/lobby/geturl"),
-				new("/api/game/geturl"),
-				new("/api/game/sm01"),
-				new("/api/game/bc")
-			};
-			if (openGameApiUrls.Contains(context.Request.Path))
+			if (_OpenGameApiUrls.Contains(context.Request.Path))
 			{
 				context.Response.StatusCode = StatusCodes.Status402PaymentRequired;
 
@@ -93,18 +154,39 @@ public sealed class VerifyBrandOperationMiddleware(
 					ErrorMessageKey = "GameMaintenance"
 				}).ConfigureAwait(false);
 
-				return;
+				return false;
 			}
 		}
 
+		if (brandRiskType is BrandGameCreditRiskTypes.HighRisk)
+		{
+			context.Response.StatusCode = StatusCodes.Status503ServiceUnavailable;
+
+			await context.Response.WriteAsJsonAsync(new TgsResponse
+			{
+				Error = 403,
+				ErrorMessage = "UnderMaintenance",
+				ErrorMessageKey = "UnderMaintenance"
+			}).ConfigureAwait(false);
+
+			return false;
+		}
+
+		return true;
+	}
+
+	private async ValueTask<bool> CheckMaintenanceAsync(
+		HttpContext context,
+		Guid brandId,
+		IMaintenanceRedisRepository maintenanceRedisService)
+	{
 		var hasBrandMaintenanceRedisCache = !string.IsNullOrEmpty(await maintenanceRedisService
-			.GetBrandMaintenanceAsync(brandId.Value)
+			.GetBrandMaintenanceAsync(brandId)
 			.ConfigureAwait(false));
 
-		if (hasBrandMaintenanceRedisCache is true
-			|| brandOperationSwitch is true && brandRiskType is BrandGameCreditRiskTypes.HighRisk)
+		if (hasBrandMaintenanceRedisCache is true)
 		{
-			_logger.LogDebug("Has Brand Maintenance Redis Cache: {hasBrandMaintenanceRedisCache}", hasBrandMaintenanceRedisCache);
+			logger.LogDebug("Has Brand Maintenance Redis Cache: {hasBrandMaintenanceRedisCache}", hasBrandMaintenanceRedisCache);
 
 			context.Response.StatusCode = StatusCodes.Status503ServiceUnavailable;
 
@@ -115,11 +197,9 @@ public sealed class VerifyBrandOperationMiddleware(
 				ErrorMessageKey = "UnderMaintenance"
 			}).ConfigureAwait(false);
 
-			return;
+			return false;
 		}
 
-		context.Items.Add(Core.Models.Consts.ContextItems.BrandId, brandId);
-
-		await _next(context);
+		return true;
 	}
 }
