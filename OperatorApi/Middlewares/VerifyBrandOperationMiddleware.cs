@@ -65,7 +65,6 @@ public sealed class VerifyBrandOperationMiddleware(
 			return;
 		}
 
-
 		var brandRiskType = await brandCreditService
 			.GetAsync(new BrandCreditQuery(brandId.Value))
 			.ConfigureAwait(false);
@@ -103,7 +102,7 @@ public sealed class VerifyBrandOperationMiddleware(
 			.ConfigureAwait(false));
 
 		if (hasBrandMaintenanceRedisCache is true
-			|| (brandOperationSwitch is true && brandRiskType is BrandGameCreditRiskTypes.HighRisk))
+			|| brandOperationSwitch is true && brandRiskType is BrandGameCreditRiskTypes.HighRisk)
 		{
 			_logger.LogDebug("Has Brand Maintenance Redis Cache: {hasBrandMaintenanceRedisCache}", hasBrandMaintenanceRedisCache);
 

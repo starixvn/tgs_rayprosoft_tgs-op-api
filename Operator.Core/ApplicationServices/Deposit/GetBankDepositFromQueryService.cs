@@ -12,10 +12,12 @@ internal class GetBankDepositFromQueryService(IPaymentServiceClient paymentServi
 
 	public async ValueTask<DepositFormInfo> GetAsync(GetBankDepositFormQuery query, CancellationToken cancellationToken = default)
 	{
-		var form = await _paymentServiceClient
-			.GetDepositFormAsync(query.BrandId, query.FormId, cancellationToken)
-			.ConfigureAwait(false);
+		var form = await _paymentServiceClient.GetDepositFormAsync(
+			query.FormId,
+			cancellationToken).ConfigureAwait(false);
 
-		return form == null || form.PlayerCode != query.PlayerCode ? throw new UltraViresException() : form;
+		return form == null || form.PlayerCode != query.PlayerCode || form.BrandId != query.BrandId
+			? throw new UltraViresException()
+			: form;
 	}
 }

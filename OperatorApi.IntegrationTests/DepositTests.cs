@@ -193,12 +193,12 @@ public class DepositTests(ITestOutputHelper testOutputHelper)
 				new Uri("http://localhost")));
 
 		_ = fakePaymentServiceClient.GetDepositFormAsync(
-			Arg.Is(brandId),
 			Arg.Any<Guid>(),
 			Arg.Any<CancellationToken>())
 			.Returns(new DepositFormInfo
 			{
 				PlayerCode = playerCode,
+				BrandId = brandId,
 				ApplyInfo = JsonSerializer.Serialize(applyInfo, PhpGoPayUtility.SerializerOptions)
 			});
 
@@ -390,12 +390,12 @@ public class DepositTests(ITestOutputHelper testOutputHelper)
 				"thirdPartyOrderNo"));
 
 		_ = fakePaymentServiceClient.GetDepositFormAsync(
-			Arg.Is(brandId),
 			Arg.Any<Guid>(),
 			Arg.Any<CancellationToken>())
 			.Returns(new DepositFormInfo
 			{
 				PlayerCode = playerCode,
+				BrandId = brandId,
 				ApplyInfo = JsonSerializer.Serialize(applyInfo, DibaoPayUtility.SerializerOptions)
 			});
 
@@ -587,12 +587,12 @@ public class DepositTests(ITestOutputHelper testOutputHelper)
 				"thirdPartyOrderNo"));
 
 		_ = fakePaymentServiceClient.GetDepositFormAsync(
-			Arg.Is(brandId),
 			Arg.Any<Guid>(),
 			Arg.Any<CancellationToken>())
 			.Returns(new DepositFormInfo
 			{
 				PlayerCode = playerCode,
+				BrandId = brandId,
 				ApplyInfo = JsonSerializer.Serialize(applyInfo, DibaoPayUtility.SerializerOptions)
 			});
 
@@ -784,12 +784,12 @@ public class DepositTests(ITestOutputHelper testOutputHelper)
 				"thirdPartyOrderNo"));
 
 		_ = fakePaymentServiceClient.GetDepositFormAsync(
-			Arg.Is(brandId),
 			Arg.Any<Guid>(),
 			Arg.Any<CancellationToken>())
 			.Returns(new DepositFormInfo
 			{
 				PlayerCode = playerCode,
+				BrandId = brandId,
 				ApplyInfo = JsonSerializer.Serialize(applyInfo, DibaoPayUtility.SerializerOptions)
 			});
 
@@ -981,12 +981,12 @@ public class DepositTests(ITestOutputHelper testOutputHelper)
 				"thirdPartyOrderNo"));
 
 		_ = fakePaymentServiceClient.GetDepositFormAsync(
-			Arg.Is(brandId),
 			Arg.Any<Guid>(),
 			Arg.Any<CancellationToken>())
 			.Returns(new DepositFormInfo
 			{
 				PlayerCode = playerCode,
+				BrandId = brandId,
 				ApplyInfo = JsonSerializer.Serialize(applyInfo, DibaoPayUtility.SerializerOptions)
 			});
 
@@ -1179,12 +1179,12 @@ public class DepositTests(ITestOutputHelper testOutputHelper)
 				new Uri("http://localhost")));
 
 		_ = fakePaymentServiceClient.GetDepositFormAsync(
-			Arg.Is(brandId),
 			Arg.Any<Guid>(),
 			Arg.Any<CancellationToken>())
 			.Returns(new DepositFormInfo
 			{
 				PlayerCode = playerCode,
+				BrandId = brandId,
 				ApplyInfo = JsonSerializer.Serialize(applyInfo, PhpGoPayUtility.SerializerOptions)
 			});
 
@@ -1384,12 +1384,12 @@ public class DepositTests(ITestOutputHelper testOutputHelper)
 				new Uri("http://localhost")));
 
 		_ = fakePaymentServiceClient.GetDepositFormAsync(
-			Arg.Is(brandId),
 			Arg.Any<Guid>(),
 			Arg.Any<CancellationToken>())
 			.Returns(new DepositFormInfo
 			{
 				PlayerCode = playerCode,
+				BrandId = brandId,
 				ApplyInfo = JsonSerializer.Serialize(applyInfo, FiveSevenPayUtility.SerializerOptions)
 			});
 
@@ -1575,12 +1575,12 @@ public class DepositTests(ITestOutputHelper testOutputHelper)
 				"thirdPartyOrderNo"));
 
 		_ = fakePaymentServiceClient.GetDepositFormAsync(
-			Arg.Is(brandId),
 			Arg.Any<Guid>(),
 			Arg.Any<CancellationToken>())
 			.Returns(new DepositFormInfo
 			{
 				PlayerCode = playerCode,
+				BrandId = brandId,
 				ApplyInfo = JsonSerializer.Serialize(applyInfo, PhpGoPayUtility.SerializerOptions)
 			});
 
@@ -1769,12 +1769,12 @@ public class DepositTests(ITestOutputHelper testOutputHelper)
 				ThirdPartyOrderNo: "130d36a1176d42638948161df47f160f"));
 
 		_ = fakePaymentServiceClient.GetDepositFormAsync(
-			Arg.Is(brandId),
 			Arg.Any<Guid>(),
 			Arg.Any<CancellationToken>())
 			.Returns(new DepositFormInfo
 			{
 				PlayerCode = playerCode,
+				BrandId = brandId,
 				ApplyInfo = JsonSerializer.Serialize(applyInfo, GCPayUtility.SerializerOptions)
 			});
 
@@ -1963,12 +1963,12 @@ public class DepositTests(ITestOutputHelper testOutputHelper)
 				ThirdPartyOrderNo: "130d36a1176d42638948161df47f160f"));
 
 		_ = fakePaymentServiceClient.GetDepositFormAsync(
-			Arg.Is(brandId),
 			Arg.Any<Guid>(),
 			Arg.Any<CancellationToken>())
 			.Returns(new DepositFormInfo
 			{
 				PlayerCode = playerCode,
+				BrandId = brandId,
 				ApplyInfo = JsonSerializer.Serialize(applyInfo, GCPayUtility.SerializerOptions)
 			});
 
@@ -2161,12 +2161,12 @@ public class DepositTests(ITestOutputHelper testOutputHelper)
 				new Uri("http://localhost")));
 
 		_ = fakePaymentServiceClient.GetDepositFormAsync(
-			Arg.Is(brandId),
 			Arg.Any<Guid>(),
 			Arg.Any<CancellationToken>())
 			.Returns(new DepositFormInfo
 			{
 				PlayerCode = playerCode,
+				BrandId = brandId,
 				ApplyInfo = JsonSerializer.Serialize(applyInfo, PhpGoPayUtility.SerializerOptions)
 			});
 
@@ -2360,12 +2360,12 @@ public class DepositTests(ITestOutputHelper testOutputHelper)
 				new Uri("http://localhost/test")));
 
 		_ = fakePaymentServiceClient.GetDepositFormAsync(
-			Arg.Is(brandId),
 			Arg.Any<Guid>(),
 			Arg.Any<CancellationToken>())
 			.Returns(new DepositFormInfo
 			{
 				PlayerCode = playerCode,
+				BrandId = brandId,
 				ApplyInfo = JsonSerializer.Serialize(applyInfo, MetaPayUtility.SerializerOptions)
 			});
 
@@ -2559,12 +2559,12 @@ public class DepositTests(ITestOutputHelper testOutputHelper)
 				new Uri("http://localhost/test")));
 
 		_ = fakePaymentServiceClient.GetDepositFormAsync(
-			Arg.Is(brandId),
 			Arg.Any<Guid>(),
 			Arg.Any<CancellationToken>())
 			.Returns(new DepositFormInfo
 			{
 				PlayerCode = playerCode,
+				BrandId = brandId,
 				ApplyInfo = JsonSerializer.Serialize(applyInfo, MetaPayUtility.SerializerOptions)
 			});
 
@@ -2757,12 +2757,12 @@ public class DepositTests(ITestOutputHelper testOutputHelper)
 				new Uri("http://localhost")));
 
 		_ = fakePaymentServiceClient.GetDepositFormAsync(
-			Arg.Is(brandId),
 			Arg.Any<Guid>(),
 			Arg.Any<CancellationToken>())
 			.Returns(new DepositFormInfo
 			{
 				PlayerCode = playerCode,
+				BrandId = brandId,
 				ApplyInfo = JsonSerializer.Serialize(applyInfo, PhpGoPayUtility.SerializerOptions)
 			});
 
@@ -2952,12 +2952,12 @@ public class DepositTests(ITestOutputHelper testOutputHelper)
 				"thirdPartyOrderNo"));
 
 		_ = fakePaymentServiceClient.GetDepositFormAsync(
-			Arg.Is(brandId),
 			Arg.Any<Guid>(),
 			Arg.Any<CancellationToken>())
 			.Returns(new DepositFormInfo
 			{
 				PlayerCode = playerCode,
+				BrandId = brandId,
 				ApplyInfo = JsonSerializer.Serialize(applyInfo, SBPayUtility.SerializerOptions)
 			});
 
@@ -3147,12 +3147,12 @@ public class DepositTests(ITestOutputHelper testOutputHelper)
 				"thirdPartyOrderNo"));
 
 		_ = fakePaymentServiceClient.GetDepositFormAsync(
-			Arg.Is(brandId),
 			Arg.Any<Guid>(),
 			Arg.Any<CancellationToken>())
 			.Returns(new DepositFormInfo
 			{
 				PlayerCode = playerCode,
+				BrandId = brandId,
 				ApplyInfo = JsonSerializer.Serialize(applyInfo, SBPayUtility.SerializerOptions)
 			});
 
@@ -3342,12 +3342,12 @@ public class DepositTests(ITestOutputHelper testOutputHelper)
 				"thirdPartyOrderNo"));
 
 		_ = fakePaymentServiceClient.GetDepositFormAsync(
-			Arg.Is(brandId),
 			Arg.Any<Guid>(),
 			Arg.Any<CancellationToken>())
 			.Returns(new DepositFormInfo
 			{
 				PlayerCode = playerCode,
+				BrandId = brandId,
 				ApplyInfo = JsonSerializer.Serialize(applyInfo, SBPayUtility.SerializerOptions)
 			});
 
@@ -3538,12 +3538,12 @@ public class DepositTests(ITestOutputHelper testOutputHelper)
 				"thirdPartyOrderNo"));
 
 		_ = fakePaymentServiceClient.GetDepositFormAsync(
-			Arg.Is(brandId),
 			Arg.Any<Guid>(),
 			Arg.Any<CancellationToken>())
 			.Returns(new DepositFormInfo
 			{
 				PlayerCode = playerCode,
+				BrandId = brandId,
 				ApplyInfo = JsonSerializer.Serialize(applyInfo, SBPayUtility.SerializerOptions)
 			});
 
@@ -3737,12 +3737,12 @@ public class DepositTests(ITestOutputHelper testOutputHelper)
 				"thirdPartyOrderNo"));
 
 		_ = fakePaymentServiceClient.GetDepositFormAsync(
-			Arg.Is(brandId),
 			Arg.Any<Guid>(),
 			Arg.Any<CancellationToken>())
 			.Returns(new DepositFormInfo
 			{
 				PlayerCode = playerCode,
+				BrandId = brandId,
 				ApplyInfo = JsonSerializer.Serialize(applyInfo, U2PayUtility.SerializerOptions)
 			});
 
@@ -3936,12 +3936,12 @@ public class DepositTests(ITestOutputHelper testOutputHelper)
 				"thirdPartyOrderNo"));
 
 		_ = fakePaymentServiceClient.GetDepositFormAsync(
-			Arg.Is(brandId),
 			Arg.Any<Guid>(),
 			Arg.Any<CancellationToken>())
 			.Returns(new DepositFormInfo
 			{
 				PlayerCode = playerCode,
+				BrandId = brandId,
 				ApplyInfo = JsonSerializer.Serialize(applyInfo, U2PayUtility.SerializerOptions)
 			});
 
@@ -4135,12 +4135,12 @@ public class DepositTests(ITestOutputHelper testOutputHelper)
 				"thirdPartyOrderNo"));
 
 		_ = fakePaymentServiceClient.GetDepositFormAsync(
-			Arg.Is(brandId),
 			Arg.Any<Guid>(),
 			Arg.Any<CancellationToken>())
 			.Returns(new DepositFormInfo
 			{
 				PlayerCode = playerCode,
+				BrandId = brandId,
 				ApplyInfo = JsonSerializer.Serialize(applyInfo, U2PayUtility.SerializerOptions)
 			});
 
@@ -4335,12 +4335,12 @@ public class DepositTests(ITestOutputHelper testOutputHelper)
 				"thirdPartyOrderNo"));
 
 		_ = fakePaymentServiceClient.GetDepositFormAsync(
-			Arg.Is(brandId),
 			Arg.Any<Guid>(),
 			Arg.Any<CancellationToken>())
 			.Returns(new DepositFormInfo
 			{
 				PlayerCode = playerCode,
+				BrandId = brandId,
 				ApplyInfo = JsonSerializer.Serialize(applyInfo, U2PayUtility.SerializerOptions)
 			});
 
@@ -4530,12 +4530,12 @@ public class DepositTests(ITestOutputHelper testOutputHelper)
 				"thirdPartyOrderNo"));
 
 		_ = fakePaymentServiceClient.GetDepositFormAsync(
-			Arg.Is(brandId),
 			Arg.Any<Guid>(),
 			Arg.Any<CancellationToken>())
 			.Returns(new DepositFormInfo
 			{
 				PlayerCode = playerCode,
+				BrandId = brandId,
 				ApplyInfo = JsonSerializer.Serialize(applyInfo, UBPayUtility.SerializerOptions)
 			});
 
@@ -4899,12 +4899,12 @@ public class DepositTests(ITestOutputHelper testOutputHelper)
 				new Uri("http://localhost")));
 
 		_ = fakePaymentServiceClient.GetDepositFormAsync(
-			Arg.Is(brandId),
 			Arg.Any<Guid>(),
 			Arg.Any<CancellationToken>())
 			.Returns(new DepositFormInfo
 			{
 				PlayerCode = playerCode,
+				BrandId = brandId,
 				ApplyInfo = JsonSerializer.Serialize(applyInfo, PhpGoPayUtility.SerializerOptions)
 			});
 

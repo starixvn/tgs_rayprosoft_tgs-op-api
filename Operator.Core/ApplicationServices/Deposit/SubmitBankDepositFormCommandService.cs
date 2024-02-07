@@ -15,24 +15,25 @@ internal class SubmitBankDepositFormCommandService(
 	IPaymentServiceClient paymentServiceClient,
 	IFileServiceClient fileServiceClient,
 	IQueryService<BrandPaymentsQuery, BrandPaymentInfo> brandPaymentsQueryService,
-	IGetService<GetPaymentQuery, PaymentInfo> getPaymentService) : ICommandService<SubmitBankDepositFormCommand>
+	IGetService<GetPaymentQuery, PaymentInfo> getPaymentService)
+	: ICommandService<SubmitBankDepositFormCommand>
 {
 	private readonly IQueryService<BrandPaymentsQuery, BrandPaymentInfo> _brandPaymentsQueryService = brandPaymentsQueryService ?? throw new ArgumentNullException(nameof(brandPaymentsQueryService));
 	private readonly IFileServiceClient _fileServiceClient = fileServiceClient ?? throw new ArgumentNullException(nameof(fileServiceClient));
 	private readonly IGetService<GetPaymentQuery, PaymentInfo> _getPaymentService = getPaymentService ?? throw new ArgumentNullException(nameof(getPaymentService));
+
 	private readonly IPaymentServiceClient _paymentServiceClient =
 			paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
 
-	public async ValueTask ExecuteAsync(SubmitBankDepositFormCommand command,
+	public async ValueTask ExecuteAsync(
+		SubmitBankDepositFormCommand command,
 		CancellationToken cancellationToken = default)
 	{
-		var formData = await _paymentServiceClient
-			.GetDepositFormAsync(
-				command.BrandId,
-				command.FormId, cancellationToken)
-			.ConfigureAwait(false);
+		var formData = await _paymentServiceClient.GetDepositFormAsync(
+			command.FormId,
+			cancellationToken).ConfigureAwait(false);
 
-		if (formData?.Status != PaymentFlowState.WaitPayment)
+		if (formData?.Status != PaymentFlowState.WaitPayment || formData?.BrandId != command.BrandId)
 			return;
 
 		var brandPayment = await _brandPaymentsQueryService
