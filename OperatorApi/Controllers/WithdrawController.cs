@@ -23,7 +23,7 @@ public class WithdrawController : ControllerBase
 	public async Task<Guid> CreateWithdrawRequestAsync(
 		[FromServices] IGetService<CheckPlayerIdentityCommand, bool> checkService,
 		[FromServices] IGetService<CreateWithdrawFormCommand, bool> checkCanCreateService,
-		[FromServices] ICommandService<CreateWithdrawFormCommand> createFormService,
+		[FromServices] IGetService<CreateWithdrawFormCommand, Guid> createFormService,
 		CreateWithdrawRequest request)
 	{
 		try
@@ -47,16 +47,13 @@ public class WithdrawController : ControllerBase
 				request.Amount,
 				request.Note);
 
-			if (!await checkCanCreateService
-					.GetAsync(command, HttpContext.RequestAborted)
-					.ConfigureAwait(false))
-				throw new PlayerCanNotWithdrawException();
-
-			await createFormService
-				.ExecuteAsync(command, HttpContext.RequestAborted)
-				.ConfigureAwait(false);
-
-			return await command.ReturnFormIdSource.Task.ConfigureAwait(false);
+			return !await checkCanCreateService.GetAsync(
+				command,
+				HttpContext.RequestAborted).ConfigureAwait(false)
+				? throw new PlayerCanNotWithdrawException()
+				: await createFormService.GetAsync(
+					command,
+					HttpContext.RequestAborted).ConfigureAwait(false);
 		}
 		catch (InsufficientFundsException)
 		{

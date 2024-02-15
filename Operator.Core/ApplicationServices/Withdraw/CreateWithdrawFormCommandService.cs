@@ -9,19 +9,17 @@ namespace TGS.Services.Operator.ApplicationServices.Withdraw;
 
 internal class CreateWithdrawFormCommandService(
 	IPaymentServiceClient paymentServiceClient,
-	IPlayerServiceClient playerServiceClient) : ICommandService<CreateWithdrawFormCommand>
+	IPlayerServiceClient playerServiceClient)
+	: IGetService<CreateWithdrawFormCommand, Guid>
 {
-	private readonly IPaymentServiceClient _paymentServiceClient = paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
-	private readonly IPlayerServiceClient _playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
-
-	public async ValueTask ExecuteAsync(CreateWithdrawFormCommand command, CancellationToken cancellationToken = default)
+	public async ValueTask<Guid> GetAsync(CreateWithdrawFormCommand command, CancellationToken cancellationToken = default)
 	{
-		var playerInfo = await _playerServiceClient
+		var playerInfo = await playerServiceClient
 			.GetPlayerInfoAsync(command.PlayerCode, cancellationToken)
 			.ConfigureAwait(false)
 			?? throw new PlayerNotFoundException("Can't find player.");
 
-		var createFormId = await _paymentServiceClient
+		var createFormId = await paymentServiceClient
 			.CreateWithdrawFormAsync(new WithdrawFormCreateInfo
 			{
 				Amount = command.Amount,
@@ -34,10 +32,11 @@ internal class CreateWithdrawFormCommandService(
 			}, cancellationToken)
 			.ConfigureAwait(false);
 
-		await _paymentServiceClient
-			.SubmitWithdrawFormStatusAsync(createFormId, PaymentFlowState.WaitApprove, cancellationToken: cancellationToken)
-			.ConfigureAwait(false);
+		await paymentServiceClient.SubmitWithdrawFormStatusAsync(
+			createFormId,
+			PaymentFlowState.WaitApprove,
+			cancellationToken: cancellationToken).ConfigureAwait(false);
 
-		command.ReturnFormIdSource.SetResult(createFormId);
+		return createFormId;
 	}
 }

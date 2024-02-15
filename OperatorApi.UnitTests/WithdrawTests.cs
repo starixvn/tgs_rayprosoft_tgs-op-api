@@ -108,7 +108,7 @@ public class WithdrawTests
 	}
 
 	[Test]
-	public void Create_Withdraw_Form_Not_Found_Player_Will_Throw_Exception()
+	public void CreateWithdrawFormCommandService_Create_Withdraw_Form_Not_Found_Player_Will_Throw_Exception()
 	{
 		var fakePaymentServiceClient = Substitute.For<IPaymentServiceClient>();
 		var fakePlayerService = Substitute.For<IPlayerServiceClient>();
@@ -124,11 +124,11 @@ public class WithdrawTests
 			1000M,
 			"ThisIsPlayerNote");
 
-		_ = Assert.ThrowsAsync<PlayerNotFoundException>(async () => await sut.ExecuteAsync(command));
+		_ = Assert.ThrowsAsync<PlayerNotFoundException>(async () => await sut.GetAsync(command));
 	}
 
 	[Test]
-	public async Task Player_Can_Create_Withdraw_Form()
+	public async Task CreateWithdrawFormCommandService_Player_Can_Create_Withdraw_Form()
 	{
 		var fakePaymentServiceClient = Substitute.For<IPaymentServiceClient>();
 		var fakePlayerService = Substitute.For<IPlayerServiceClient>();
@@ -195,9 +195,7 @@ public class WithdrawTests
 				expected.ShouldMatch(info);
 			});
 
-		await sut.ExecuteAsync(command);
-
-		var actual = await command.ReturnFormIdSource.Task;
+		var actual = await sut.GetAsync(command);
 
 		_ = fakePaymentServiceClient.Received(1)
 			.CreateWithdrawFormAsync(Arg.Any<WithdrawFormCreateInfo>());
