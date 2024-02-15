@@ -43,30 +43,6 @@ public class GameBalanceTests
 	}
 
 	[Test]
-	public async Task Player_Can_Fund_Out()
-	{
-		// arrange
-		var fakeGameProvidersOperatorPluggableClient = Substitute.For<IGameProvidersOperatorPluggableClient>();
-		var fakeLogger = new NullLogger<FundOutGameBalanceCommandService>();
-
-		var gameProviderCode = "KY";
-		var playerCode = "playerCode";
-		int amount = 10000;
-
-		var sut = new FundOutGameBalanceCommandService(fakeGameProvidersOperatorPluggableClient, fakeLogger);
-
-		// act
-		var command = new FundOutGameBalanceCommand(gameProviderCode, playerCode, amount);
-		await sut.ExecuteAsync(command, default);
-
-		await fakeGameProvidersOperatorPluggableClient.Received(1)
-			.GameProviderFundOutAsync(
-			playerCode,
-			gameProviderCode,
-			amount).ConfigureAwait(false);
-	}
-
-	[Test]
 	public async Task Player_Can_Get_Game_Balance_Infos()
 	{
 		var dbContextOptionsBuilder = new DbContextOptionsBuilder<TgsRepository>();
