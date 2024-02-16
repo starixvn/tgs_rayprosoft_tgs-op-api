@@ -10,7 +10,7 @@ export default class OperatorService {
 
     // #endregion Constructors (1)
 
-    // #region Public Methods (50)
+    // #region Public Methods (55)
 
     public async createIdentityAuthenticationForm(
         request: CreateIdentityAuthenticationFormRequest,
@@ -127,6 +127,19 @@ export default class OperatorService {
             .then(res => res.data);
     }
 
+    public getWithdrawForms(
+        request: GetWithdrawFormsRequest,
+        paging: PagingRequest): Promise<PagingResponse<WithdrawFormViewModel>>{
+            return this.http
+                .get("/api/withdraw/player/list",{
+                    params: {
+                        ...request,
+                        ...paging
+                    }
+                })
+                .then(res => res.data);
+        }
+
     public getWithdrawRequireBucketAmount(): Promise<number> {
         return this.http
             .get("/api/player/bucket/amount")
@@ -220,6 +233,30 @@ export default class OperatorService {
     public submitDibaoZaloDepositRequest(request: DepositRequest): Promise<SuccessResponse<DepositFormCreatedResponse>> {
         return this.http
             .post("/api/deposit/zalo/dibaopay", request)
+            .then<SuccessResponse<DepositFormCreatedResponse>>(res => res.data);
+    }
+
+    public submitFeibaoBankDepositRequest(request: DepositRequest): Promise<SuccessResponse<DepositFormCreatedResponse>> {
+        return this.http
+            .post("/api/deposit/bank/feibaopay", request)
+            .then<SuccessResponse<DepositFormCreatedResponse>>(res => res.data);
+    }
+
+    public submitFeibaoMomoDepositRequest(request: DepositRequest): Promise<SuccessResponse<DepositFormCreatedResponse>> {
+        return this.http
+            .post("/api/deposit/momo/feibaopay", request)
+            .then<SuccessResponse<DepositFormCreatedResponse>>(res => res.data);
+    }
+
+    public submitFeibaoThirdPartyDepositRequest(request: DepositRequest): Promise<SuccessResponse<DepositFormCreatedResponse>> {
+        return this.http
+            .post("/api/deposit/thirdparty/feibaopay", request)
+            .then(res => res.data);
+    }
+
+    public submitFeibaoZaloDepositRequest(request: DepositRequest): Promise<SuccessResponse<DepositFormCreatedResponse>> {
+        return this.http
+            .post("/api/deposit/zalo/feibaopay", request)
             .then<SuccessResponse<DepositFormCreatedResponse>>(res => res.data);
     }
 
@@ -447,18 +484,5 @@ export default class OperatorService {
             .then(res => res.data);
     }
 
-    public getWithdrawForms(
-        request: GetWithdrawFormsRequest,
-        paging: PagingRequest): Promise<PagingResponse<WithdrawFormViewModel>>{
-            return this.http
-                .get("/api/withdraw/player/list",{
-                    params: {
-                        ...request,
-                        ...paging
-                    }
-                })
-                .then(res => res.data);
-        }
-
-    // #endregion Public Methods (50)
+    // #endregion Public Methods (55)
 }
