@@ -270,7 +270,7 @@ public class PlayerController(ILogger<PlayerController> logger) : ControllerBase
 	public async ValueTask<PlayerInfoViewModel> GetPlayerAsync(
 		[FromServices] IGetService<GetPlayerMainDataQuery, Tgs.PlayerService.Client.PlayerInfo> getPlayerMainDataQueryService,
 		[FromServices] IGetService<GetPlayerStatusQuery, Tgs.PlayerService.Client.PlayerStatus> getPlayerStatusQueryService,
-		[FromServices] IGetService<GetPlayerVipLevelQuery, int> getPlayerVipLevelQueryService,
+		[FromServices] IGetService<GetPlayerVipLevelQuery, Tgs.VipLevelService.Common.ViewModels.PlayerVipLevelInfoViewModel> getPlayerVipLevelQueryService,
 		[FromServices] IGetService<GetPlayerPropertiesQuery, IImmutableDictionary<string, string>> getPlayerPropertiesQueryService,
 		[FromServices] IGetService<GetPlayerIsAutoTransferToGameQuery, bool> getAutoTransFlagService,
 		[FromServices] IGetService<GetPlayerIdentityFormQuery, PlayerIdentityFormInfo> getIdentityFormStatusService,
@@ -284,8 +284,8 @@ public class PlayerController(ILogger<PlayerController> logger) : ControllerBase
 			.ConfigureAwait(false)
 			?? throw new CoreExceptions.PlayerNotFoundException(playerCode, "Player not found.");
 
-		var vipLevel = await getPlayerVipLevelQueryService
-			.GetAsync(new GetPlayerVipLevelQuery(player.VipLevelId))
+		var playerVipLevelInfo = await getPlayerVipLevelQueryService
+			.GetAsync(new GetPlayerVipLevelQuery(player.PlayerCode))
 			.ConfigureAwait(false);
 
 		var playerProperties = await getPlayerPropertiesQueryService
@@ -321,7 +321,13 @@ public class PlayerController(ILogger<PlayerController> logger) : ControllerBase
 			IsSetPayPassword = player.IsSetPayPassword,
 			Username = player.UserName,
 			Birthdate = string.IsNullOrWhiteSpace(birthdateValue) ? null : DateOnly.ParseExact(birthdateValue, "MM/dd/yyyy"),
-			VipLevel = vipLevel,
+			VipLevel = playerVipLevelInfo.VipLevel,
+			AccumTurnover = playerVipLevelInfo.AccumTurnover,
+			AccumDeposit = playerVipLevelInfo.AccumDeposit,
+			LevelUpAccumulateBetAmount = playerVipLevelInfo.LevelUpAccumulateBetAmount,
+			LevelUpAccumulateDeposit = playerVipLevelInfo.LevelUpAccumulateDeposit,
+			FullLevel = playerVipLevelInfo.FullLevel,
+			NextVipLevel = playerVipLevelInfo.NextVipLevel,
 			RealName = playerProperties.GetValueOrDefault("RealName"),
 			Email = playerProperties.GetValueOrDefault("Email"),
 			Phone = playerProperties.GetValueOrDefault("Phone"),
