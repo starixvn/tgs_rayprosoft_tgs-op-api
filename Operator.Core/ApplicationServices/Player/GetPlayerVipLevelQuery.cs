@@ -2,4 +2,4 @@
 
 namespace TGS.Services.Operator.ApplicationServices.Player;
 
-public record GetPlayerVipLevelQuery(Guid? VipLevelId);
+public record GetPlayerVipLevelQuery(string PlayerCode);

@@ -1,10 +1,12 @@
 ﻿#nullable enable
 
 using System.Collections.Immutable;
+using System.Numerics;
 using Moq;
 using NSubstitute;
 using NUnit.Framework.Legacy;
 using Tgs.PlayerService.Client;
+using Tgs.VipLevelService.Clients;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Services.Operations;
 using TGS.Services.Operator;
@@ -152,41 +154,24 @@ public class PlayerInfoTests
 	}
 
 	[Test]
-	public async Task Query_Player_Info_Should_Get_Player_VipLevel_When_VipLevelId_Is_Not_Null()
+	public async Task Querying_Player_Information_Should_Obtain_The_Player_VipLevel()
 	{
-		var moqVipLevelRepository = new Mock<IVipLevelRepository>();
+		var moqVipLevelServiceClient = new Mock<IVipLevelServiceClient>();
 
-		var sut = new GetPlayerVipLevelQueryService(moqVipLevelRepository.Object);
+		var sut = new GetPlayerVipLevelQueryService(moqVipLevelServiceClient.Object);
 
-		var vipLevelId = Guid.NewGuid();
+		var playerCode = "abcdef123456";
 
-		var query = new GetPlayerVipLevelQuery(vipLevelId);
+		var query = new GetPlayerVipLevelQuery(playerCode);
 
 		_ = await sut.GetAsync(query).ConfigureAwait(false);
 
-		moqVipLevelRepository
+		moqVipLevelServiceClient
 			.Verify(fake =>
-					fake.GetVipLevelAsync(
-						It.Is<Guid>(x => x == vipLevelId)),
-				Times.Exactly(1));
-	}
-
-	[Test]
-	public async Task Query_Player_Info_Should_Not_Get_Player_VipLevel_When_VipLevelId_Is_Null()
-	{
-		var moqVipLevelRepository = new Mock<IVipLevelRepository>();
-
-		var sut = new GetPlayerVipLevelQueryService(moqVipLevelRepository.Object);
-
-		var query = new GetPlayerVipLevelQuery(null);
-
-		_ = await sut.GetAsync(query).ConfigureAwait(false);
-
-		moqVipLevelRepository
-			.Verify(fake =>
-					fake.GetVipLevelAsync(
-						It.IsAny<Guid>()),
-				Times.Never);
+				fake.PlayerVipLevelGetAsync(
+					It.Is<string>(x => x == playerCode),
+					It.IsAny<CancellationToken>()),
+					Times.Exactly(1));
 	}
 
 	[Test]

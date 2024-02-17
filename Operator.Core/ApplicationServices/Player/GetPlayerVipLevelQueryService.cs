@@ -1,25 +1,14 @@
-﻿using System;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using Tgs.ServiceUtility;
+using Tgs.VipLevelService.Clients;
 
 namespace TGS.Services.Operator.ApplicationServices.Player;
 
 internal class GetPlayerVipLevelQueryService(
-	IVipLevelRepository vipLevelRepository) : IGetService<GetPlayerVipLevelQuery, int>
+	IVipLevelServiceClient vipLevelServiceClient) : IGetService<GetPlayerVipLevelQuery, Tgs.VipLevelService.Common.ViewModels.PlayerVipLevelInfoViewModel>
 {
-	private readonly IVipLevelRepository _vipLevelRepository = vipLevelRepository ?? throw new ArgumentNullException(nameof(vipLevelRepository));
+	public ValueTask<Tgs.VipLevelService.Common.ViewModels.PlayerVipLevelInfoViewModel> GetAsync(GetPlayerVipLevelQuery query, CancellationToken cancellationToken = default)
+		=> vipLevelServiceClient.PlayerVipLevelGetAsync(query.PlayerCode, cancellationToken);
 
-	public async ValueTask<int> GetAsync(GetPlayerVipLevelQuery query, CancellationToken cancellationToken = default)
-	{
-		int? vipLevel = null;
-
-		if (query.VipLevelId.HasValue)
-		{
-			vipLevel = await _vipLevelRepository.GetVipLevelAsync(query.VipLevelId.Value)
-				.ConfigureAwait(false);
-		}
-
-		return vipLevel ?? 0;
-	}
 }
