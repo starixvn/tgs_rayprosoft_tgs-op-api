@@ -4733,12 +4733,12 @@ public class DepositTests(ITestOutputHelper testOutputHelper)
 			""";
 
 		// Act
-		var actual = await StaticNodeJSService.InvokeFromStringAsync<GetUBPayExchangeRateResponse>(
+		var actual = await StaticNodeJSService.InvokeFromStringAsync<SuccessResponse<GetUBPayExchangeRateResponse>>(
 			nodeModule,
 			args: [brandToken, loginResult.PlayerToken, brandPaymentId]);
 
 		// Assert
-		Assert.Equal(applyInfo.Response.Rate, actual?.Rate);
+		Assert.Equal(applyInfo.Response.Rate, actual?.Data.Rate);
 	}
 
 	[Fact]
