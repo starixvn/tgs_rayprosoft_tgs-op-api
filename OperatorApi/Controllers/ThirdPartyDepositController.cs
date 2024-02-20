@@ -1,6 +1,7 @@
 ﻿using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Tgs.Payment.AlfaPay;
+using Tgs.Payment.AlfaPay.Client;
 using Tgs.Payment.Clients;
 using Tgs.Payment.DibaoPay.Client;
 using Tgs.Payment.FeibaoPay.Client;
@@ -335,7 +336,6 @@ public class ThirdPartyDepositController : ControllerBase
 	public async Task<DepositFormCreatedResponse> SubmitAlfaPayDepositRequestAsync(
 		[FromServices] IGetService<CreateDepositFormCommand, Guid> createDepositFormService,
 		[FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
-		[FromServices] AlfaPaySerializer serializer,
 		[FromServices] IGetService<GetDepositFormQuery, DepositFormInfo> getDepositFormService,
 		[FromServices] ICommandService<SubmitDepositFormThirdPartyOrderNoCommand> updateDepositFormService,
 		[FromBody] SubmitDepositRequest request)
@@ -356,12 +356,13 @@ public class ThirdPartyDepositController : ControllerBase
 			request.Amount,
 			"tgs.payment.alfapay.deposit",
 			request.PromotionId,
-			formId => serializer.Serialize(
+			formId => JsonSerializer.Serialize(
 				new AlfaPayDepositSettings(
 					brandPaymentInfo.RootElement.GetProperty("apiToken").GetString(),
 					brandPaymentInfo.RootElement.GetProperty("notifyToken").GetString(),
 					formId,
-					null)));
+					null),
+				AlfaPayUtility.SerializerOptions));
 
 		var createdFormId = await createDepositFormService
 			.GetAsync(command, HttpContext.RequestAborted)
@@ -376,11 +377,11 @@ public class ThirdPartyDepositController : ControllerBase
 			.GetAsync(getDepositFormQuery, HttpContext.RequestAborted)
 			.ConfigureAwait(false);
 
-		var applyInfo = serializer.Deserialize<AlfaPayDepositApplyInfo>(formData.ApplyInfo!);
+		var applyInfo = JsonSerializer.Deserialize<AlfaPayDepositApplyInfo>(formData.ApplyInfo!, AlfaPayUtility.SerializerOptions);
 
 		var updateThirdPartyOrderNoCommand = new SubmitDepositFormThirdPartyOrderNoCommand(
 			createdFormId,
-			applyInfo.Response.Data.TradeNo);
+			applyInfo.Response.ThirdPartyOrderNo);
 
 		await updateDepositFormService
 			.ExecuteAsync(updateThirdPartyOrderNoCommand, HttpContext.RequestAborted)
@@ -389,7 +390,7 @@ public class ThirdPartyDepositController : ControllerBase
 		return new DepositFormCreatedResponse
 		{
 			FormId = createdFormId,
-			PaymentUrl = applyInfo.Response.Data.Uri.ToString()
+			PaymentUrl = applyInfo.Response.RedirectUrl.ToString(),
 		};
 	}
 

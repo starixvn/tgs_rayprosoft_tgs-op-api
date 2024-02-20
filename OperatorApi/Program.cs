@@ -14,7 +14,6 @@ using NATS.Client.Core;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
-using Tgs.Payment.AlfaPay;
 using Tgs.Payment.Help2Pay;
 using Tgs.Payment.LeePay;
 using Tgs.Payment.MalakiPay;
@@ -158,7 +157,6 @@ builder.Services
 	.AddSingleton<ZeroNineNinePaySerializer>()
 	.AddSingleton<TuPaySerializer>()
 	.AddSingleton<MalakiPaySerializer>()
-	.AddSingleton<AlfaPaySerializer>()
 	.AddTgsRepository(builder.Configuration, "Tgs")
 	.AddMemoryCache()
 	.AddWebApiServices()
@@ -239,7 +237,7 @@ builder.Services
 	.Decorate<IValidateCodeGenerator, ConstValidateCodeGenerator>()
 	.AddHostedService<PaymentNotifyConsumer>()
 	.AddHostedService<PushNotifyfConsumer>()
-	.AddNotificationClient();	
+	.AddNotificationClient();
 
 builder.Services
 	.AddRedis((options, sp) =>
