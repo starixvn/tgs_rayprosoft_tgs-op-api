@@ -230,6 +230,10 @@ builder.Services
 		c.BaseAddress = new Uri(url.Value);
 	})
 	.Services
+	.AddAgentClient()
+	.ConfigureHttpClient(httpBuilder => httpBuilder.BaseAddress =
+		builder.Configuration.GetValue<Uri>("Operator:AgentBaseUrl"))
+	.Services
 	.AddOptions<ConstValidateCodeOptions>()
 	.Configure<IConfiguration>((options, config) => config
 		.GetSection("Operator").Bind(options))

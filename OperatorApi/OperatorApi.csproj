@@ -65,6 +65,7 @@
 		<PackageReference Include="ProfileViewer.OpenTelemetry.Exporter" Version="0.3.1" />
 		<PackageReference Include="Scrutor" Version="4.2.2" />
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+		<PackageReference Include="Tgs.Agent.Client" Version="0.0.29" />
 		<PackageReference Include="Tgs.Interceptors" Version="0.2.1" />
 		<PackageReference Include="Tgs.Notification.Client" Version="0.1.0" />
 		<PackageReference Include="Tgs.Payment.AlfaPay.Client" Version="0.0.8" />
