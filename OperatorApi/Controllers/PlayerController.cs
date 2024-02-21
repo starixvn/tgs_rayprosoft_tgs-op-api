@@ -3,8 +3,11 @@ using System.Globalization;
 using System.Net.Mime;
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
+using Tgs.Agent.Client;
+using Tgs.Agent.Client.Models;
 using Tgs.BrandCertificate;
 using Tgs.Payment.Clients;
+using Tgs.PlayerService.Client;
 using Tgs.ServiceUtility;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
@@ -39,6 +42,8 @@ public class PlayerController(ILogger<PlayerController> logger) : ControllerBase
 	[AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
 	[Consumes(MediaTypeNames.Application.Json)]
 	public async Task<ChangePasswordResponse> ChangePasswordAsync(
+		[FromServices] IPlayerServiceClient playerServiceClient,
+		[FromServices] IAgentClient agentClient,
 		[FromServices] IGetService<ChangePasswordQuery, ChangePasswordInfo> getChangePasswordQueryService,
 		[FromBody] ChangePasswordRequest request)
 	{
@@ -51,6 +56,10 @@ public class PlayerController(ILogger<PlayerController> logger) : ControllerBase
 			request.OldPassword,
 			request.NewPassword);
 
+		var playerAgentId =
+			await playerServiceClient.GetAgentIdForPlayerUpgradedAsync(playerTokenData.PlayerCode,
+				HttpContext.RequestAborted);
+
 		ChangePasswordInfo info;
 
 		try
@@ -58,6 +67,15 @@ public class PlayerController(ILogger<PlayerController> logger) : ControllerBase
 			info = await getChangePasswordQueryService
 				.GetAsync(query)
 				.ConfigureAwait(false);
+
+			if (playerAgentId is not null)
+			{
+				await agentClient
+					.SetAgentPasswordAsync(
+						new SetAgentPasswordRequest(playerAgentId!.Value, request.NewPassword, playerTokenData.PlayerCode),
+						HttpContext.RequestAborted)
+					.ConfigureAwait(false);
+			}
 		}
 		catch (InvalidCredentialsException)
 		{

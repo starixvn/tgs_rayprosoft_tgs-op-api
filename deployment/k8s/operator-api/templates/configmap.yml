@@ -24,7 +24,8 @@ data:
         "PlayerBucketBaseUrl": "http://tgs-playerbucket-service",
         "VipLevelServiceBaseUrl": "http://tgs-viplevel",
         "ArticleManagementBaseUrl": "http://tgs-article-management",
-        "BrandGameCreditsBaseUrl": "http://brand-gamecredits"
+        "BrandGameCreditsBaseUrl": "http://brand-gamecredits",
+        "AgentBaseUrl": "http://agent-service"
       },
       "ConnectionStrings": {
         "Tgs": "{{ .Values.connectionStrings.tgs }}",
