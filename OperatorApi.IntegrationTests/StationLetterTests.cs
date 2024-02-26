@@ -1197,15 +1197,18 @@ public class StationLetterTests(ITestOutputHelper testOutputHelper)
 		Assert.NotNull(actual);
 		Assert.Equal(0, actual.Error);
 
+		var a = new[] { brandCode };
+		IEnumerable<string> b = [brandCode];
+
 		var requestExpected = new StationLetterRequest(
 			playerCode,
-			new[] { brandCode },
+			[brandCode],
 			request.Subject,
 			request.Content,
 			userName).ToExpectedObject(ctx =>
 			{
 				_ = ctx.IgnoreEqualsOverride();
-				_ = ctx.ArrayMemberShouldEqual(o => o.Receivers);
+				_ = ctx.ArrayMemberShouldMatch(o => o.Receivers);
 			});
 		_ = fakeStationLetterClient.Received(1)
 			.SendStationLetterAsync(

@@ -31,6 +31,7 @@ using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Filters;
 using TGS.Apis.OperatorApi.Filters.Swaggers;
 using TGS.Apis.OperatorApi.Models;
+using TGS.Apis.OperatorApi.Models.Deposit;
 using TGS.Apis.OperatorApi.SignalR;
 using TGS.Core.DataServices.Tgs.Extensions;
 using TGS.Core.Infrastructures.ErrorMappers;
@@ -146,6 +147,7 @@ builder.Services
 			http.BaseAddress = config.GetValue<Uri>("Operator:PaymentServiceBaseUrl");
 		}))
 	.Services
+	.AddScoped<DepositFormCommandBuilderFactory>()
 	.AddTransient<IGetService<GetSM01HtmlContentQuery, SM01HtmlContentInfo>, GetSM01HtmlContentQueryService>()
 	.AddSingleton<ManualDepositSerializer>()
 	.AddSingleton<PrimePaySerializer>()
