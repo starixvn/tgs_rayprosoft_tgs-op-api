@@ -12,8 +12,10 @@ internal class FundOutBeforeEnterGameCommandService(
 	ICommandService<FundOutGameBalanceCommand> fundInService) : ICommandService<FundOutBeforeEnterGameCommand>
 {
 	private readonly ICommandService<FundOutGameBalanceCommand> _fundOutService = fundInService ?? throw new ArgumentNullException(nameof(fundInService));
+
 	private readonly IGetService<GetBalanceQuery, BalanceInfo> _getPlayerBalanceService = getPlayerBalanceService ??
 			throw new ArgumentNullException(nameof(getPlayerBalanceService));
+
 	private readonly IPlayerRepository _playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
 
 	public async ValueTask ExecuteAsync(FundOutBeforeEnterGameCommand command,

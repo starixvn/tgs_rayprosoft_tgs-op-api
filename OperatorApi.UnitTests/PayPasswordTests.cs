@@ -1,7 +1,6 @@
 ﻿using System.Globalization;
 using ExpectedObjects;
 using FluentValidation.TestHelper;
-using NSubstitute;
 using NUnit.Framework.Legacy;
 using Tgs.BrandCertificate.Clients;
 using Tgs.Core.Infrastructures.Security;

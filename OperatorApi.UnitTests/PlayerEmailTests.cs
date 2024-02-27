@@ -1,7 +1,6 @@
 ﻿using System.Collections.Immutable;
 using System.Globalization;
 using ExpectedObjects;
-using NSubstitute;
 using NUnit.Framework.Legacy;
 using Tgs.BrandCertificate.Clients;
 using Tgs.PlayerService.Client;

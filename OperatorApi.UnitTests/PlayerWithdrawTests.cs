@@ -17,7 +17,7 @@ public class PlayerWithdrawTests
 		var query = new WithdrawFormsQuery(
 			BrandId: Guid.NewGuid(),
 			"playerCode",
-			new List<PaymentFlowState>(),
+			[],
 			CreateOnRange: null,
 			UpdateOnRange: null,
 			new Paging());
@@ -41,7 +41,7 @@ public class PlayerWithdrawTests
 		var query = new WithdrawFormsQuery(
 			Guid.NewGuid(),
 			"PlayerCode",
-			Array.Empty<PaymentFlowState>(),
+			[],
 			null,
 			null,
 			new Paging());

@@ -1,5 +1,4 @@
 ﻿using Moq;
-using NSubstitute;
 using Tgs.BrandCertificate.Clients;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Services.Operations;

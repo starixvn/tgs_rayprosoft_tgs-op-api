@@ -1,7 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Logging.Abstractions;
-using NSubstitute;
 using NUnit.Framework.Legacy;
 using Tgs.GameProviders.Pluggable.Client;
 using TGS.Core.DataServices.Tgs;

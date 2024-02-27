@@ -85,7 +85,7 @@ internal class StartChangePayPasswordCommandService(
 				saveResult.ValidateCode);
 
 			var mailMessage = new SendEmailRequest(
-				new[] { player.Email },
+				[player.Email],
 				mailSubject,
 				mailBody);
 

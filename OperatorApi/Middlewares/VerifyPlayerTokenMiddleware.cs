@@ -4,16 +4,12 @@ using System.Diagnostics;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
-using Tgs.Core.Infrastructures.Security;
-using Tgs.PlayerService.Client;
 using Tgs.ServiceUtility;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.Messages;
 using TGS.Core.Models.Tokens;
-using TGS.Services.Operator;
 using TGS.Services.Operator.ApplicationServices.Player;
-using PlayerInfo = Tgs.PlayerService.Client.PlayerInfo;
 
 namespace TGS.Apis.OperatorApi.Middlewares;
 
@@ -28,10 +24,6 @@ public sealed class VerifyPlayerTokenMiddleware(
 
 	public async Task InvokeAsync(
 		HttpContext context,
-		IPlayerServiceClient playerServiceClient,
-		IBrandRepository brandRepository,
-		IJwtTokenHandler handler,
-		IGetService<GetPlayerMainDataQuery, PlayerInfo?> playerDataQueryService,
 		IGetService<PlayerTokenParserCommand, PlayerTokenData?> playerTokenParserCommandService,
 		ICommandService<ValidatePlayerLoginRecordCommand> loginRecordValidateService)
 	{

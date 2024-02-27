@@ -69,7 +69,7 @@
 		<PackageReference Include="Tgs.Interceptors" Version="0.2.1" />
 		<PackageReference Include="Tgs.Notification.Client" Version="0.1.0" />
 		<PackageReference Include="Tgs.Payment.AlfaPay.Client" Version="0.0.8" />
-		<PackageReference Include="Tgs.Payment.DibaoPay.Client" Version="0.0.2" />
+		<PackageReference Include="Tgs.Payment.DibaoPay.Client" Version="0.0.3" />
 		<PackageReference Include="Tgs.Payment.FeibaoPay.Client" Version="0.0.2" />
 		<PackageReference Include="Tgs.Payment.FiveSevenPay.Client" Version="0.0.3" />
 		<PackageReference Include="Tgs.Payment.GanyoPay.Client" Version="0.0.2" />

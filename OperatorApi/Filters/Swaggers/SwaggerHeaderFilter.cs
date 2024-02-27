@@ -8,7 +8,7 @@ public sealed class SwaggerHeaderFilter : IOperationFilter
 {
 	void IOperationFilter.Apply(OpenApiOperation operation, OperationFilterContext context)
 	{
-		operation.Parameters ??= new List<OpenApiParameter>();
+		operation.Parameters ??= [];
 
 		var meta = context.ApiDescription.ActionDescriptor.EndpointMetadata;
 

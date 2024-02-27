@@ -21,6 +21,7 @@ internal class GetGameProvidersQueryService(
 {
 	private readonly IGameProviderRepository _gameProviderRepository =
 			gameProviderRepository ?? throw new ArgumentNullException(nameof(gameProviderRepository));
+
 	private readonly IPlayerOperations _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
 
 	public async IAsyncEnumerable<GameProviderInfo> QueryAsync(
@@ -121,7 +122,7 @@ internal class GetGameProvidersQueryService(
 				GameStatus.Maintenance,
 				GameStatus.Testing
 			],
-			_ => Array.Empty<GameStatus>()
+			_ => []
 		};
 
 	private static Status[] GetAvailableStatus(PlayerType playerType)

@@ -14,6 +14,7 @@ internal class ResetPasswordCommandService(
 {
 	private readonly IPasswordHandler _passwordHandler = passwordHandler ?? throw new ArgumentNullException(nameof(passwordHandler));
 	private readonly IPlayerRepository _playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
+
 	private readonly IValidateCodeOperator _validateCodeOperator =
 			validateCodeOperator ?? throw new ArgumentNullException(nameof(validateCodeOperator));
 

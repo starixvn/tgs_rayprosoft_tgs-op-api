@@ -1,5 +1,4 @@
 ﻿using Moq;
-using NSubstitute;
 using Tgs.Payment.Clients;
 using Tgs.PlayerService.Client;
 using TGS.Services.Operator.ApplicationServices.BrandPayments;

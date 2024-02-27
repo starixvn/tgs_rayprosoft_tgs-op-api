@@ -1,7 +1,6 @@
 ﻿using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.FeatureManagement;
-using Polly;
 using Tgs.BrandCertificate;
 using Tgs.BrandCertificate.Clients;
 using Tgs.BrandGameCredits.Common;
@@ -66,55 +65,6 @@ public sealed class VerifyBrandOperationMiddleware(
 		await next(context);
 	}
 
-	private async ValueTask<bool> CheckBrandIdNotNullAsync(HttpContext context, Guid? brandId)
-	{
-		if (brandId is null)
-		{
-			logger.LogDebug("Missing Brand Token");
-
-			context.Response.StatusCode = StatusCodes.Status401Unauthorized;
-
-			await context.Response.WriteAsJsonAsync(new TgsResponse
-			{
-				Error = 101,
-				ErrorMessage = "InvalidCredentials",
-				ErrorMessageKey = "InvalidCredentials"
-			}).ConfigureAwait(false);
-
-			return false;
-		}
-
-		return true;
-	}
-
-	private async ValueTask<bool> CheckBrandStatusAsync(
-		HttpContext context,
-		Guid brandId,
-		IBrandServiceClient brandServiceClient)
-	{
-		var brandStatus = await brandServiceClient.GetBrandStatusAsync(
-			brandId,
-			context.RequestAborted).ConfigureAwait(false);
-
-		if (brandStatus is not (BrandStatus.Active or BrandStatus.Maintenance))
-		{
-			logger.LogDebug("Brand is inactive");
-
-			context.Response.StatusCode = StatusCodes.Status401Unauthorized;
-
-			await context.Response.WriteAsJsonAsync(new TgsResponse
-			{
-				Error = 404,
-				ErrorMessage = "InvalidStatus",
-				ErrorMessageKey = "InvalidStatus"
-			}).ConfigureAwait(false);
-
-			return false;
-		}
-
-		return true;
-	}
-
 	private static async ValueTask<bool> CheckRiskAsync(
 		HttpContext context,
 		Guid brandId,
@@ -167,6 +117,55 @@ public sealed class VerifyBrandOperationMiddleware(
 				Error = 403,
 				ErrorMessage = "UnderMaintenance",
 				ErrorMessageKey = "UnderMaintenance"
+			}).ConfigureAwait(false);
+
+			return false;
+		}
+
+		return true;
+	}
+
+	private async ValueTask<bool> CheckBrandIdNotNullAsync(HttpContext context, Guid? brandId)
+	{
+		if (brandId is null)
+		{
+			logger.LogDebug("Missing Brand Token");
+
+			context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+
+			await context.Response.WriteAsJsonAsync(new TgsResponse
+			{
+				Error = 101,
+				ErrorMessage = "InvalidCredentials",
+				ErrorMessageKey = "InvalidCredentials"
+			}).ConfigureAwait(false);
+
+			return false;
+		}
+
+		return true;
+	}
+
+	private async ValueTask<bool> CheckBrandStatusAsync(
+		HttpContext context,
+		Guid brandId,
+		IBrandServiceClient brandServiceClient)
+	{
+		var brandStatus = await brandServiceClient.GetBrandStatusAsync(
+			brandId,
+			context.RequestAborted).ConfigureAwait(false);
+
+		if (brandStatus is not (BrandStatus.Active or BrandStatus.Maintenance))
+		{
+			logger.LogDebug("Brand is inactive");
+
+			context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+
+			await context.Response.WriteAsJsonAsync(new TgsResponse
+			{
+				Error = 404,
+				ErrorMessage = "InvalidStatus",
+				ErrorMessageKey = "InvalidStatus"
 			}).ConfigureAwait(false);
 
 			return false;

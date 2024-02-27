@@ -5,7 +5,6 @@ using System.Security.Claims;
 using ExpectedObjects;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.IdentityModel.Tokens;
-using NSubstitute;
 using NUnit.Framework.Legacy;
 using Tgs.Core.Infrastructures.Security;
 using TGS.Core.Models.Enums;

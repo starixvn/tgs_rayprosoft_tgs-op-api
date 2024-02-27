@@ -72,15 +72,20 @@ public class PlayerInfoViewModel
 	public int VipLevel { get; set; }
 
 	[JsonPropertyName("accumturnover")]
-	public decimal	AccumTurnover { get; set; }
+	public decimal AccumTurnover { get; set; }
+
 	[JsonPropertyName("accumdeposit")]
 	public decimal AccumDeposit { get; set; }
+
 	[JsonPropertyName("levelupaccumulatebetamount")]
 	public decimal LevelUpAccumulateBetAmount { get; set; }
+
 	[JsonPropertyName("levelupaccumulatedeposit")]
 	public decimal LevelUpAccumulateDeposit { get; set; }
+
 	[JsonPropertyName("fulllevel")]
 	public bool FullLevel { get; set; }
+
 	[JsonPropertyName("nextviplevel")]
 	public int NextVipLevel { get; set; }
 

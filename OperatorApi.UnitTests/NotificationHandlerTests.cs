@@ -1,5 +1,4 @@
 ﻿using Google.Protobuf;
-using NSubstitute;
 using Tgs.Notification.Protos;
 using TGS.Services.Operator.MessageQueue;
 using TGS.Services.Operator.Notify;

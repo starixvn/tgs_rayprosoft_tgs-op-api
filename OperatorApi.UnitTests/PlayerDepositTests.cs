@@ -18,7 +18,7 @@ public class PlayerDepositTests
 		var query = new DepositFormsQuery(
 			BrandId: Guid.NewGuid(),
 			"playerCode",
-			new List<PaymentFlowState>(),
+			[],
 			CreateOnRange: null,
 			UpdateOnRange: null,
 			new Paging());
@@ -42,7 +42,7 @@ public class PlayerDepositTests
 		var query = new DepositFormsQuery(
 			BrandId: Guid.NewGuid(),
 			"playerCode",
-			new List<PaymentFlowState>(),
+			[],
 			CreateOnRange: null,
 			UpdateOnRange: null,
 			new Paging());

@@ -138,7 +138,7 @@ public class StationLetterV2Controller : ControllerBase
 
 		var command = new SendStationLetterCommand(
 			playerTokenData.PlayerCode,
-			new[] { brandInfo.Code },
+			[brandInfo.Code],
 			viewModel.Subject,
 			viewModel.Content,
 			playerInfo.UserName);
