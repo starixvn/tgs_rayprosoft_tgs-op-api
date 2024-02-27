@@ -585,7 +585,7 @@ public class RegisterFlowTests
 	[Test]
 	public async Task If_Has_Any_Undone_Step_ConfirmCompleted_Should_Return_True()
 	{
-		var sut = new RegisterFlow(Array.Empty<IRegisterFlowStep>(), NullLogger<RegisterFlow>.Instance);
+		var sut = new RegisterFlow([], NullLogger<RegisterFlow>.Instance);
 
 		var actual = await sut.ConfirmCompletedAsync(null);
 

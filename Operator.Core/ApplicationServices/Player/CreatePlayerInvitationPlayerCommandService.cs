@@ -18,47 +18,6 @@ internal class CreatePlayerInvitationPlayerCommandService(
 	private readonly IPlayerServiceClient _playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
 	private readonly IVipLevelServiceClient _vipLevelServiceClient = vipLevelServiceClient ?? throw new ArgumentNullException(nameof(vipLevelServiceClient));
 
-	private async Task<string> CreatePlayerByUpperPlayerAsync(
-		CreatePlayerWithPlayerInvitationCommand command,
-		string currency,
-		int betLimitId,
-		Guid vipId,
-		CancellationToken cancellationToken)
-	{
-		var upperPlayer = await _playerServiceClient
-			.GetPlayerInfoAsync(command.UpperPlayerCode, cancellationToken)
-			.ConfigureAwait(false);
-
-		var upperPlayerStatus = await _playerServiceClient
-			.GetPlayerStatusAsync(command.UpperPlayerCode, cancellationToken)
-			.ConfigureAwait(false);
-
-		if (upperPlayer == null
-			|| upperPlayer.BrandId != command.BrandId
-			|| upperPlayerStatus != PlayerStatus.Enabled)
-			throw new InvalidInvitationCodeException(
-				command.UpperPlayerCode,
-				"Can't find the player info");
-
-		var result = await _playerServiceClient.CreatePlayerAsync(
-			new CreatePlayerData(
-				command.BrandId,
-				null,
-				vipId,
-				currency,
-				command.UserName,
-				command.Password,
-				upperPlayer.PlayerCode,
-				betLimitId,
-				command.IsTestPlayer
-					? PlayerType.TestPlayer
-					: PlayerType.RealPlayer,
-				RegisterSiteType.Player,
-				command.UserName), cancellationToken);
-
-		return result;
-	}
-
 	public async ValueTask<CreatePlayerInfo> GetAsync(
 		CreatePlayerWithPlayerInvitationCommand command,
 		CancellationToken cancellationToken = default)
@@ -102,5 +61,46 @@ internal class CreatePlayerInvitationPlayerCommandService(
 			.ConfigureAwait(false);
 
 		return new CreatePlayerInfo(resultPlayerCode, true);
+	}
+
+	private async Task<string> CreatePlayerByUpperPlayerAsync(
+			CreatePlayerWithPlayerInvitationCommand command,
+		string currency,
+		int betLimitId,
+		Guid vipId,
+		CancellationToken cancellationToken)
+	{
+		var upperPlayer = await _playerServiceClient
+			.GetPlayerInfoAsync(command.UpperPlayerCode, cancellationToken)
+			.ConfigureAwait(false);
+
+		var upperPlayerStatus = await _playerServiceClient
+			.GetPlayerStatusAsync(command.UpperPlayerCode, cancellationToken)
+			.ConfigureAwait(false);
+
+		if (upperPlayer == null
+			|| upperPlayer.BrandId != command.BrandId
+			|| upperPlayerStatus != PlayerStatus.Enabled)
+			throw new InvalidInvitationCodeException(
+				command.UpperPlayerCode,
+				"Can't find the player info");
+
+		var result = await _playerServiceClient.CreatePlayerAsync(
+			new CreatePlayerData(
+				command.BrandId,
+				null,
+				vipId,
+				currency,
+				command.UserName,
+				command.Password,
+				upperPlayer.PlayerCode,
+				betLimitId,
+				command.IsTestPlayer
+					? PlayerType.TestPlayer
+					: PlayerType.RealPlayer,
+				RegisterSiteType.Player,
+				command.UserName), cancellationToken);
+
+		return result;
 	}
 }

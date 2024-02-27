@@ -15,6 +15,7 @@ internal class ChangePayPasswordCommandService(
 {
 	private readonly IPasswordHandler _passwordHandler = passwordHandler ?? throw new ArgumentNullException(nameof(passwordHandler));
 	private readonly IPlayerOperations _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
+
 	private readonly IValidateCodeOperator _validateCodeOperator =
 			validateCodeOperator ?? throw new ArgumentNullException(nameof(validateCodeOperator));
 

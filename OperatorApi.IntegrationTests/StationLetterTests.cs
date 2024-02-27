@@ -23,6 +23,7 @@ using PagingDeliveryLetterListView = TGS.Apis.OperatorApi.Models.Messages.Paging
 using PagingStationLetterListView = TGS.Apis.OperatorApi.Models.Messages.PagingResponse<TGS.Apis.OperatorApi.Models.Messages.StationLetterListItemViewModel>;
 
 namespace OperatorApi.IntegrationTests;
+
 public class StationLetterTests(ITestOutputHelper testOutputHelper)
 {
 	private readonly ITestOutputHelper _testOutputHelper = testOutputHelper ?? throw new ArgumentNullException(nameof(testOutputHelper));

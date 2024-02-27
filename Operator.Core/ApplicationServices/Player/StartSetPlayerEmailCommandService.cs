@@ -57,7 +57,7 @@ internal class StartSetPlayerEmailCommandService(
 			saveResult.ValidateCode);
 
 		var mailMessage = new SendEmailRequest(
-			new[] { command.Email },
+			[command.Email],
 			mailSubject,
 			mailBody);
 

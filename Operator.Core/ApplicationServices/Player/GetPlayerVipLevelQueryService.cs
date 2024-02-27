@@ -10,5 +10,4 @@ internal class GetPlayerVipLevelQueryService(
 {
 	public ValueTask<Tgs.VipLevelService.Common.ViewModels.PlayerVipLevelInfoViewModel> GetAsync(GetPlayerVipLevelQuery query, CancellationToken cancellationToken = default)
 		=> vipLevelServiceClient.PlayerVipLevelGetAsync(query.PlayerCode, cancellationToken);
-
 }

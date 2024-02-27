@@ -1150,8 +1150,7 @@ public class WithdrawTests(ITestOutputHelper testOutputHelper)
 				Page = 1,
 				Rows = 20,
 				Sum = 168M,
-				Items = new WithdrawFormInfo[]
-				{
+				Items = [
 					new()
 					{
 						Id = Guid.NewGuid(),
@@ -1166,7 +1165,7 @@ public class WithdrawTests(ITestOutputHelper testOutputHelper)
 						BrandId = brandId,
 						PlayerRemark = "playerRemark"
 					}
-				}
+				]
 			});
 
 		var isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "true" : "false";

@@ -32,14 +32,14 @@ public class PlayerStatusCheckTests
 		var routeData = new RouteData();
 		var actionDescriptor = new ActionDescriptor();
 		var actionContext = new ActionContext(fakeHttpContext, routeData, actionDescriptor);
-		var context = new AuthorizationFilterContext(actionContext, new List<IFilterMetadata> { });
-		context.ActionDescriptor.EndpointMetadata = new List<object> {
+		var context = new AuthorizationFilterContext(actionContext, []);
+		context.ActionDescriptor.EndpointMetadata = [
 			new AuthorizePlayerTokenAttribute()
 			{
 				NeedAuthorize = false,
 				AllowNullOrEmpty = false
 			},
-		};
+		];
 		await sut.OnAuthorizationAsync(context);
 
 		ClassicAssert.IsNull(context.Result);
@@ -62,14 +62,14 @@ public class PlayerStatusCheckTests
 		var routeData = new RouteData();
 		var actionDescriptor = new ActionDescriptor();
 		var actionContext = new ActionContext(fakeHttpContext, routeData, actionDescriptor);
-		var context = new AuthorizationFilterContext(actionContext, new List<IFilterMetadata> { });
-		context.ActionDescriptor.EndpointMetadata = new List<object> {
+		var context = new AuthorizationFilterContext(actionContext, []);
+		context.ActionDescriptor.EndpointMetadata = [
 			new AuthorizePlayerTokenAttribute()
 			{
 				AllowNullOrEmpty = false,
 				NeedAuthorize = true
 			},
-		};
+		];
 		await sut.OnAuthorizationAsync(context);
 
 		ClassicAssert.IsNull(context.Result);
@@ -89,14 +89,14 @@ public class PlayerStatusCheckTests
 		var routeData = new RouteData();
 		var actionDescriptor = new ActionDescriptor();
 		var actionContext = new ActionContext(fakeHttpContext, routeData, actionDescriptor);
-		var context = new AuthorizationFilterContext(actionContext, new List<IFilterMetadata> { });
-		context.ActionDescriptor.EndpointMetadata = new List<object> {
+		var context = new AuthorizationFilterContext(actionContext, []);
+		context.ActionDescriptor.EndpointMetadata = [
 			new AuthorizePlayerTokenAttribute()
 			{
 				AllowNullOrEmpty = true,
 				NeedAuthorize = false
 			},
-		};
+		];
 		await sut.OnAuthorizationAsync(context);
 
 		ClassicAssert.IsNull(context.Result);
@@ -116,14 +116,14 @@ public class PlayerStatusCheckTests
 		var routeData = new RouteData();
 		var actionDescriptor = new ActionDescriptor();
 		var actionContext = new ActionContext(fakeHttpContext, routeData, actionDescriptor);
-		var context = new AuthorizationFilterContext(actionContext, new List<IFilterMetadata> { });
-		context.ActionDescriptor.EndpointMetadata = new List<object> {
+		var context = new AuthorizationFilterContext(actionContext, []);
+		context.ActionDescriptor.EndpointMetadata = [
 			new AuthorizePlayerTokenAttribute()
 			{
 				AllowNullOrEmpty = true,
 				NeedAuthorize = true
 			},
-		};
+		];
 		await sut.OnAuthorizationAsync(context);
 
 		ClassicAssert.IsNull(context.Result);
@@ -146,14 +146,14 @@ public class PlayerStatusCheckTests
 		var routeData = new RouteData();
 		var actionDescriptor = new ActionDescriptor();
 		var actionContext = new ActionContext(fakeHttpContext, routeData, actionDescriptor);
-		var context = new AuthorizationFilterContext(actionContext, new List<IFilterMetadata> { });
-		context.ActionDescriptor.EndpointMetadata = new List<object> {
+		var context = new AuthorizationFilterContext(actionContext, []);
+		context.ActionDescriptor.EndpointMetadata = [
 			new AuthorizePlayerTokenAttribute()
 			{
 				AllowNullOrEmpty = false,
 				NeedAuthorize = true
 			},
-		};
+		];
 		await sut.OnAuthorizationAsync(context);
 
 		ClassicAssert.IsNotNull(context.Result);
@@ -179,7 +179,7 @@ public class PlayerStatusCheckTests
 		var routeData = new RouteData();
 		var actionDescriptor = new ActionDescriptor();
 		var actionContext = new ActionContext(fakeHttpContext, routeData, actionDescriptor);
-		var context = new AuthorizationFilterContext(actionContext, new List<IFilterMetadata> { });
+		var context = new AuthorizationFilterContext(actionContext, []);
 		await sut.OnAuthorizationAsync(context);
 
 		ClassicAssert.IsNull(context.Result);
@@ -206,18 +206,17 @@ public class PlayerStatusCheckTests
 		var routeData = new RouteData();
 		var actionDescriptor = new ActionDescriptor();
 		var actionContext = new ActionContext(fakeHttpContext, routeData, actionDescriptor);
-		var context = new AuthorizationFilterContext(actionContext, Array.Empty<IFilterMetadata>())
+		var context = new AuthorizationFilterContext(actionContext, [])
 		{
 			ActionDescriptor = {
-				EndpointMetadata = new List<object>
-				{
+				EndpointMetadata = [
 					new AuthorizePlayerTokenAttribute
 					{
 						AllowNullOrEmpty = false,
 						NeedAuthorize = true
 					},
 					new IgnoreUserBlacklistCheckAttribute()
-				}
+				]
 			}
 		};
 
@@ -245,14 +244,14 @@ public class PlayerStatusCheckTests
 		var routeData = new RouteData();
 		var actionDescriptor = new ActionDescriptor();
 		var actionContext = new ActionContext(fakeHttpContext, routeData, actionDescriptor);
-		var context = new AuthorizationFilterContext(actionContext, new List<IFilterMetadata> { });
-		context.ActionDescriptor.EndpointMetadata = new List<object> {
+		var context = new AuthorizationFilterContext(actionContext, []);
+		context.ActionDescriptor.EndpointMetadata = [
 			new AuthorizePlayerTokenAttribute()
 			{
 				AllowNullOrEmpty = false,
 				NeedAuthorize = true
 			}
-		};
+		];
 
 		await sut.OnAuthorizationAsync(context);
 
@@ -284,15 +283,15 @@ public class PlayerStatusCheckTests
 		var routeData = new RouteData();
 		var actionDescriptor = new ActionDescriptor();
 		var actionContext = new ActionContext(fakeHttpContext, routeData, actionDescriptor);
-		var context = new AuthorizationFilterContext(actionContext, new List<IFilterMetadata> { });
-		context.ActionDescriptor.EndpointMetadata = new List<object> {
+		var context = new AuthorizationFilterContext(actionContext, []);
+		context.ActionDescriptor.EndpointMetadata = [
 			new AuthorizePlayerTokenAttribute()
 			{
 				AllowNullOrEmpty = false,
 				NeedAuthorize = true
 			},
 			new EnableUserBlockedCheckAttribute()
-		};
+		];
 		await sut.OnAuthorizationAsync(context);
 
 		ClassicAssert.IsNotNull(context.Result);
@@ -323,14 +322,14 @@ public class PlayerStatusCheckTests
 		var routeData = new RouteData();
 		var actionDescriptor = new ActionDescriptor();
 		var actionContext = new ActionContext(fakeHttpContext, routeData, actionDescriptor);
-		var context = new AuthorizationFilterContext(actionContext, new List<IFilterMetadata> { });
-		context.ActionDescriptor.EndpointMetadata = new List<object> {
+		var context = new AuthorizationFilterContext(actionContext, []);
+		context.ActionDescriptor.EndpointMetadata = [
 			new AuthorizePlayerTokenAttribute()
 			{
 				AllowNullOrEmpty = false,
 				NeedAuthorize = true
 			}
-		};
+		];
 		await sut.OnAuthorizationAsync(context);
 
 		ClassicAssert.IsNull(context.Result);
@@ -355,14 +354,14 @@ public class PlayerStatusCheckTests
 		var routeData = new RouteData();
 		var actionDescriptor = new ActionDescriptor();
 		var actionContext = new ActionContext(fakeHttpContext, routeData, actionDescriptor);
-		var context = new AuthorizationFilterContext(actionContext, new List<IFilterMetadata> { });
-		context.ActionDescriptor.EndpointMetadata = new List<object> {
+		var context = new AuthorizationFilterContext(actionContext, []);
+		context.ActionDescriptor.EndpointMetadata = [
 			new AuthorizePlayerTokenAttribute()
 			{
 				AllowNullOrEmpty = false,
 				NeedAuthorize = true
 			},
-		};
+		];
 
 		await sut.OnAuthorizationAsync(context);
 		ClassicAssert.IsNull(context.Result);

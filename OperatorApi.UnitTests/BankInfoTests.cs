@@ -1,5 +1,4 @@
 ﻿using System.Text.Json;
-using NSubstitute;
 using Tgs.Payment.Clients;
 using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Models.Enums;

@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
-using NSubstitute;
 using Tgs.ServiceUtility;
 using TGS.Apis.OperatorApi.Filters;
 using TGS.Core.Models.Tokens;

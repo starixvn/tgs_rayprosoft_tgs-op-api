@@ -11,7 +11,6 @@ using Tgs.Payment.AlfaPay.Client;
 using Tgs.Payment.Clients;
 using Tgs.Payment.DibaoPay.Client;
 using Tgs.Payment.FeibaoPay.Client;
-using Tgs.Payment.FiveSevenPay.Client;
 using Tgs.Payment.GanyoPay.Client;
 using Tgs.Payment.GCPay.Client;
 using Tgs.Payment.MetaPay.Client;
@@ -5769,7 +5768,7 @@ public class DepositTests(ITestOutputHelper testOutputHelper)
 					"merchant": "merchant",
 					"hashKey": "hashKey",
 					"hashIV": "hashIV",
-					"gateWay": "zalo"					
+					"gateWay": "zalo"
 				}
 				""",
 			PaymentId = Guid.NewGuid(),
@@ -6200,7 +6199,7 @@ public class DepositTests(ITestOutputHelper testOutputHelper)
 			new FeibaoPayDepositSettings(
 				"merchant",
 				"hashKey",
-				"hashIV",				
+				"hashIV",
 				Guid.NewGuid(),
 				"bank",
 				"UBP",

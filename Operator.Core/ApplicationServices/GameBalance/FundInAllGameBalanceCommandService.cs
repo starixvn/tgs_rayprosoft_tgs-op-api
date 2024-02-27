@@ -14,8 +14,10 @@ internal class FundInAllGameBalanceCommandService(
 	ICommandService<FundInGameBalanceCommand> fundInService) : ICommandService<FundInAllGameBalanceCommand>
 {
 	private readonly ICommandService<FundInGameBalanceCommand> _fundInService = fundInService ?? throw new ArgumentNullException(nameof(fundInService));
+
 	private readonly IGameProviderRepository _gameProviderRepository =
 			gameProviderRepository ?? throw new ArgumentNullException(nameof(gameProviderRepository));
+
 	private readonly IGetService<GetGameBalanceQuery, decimal> _getGameBalanceService =
 			getGameBalanceService ?? throw new ArgumentNullException(nameof(getGameBalanceService));
 

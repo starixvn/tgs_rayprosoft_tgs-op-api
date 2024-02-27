@@ -13,7 +13,6 @@ namespace TGS.Apis.OperatorApi.Controllers;
 [ApiController]
 public class PlayerReportController(IReportClient client) : ControllerBase
 {
-
 	/// <summary>
 	/// Get player round report
 	/// </summary>

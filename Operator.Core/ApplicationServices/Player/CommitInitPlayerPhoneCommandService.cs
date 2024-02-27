@@ -18,6 +18,7 @@ public class CommitInitPlayerPhoneCommandService(
 {
 	private readonly IRedisCacheManager _cacheManager = cacheManager ?? throw new ArgumentNullException(nameof(cacheManager));
 	private readonly IPlayerServiceClient _playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
+
 	private readonly IValidateCodeOperator _validateCodeOperator =
 			validateCodeOperator ?? throw new ArgumentNullException(nameof(validateCodeOperator));
 

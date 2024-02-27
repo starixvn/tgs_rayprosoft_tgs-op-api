@@ -1,9 +1,9 @@
 ﻿using Microsoft.Extensions.Logging.Abstractions;
-using NUnit.Framework;
 using Tgs.GameProviders.Pluggable.Client;
 using TGS.Services.Operator.ApplicationServices.GameBalance;
 
 namespace TGS.Tests.OperatorApi.UnitTests;
+
 public class FundOutGameBalanceCommandServiceTests
 {
 	[Test]

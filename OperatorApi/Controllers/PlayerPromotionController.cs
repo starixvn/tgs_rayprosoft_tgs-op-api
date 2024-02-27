@@ -16,7 +16,6 @@ namespace TGS.Apis.OperatorApi.Controllers;
 [Produces(MediaTypeNames.Application.Json)]
 public class PlayerPromotionController(IPromotionClient client) : ControllerBase
 {
-
 	/// <summary>
 	/// Get promotions that the player has already joined in.
 	/// </summary>

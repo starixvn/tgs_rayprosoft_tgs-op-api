@@ -41,7 +41,7 @@ internal class RestValidateCodeOperator(
 			validateCode);
 
 		var mailMessage = new SendEmailRequest(
-			new[] { email },
+			[email],
 			mailSubject,
 			mailBody);
 

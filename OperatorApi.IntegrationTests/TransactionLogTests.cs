@@ -114,8 +114,7 @@ public class TransactionLogTests(ITestOutputHelper testOutputHelper)
 		var expected = new TransactionLogResponseViewMode
 		{
 			TotalCount = 2,
-			Items = new[]
-			{
+			Items = [
 				new TransactionLogViewModel
 				{
 					Id  = Guid.NewGuid(),
@@ -129,7 +128,7 @@ public class TransactionLogTests(ITestOutputHelper testOutputHelper)
 					RecordedOn = DateTime.UtcNow,
 					TransactionType = "Transaction.Rebate"
 				}
-			}
+			]
 		};
 
 		_ = fakePlayerServiceClient.GetPlayerPropertiesAsync(Arg.Is(playerCode), Arg.Any<CancellationToken>())
@@ -187,6 +186,6 @@ public class TransactionLogTests(ITestOutputHelper testOutputHelper)
 
 		// Assert
 		Assert.Equal(expected.TotalCount, actual?.Data.TotalCount);
-		expected.Items.ToExpectedObject().ShouldMatch(actual?.Data.Items);
+		expected.Items.ToArray().ToExpectedObject().ShouldMatch(actual?.Data.Items);
 	}
 }

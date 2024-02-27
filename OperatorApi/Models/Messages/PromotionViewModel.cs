@@ -32,5 +32,5 @@ public class PromotionViewModel
 
 	public DateTime To { get; init; }
 
-	public IEnumerable<int> VipLevels { get; init; } = Array.Empty<int>();
+	public IEnumerable<int> VipLevels { get; init; } = [];
 }
