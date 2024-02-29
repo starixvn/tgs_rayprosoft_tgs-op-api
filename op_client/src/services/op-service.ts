@@ -129,16 +129,16 @@ export default class OperatorService {
 
     public getWithdrawForms(
         request: GetWithdrawFormsRequest,
-        paging: PagingRequest): Promise<PagingResponse<WithdrawFormViewModel>>{
-            return this.http
-                .get("/api/withdraw/player/list",{
-                    params: {
-                        ...request,
-                        ...paging
-                    }
-                })
-                .then(res => res.data);
-        }
+        paging: PagingRequest): Promise<PagingResponse<WithdrawFormViewModel>> {
+        return this.http
+            .get("/api/withdraw/player/list", {
+                params: {
+                    ...request,
+                    ...paging
+                }
+            })
+            .then(res => res.data);
+    }
 
     public getWithdrawRequireBucketAmount(): Promise<number> {
         return this.http
@@ -487,6 +487,15 @@ export default class OperatorService {
     public submitWinThirdPartyDepositRequest(request: DepositRequest): Promise<SuccessResponse<DepositFormCreatedResponse>> {
         return this.http
             .post("/api/deposit/thirdparty/winpay", request)
+            .then(res => res.data);
+    }
+
+    public submitDepositRequest(
+        paymentCode: string,
+        bankType: string,
+        request: DepositRequest): Promise<SuccessResponse<DepositFormCreatedResponse>> {
+        return this.http
+            .post(`/api/deposit/${bankType}/${paymentCode}`, request)
             .then(res => res.data);
     }
 
