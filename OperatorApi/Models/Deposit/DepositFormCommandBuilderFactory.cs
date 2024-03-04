@@ -58,6 +58,8 @@ public class DepositFormCommandBuilderFactory(IServiceProvider serviceProvider)
 				=> ActivatorUtilities.GetServiceOrCreateInstance<FeibaoPayCommandBuilder>(serviceProvider),
 			_ when string.Equals("LPay", paymentCode, StringComparison.InvariantCultureIgnoreCase)
 				=> ActivatorUtilities.GetServiceOrCreateInstance<GalaxyPayCommandBuilder>(serviceProvider),
+			_ when string.Equals("SunnyPay", paymentCode, StringComparison.InvariantCultureIgnoreCase)
+				=> ActivatorUtilities.GetServiceOrCreateInstance<GalaxyPayCommandBuilder>(serviceProvider),
 			_ => throw new NotImplementedException()
 		};
 	}
