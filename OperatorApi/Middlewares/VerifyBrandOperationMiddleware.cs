@@ -1,6 +1,5 @@
 ﻿using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.FeatureManagement;
 using Tgs.BrandCertificate;
 using Tgs.BrandCertificate.Clients;
 using Tgs.BrandGameCredits.Common;
@@ -28,8 +27,7 @@ public sealed class VerifyBrandOperationMiddleware(
 		HttpContext context,
 		IBrandServiceClient brandServiceClient,
 		IMaintenanceRedisRepository maintenanceRedisService,
-		IGetService<BrandCreditQuery, BrandGameCreditRiskTypes> brandCreditService,
-		IFeatureManager featureManager)
+		IGetService<BrandCreditQuery, BrandGameCreditRiskTypes> brandCreditService)
 	{
 		using var activity = _VerifyCredentialsMiddlewareSource.StartActivity(nameof(VerifyBrandOperationMiddleware));
 
@@ -49,7 +47,6 @@ public sealed class VerifyBrandOperationMiddleware(
 		if (!await CheckRiskAsync(
 			context,
 			brandId.Value,
-			featureManager,
 			brandServiceClient,
 			brandCreditService).ConfigureAwait(false))
 			return;
@@ -68,17 +65,9 @@ public sealed class VerifyBrandOperationMiddleware(
 	private static async ValueTask<bool> CheckRiskAsync(
 		HttpContext context,
 		Guid brandId,
-		IFeatureManager featureManager,
 		IBrandServiceClient brandServiceClient,
 		IGetService<BrandCreditQuery, BrandGameCreditRiskTypes> brandCreditService)
 	{
-		var brandOperationSwitch = await featureManager
-			.IsEnabledAsync("BrandOperation")
-			.ConfigureAwait(false);
-
-		if (!brandOperationSwitch)
-			return true;
-
 		var checkPlatformAccountFundIsEnabled = await brandServiceClient.GetBrandPlatformAccountFundAsync(
 			brandId,
 			context.RequestAborted).ConfigureAwait(false)
