@@ -1,11 +1,8 @@
 ﻿using System.Text.Json;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.FeatureManagement;
-using NSubstitute;
-using NUnit.Framework;
 using NUnit.Framework.Legacy;
 using Tgs.BrandCertificate;
 using Tgs.BrandCertificate.Clients;
@@ -31,11 +28,6 @@ public class VerifyBrandOperationMiddlewareTests
 		var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
 		var fakeMaintenanceRedisRepository = Substitute.For<IMaintenanceRedisRepository>();
 		var fakeBrandCreditQueryService = Substitute.For<IGetService<BrandCreditQuery, BrandGameCreditRiskTypes>>();
-		var fakeFeatureManager = Substitute.For<IFeatureManager>();
-
-		_ = fakeFeatureManager
-			.IsEnabledAsync("BrandOperation")
-			.Returns(false);
 
 		var fakeHttpContext = new DefaultHttpContext();
 
@@ -43,7 +35,7 @@ public class VerifyBrandOperationMiddlewareTests
 			fakeHttpContext,
 			fakeBrandServiceClient,
 			fakeMaintenanceRedisRepository,
-			fakeBrandCreditQueryService, fakeFeatureManager);
+			fakeBrandCreditQueryService);
 
 		_ = fakeBrandCreditQueryService
 			.Received(0)
@@ -62,11 +54,6 @@ public class VerifyBrandOperationMiddlewareTests
 		var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
 		var fakeMaintenanceRedisRepository = Substitute.For<IMaintenanceRedisRepository>();
 		var fakeBrandCreditQueryService = Substitute.For<IGetService<BrandCreditQuery, BrandGameCreditRiskTypes>>();
-		var fakeFeatureManager = Substitute.For<IFeatureManager>();
-
-		_ = fakeFeatureManager
-			.IsEnabledAsync(Arg.Is("BrandOperation"))
-			.Returns(false);
 
 		var features = new FeatureCollection();
 
@@ -87,7 +74,11 @@ public class VerifyBrandOperationMiddlewareTests
 			.GetBrandStatusAsync(brandId)
 			.Returns(BrandStatus.Inactive);
 
-		await sut.InvokeAsync(fakeHttpContext, fakeBrandServiceClient, fakeMaintenanceRedisRepository, fakeBrandCreditQueryService, fakeFeatureManager);
+		await sut.InvokeAsync(
+			fakeHttpContext,
+			fakeBrandServiceClient,
+			fakeMaintenanceRedisRepository,
+			fakeBrandCreditQueryService);
 
 		_ = fakeBrandCreditQueryService
 			.Received(0)
@@ -112,11 +103,6 @@ public class VerifyBrandOperationMiddlewareTests
 		var fakeMaintenanceRedisRepository = Substitute.For<IMaintenanceRedisRepository>();
 		var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
 		var fakeBrandCreditQueryService = Substitute.For<IGetService<BrandCreditQuery, BrandGameCreditRiskTypes>>();
-		var fakeFeatureManager = Substitute.For<IFeatureManager>();
-
-		_ = fakeFeatureManager
-			.IsEnabledAsync(Arg.Is("BrandOperation"))
-			.Returns(true);
 
 		var brandId = Guid.NewGuid();
 		var features = new FeatureCollection();
@@ -151,8 +137,7 @@ public class VerifyBrandOperationMiddlewareTests
 			fakeHttpContext,
 			fakeBrandServiceClient,
 			fakeMaintenanceRedisRepository,
-			fakeBrandCreditQueryService,
-			fakeFeatureManager);
+			fakeBrandCreditQueryService);
 
 		ClassicAssert.AreEqual(402, fakeHttpContext.Response.StatusCode);
 
@@ -174,11 +159,6 @@ public class VerifyBrandOperationMiddlewareTests
 		var fakeMaintenanceRedisRepository = Substitute.For<IMaintenanceRedisRepository>();
 		var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
 		var fakeBrandCreditQueryService = Substitute.For<IGetService<BrandCreditQuery, BrandGameCreditRiskTypes>>();
-		var fakeFeatureManager = Substitute.For<IFeatureManager>();
-
-		_ = fakeFeatureManager
-			.IsEnabledAsync(Arg.Is("BrandOperation"))
-			.Returns(false);
 
 		var brandId = Guid.NewGuid();
 		var features = new FeatureCollection();
@@ -199,7 +179,11 @@ public class VerifyBrandOperationMiddlewareTests
 			.GetBrandMaintenanceAsync(Arg.Is(brandId))
 			.Returns($"Maintenance:Brands:{brandId}");
 
-		await sut.InvokeAsync(fakeHttpContext, fakeBrandServiceClient, fakeMaintenanceRedisRepository, fakeBrandCreditQueryService, fakeFeatureManager);
+		await sut.InvokeAsync(
+			fakeHttpContext,
+			fakeBrandServiceClient,
+			fakeMaintenanceRedisRepository,
+			fakeBrandCreditQueryService);
 
 		ClassicAssert.AreEqual(503, fakeHttpContext.Response.StatusCode);
 
@@ -221,11 +205,6 @@ public class VerifyBrandOperationMiddlewareTests
 		var fakeMaintenanceRedisRepository = Substitute.For<IMaintenanceRedisRepository>();
 		var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
 		var fakeBrandCreditQueryService = Substitute.For<IGetService<BrandCreditQuery, BrandGameCreditRiskTypes>>();
-		var fakeFeatureManager = Substitute.For<IFeatureManager>();
-
-		_ = fakeFeatureManager
-			.IsEnabledAsync(Arg.Is("BrandOperation"))
-			.Returns(true);
 
 		var brandId = Guid.NewGuid();
 		var features = new FeatureCollection();
@@ -249,97 +228,11 @@ public class VerifyBrandOperationMiddlewareTests
 			.GetAsync(Arg.Is(new BrandCreditQuery(brandId)), Arg.Any<CancellationToken>())
 			.Returns(BrandGameCreditRiskTypes.HighRisk);
 
-		await sut.InvokeAsync(fakeHttpContext, fakeBrandServiceClient, fakeMaintenanceRedisRepository, fakeBrandCreditQueryService, fakeFeatureManager);
-
-		ClassicAssert.AreEqual(503, fakeHttpContext.Response.StatusCode);
-
-		responseBodyStream.Position = 0;
-		var body = JsonSerializer.Deserialize<TgsResponse>(new StreamReader(fakeHttpContext.Response.Body).ReadToEnd());
-
-		ClassicAssert.AreEqual(403, body.Error);
-		ClassicAssert.AreEqual("UnderMaintenance", body.ErrorMessage);
-		ClassicAssert.AreEqual("UnderMaintenance", body.ErrorMessageKey);
-	}
-
-	[Test]
-	public async Task VerifyBrandOperationMiddleware_BrandOpertation開關為false時不會進行平台額度檢查()
-	{
-		var fakeRequestDelegate = Substitute.For<RequestDelegate>();
-
-		var sut = new VerifyBrandOperationMiddleware(fakeRequestDelegate, NullLogger<VerifyBrandOperationMiddleware>.Instance);
-
-		var fakeMaintenanceRedisRepository = Substitute.For<IMaintenanceRedisRepository>();
-		var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
-		var fakeBrandCreditQueryService = Substitute.For<IGetService<BrandCreditQuery, BrandGameCreditRiskTypes>>();
-		var fakeFeatureManager = Substitute.For<IFeatureManager>();
-
-		_ = fakeFeatureManager
-			.IsEnabledAsync(Arg.Is("BrandOperation"))
-			.Returns(false);
-
-		var brandId = Guid.NewGuid();
-		var features = new FeatureCollection();
-
-		var fakeBrandFeature = Substitute.For<IBrandFeature>();
-		_ = fakeBrandFeature.BrandId.Returns(brandId);
-		features.Set(fakeBrandFeature);
-
-		var fakeHttpResponse = Substitute.For<IHttpResponseFeature>();
-		features.Set(fakeHttpResponse);
-
-		var responseBodyStream = new MemoryStream();
-		features.Set<IHttpResponseBodyFeature>(new StreamResponseBodyFeature(responseBodyStream));
-
-		var fakeHttpContext = new DefaultHttpContext(features);
-
-		_ = fakeBrandCreditQueryService
-			.GetAsync(Arg.Is(new BrandCreditQuery(brandId)), Arg.Any<CancellationToken>())
-			.Returns(BrandGameCreditRiskTypes.HighRisk);
-
-		await sut.InvokeAsync(fakeHttpContext, fakeBrandServiceClient, fakeMaintenanceRedisRepository, fakeBrandCreditQueryService, fakeFeatureManager);
-
-		ClassicAssert.AreEqual(brandId, fakeHttpContext.Items["brandId"]);
-	}
-
-	[Test]
-	public async Task VerifyBrandOperationMiddleware_BrandOpertation開關為true時會進行平台額度檢查()
-	{
-		var fakeRequestDelegate = Substitute.For<RequestDelegate>();
-
-		var sut = new VerifyBrandOperationMiddleware(fakeRequestDelegate, NullLogger<VerifyBrandOperationMiddleware>.Instance);
-
-		var fakeMaintenanceRedisRepository = Substitute.For<IMaintenanceRedisRepository>();
-		var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
-		var fakeBrandCreditQueryService = Substitute.For<IGetService<BrandCreditQuery, BrandGameCreditRiskTypes>>();
-		var fakeFeatureManager = Substitute.For<IFeatureManager>();
-
-		_ = fakeFeatureManager
-			.IsEnabledAsync(Arg.Is("BrandOperation"))
-			.Returns(true);
-
-		var brandId = Guid.NewGuid();
-		var features = new FeatureCollection();
-
-		var fakeBrandFeature = Substitute.For<IBrandFeature>();
-		_ = fakeBrandFeature.BrandId.Returns(brandId);
-		features.Set(fakeBrandFeature);
-
-		var fakeHttpResponse = Substitute.For<IHttpResponseFeature>();
-		features.Set(fakeHttpResponse);
-
-		var responseBodyStream = new MemoryStream();
-		features.Set<IHttpResponseBodyFeature>(new StreamResponseBodyFeature(responseBodyStream));
-
-		var fakeHttpContext = new DefaultHttpContext(features);
-
-		_ = fakeBrandServiceClient.GetBrandPlatformAccountFundAsync(Arg.Is(brandId))
-			.Returns(true);
-
-		_ = fakeBrandCreditQueryService
-			.GetAsync(Arg.Is(new BrandCreditQuery(brandId)), Arg.Any<CancellationToken>())
-			.Returns(BrandGameCreditRiskTypes.HighRisk);
-
-		await sut.InvokeAsync(fakeHttpContext, fakeBrandServiceClient, fakeMaintenanceRedisRepository, fakeBrandCreditQueryService, fakeFeatureManager);
+		await sut.InvokeAsync(
+			fakeHttpContext,
+			fakeBrandServiceClient,
+			fakeMaintenanceRedisRepository,
+			fakeBrandCreditQueryService);
 
 		ClassicAssert.AreEqual(503, fakeHttpContext.Response.StatusCode);
 
@@ -361,11 +254,6 @@ public class VerifyBrandOperationMiddlewareTests
 		var fakeMaintenanceRedisRepository = Substitute.For<IMaintenanceRedisRepository>();
 		var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
 		var fakeBrandCreditQueryService = Substitute.For<IGetService<BrandCreditQuery, BrandGameCreditRiskTypes>>();
-		var fakeFeatureManager = Substitute.For<IFeatureManager>();
-
-		_ = fakeFeatureManager
-			.IsEnabledAsync(Arg.Is("BrandOperation"))
-			.Returns(true);
 
 		var brandId = Guid.NewGuid();
 		var features = new FeatureCollection();
@@ -383,7 +271,11 @@ public class VerifyBrandOperationMiddlewareTests
 			.GetAsync(Arg.Is(new BrandCreditQuery(brandId)), Arg.Any<CancellationToken>())
 			.Returns(BrandGameCreditRiskTypes.LowRisk);
 
-		await sut.InvokeAsync(fakeHttpContext, fakeBrandServiceClient, fakeMaintenanceRedisRepository, fakeBrandCreditQueryService, fakeFeatureManager);
+		await sut.InvokeAsync(
+			fakeHttpContext,
+			fakeBrandServiceClient,
+			fakeMaintenanceRedisRepository,
+			fakeBrandCreditQueryService);
 
 		ClassicAssert.AreEqual(brandId, fakeHttpContext.Items["brandId"]);
 	}
@@ -398,11 +290,6 @@ public class VerifyBrandOperationMiddlewareTests
 		var fakeMaintenanceRedisRepository = Substitute.For<IMaintenanceRedisRepository>();
 		var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
 		var fakeBrandCreditQueryService = Substitute.For<IGetService<BrandCreditQuery, BrandGameCreditRiskTypes>>();
-		var fakeFeatureManager = Substitute.For<IFeatureManager>();
-
-		_ = fakeFeatureManager
-			.IsEnabledAsync(Arg.Is("BrandOperation"))
-			.Returns(false);
 
 		var brandId = Guid.NewGuid();
 		var features = new FeatureCollection();
@@ -420,7 +307,11 @@ public class VerifyBrandOperationMiddlewareTests
 			.GetAsync(Arg.Is(new BrandCreditQuery(brandId)), Arg.Any<CancellationToken>())
 			.Returns(BrandGameCreditRiskTypes.NormalRisk);
 
-		await sut.InvokeAsync(fakeHttpContext, fakeBrandServiceClient, fakeMaintenanceRedisRepository, fakeBrandCreditQueryService, fakeFeatureManager);
+		await sut.InvokeAsync(
+			fakeHttpContext,
+			fakeBrandServiceClient,
+			fakeMaintenanceRedisRepository,
+			fakeBrandCreditQueryService);
 
 		ClassicAssert.AreEqual(brandId, fakeHttpContext.Items["brandId"]);
 	}
@@ -435,11 +326,6 @@ public class VerifyBrandOperationMiddlewareTests
 		var fakeMaintenanceRedisRepository = Substitute.For<IMaintenanceRedisRepository>();
 		var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
 		var fakeBrandCreditQueryService = Substitute.For<IGetService<BrandCreditQuery, BrandGameCreditRiskTypes>>();
-		var fakeFeatureManager = Substitute.For<IFeatureManager>();
-
-		_ = fakeFeatureManager
-			.IsEnabledAsync(Arg.Is("BrandOperation"))
-			.Returns(true);
 
 		var brandId = Guid.NewGuid();
 		var features = new FeatureCollection();
@@ -467,8 +353,7 @@ public class VerifyBrandOperationMiddlewareTests
 			fakeHttpContext,
 			fakeBrandServiceClient,
 			fakeMaintenanceRedisRepository,
-			fakeBrandCreditQueryService,
-			fakeFeatureManager);
+			fakeBrandCreditQueryService);
 
 		ClassicAssert.AreEqual(brandId, fakeHttpContext.Items["brandId"]);
 	}
