@@ -118,12 +118,12 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="ForgotPasswordMessage" xml:space="preserve">
-    <value>[身份驗證] 驗證碼為{0}, 請於3分鐘內完成驗證。</value>
+    <value>[身份驗證] 驗證碼為{0}, 請於5分鐘內完成驗證。</value>
   </data>
   <data name="ValidateCodeMailSubject" xml:space="preserve">
     <value>驗證碼</value>
   </data>
   <data name="ValidateCodeMailBody" xml:space="preserve">
-    <value>[身份驗證] 驗證碼為{0}, 請於3分鐘內完成驗證。</value>
+    <value>[身份驗證] 驗證碼為{0}, 請於5分鐘內完成驗證。</value>
   </data>
 </root>

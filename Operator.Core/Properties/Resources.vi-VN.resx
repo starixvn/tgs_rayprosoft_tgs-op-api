@@ -118,11 +118,11 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="ForgotPasswordMessage" xml:space="preserve">
-    <value>[Xác minh danh tính] Mã xác minh là {0}, vui lòng hoàn tất xác minh trong vòng 3 phút.</value>
+    <value>[Xác minh danh tính] Mã xác minh là {0}, vui lòng hoàn tất xác minh trong vòng 5 phút.</value>
     <comment>忘記密碼</comment>
   </data>
   <data name="ValidateCodeMailBody" xml:space="preserve">
-    <value>Verification code is {0}, it will expire after 3 minutes.</value>
+    <value>Verification code is {0}, it will expire after 5 minutes.</value>
     <comment>驗證碼</comment>
   </data>
   <data name="ValidateCodeMailSubject" xml:space="preserve">
