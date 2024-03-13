@@ -126,7 +126,7 @@
     <comment>驗證碼</comment>
   </data>
   <data name="ValidateCodeMailBody" xml:space="preserve">
-    <value>Verification code is {0}, it will expire after 3 minutes.</value>
+    <value>Verification code is {0}, it will expire after 5 minutes.</value>
     <comment>驗證碼</comment>
   </data>
 </root>
