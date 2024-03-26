@@ -14,6 +14,8 @@ public class U2PayCommandBuilder : IDepositFormCommandBuilder
 	{
 		var brandPaymentInfo = JsonDocument.Parse(requestInfo.BrandPaymentInfo.ExtendedData);
 
+		var hasBankName = brandPaymentInfo.RootElement.TryGetProperty("bankName", out var bankName);
+
 		var command = new CreateDepositFormCommand(
 			requestInfo.PlayerCode,
 			requestInfo.BrandId,
@@ -28,7 +30,7 @@ public class U2PayCommandBuilder : IDepositFormCommandBuilder
 					brandPaymentInfo.RootElement.GetProperty("privateKey").GetString(),
 					formId,
 					brandPaymentInfo.RootElement.GetProperty("channelNo").GetInt32(),
-					"",
+					hasBankName ? bankName.GetString() : "",
 					brandPaymentInfo.RootElement.GetProperty("exchangeRate").GetDecimal()),
 				U2PayUtility.SerializerOptions));
 
