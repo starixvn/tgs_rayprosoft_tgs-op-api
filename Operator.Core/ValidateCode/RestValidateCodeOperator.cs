@@ -12,15 +12,12 @@ namespace TGS.Services.Operator.ValidateCode;
 internal class RestValidateCodeOperator(
 	IValidateCodeServiceClient validateCodeServiceClient,
 	ISmsServiceClient smsServiceClient,
-	IEmailClient emailClient) : IValidateCodeOperator
+	IEmailClient emailClient)
+	: IValidateCodeOperator
 {
-	private readonly IEmailClient _emailClient = emailClient ?? throw new ArgumentNullException(nameof(emailClient));
-	private readonly ISmsServiceClient _smsServiceClient = smsServiceClient ?? throw new ArgumentNullException(nameof(smsServiceClient));
-	private readonly IValidateCodeServiceClient _validateCodeServiceClient = validateCodeServiceClient ?? throw new ArgumentNullException(nameof(validateCodeServiceClient));
-
 	public async ValueTask<TData?> GetValidateCodeDataAsync<TData>(string validateCode, string token)
 	{
-		var result = await _validateCodeServiceClient
+		var result = await validateCodeServiceClient
 			.GetValidateCodeDataAsync(validateCode, token)
 			.ConfigureAwait(false);
 
@@ -29,7 +26,7 @@ internal class RestValidateCodeOperator(
 
 	public ValueTask<bool> SaveValidateDataAsync<TData>(string validateCode, string token, TData data)
 	{
-		return _validateCodeServiceClient
+		return validateCodeServiceClient
 			.SaveValidateCodeDataAsync(validateCode, token, SerializeValidateCodeData(data));
 	}
 
@@ -45,13 +42,11 @@ internal class RestValidateCodeOperator(
 			mailSubject,
 			mailBody);
 
-		_ = await _emailClient.SendAsync(mailMessage).ConfigureAwait(false);
+		_ = await emailClient.SendAsync(mailMessage).ConfigureAwait(false);
 	}
 
 	public ValueTask SendMessageAsync(string phone, string shortMessage, string currency, Guid brandId)
-	{
-		return _smsServiceClient.SendShortMessageAsync(phone, shortMessage, brandId);
-	}
+		=> smsServiceClient.SendShortMessageAsync(phone, shortMessage, brandId);
 
 	private static TData? DeserializeValidateCodeData<TData>(string json) => JsonSerializer.Deserialize<TData>(json);
 
