@@ -147,7 +147,7 @@ public class PlayerPasswordTests
 				SmsRegisterFlowEnabled = true
 			});
 
-		var expected = $"Verification code is {validateCode}, it will expire after 5 minutes.";
+		var expected = $"Verification code is {validateCode}, it will expire after 10 minutes.";
 
 		_ = await sut.GetAsync(command);
 

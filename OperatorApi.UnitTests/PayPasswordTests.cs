@@ -231,7 +231,7 @@ public class PayPasswordTests
 				email
 			},
 			Subject = "Verification Code",
-			Content = $"Verification code is {validateCode}, it will expire after 5 minutes."
+			Content = $"Verification code is {validateCode}, it will expire after 10 minutes."
 		}.ToExpectedObject();
 
 		SendEmailRequest actual = null;

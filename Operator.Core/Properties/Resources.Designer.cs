@@ -70,7 +70,7 @@ namespace TGS.Services.Operator.Properties {
         }
         
         /// <summary>
-        ///   查詢類似 Verification code is {0}, it will expire after 5 minutes. 的當地語系化字串。
+        ///   查詢類似 Verification code is {0}, it will expire after 10 minutes. 的當地語系化字串。
         /// </summary>
         internal static string ValidateCodeMailBody {
             get {
