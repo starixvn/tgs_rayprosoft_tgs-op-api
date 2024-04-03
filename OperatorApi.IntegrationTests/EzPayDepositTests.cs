@@ -136,7 +136,7 @@ public class EzPayDepositTests(ITestOutputHelper testOutputHelper)
 				{
 					"customerId": "customerId",
 					"key": "key",
-					"payChannelId": "2643"
+					"payChannelId": "4616"
 				}
 				""",
 			PaymentId = Guid.NewGuid(),
@@ -169,7 +169,7 @@ public class EzPayDepositTests(ITestOutputHelper testOutputHelper)
 				"customerId",
 				"key",
 				Guid.NewGuid(),
-				"2643"),
+				"4616"),
 			new GCPayDepositResponse(
 				100M,
 				Guid.NewGuid(),
