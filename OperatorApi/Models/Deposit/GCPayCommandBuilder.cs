@@ -19,7 +19,7 @@ public class GCPayCommandBuilder : IDepositFormCommandBuilder
 			requestInfo.BrandId,
 			requestInfo.BrandPaymentInfo.Id,
 			requestInfo.Amount,
-			"tgs.payment.gcpay.deposit",
+			$"tgs.payment.{paymentCode.ToLower()}.deposit",
 			requestInfo.PromotionId,
 			formId => JsonSerializer.Serialize(
 				new GCPayDepositSettings(

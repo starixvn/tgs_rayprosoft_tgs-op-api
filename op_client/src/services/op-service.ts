@@ -10,7 +10,7 @@ export default class OperatorService {
 
     // #endregion Constructors (1)
 
-    // #region Public Methods (55)
+    // #region Public Methods (58)
 
     public async createIdentityAuthenticationForm(
         request: CreateIdentityAuthenticationFormRequest,
@@ -212,6 +212,21 @@ export default class OperatorService {
             .then(res => res.data);
     }
 
+    public submitAlfaThirdPartyDepositRequest(request: DepositRequest): Promise<SuccessResponse<DepositFormCreatedResponse>> {
+        return this.http
+            .post("/api/deposit/thirdparty/alfapay", request)
+            .then<SuccessResponse<DepositFormCreatedResponse>>(res => res.data);
+    }
+
+    public submitDepositRequest(
+        paymentCode: string,
+        bankType: string,
+        request: DepositRequest): Promise<SuccessResponse<DepositFormCreatedResponse>> {
+        return this.http
+            .post(`/api/deposit/${bankType}/${paymentCode}`, request)
+            .then(res => res.data);
+    }
+
     public submitDibaoBankDepositRequest(request: DepositRequest): Promise<SuccessResponse<DepositFormCreatedResponse>> {
         return this.http
             .post("/api/deposit/bank/dibaopay", request)
@@ -233,6 +248,12 @@ export default class OperatorService {
     public submitDibaoZaloDepositRequest(request: DepositRequest): Promise<SuccessResponse<DepositFormCreatedResponse>> {
         return this.http
             .post("/api/deposit/zalo/dibaopay", request)
+            .then<SuccessResponse<DepositFormCreatedResponse>>(res => res.data);
+    }
+
+    public submitEzThirdPartyDepositRequest(request: DepositRequest): Promise<SuccessResponse<DepositFormCreatedResponse>> {
+        return this.http
+            .post("/api/deposit/thirdparty/ezpay", request)
             .then<SuccessResponse<DepositFormCreatedResponse>>(res => res.data);
     }
 
@@ -418,12 +439,6 @@ export default class OperatorService {
             .then<SuccessResponse<DepositFormCreatedResponse>>(res => res.data);
     }
 
-    public submitAlfaThirdPartyDepositRequest(request: DepositRequest): Promise<SuccessResponse<DepositFormCreatedResponse>> {
-        return this.http
-            .post("/api/deposit/thirdparty/alfapay", request)
-            .then<SuccessResponse<DepositFormCreatedResponse>>(res => res.data);
-    }
-
     public submitPhpGoThirdPartyDepositRequest(request: DepositRequest): Promise<SuccessResponse<DepositFormCreatedResponse>> {
         return this.http
             .post("/api/deposit/thirdparty/phpgopay", request)
@@ -490,14 +505,5 @@ export default class OperatorService {
             .then(res => res.data);
     }
 
-    public submitDepositRequest(
-        paymentCode: string,
-        bankType: string,
-        request: DepositRequest): Promise<SuccessResponse<DepositFormCreatedResponse>> {
-        return this.http
-            .post(`/api/deposit/${bankType}/${paymentCode}`, request)
-            .then(res => res.data);
-    }
-
-    // #endregion Public Methods (55)
+    // #endregion Public Methods (58)
 }
