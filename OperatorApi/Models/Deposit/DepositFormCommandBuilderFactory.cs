@@ -64,6 +64,10 @@ public class DepositFormCommandBuilderFactory(IServiceProvider serviceProvider)
 				=> ActivatorUtilities.GetServiceOrCreateInstance<GCPayCommandBuilder>(serviceProvider),
 			_ when string.Equals("ShunfaPay", paymentCode, StringComparison.InvariantCultureIgnoreCase)
 				=> ActivatorUtilities.GetServiceOrCreateInstance<ShunfaPayCommandBuilder>(serviceProvider),
+			_ when string.Equals("AlfaPay-IDR", paymentCode, StringComparison.InvariantCultureIgnoreCase)
+				=> ActivatorUtilities.GetServiceOrCreateInstance<AlfaPayCommandBuilder>(serviceProvider),
+			_ when string.Equals("MegaPay", paymentCode, StringComparison.InvariantCultureIgnoreCase)
+				=> ActivatorUtilities.GetServiceOrCreateInstance<AlfaPayCommandBuilder>(serviceProvider),
 			_ => throw new NotImplementedException()
 		};
 	}
