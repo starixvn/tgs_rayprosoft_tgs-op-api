@@ -19,7 +19,7 @@ public class AlfaPayCommandBuilder : IDepositFormCommandBuilder
 			requestInfo.BrandId,
 			requestInfo.BrandPaymentInfo.Id,
 			requestInfo.Amount,
-			"tgs.payment.alfapay.deposit",
+			$"tgs.payment.{paymentCode.ToLower()}.deposit",
 			requestInfo.PromotionId,
 			formId => JsonSerializer.Serialize(
 				new AlfaPayDepositSettings(
