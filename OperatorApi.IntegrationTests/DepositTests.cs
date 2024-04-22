@@ -6364,7 +6364,8 @@ public class DepositTests(ITestOutputHelper testOutputHelper)
 			ExtendedData = """
 				{
 					"apiToken": "apiToken",
-					"notifyToken": "notifyToken"
+					"notifyToken": "notifyToken",
+					"exchangeRate": 1
 				}
 				""",
 			PaymentId = Guid.NewGuid(),
@@ -6397,7 +6398,8 @@ public class DepositTests(ITestOutputHelper testOutputHelper)
 				"apiToken",
 				"notifyToken",
 				Guid.NewGuid(),
-				null),
+				null,
+				ExchangeRate:1m),
 			new AlfaPayDepositResponse(
 				200000m,
 				Guid.NewGuid(),
