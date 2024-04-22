@@ -26,7 +26,8 @@ public class AlfaPayCommandBuilder : IDepositFormCommandBuilder
 					brandPaymentInfo.RootElement.GetProperty("apiToken").GetString(),
 					brandPaymentInfo.RootElement.GetProperty("notifyToken").GetString(),
 					formId,
-					null),
+					null,
+					brandPaymentInfo.RootElement.GetProperty("exchangeRate").GetDecimal()),
 				AlfaPayUtility.SerializerOptions));
 
 		return ValueTask.FromResult(command);
