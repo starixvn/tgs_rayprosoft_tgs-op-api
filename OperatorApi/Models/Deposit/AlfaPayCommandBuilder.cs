@@ -14,6 +14,8 @@ public class AlfaPayCommandBuilder : IDepositFormCommandBuilder
 	{
 		var brandPaymentInfo = JsonDocument.Parse(requestInfo.BrandPaymentInfo.ExtendedData);
 
+		var hasBankId = brandPaymentInfo.RootElement.TryGetProperty("bankId", out var bankId);
+
 		var command = new CreateDepositFormCommand(
 			requestInfo.PlayerCode,
 			requestInfo.BrandId,
@@ -27,6 +29,7 @@ public class AlfaPayCommandBuilder : IDepositFormCommandBuilder
 					brandPaymentInfo.RootElement.GetProperty("notifyToken").GetString(),
 					formId,
 					null,
+					hasBankId ? bankId.ToString() : null,
 					brandPaymentInfo.RootElement.GetProperty("exchangeRate").GetDecimal()),
 				AlfaPayUtility.SerializerOptions));
 

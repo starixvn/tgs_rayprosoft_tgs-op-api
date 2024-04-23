@@ -6399,7 +6399,8 @@ public class DepositTests(ITestOutputHelper testOutputHelper)
 				"notifyToken",
 				Guid.NewGuid(),
 				null,
-				ExchangeRate:1m),
+				null,
+				ExchangeRate: 1m),
 			new AlfaPayDepositResponse(
 				200000m,
 				Guid.NewGuid(),
