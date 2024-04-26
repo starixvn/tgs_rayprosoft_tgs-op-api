@@ -18,6 +18,9 @@ public class BrandAllAgentTests
 
 		var brandId = Guid.NewGuid();
 
+		_ = fakeBrandAllAgentClient.GetBrandAllAgentAsync(Arg.Any<GetBrandAllAgentRequest>())
+			.Returns(new BrandAllAgent(true, SettlementIntervalType.Daily));
+
 		var query = new GetBrandAllAgentSwitchOnQuery(brandId);
 
 		_ = await sut.GetAsync(query);
