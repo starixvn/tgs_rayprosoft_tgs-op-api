@@ -14,8 +14,4 @@ public interface IBrandRepository
 	IAsyncEnumerable<AnnouncementInfo> QueryAnnouncementInfosAsync(Guid brandId, DateTimeOffset searchDate);
 
 	IAsyncEnumerable<BannerInfo> QueryBrandBannersAsync(Guid brandId);
-
-	ValueTask<bool> CheckHaveAllAgentAsync(Guid brandId, CancellationToken cancellationToken = default);
-
-	IAsyncEnumerable<BrandAllAgentTurnover> GetBrandAllAgentTurnoverConditionsAsync(Guid brandId, CancellationToken cancellationToken = default);
 }
