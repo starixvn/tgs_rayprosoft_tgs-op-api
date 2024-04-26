@@ -34,7 +34,8 @@ public class HaloPayCommandBuilder(IPlayerServiceClient playerServiceClient) : I
 					formId,
 					requestInfo.PlayerCode,
 					hasPayType ? payType.GetString() : "",
-					playerPhone),
+					playerPhone,
+					brandPaymentInfo.RootElement.GetProperty("exchangeRate").GetDecimal()),
 				ShunfaPayUtility.SerializerOptions));
 
 		return ValueTask.FromResult(command);
