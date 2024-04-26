@@ -39,6 +39,7 @@ using TGS.Core.Infrastructures.Mail;
 using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Infrastructures.WebApiServices;
 using TGS.Payment.ManualDeposit;
+using Tgs.Player.All.Agent.Client.DependencyInjection;
 using TGS.Services.Operations.Extensions;
 using TGS.Services.Operator;
 using TGS.Services.Operator.ApplicationServices.Game;
@@ -206,6 +207,11 @@ builder.Services
 		var config = sp.GetRequiredService<IConfiguration>();
 
 		options.BaseUrl = config.GetValue<Uri>("Operator:DepositAccumulateRouletteServiceBaseUrl")!;
+	})
+	.AddPlayerAllAgentClient((options, sp) =>
+	{
+		var config = sp.GetRequiredService<IConfiguration>();
+		options.Url = config.GetValue<Uri>("Operator:PlayerAllAgentBaseUrl");
 	})
 	.AddPlayerBucketClient(httpBuilder => httpBuilder
 		.ConfigureHttpClient(httpClient => httpClient.BaseAddress =
