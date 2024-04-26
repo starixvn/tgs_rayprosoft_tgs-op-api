@@ -68,6 +68,8 @@ public class DepositFormCommandBuilderFactory(IServiceProvider serviceProvider)
 				=> ActivatorUtilities.GetServiceOrCreateInstance<AlfaPayCommandBuilder>(serviceProvider),
 			_ when string.Equals("MegaPay", paymentCode, StringComparison.InvariantCultureIgnoreCase)
 				=> ActivatorUtilities.GetServiceOrCreateInstance<AlfaPayCommandBuilder>(serviceProvider),
+			_ when string.Equals("HaloPay", paymentCode, StringComparison.InvariantCultureIgnoreCase)
+				=> ActivatorUtilities.GetServiceOrCreateInstance<HaloPayCommandBuilder>(serviceProvider),
 			_ => throw new NotImplementedException()
 		};
 	}
