@@ -144,7 +144,8 @@ public class HaloPayDepositTests(ITestOutputHelper testOutputHelper)
 			ExtendedData = """
 				{
 					"merchantId": "merchantId",
-					"apiKey": "apiKey"
+					"apiKey": "apiKey",
+					"exchangeRate": 1
 				}
 				""",
 			PaymentId = Guid.NewGuid(),
@@ -179,7 +180,8 @@ public class HaloPayDepositTests(ITestOutputHelper testOutputHelper)
 				Guid.NewGuid(),
 				playerCode,
 				"",
-				""),
+				"",
+				1m),
 			new HaloPayDepositResponse(
 				100M,
 				Guid.NewGuid(),
