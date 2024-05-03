@@ -115,7 +115,7 @@ public class PlayerController(ILogger<PlayerController> logger) : ControllerBase
 	}
 
 	[HttpPost("phone/check")]
-	[AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+	[AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = true)]
 	public ValueTask<bool> CheckPhoneCanUseAsync(
 		[FromServices] IGetService<CheckBrandPhoneCanUseQuery, bool> checkService,
 		[FromBody] StartSetPhoneRequest viewModel)
