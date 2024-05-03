@@ -10,7 +10,13 @@ export default class OperatorService {
 
     // #endregion Constructors (1)
 
-    // #region Public Methods (60)
+    // #region Public Methods (61)
+
+    public checkPhoneCanUse(request: StartSetPhoneRequest): Promise<SuccessResponse<boolean>> {
+        return this.http
+            .post("/api/player/phone/check", request)
+            .then(res => res.data);
+    }
 
     public async createIdentityAuthenticationForm(
         request: CreateIdentityAuthenticationFormRequest,
@@ -517,5 +523,5 @@ export default class OperatorService {
             .then(res => res.data);
     }
 
-    // #endregion Public Methods (60)
+    // #endregion Public Methods (61)
 }
