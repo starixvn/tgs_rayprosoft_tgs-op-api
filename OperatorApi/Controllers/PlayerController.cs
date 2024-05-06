@@ -292,7 +292,8 @@ public class PlayerController(ILogger<PlayerController> logger) : ControllerBase
 		[FromServices] IGetService<GetPlayerPropertiesQuery, IImmutableDictionary<string, string>> getPlayerPropertiesQueryService,
 		[FromServices] IGetService<GetPlayerIsAutoTransferToGameQuery, bool> getAutoTransFlagService,
 		[FromServices] IGetService<GetPlayerIdentityFormQuery, PlayerIdentityFormInfo> getIdentityFormStatusService,
-		[FromServices] IQueryService<GetPlayerBankInfosQuery, PlayerBankInfo> getBankInfoQueryService)
+		[FromServices] IQueryService<GetPlayerBankInfosQuery, PlayerBankInfo> getBankInfoQueryService,
+		[FromServices] IGetService<GetPlayerAgentQuery, Guid?> playerAgentService)
 	{
 		var playerTokenData = HttpContext.Items.GetPlayerTokenData();
 		var playerCode = playerTokenData.PlayerCode;
@@ -329,6 +330,9 @@ public class PlayerController(ILogger<PlayerController> logger) : ControllerBase
 				  .QueryAsync(new GetPlayerBankInfosQuery(playerCode))
 				  .AnyAsync(info => info.IsDefault).ConfigureAwait(false);
 
+		var agentId =
+			await playerAgentService.GetAsync(new GetPlayerAgentQuery(playerCode), HttpContext.RequestAborted);
+
 		var playerInfo = new PlayerInfoViewModel
 		{
 			PlayerCode = player.PlayerCode,
@@ -361,7 +365,8 @@ public class PlayerController(ILogger<PlayerController> logger) : ControllerBase
 			BankInfoAuthentication = bankInfoAuthentication,
 			EmailAuthentication = player.EmailAuthentication,
 			PhoneAuthentication = player.PhoneAuthentication,
-			IsCompletedRegister = playerStatus != Tgs.PlayerService.Client.PlayerStatus.RegisterUndone
+			IsCompletedRegister = playerStatus != Tgs.PlayerService.Client.PlayerStatus.RegisterUndone,
+			PlayerIsAgentId = agentId
 		};
 
 		return playerInfo;

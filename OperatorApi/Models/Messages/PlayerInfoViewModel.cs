@@ -97,4 +97,7 @@ public class PlayerInfoViewModel
 
 	[JsonPropertyName("zalo")]
 	public string Zalo { get; set; }
+
+	[JsonPropertyName("playerisagentid")]
+	public Guid? PlayerIsAgentId { get; set; }
 }
