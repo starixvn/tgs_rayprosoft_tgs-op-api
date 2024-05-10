@@ -2,4 +2,4 @@
 
 namespace TGS.Services.Operator.ApplicationServices.Brand;
 
-public record GetPlatformChargePQuery(Guid BrandId);
+public record GetPlatformChargeQuery(Guid BrandId);

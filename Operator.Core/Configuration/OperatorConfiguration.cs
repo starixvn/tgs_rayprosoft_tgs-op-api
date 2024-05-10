@@ -140,4 +140,13 @@ public class OperatorConfiguration(IServiceCollection services)
 
 		return this;
 	}
+
+	public OperatorConfiguration AddPlayerAgentRepository<T>()
+		where T : class, IPlayerAgentRepository
+	{
+		_ = Services.AddTransient<IPlayerAgentRepository, T>()
+			.Decorate<IPlayerAgentRepository, MemoryCachedPlayerAgentRepository>();
+
+		return this;
+	}
 }

@@ -238,6 +238,12 @@ builder.Services
 		c.BaseAddress = new Uri(url.Value);
 	})
 	.Services
+	.AddAgentDividendClient((options, sp) =>
+	{
+		var config = sp.GetRequiredService<IConfiguration>();
+		options.BaseUrl = config.GetValue<Uri>("Operator:AgentDividendBaseUrl");
+	})
+	.Services
 	.AddAgentClient()
 	.ConfigureHttpClient(httpBuilder => httpBuilder.BaseAddress =
 		builder.Configuration.GetValue<Uri>("Operator:AgentBaseUrl"))

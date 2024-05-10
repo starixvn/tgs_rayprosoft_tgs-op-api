@@ -1,5 +1,5 @@
 ﻿using System;
 
-namespace TGS.Services.Agent.ApplicationServices.AgentTeam;
+namespace TGS.Services.Operator.ApplicationServices.Agent;
 
 public record GetAgentTeamInfoQuery(Guid BrandId, Guid AgentId);

@@ -7,11 +7,11 @@ using Tgs.ServiceUtility;
 
 namespace TGS.Services.Operator.ApplicationServices.Brand;
 
-internal class GetPlatformChargePQueryService(IBrandServiceClient brandServiceClient, IMemoryCache memoryCache)
-	: IGetService<GetPlatformChargePQuery, PlatformChargeInfo?>
+internal class GetPlatformChargeQueryService(IBrandServiceClient brandServiceClient, IMemoryCache memoryCache)
+	: IGetService<GetPlatformChargeQuery, PlatformChargeInfo?>
 {
 	public async ValueTask<PlatformChargeInfo?> GetAsync(
-		GetPlatformChargePQuery query,
+		GetPlatformChargeQuery query,
 		CancellationToken cancellationToken = default)
 	{
 		var key = $"PlatformChargeInfo:{query.BrandId}";

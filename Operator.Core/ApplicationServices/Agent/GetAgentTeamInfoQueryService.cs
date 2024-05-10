@@ -5,27 +5,23 @@ using System.Threading.Tasks;
 using Tgs.Agent.Client;
 using Tgs.Agent.Client.Models;
 using Tgs.PlayerService.Client;
+using TGS.Services.Agent;
 using Tgs.ServiceUtility;
 
-namespace TGS.Services.Agent.ApplicationServices.AgentTeam;
+namespace TGS.Services.Operator.ApplicationServices.Agent;
 
-internal class GetAgentTeamInfoQueryService : IGetService<GetAgentTeamInfoQuery, GetAgentTeamInfoModel?>
+internal class GetAgentTeamInfoQueryService(
+	IAgentClient agentClient,
+	IPlayerServiceClient playerServiceClient)
+	: IGetService<GetAgentTeamInfoQuery, GetAgentTeamInfoModel?>
 {
-    private readonly IAgentClient _agentClient;
-    private readonly IPlayerServiceClient _playerServiceClient;
-
-    public GetAgentTeamInfoQueryService(
-        IAgentClient agentClient,
-        IPlayerServiceClient playerServiceClient)
-    {
-        _agentClient = agentClient ?? throw new ArgumentNullException(nameof(agentClient));
-        _playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
-    }
+    private readonly IAgentClient _agentClient = agentClient ?? throw new ArgumentNullException(nameof(agentClient));
+    private readonly IPlayerServiceClient _playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
 
     public async ValueTask<GetAgentTeamInfoModel?> GetAsync(GetAgentTeamInfoQuery query,
         CancellationToken cancellationToken = default)
     {
-        var allChildAgents = await _agentClient.GetChildAgentInfosAsync(new GetChildAgentInfosRequest(query.AgentId))
+        var allChildAgents = await _agentClient.GetChildAgentInfosAsync(new GetChildAgentInfosRequest(query.AgentId), cancellationToken)
             .ToArrayAsync(cancellationToken);
 
         var directAgents = allChildAgents.Where(x => x.ParentAgentId == query.AgentId);
@@ -33,7 +29,7 @@ internal class GetAgentTeamInfoQueryService : IGetService<GetAgentTeamInfoQuery,
         var indirectAgents = allChildAgents.Where(x => x.ParentAgentId != query.AgentId);
 
         var agentPlayerCounts =
-            await _playerServiceClient.GetPlayerCountInfosByBrandIdAsync(query.BrandId, cancellationToken)
+            await _playerServiceClient.GetPlayerCountInfosByBrandIdAsync(query.BrandId, false, cancellationToken)
                 .ToArrayAsync(cancellationToken);
 
         var directPlayerCountInfo =
