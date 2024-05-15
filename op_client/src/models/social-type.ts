@@ -1,0 +1,1 @@
+type SocialType = "Facbook" | "X" | "Instagram" | "Threads";
