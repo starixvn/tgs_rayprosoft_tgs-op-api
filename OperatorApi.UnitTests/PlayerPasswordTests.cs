@@ -155,7 +155,9 @@ public class PlayerPasswordTests
 			.SendShortMessageAsync(
 				Arg.Is($"{command.AreaCode}{command.Phone}"),
 				Arg.Is(expected),
-				Arg.Is(command.BrandId));
+				Arg.Is(command.BrandId),
+				areaCode: Arg.Is(command.AreaCode),
+				phone: Arg.Is(command.Phone));
 	}
 
 	[Test]
