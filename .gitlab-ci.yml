@@ -13,7 +13,7 @@ stages:
   - build
   - test
   - publish
-  #- deploy-dev
+  - deploy-dev
   - deploy-staging
   - deploy-prod
 
@@ -67,23 +67,23 @@ push-docker-image:
 push-k8s-template:
   extends: .push-k8s-template
 
-# deploy-dev:
-#   extends: .deploy-template
-#   variables:
-#     namespace: dev
-#     kube_config: KubeConfig_Raypro_dev
-#   environment:
-#     name: dev
-#   stage: deploy-dev
-#   needs:
-#     - push-docker-image
-#     - job: push-k8s-template
-#       artifacts: true
-#   only:
-#     - main
-#   when: on_success
-#   script:
-#     - deploy_k8s $TgsSettingKey $HelmTemplateFolderName $namespace
+deploy-dev:
+  extends: .deploy-template
+  variables:
+    namespace: dev
+    kube_config: KubeConfig_Raypro_dev
+  environment:
+    name: dev
+  stage: deploy-dev
+  needs:
+    - push-docker-image
+    - job: push-k8s-template
+      artifacts: true
+  only:
+    - main
+  when: on_success
+  script:
+    - deploy_k8s $TgsSettingKey $HelmTemplateFolderName $namespace
 
 deploy-staging:
   extends: .deploy-template
