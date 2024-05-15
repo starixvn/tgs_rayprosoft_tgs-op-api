@@ -523,5 +523,10 @@ export default class OperatorService {
             .then(res => res.data);
     }
 
+    public listBrandSocialMediaSettings(): Promise<SuccessResponse<SocialMediaSetting[]>> {
+        return this.http
+            .get(`/api/brand/social`)
+            .then(res => res.data);
+    }
     // #endregion Public Methods (61)
 }
