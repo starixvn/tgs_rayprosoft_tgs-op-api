@@ -13,31 +13,31 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Grpc.Tools" Version="2.62.0">
+    <PackageReference Include="Grpc.Tools" Version="2.63.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="17.9.28">
+    <PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="17.10.48">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="PhoenixToolkits.MessageQueue" Version="2.1.0" />
+    <PackageReference Include="PhoenixToolkits.MessageQueue" Version="2.2.0" />
     <PackageReference Include="PhoenixToolkits.Protobuf.ExtendTypes" Version="0.0.7" />
-    <PackageReference Include="Polly" Version="8.3.0" />
+    <PackageReference Include="Polly" Version="8.4.0" />
     <PackageReference Include="Scrutor" Version="4.2.2" />
     <PackageReference Include="System.Linq.Async" Version="6.0.1" />
     <PackageReference Include="System.Reactive" Version="6.0.0" />
     <PackageReference Include="Tgs.Agent.Client" Version="0.0.35" />
     <PackageReference Include="Tgs.Agent.Dividend.Client" Version="1.0.15" />
     <PackageReference Include="Tgs.ArticleManagementClient" Version="0.0.4" />
-    <PackageReference Include="Tgs.BrandCertificateClient" Version="0.1.6" />
-	<PackageReference Include="Tgs.BrandGameCredits.Client" Version="0.0.9" />
+    <PackageReference Include="Tgs.BrandCertificateClient" Version="0.2.2" />
+	<PackageReference Include="Tgs.BrandGameCredits.Client" Version="1.0.1" />
     <PackageReference Include="Tgs.CashService.Client" Version="0.2.9" />
     <PackageReference Include="TGS.Core.Infrastructures.Mail" Version="0.0.6" />
     <PackageReference Include="Tgs.Core.Infrastructures.Security" Version="0.0.2" />
     <PackageReference Include="Tgs.DepositAccumulateRoulette.Client" Version="0.1.0" />
     <PackageReference Include="TGS.FileService.Client" Version="0.0.5" />
-    <PackageReference Include="Tgs.GameProviders.Pluggable.Client" Version="0.0.34" />
+    <PackageReference Include="Tgs.GameProviders.Pluggable.Client" Version="1.0.0" />
     <PackageReference Include="Tgs.Notification.Client" Version="0.1.0" />
     <PackageReference Include="Tgs.Paging.AsyncEnumerable" Version="1.2.1" />
     <PackageReference Include="Tgs.Payment.Client" Version="0.6.8" />
@@ -49,10 +49,10 @@
     <PackageReference Include="Tgs.Promotion.Client" Version="1.0.47" />
     <PackageReference Include="Tgs.Report.Client" Version="0.0.76" />
     <PackageReference Include="TGS.ServiceUtility" Version="0.2.0" />
-    <PackageReference Include="TGS.SmsServiceClient" Version="0.1.1" />
+    <PackageReference Include="TGS.SmsServiceClient" Version="0.1.2" />
     <PackageReference Include="Tgs.StationLetter.Client" Version="0.0.7" />
     <PackageReference Include="Tgs.ValidateCode.Client" Version="1.1.0" />
-    <PackageReference Include="Tgs.VipLevelService.Client" Version="0.0.26" />	  
+    <PackageReference Include="Tgs.VipLevelService.Client" Version="1.0.0" />	  
   </ItemGroup>
 
   <ItemGroup>

@@ -115,15 +115,17 @@ public class PlayerController(ILogger<PlayerController> logger) : ControllerBase
 	}
 
 	[HttpPost("phone/check")]
+	[AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = true)]
 	public ValueTask<bool> CheckPhoneCanUseAsync(
-			[FromServices] IGetService<CheckBrandPhoneCanUseQuery, bool> checkService,
-			[FromBody] StartSetPhoneRequest viewModel)
+		[FromServices] IGetService<CheckBrandPhoneCanUseQuery, bool> checkService,
+		[FromBody] StartSetPhoneRequest viewModel)
 	{
 		var brandId = HttpContext.Items.GetBrandId();
+		var playerTokenData = HttpContext.Items.GetPlayerTokenData();
 
 		var query = new CheckBrandPhoneCanUseQuery(
 			brandId,
-			null,
+			playerTokenData.PlayerCode,
 			viewModel.AreaCode,
 			viewModel.Phone);
 

@@ -75,6 +75,8 @@ internal class StartChangePayPasswordCommandService(
 					command.CultureInfo)!,
 					saveResult.ValidateCode),
 				player.BrandId,
+				areaCode: player.AreaCode,
+				phone: player.Phone,
 				cancellationToken: cancellationToken).ConfigureAwait(false);
 		}
 		else

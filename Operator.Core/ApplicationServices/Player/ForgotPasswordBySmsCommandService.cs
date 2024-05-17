@@ -68,6 +68,8 @@ internal class ForgotPasswordBySmsCommandService(
 				Resources.ResourceManager.GetString(nameof(Resources.ValidateCodeMailBody), command.CultureInfo)!,
 				saveResult.ValidateCode),
 			player.BrandId,
+			areaCode: command.AreaCode,
+			phone: command.Phone,
 			cancellationToken: cancellationToken).ConfigureAwait(false);
 
 		return saveResult.Token;

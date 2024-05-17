@@ -50,7 +50,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OperatorApi.UnitTests", "Op
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OperatorApi.IntegrationTests", "OperatorApi.IntegrationTests\OperatorApi.IntegrationTests.csproj", "{BFB256C5-A790-4B2B-A2EB-9AC97A5A5038}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Operator.Client", "Operator.Client\Operator.Client.csproj", "{11F27E8F-4C17-4CF0-8890-C1CDCC198E60}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Operator.Client", "Operator.Client\Operator.Client.csproj", "{11F27E8F-4C17-4CF0-8890-C1CDCC198E60}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -105,8 +105,8 @@ Global
 		{75FBF9C7-4204-4BA1-855D-AAFFAB98B631} = {A7922C1B-C1EF-44C3-B04B-B0DF6EA00ABB}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		RESX_Rules = {"EnabledRules":[]}
-		RESX_TaskErrorCategory = Message
 		SolutionGuid = {079E8E6E-803B-42FB-ACC6-2B253C8A689A}
+		RESX_TaskErrorCategory = Message
+		RESX_Rules = {"EnabledRules":[]}
 	EndGlobalSection
 EndGlobal

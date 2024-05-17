@@ -5,6 +5,7 @@ using System.Runtime.InteropServices;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using Jering.Javascript.NodeJS;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
@@ -723,5 +724,153 @@ public class PlayerTests(ITestOutputHelper testOutputHelper)
 					dict => dict[PlayerPropertyName.Zalo] == "testZaloInfo"),
 				Arg.Any<string?>(),
 				Arg.Any<CancellationToken>());
+	}
+
+	[Fact]
+	public async Task 檢查電話是否重複()
+	{
+		var channelName = Guid.NewGuid().ToString();
+
+		var fakeBrandCertClient = Substitute.For<IBrandCertificateClient>();
+		var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
+		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
+		var fakePlayerPasswordValidateCommandService = Substitute.For<IGetService<PlayerPasswordValidateCommand, bool>>();
+		var fakePlayerLoginRecordRepository = Substitute.For<IPlayerLoginRecordRepository>();
+		var fakeBrandRepository = Substitute.For<IBrandRepository>();
+		var fakeValidatePlayerLoginRecordCommandService = Substitute.For<ICommandService<ValidatePlayerLoginRecordCommand>>();
+
+		_ = fakeBrandCertClient.GetSystemValidateSecurityKeyAsync(Arg.Any<CancellationToken>())
+			.Returns(TestOperatorApplication.TestSecurityKey);
+
+		var brandId = Guid.NewGuid();
+		var brandCode = "Test";
+		var brandToken = TestOperatorApplication.MakeTestBrandToken(brandId, brandCode);
+		var secretKey = "N2KAnljo5zbLCZDSoUBFJ70ONsy";
+
+		_ = fakeBrandRepository.GetSecretKeyAsync(
+				Arg.Is(brandId),
+				Arg.Any<CancellationToken>())
+			.Returns(secretKey);
+
+		using var web = TestOperatorApplication.Builder
+			.UseTestChannelServer(channelName)
+			.ConfigureLogging(logging => logging.AddXUnit(_testOutputHelper))
+			.ConfigureServices(services => services
+				.AddSingleton(fakeBrandCertClient)
+				.AddSingleton(fakeBrandServiceClient)
+				.AddSingleton(fakePlayerServiceClient)
+				.AddSingleton(fakePlayerPasswordValidateCommandService)
+				.AddSingleton(fakePlayerLoginRecordRepository)
+				.AddSingleton(fakeBrandRepository)
+				.AddSingleton(fakeValidatePlayerLoginRecordCommandService))
+			.Build();
+
+		await web.StartAsync();
+
+		var playerCode = "test1";
+		var userName = "test01";
+
+		_ = fakeBrandServiceClient.GetBrandStatusAsync(
+				Arg.Is(brandId),
+				Arg.Any<CancellationToken>())
+			.Returns(BrandStatus.Active);
+
+		_ = fakePlayerServiceClient.GetPlayerInfoByUserNameAsync(
+				Arg.Is(brandId),
+				Arg.Is(userName),
+				Arg.Any<CancellationToken>())
+			.Returns(new Tgs.PlayerService.Client.PlayerInfo
+			{
+				BrandId = brandId,
+				UserName = userName,
+				PlayerCode = playerCode
+			});
+
+		_ = fakePlayerPasswordValidateCommandService.GetAsync(
+			Arg.Any<PlayerPasswordValidateCommand>(),
+			Arg.Any<CancellationToken>())
+			.Returns(true);
+
+		_ = fakePlayerLoginRecordRepository.AddPlayerLoginRecordAsync(
+				Arg.Is(brandId),
+				Arg.Is(playerCode),
+				Arg.Is(PlatformType.Desktop),
+				Arg.Any<string>())
+			.Returns(new LoginRecordInfo(
+			Guid.NewGuid(),
+			playerCode,
+			LoginStatus.Enabled,
+			PlatformType.Desktop,
+			DateTimeOffset.Now,
+			DateTimeOffset.Now.AddDays(1D)));
+
+		_ = fakePlayerServiceClient.GetPlayerInfoAsync(Arg.Is(playerCode), Arg.Any<CancellationToken>())
+			.Returns(new Tgs.PlayerService.Client.PlayerInfo
+			{
+				BrandId = brandId,
+				UserName = userName,
+				PlayerCode = playerCode
+			});
+
+		await using var scope = web.Services.CreateAsyncScope();
+
+		var loginService = scope.ServiceProvider.GetRequiredService<IGetService<LoginCommand, LoginInfo>>();
+
+		var loginCommand = new LoginCommand(
+			brandId,
+			userName,
+			"test123",
+			"127.0.0.1",
+			"localhost",
+			TGS.Core.Models.Enums.PlatformType.Desktop,
+			"operator-api");
+
+		var loginResult = await loginService.GetAsync(loginCommand);
+
+		_ = fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId), Arg.Any<CancellationToken>())
+			.Returns(new Tgs.BrandCertificate.Clients.BrandInfo
+			{
+				Id = brandId,
+				PlayerIdentityEnabled = true,
+			});
+
+		var request = new StartSetPhoneRequest
+		{
+			AreaCode = "+84",
+			Phone = "123456789585"
+		};
+
+		var isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "true" : "false";
+		var nodeModule = $$"""
+			const axiosConfigFactory = require('./models/axios-configuration.js').default;
+			const OperatorService = require('./services/op-service.js').default;
+
+			module.exports = async (brandToken, loginToken, request) =>
+			{
+				let instance = axiosConfigFactory("{{channelName}}", {{isWindows}}, brandToken, loginToken);
+
+				let svc = new OperatorService(instance);
+
+				return await svc.checkPhoneCanUse(request);
+			};
+		""";
+
+		// Act
+		var response = await StaticNodeJSService.InvokeFromStringAsync<string>(
+			nodeModule,
+			args: [brandToken, loginResult.PlayerToken, request]);
+
+		// Assert		
+		_ = fakePlayerServiceClient
+			.Received(1)
+			.GetPlayerInfoByPhoneAsync(
+				Arg.Is(brandId),
+				Arg.Is("+84"),
+				Arg.Is("123456789585"),
+				Arg.Any<CancellationToken>());
+
+		var jsonNode = JsonNode.Parse(response!);
+		var actual = jsonNode?["data"]?.GetValue<bool>();
+		Assert.True(actual);
 	}
 }
