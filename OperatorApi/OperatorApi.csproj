@@ -91,7 +91,6 @@
 		<PackageReference Include="Tgs.Payment.UmPay.Client" Version="0.0.1" />
 		<PackageReference Include="Tgs.Payment.WandaPay.Client" Version="0.0.5" />
 		<PackageReference Include="Tgs.Payment.ZeroNineNinePay.Client" Version="0.0.7" />
-		<PackageReference Include="Tgs.Report.Client" Version="0.0.68" />
 		<PackageReference Include="Tgs.WebApi.Toolkits" Version="0.4.0" />
 	</ItemGroup>
 

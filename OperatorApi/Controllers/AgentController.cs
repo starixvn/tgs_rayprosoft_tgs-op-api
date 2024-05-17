@@ -4,11 +4,20 @@ using Tgs.ServiceUtility;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models.Messages;
+using TGS.Core.Models.Messages;
+using Tgs.PlayerService.Client;
 using TGS.Services.Agent;
 using TGS.Services.Operator;
 using TGS.Services.Operator.ApplicationServices.Agent;
 using TGS.Services.Operator.ApplicationServices.Brand;
 using TGS.Services.Operator.ApplicationServices.Player;
+using TGS.Services.Operator.ApplicationServices.PlayerPayment;
+using Tgs.VipLevelService.Clients;
+using PlayerStatus = TGS.Core.Models.Enums.PlayerStatus;
+using Tgs.Agent.Client;
+using TGS.Core.Models.Enums;
+
+
 
 #nullable enable
 
@@ -96,5 +105,127 @@ public class AgentController : ControllerBase
 				NegativeAgentDividendCarryForward = agentInfo.NegativeAgentDividendCarryForward
 			}
 			: null;
+	}
+
+	[HttpGet("direct-player", Name = "GetDirectPlayers")]
+	[AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+	public async Task<PagedResponse<DirectPlayersResponse>> GetDirectPlayersAsync(
+		[FromServices] IGetService<GetPlayerAgentQuery, Guid?> playerAgentService,
+		[FromServices] IGetService<GetPlayerPaymentOverviewQuery, PlayerPaymentOverview> playerPaymentService,
+		[FromServices] IQueryService<GetDirectPlayersQuery, PlayerListItem> directPlayersService,
+		[FromServices] IVipLevelServiceClient vipLevelServiceClient,
+		[FromServices] IPlayerServiceClient playerServiceClient,
+		[FromQuery] GetDirectPlayersRequest request)
+	{
+		var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+		var brandId = HttpContext.Items.GetBrandId();
+
+		var agentId =
+			await playerAgentService.GetAsync(new GetPlayerAgentQuery(playerTokenData!.PlayerCode),
+				HttpContext.RequestAborted);
+
+		if (agentId is null)
+		{
+			return new PagedResponse<DirectPlayersResponse>
+			{
+				Valid = false
+			};
+		}
+
+		var directPlayers =
+			directPlayersService.QueryAsync(new GetDirectPlayersQuery(brandId, agentId!.Value, request.PlayerUsername,
+				request.PlayerStatus));
+
+		var response = await directPlayers
+			.Where(x => x.RegisteredOn != null)
+			.SelectAwait(async x =>
+			{
+				var totalDepositWithdraw =
+					await playerPaymentService.GetAsync(new GetPlayerPaymentOverviewQuery(x.PlayerCode));
+
+				var playerVipLevel = await vipLevelServiceClient.PlayerVipLevelGetAsync(
+						x.PlayerCode,
+						HttpContext.RequestAborted)
+					.ConfigureAwait(false);
+
+				var loginInfo = await playerServiceClient.GetPlayerLoginInfoAsync(
+					x.PlayerCode,
+					HttpContext.RequestAborted).ConfigureAwait(false);
+
+				return new DirectPlayersResponse
+				{
+					PlayerUsername = x.UserName,
+					PlayerStatus = (PlayerStatus)x.Status,
+					VipLevel = playerVipLevel.VipLevel,
+					RegisteredOn = x.RegisteredOn,
+					LastLoginOn = loginInfo?.LoginOn,
+					TotalDepositAmount = totalDepositWithdraw.TotalDepositAmount,
+					TotalWithdrawAmount = totalDepositWithdraw.TotalWithdrawAmount
+				};
+			}).OrderByDescending(x => x.RegisteredOn)
+			.ToArrayAsync(HttpContext.RequestAborted);
+
+		return new PagedResponse<DirectPlayersResponse>
+		{
+			Valid = true,
+			TotalCount = response.Length,
+			Items = response.Chunk(request.Rows).Skip(request.Page - 1).FirstOrDefault() ?? []
+		};
+	}
+
+	[HttpGet("direct-agent", Name = "GetDirectAgents")]
+	[AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+	public async Task<PagedResponse<DirectAgentsResponse>> GetDirectAgentsAsync(
+		[FromServices] IGetService<GetPlayerAgentQuery, Guid?> playerAgentService,
+		[FromServices] IPlayerServiceClient playerServiceClient,
+		[FromServices] IAgentClient agentClient,
+		[FromQuery] GetDirectAgentsRequest request)
+	{
+		var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+		var brandId = HttpContext.Items.GetBrandId();
+
+		var agentId =
+			await playerAgentService.GetAsync(new GetPlayerAgentQuery(playerTokenData!.PlayerCode),
+				HttpContext.RequestAborted);
+
+		if (agentId is null)
+		{
+			return new PagedResponse<DirectAgentsResponse>
+			{
+				Valid = false
+			};
+		}
+
+		var childAgentInfos = agentClient.GetChildAgentInfosAsync(new GetChildAgentInfosRequest(agentId.Value), HttpContext.RequestAborted);
+
+		var response = await childAgentInfos.SelectAwait(async x =>
+			{
+				var agentPlayerCounts =
+					await playerServiceClient
+						.GetPlayerCountInfosByBrandIdAsync(brandId, false, HttpContext.RequestAborted)
+						.ToArrayAsync(HttpContext.RequestAborted);
+
+				var directPlayerCountInfo =
+					agentPlayerCounts.FirstOrDefault(a => a.AgentId == agentId);
+
+
+				return new DirectAgentsResponse
+				{
+					AgentDividendPercentage = x.DividendPercentage,
+					AgentStatus = (AgentStatus)x.Status,
+					AgentUsername = x.AgentUsername,
+					RealName = x.RealName,
+					RegisteredOn = x.RegisteredOn,
+					DirectPlayerWithAgentCount = (directPlayerCountInfo?.PlayerCount ?? 0) + 1
+				};
+			}).OrderByDescending(x => x.RegisteredOn)
+			.ToArrayAsync(HttpContext.RequestAborted);
+
+		return new PagedResponse<DirectAgentsResponse>
+		{
+			Valid = true,
+			TotalCount = response.Length,
+			Items = response.Chunk(request.Rows).Skip(request.Page - 1).FirstOrDefault() ?? []
+		};
 	}
 }

@@ -1,11 +1,12 @@
 ﻿#nullable enable
 
 using TGS.Core.Models.Enums;
+using TGS.Core.Models.Messages;
 
 namespace TGS.Apis.OperatorApi.Models.Messages;
 
-public record GetDirectPlayerReportRequest : PagingRequest
+public class GetDirectPlayersRequest : PageableRequest
 {
 	public string? PlayerUsername { get; set; }
-	public PlayerStatus? Status { get; set; }
+	public PlayerStatus? PlayerStatus { get; set; }
 }
