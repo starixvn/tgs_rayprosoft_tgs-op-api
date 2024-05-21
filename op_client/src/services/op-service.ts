@@ -10,7 +10,7 @@ export default class OperatorService {
 
     // #endregion Constructors (1)
 
-    // #region Public Methods (61)
+    // #region Public Methods (63)
 
     public checkPhoneCanUse(request: StartSetPhoneRequest): Promise<SuccessResponse<boolean>> {
         return this.http
@@ -170,6 +170,12 @@ export default class OperatorService {
             .then(res => res.data);
     }
 
+    public listBrandSocialMediaSettings(): Promise<SuccessResponse<SocialMediaSetting[]>> {
+        return this.http
+            .get(`/api/brand/social`)
+            .then(res => res.data);
+    }
+
     public playerLogin(username: string, password: string, platformtype: number): Promise<LoginResponse> {
         return this.http
             .post(
@@ -297,6 +303,12 @@ export default class OperatorService {
         return this.http
             .post("/api/deposit/thirdparty/fivesevenpay-v2", request)
             .then(res => res.data);
+    }
+
+    public submitFuKaiThirdPartyDepositRequest(request: DepositRequest): Promise<SuccessResponse<DepositFormCreatedResponse>> {
+        return this.http
+            .post("/api/deposit/thirdparty/fukaipay", request)
+            .then<SuccessResponse<DepositFormCreatedResponse>>(res => res.data);
     }
 
     public submitGCThirdPartyDepositRequest(request: DepositRequest): Promise<SuccessResponse<DepositFormCreatedResponse>> {
@@ -523,10 +535,5 @@ export default class OperatorService {
             .then(res => res.data);
     }
 
-    public listBrandSocialMediaSettings(): Promise<SuccessResponse<SocialMediaSetting[]>> {
-        return this.http
-            .get(`/api/brand/social`)
-            .then(res => res.data);
-    }
-    // #endregion Public Methods (61)
+    // #endregion Public Methods (63)
 }
