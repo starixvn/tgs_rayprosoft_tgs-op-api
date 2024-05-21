@@ -1,0 +1,38 @@
+﻿using Microsoft.AspNetCore.Mvc;
+using Tgs.Agent.Dividend.Client;
+using Tgs.Agent.Dividend.Client.Models;
+using Tgs.ServiceUtility;
+using TGS.Apis.OperatorApi.Attributes;
+using TGS.Apis.OperatorApi.Extensions;
+using TGS.Services.Operator.ApplicationServices.Player;
+
+namespace TGS.Apis.OperatorApi.Controllers;
+[Route("api/[controller]")]
+[ApiController]
+public class AgentDividendReportController : ControllerBase
+{
+	[HttpGet("beforehand", Name = "GetAgentDividendBeforehand")]
+	[AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+	public async Task<AgentDividendBeforehandResponse> GetAgentDividendBeforehandAsync(
+		[FromServices] IAgentDividendClient agentDividendClient,
+		[FromServices] IGetService<GetPlayerAgentQuery, Guid?> playerAgentService)
+	{
+		var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+		var brandId = HttpContext.Items.GetBrandId();
+
+		var agentId =
+			await playerAgentService.GetAsync(new GetPlayerAgentQuery(playerTokenData!.PlayerCode),
+				HttpContext.RequestAborted);
+
+		if (agentId is null)
+		{
+			return new AgentDividendBeforehandResponse();
+		}
+
+		var response =
+			await agentDividendClient.GetAgentDividendBeforehandAsync(brandId, agentId.Value,
+				HttpContext.RequestAborted);
+
+		return new AgentDividendBeforehandResponse { Current = response.Current, Previous = response.Previous };
+	}
+}

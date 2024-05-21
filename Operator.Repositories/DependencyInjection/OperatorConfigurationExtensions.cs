@@ -33,6 +33,7 @@ public static class OperatorConfigurationExtensions
 			.AddHelp2PayRedisRepository<Help2PayRedisRepository>(redisDatabaseResolver)
 			.AddVipLevelRepository<VipLevelRepository>()
 			.AddAgentRepository<AgentRepository>()
-			.AddPlayerLoginRecordRepository<PlayerLoginRecordRepository>();
+			.AddPlayerLoginRecordRepository<PlayerLoginRecordRepository>()
+			.AddPlayerAgentRepository<PlayerAgentRepository>();
 	}
 }
