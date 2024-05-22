@@ -72,7 +72,7 @@
 		<PackageReference Include="Tgs.Payment.DibaoPay.Client" Version="0.0.3" />
 		<PackageReference Include="Tgs.Payment.FeibaoPay.Client" Version="0.0.2" />
 		<PackageReference Include="Tgs.Payment.FiveSevenPay.Client" Version="0.0.3" />
-		<PackageReference Include="Tgs.Payment.FuKaiPay.Client" Version="0.0.1" />
+		<PackageReference Include="Tgs.Payment.FuKaiPay.Client" Version="0.0.2" />
 		<PackageReference Include="Tgs.Payment.GanyoPay.Client" Version="0.0.2" />
 		<PackageReference Include="Tgs.Payment.GCPay.Client" Version="0.0.2" />
 		<PackageReference Include="Tgs.Payment.HaloPay.Client" Version="0.0.2" />
