@@ -1,6 +1,5 @@
 ﻿using System.Text.Json;
 using Tgs.Payment.HaloPay.Client;
-using Tgs.Payment.ShunfaPay.Client;
 using Tgs.PlayerService.Client;
 using TGS.Services.Operator.ApplicationServices.Deposit;
 
@@ -36,7 +35,7 @@ public class HaloPayCommandBuilder(IPlayerServiceClient playerServiceClient) : I
 					hasPayType ? payType.GetString() : "",
 					playerPhone,
 					brandPaymentInfo.RootElement.GetProperty("exchangeRate").GetDecimal()),
-				ShunfaPayUtility.SerializerOptions));
+				HaloPayUtility.SerializerOptions));
 
 		return ValueTask.FromResult(command);
 	}
