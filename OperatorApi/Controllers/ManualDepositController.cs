@@ -181,13 +181,13 @@ public class ManualDepositController : ControllerBase
 		[FromServices] ICommandService<SubmitBankDepositFormCommand> submitBankDepositFormCommandService,
 		[FromServices] ManualDepositSerializer serializer,
 		Guid id,
-		[FromForm(Name = "file")] IFormFile manualReceipt)
+		IFormFile file)
 	{
 		var playerTokenData = HttpContext.Items.GetPlayerTokenData();
 		var brandId = HttpContext.Items.GetBrandId();
 
-		var contentType = manualReceipt.ContentType;
-		await using var fileStream = manualReceipt.OpenReadStream();
+		var contentType = file.ContentType;
+		await using var fileStream = file.OpenReadStream();
 
 		var command = new SubmitBankDepositFormCommand(
 			brandId,
