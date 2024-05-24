@@ -28,7 +28,7 @@
     <PackageReference Include="System.Linq.Async" Version="6.0.1" />
     <PackageReference Include="System.Reactive" Version="6.0.0" />
     <PackageReference Include="Tgs.Agent.Client" Version="0.0.36" />
-    <PackageReference Include="Tgs.Agent.Dividend.Client" Version="1.0.16" />
+    <PackageReference Include="Tgs.Agent.Dividend.Client" Version="1.0.17" />
     <PackageReference Include="Tgs.ArticleManagementClient" Version="0.0.4" />
     <PackageReference Include="Tgs.BrandCertificateClient" Version="0.2.2" />
 	<PackageReference Include="Tgs.BrandGameCredits.Client" Version="1.0.1" />
@@ -47,7 +47,7 @@
     <PackageReference Include="Tgs.PlayerBucketType.Client" Version="0.1.0" />
     <PackageReference Include="Tgs.PlayerService.Client" Version="0.2.6" />
     <PackageReference Include="Tgs.Promotion.Client" Version="1.0.47" />
-    <PackageReference Include="Tgs.Report.Client" Version="0.0.76" />
+    <PackageReference Include="Tgs.Report.Client" Version="0.0.78" />
     <PackageReference Include="TGS.ServiceUtility" Version="0.2.0" />
     <PackageReference Include="TGS.SmsServiceClient" Version="0.1.2" />
     <PackageReference Include="Tgs.StationLetter.Client" Version="0.0.7" />
