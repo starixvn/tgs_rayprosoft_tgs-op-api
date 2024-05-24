@@ -193,13 +193,13 @@ public class PlayerController(ILogger<PlayerController> logger) : ControllerBase
 		[FromServices] ICommandService<CreateIdentityAuthenticationFormCommand> commandService,
 		[FromServices] ICommandService<SetIdentityCommand> setIdentityService,
 		CreateIdentityAuthenticationFormRequest request,
-		[FromForm(Name = "file")] IFormFile identityFile)
+		IFormFile file)
 	{
 		var playerTokenData = HttpContext.Items.GetPlayerTokenData();
 		var brandId = HttpContext.Items.GetBrandId();
 
-		var contentType = identityFile.ContentType;
-		await using var fileStream = identityFile.OpenReadStream();
+		var contentType = file.ContentType;
+		await using var fileStream = file.OpenReadStream();
 
 		var fileId = await uploadIdentityCommandService
 			.GetAsync(new UploadIdentityCommand(contentType, fileStream), HttpContext.RequestAborted)
