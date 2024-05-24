@@ -23,9 +23,7 @@ public class
         return new AgentPlayerSpecialDetailModel
         {
             Bonus = response.Bonus,
-            BonusAdjust = response.BonusAdjust,
-            PlatformCharge = response.PlatformCharge,
-            ProductFee = response.ProductFee
+            BonusAdjust = response.BonusAdjust
         };
     }
 }

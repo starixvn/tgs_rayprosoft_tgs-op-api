@@ -163,9 +163,7 @@ public class AgentWinLossReportController : ControllerBase
 		return new AgentPlayerSpecialDetailReportModel
 		{
 			Bonus = response.Bonus,
-			BonusAdjust = response.BonusAdjust,
-			PlatformCharge = response.PlatformCharge,
-			ProductFee = response.ProductFee
+			BonusAdjust = response.BonusAdjust
 		};
 	}
 
