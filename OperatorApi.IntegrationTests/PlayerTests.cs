@@ -276,13 +276,11 @@ public class PlayerTests(ITestOutputHelper testOutputHelper)
 				Arg.Any<string>())
 			.Returns(loginRecord);
 
-		var identity = new ClaimsIdentity(
-			new[]
-			{
-				new Claim(Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.Sub, playerCode),
-				new Claim("login_id", loginRecord.Id.ToString()),
-				new Claim("platform_type", platformType.ToString())
-			});
+		var identity = new ClaimsIdentity([
+			new Claim(Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.Sub, playerCode),
+			new Claim("login_id", loginRecord.Id.ToString()),
+			new Claim("platform_type", platformType.ToString())
+		]);
 
 		var signature = Encoding.UTF8.GetBytes($"{secretKey}{secretKey}");
 

@@ -19,12 +19,11 @@ internal class GetAuthQueryService(
 	{
 		var brandId = await _brandOperations.GetBrandIdByApiKeyAsync(query.ApiKey);
 
-		var identity = new ClaimsIdentity(new[]
-		{
+		var identity = new ClaimsIdentity([
 			new Claim(JwtRegisteredClaimNames.Sub, $"{brandId}"),
 			new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
 			new Claim("curr", query.Currency)
-		});
+		]);
 
 		return identity;
 	}

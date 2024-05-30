@@ -41,13 +41,11 @@ public class AuthTests
 		var brandId = Guid.NewGuid();
 		var currency = "CNY";
 
-		var identity = new ClaimsIdentity(
-			new[]
-			{
-				new Claim(JwtRegisteredClaimNames.Sub, brandId.ToString()),
-				new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-				new Claim("curr", currency)
-			});
+		var identity = new ClaimsIdentity([
+			new Claim(JwtRegisteredClaimNames.Sub, brandId.ToString()),
+			new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+			new Claim("curr", currency)
+		]);
 
 		var command = new MakeBrandAuthTokenCommand(brandId, identity, "operator-api");
 
