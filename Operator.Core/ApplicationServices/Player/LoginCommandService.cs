@@ -88,13 +88,11 @@ internal class LoginCommandService(
 		PlayerTokenData playerTokenData,
 		string site)
 	{
-		var identity = new ClaimsIdentity(
-			new[]
-			{
-				new Claim(JwtRegisteredClaimNames.Sub, playerTokenData.PlayerCode),
-				new Claim("login_id", playerTokenData.LoginRecordId.ToString()),
-				new Claim("platform_type", playerTokenData.PlatformType.ToString())
-			});
+		var identity = new ClaimsIdentity([
+			new Claim(JwtRegisteredClaimNames.Sub, playerTokenData.PlayerCode),
+			new Claim("login_id", playerTokenData.LoginRecordId.ToString()),
+			new Claim("platform_type", playerTokenData.PlatformType.ToString())
+		]);
 
 		var secretKey = await _brandRepository.GetSecretKeyAsync(brandId);
 		var signature = Encoding.UTF8.GetBytes($"{secretKey}{secretKey}");

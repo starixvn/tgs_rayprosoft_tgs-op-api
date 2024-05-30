@@ -52,11 +52,11 @@ public class RegisterFlowTests
 		var step2 = new StubRegisterFlowStep();
 		var step3 = new StubRegisterFlowStep();
 
-		var sut = new RegisterFlow(new[] {
+		var sut = new RegisterFlow([
 			step1,
 			step2,
 			step3
-		}, NullLogger<RegisterFlow>.Instance);
+		], NullLogger<RegisterFlow>.Instance);
 
 		var actual = await sut.ConfirmCompletedAsync(playerCode);
 
@@ -1529,11 +1529,11 @@ public class RegisterFlowTests
 			Type = "Step3"
 		};
 
-		var sut = new RegisterFlow(new[] {
+		var sut = new RegisterFlow([
 			step1,
 			step2,
 			step3
-		}, NullLogger<RegisterFlow>.Instance);
+		], NullLogger<RegisterFlow>.Instance);
 
 		var actual = await sut.ProcessInputAsync(brandId, JsonDocument.Parse("{}"), locationInfo);
 
@@ -1563,11 +1563,11 @@ public class RegisterFlowTests
 			Type = "Step3"
 		};
 
-		var sut = new RegisterFlow(new[] {
+		var sut = new RegisterFlow([
 			step1,
 			step2,
 			step3
-		}, NullLogger<RegisterFlow>.Instance);
+		], NullLogger<RegisterFlow>.Instance);
 
 		var actual = await sut.ProcessInputAsync(brandId, JsonDocument.Parse("{}"), locationInfo);
 
@@ -1595,11 +1595,11 @@ public class RegisterFlowTests
 			Type = "Step3"
 		};
 
-		var sut = new RegisterFlow(new[] {
+		var sut = new RegisterFlow([
 			step1,
 			step2,
 			step3
-		}, NullLogger<RegisterFlow>.Instance);
+		], NullLogger<RegisterFlow>.Instance);
 
 		var actual = await sut.ConfirmCompletedAsync(playerCode);
 
@@ -1643,11 +1643,11 @@ public class RegisterFlowTests
 		finalStep.SetProcessInputDelegate((_, _, _) => Task.FromResult(
 			new RegisterFlowProcessResult(true, null, stepResponse)));
 
-		var sut = new RegisterFlow(new[] {
+		var sut = new RegisterFlow([
 			step1,
 			step2,
 			finalStep
-		}, NullLogger<RegisterFlow>.Instance);
+		], NullLogger<RegisterFlow>.Instance);
 
 		var actual = await sut.ProcessInputAsync(brandId, JsonDocument.Parse("{}"), locationInfo);
 
@@ -1678,10 +1678,10 @@ public class RegisterFlowTests
 		finalStep.SetProcessInputDelegate((_, _, _) => Task.FromResult(
 			new RegisterFlowProcessResult(true, null, stepResponse)));
 
-		var sut = new RegisterFlow(new[] {
+		var sut = new RegisterFlow([
 			step1,
 			finalStep
-		}, NullLogger<RegisterFlow>.Instance);
+		], NullLogger<RegisterFlow>.Instance);
 
 		var actual = await sut.ProcessInputAsync(brandId, JsonDocument.Parse("{}"), locationInfo);
 
@@ -2201,9 +2201,9 @@ public class RegisterFlowTests
 	{
 		var playerCode = "player1";
 
-		var sut = new RegisterFlow(new[] {
+		var sut = new RegisterFlow([
 			new StubRegisterFlowStep()
-		}, NullLogger<RegisterFlow>.Instance);
+		], NullLogger<RegisterFlow>.Instance);
 
 		var actual = await sut.ConfirmCompletedAsync(playerCode);
 

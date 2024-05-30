@@ -57,10 +57,10 @@ internal static class TestOperatorApplication
 
 	public static string MakeTestBrandToken(Guid brandId, string brandCode)
 	{
-		var id = new ClaimsIdentity(new[]{
+		var id = new ClaimsIdentity([
 			new Claim(JwtRegisteredClaimNames.Name, brandCode),
 			new Claim(JwtRegisteredClaimNames.Sub, brandId.ToString())
-		});
+		]);
 
 		var token = _JwtSecurityTokenHandler.CreateToken(new SecurityTokenDescriptor
 		{
