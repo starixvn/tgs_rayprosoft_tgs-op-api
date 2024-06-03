@@ -28,7 +28,7 @@ internal class GetBrandAgentDividendInfoQueryService(IBrandServiceClient brandSe
 						                .ConfigureAwait(false) ??
 					                throw new BrandNotFoundException();
 
-					return new BrandAgentDividendInfo(brandInfo.Id, brandInfo.AgentDividendType);
+					return new BrandAgentDividendInfo(brandInfo.Id, brandInfo.SettlementIntervalType);
 				})
 			.ConfigureAwait(false);
 	}

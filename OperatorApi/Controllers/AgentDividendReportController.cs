@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Tgs.Agent.Dividend.Client;
-using Tgs.Agent.Dividend.Client.Models;
 using Tgs.ServiceUtility;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
@@ -42,7 +41,7 @@ public class AgentDividendReportController : ControllerBase
 
 		return new AgentDividendBeforehandViewModel
 		{
-			AgentDividendType = brandInfo.AgentDividendType,
+			SettlementIntervalType = brandInfo.SettlementIntervalType,
 			Current = response.Current,
 			Previous = response.Previous
 		};
