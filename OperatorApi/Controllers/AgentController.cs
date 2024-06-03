@@ -198,7 +198,12 @@ public class AgentController : ControllerBase
 
 		var childAgentInfos = agentClient.GetChildAgentInfosAsync(new GetChildAgentInfosRequest(agentId.Value), HttpContext.RequestAborted);
 
-		var response = await childAgentInfos.SelectAwait(async x =>
+		var response = await childAgentInfos
+			.Where(x => string.IsNullOrEmpty(request.AgentUsername) ||
+			            x.AgentUsername.Contains(request.AgentUsername, StringComparison.OrdinalIgnoreCase))
+			.Where(x => request.AgentStatus == null ||
+			            x.Status == (Tgs.Agent.Client.Models.Enums.AgentStatus)request.AgentStatus)
+			.SelectAwait(async x =>
 			{
 				var agentPlayerCounts =
 					await playerServiceClient
@@ -207,7 +212,6 @@ public class AgentController : ControllerBase
 
 				var directPlayerCountInfo =
 					agentPlayerCounts.FirstOrDefault(a => a.AgentId == agentId);
-
 
 				return new DirectAgentsResponse
 				{
@@ -218,7 +222,8 @@ public class AgentController : ControllerBase
 					RegisteredOn = x.RegisteredOn,
 					DirectPlayerWithAgentCount = (directPlayerCountInfo?.PlayerCount ?? 0) + 1
 				};
-			}).OrderByDescending(x => x.RegisteredOn)
+			})
+			.OrderByDescending(x => x.RegisteredOn)
 			.ToArrayAsync(HttpContext.RequestAborted);
 
 		return new PagedResponse<DirectAgentsResponse>
