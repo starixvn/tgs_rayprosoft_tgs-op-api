@@ -54,7 +54,6 @@ public class AgentController : ControllerBase
 	public async Task<AgentInfoResponse?> GetAgentInfoAsync(
 		[FromServices] IGetService<GetAgentInfoQuery, AgentInfoModel?> getAgentInfoService,
 		[FromServices] IGetService<GetNegativeAgentDividendQuery, decimal> getNegativeAgentDividendService,
-		[FromServices] IGetService<GetPlatformChargeQuery, PlatformChargeInfo?> getPlatformChargeService,
 		[FromServices] IGetService<GetAgentProductFeeInfoQuery, AgentProductFeeInfo?> getAgentProductFeeInfoService,
 		[FromServices] IGetService<GetAgentTeamInfoQuery, GetAgentTeamInfoModel?> getAgentTeamInfoService,
 		[FromServices] IGetService<GetPlayerAgentQuery, Guid?> playerAgentService)
@@ -77,9 +76,6 @@ public class AgentController : ControllerBase
 		var negativeAgentDividend =
 			await getNegativeAgentDividendService.GetAsync(new GetNegativeAgentDividendQuery(agentId.Value));
 
-		var platformChargeInfo =
-			await getPlatformChargeService.GetAsync(new GetPlatformChargeQuery(brandId));
-
 		var agentProductFeeInfo =
 			await getAgentProductFeeInfoService.GetAsync(new GetAgentProductFeeInfoQuery(agentId.Value));
 
@@ -89,7 +85,6 @@ public class AgentController : ControllerBase
 			? new AgentInfoResponse
 			{
 				DividendPercentage = agentInfo.DividendPercentage,
-				PlatformChargePercentage = platformChargeInfo?.PlatformChargePercentage ?? 0M,
 				NegativeAgentDividend = negativeAgentDividend,
 				CardGamePercentage = agentProductFeeInfo?.CurrentCardGamePercentage ?? 0M,
 				LiveDealerPercentage = agentProductFeeInfo?.CurrentLiveDealerPercentage ?? 0M,
