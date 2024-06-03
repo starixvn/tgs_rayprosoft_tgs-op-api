@@ -5,7 +5,7 @@ namespace TGS.Apis.OperatorApi.Models.Messages;
 
 public class AgentDividendBeforehandViewModel
 {
-	public AgentDividendType AgentDividendType { get; set; }
+	public SettlementIntervalType SettlementIntervalType { get; set; }
 	public IEnumerable<AgentDividendBeforehand> Previous { get; set; }
 	public IEnumerable<AgentDividendBeforehand> Current { get; set; }
 }

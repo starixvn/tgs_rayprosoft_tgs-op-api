@@ -7,4 +7,4 @@ namespace TGS.Services.Operator;
 
 public record BrandAgentDividendInfo(
 	Guid BrandId,
-	AgentDividendType AgentDividendType);
+	SettlementIntervalType SettlementIntervalType);
