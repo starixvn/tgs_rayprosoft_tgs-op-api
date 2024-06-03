@@ -5,7 +5,6 @@ namespace TGS.Apis.OperatorApi.Models.Messages;
 public class AgentInfoResponse
 {
 	public decimal DividendPercentage { get; set; }
-	public decimal PlatformChargePercentage { get; set; }
 	public decimal NegativeAgentDividend { get; set; }
 	public decimal CardGamePercentage { get; set; }
 	public decimal LiveDealerPercentage { get; set; }

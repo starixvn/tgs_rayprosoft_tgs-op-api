@@ -28,7 +28,7 @@
     <PackageReference Include="System.Linq.Async" Version="6.0.1" />
     <PackageReference Include="System.Reactive" Version="6.0.1" />
     <PackageReference Include="Tgs.Agent.Client" Version="0.0.36" />
-    <PackageReference Include="Tgs.Agent.Dividend.Client" Version="1.0.17" />
+    <PackageReference Include="Tgs.Agent.Dividend.Client" Version="1.0.18" />
     <PackageReference Include="Tgs.ArticleManagementClient" Version="0.0.4" />
     <PackageReference Include="Tgs.BrandCertificateClient" Version="0.2.3" />
 	<PackageReference Include="Tgs.BrandGameCredits.Client" Version="1.0.1" />

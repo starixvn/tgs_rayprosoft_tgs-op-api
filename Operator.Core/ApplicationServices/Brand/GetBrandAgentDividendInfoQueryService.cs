@@ -3,18 +3,19 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Memory;
 using Tgs.BrandCertificate.Clients;
+using TGS.Core.Models.Enums;
 using Tgs.ServiceUtility;
 
 namespace TGS.Services.Operator.ApplicationServices.Brand;
 
-internal class GetPlatformChargeQueryService(IBrandServiceClient brandServiceClient, IMemoryCache memoryCache)
-	: IGetService<GetPlatformChargeQuery, PlatformChargeInfo?>
+internal class GetBrandAgentDividendInfoQueryService(IBrandServiceClient brandServiceClient, IMemoryCache memoryCache)
+	: IGetService<GetBrandAgentDividendInfoQuery, BrandAgentDividendInfo?>
 {
-	public async ValueTask<PlatformChargeInfo?> GetAsync(
-		GetPlatformChargeQuery query,
+	public async ValueTask<BrandAgentDividendInfo?> GetAsync(
+		GetBrandAgentDividendInfoQuery query,
 		CancellationToken cancellationToken = default)
 	{
-		var key = $"PlatformChargeInfo:{query.BrandId}";
+		var key = $"BrandAgentDividendInfo:{query.BrandId}";
 
 		return await memoryCache.GetOrCreateAsync(
 				key,
@@ -27,7 +28,7 @@ internal class GetPlatformChargeQueryService(IBrandServiceClient brandServiceCli
 						                .ConfigureAwait(false) ??
 					                throw new BrandNotFoundException();
 
-					return new PlatformChargeInfo(brandInfo.Id, brandInfo.PlatformCharge);
+					return new BrandAgentDividendInfo(brandInfo.Id, brandInfo.AgentDividendType);
 				})
 			.ConfigureAwait(false);
 	}

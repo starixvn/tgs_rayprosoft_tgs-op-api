@@ -4,6 +4,9 @@ using Tgs.Agent.Dividend.Client.Models;
 using Tgs.ServiceUtility;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
+using TGS.Apis.OperatorApi.Models.Messages;
+using TGS.Services.Operator;
+using TGS.Services.Operator.ApplicationServices.Brand;
 using TGS.Services.Operator.ApplicationServices.Player;
 
 namespace TGS.Apis.OperatorApi.Controllers;
@@ -13,9 +16,10 @@ public class AgentDividendReportController : ControllerBase
 {
 	[HttpGet("beforehand", Name = "GetAgentDividendBeforehand")]
 	[AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-	public async Task<AgentDividendBeforehandResponse> GetAgentDividendBeforehandAsync(
+	public async Task<AgentDividendBeforehandViewModel> GetAgentDividendBeforehandAsync(
 		[FromServices] IAgentDividendClient agentDividendClient,
-		[FromServices] IGetService<GetPlayerAgentQuery, Guid?> playerAgentService)
+		[FromServices] IGetService<GetPlayerAgentQuery, Guid?> playerAgentService,
+		[FromServices] IGetService<GetBrandAgentDividendInfoQuery, BrandAgentDividendInfo> brandAgentDividendService)
 	{
 		var playerTokenData = HttpContext.Items.GetPlayerTokenData();
 		var brandId = HttpContext.Items.GetBrandId();
@@ -26,13 +30,21 @@ public class AgentDividendReportController : ControllerBase
 
 		if (agentId is null)
 		{
-			return new AgentDividendBeforehandResponse();
+			return new AgentDividendBeforehandViewModel();
 		}
 
 		var response =
 			await agentDividendClient.GetAgentDividendBeforehandAsync(brandId, agentId.Value,
 				HttpContext.RequestAborted);
 
-		return new AgentDividendBeforehandResponse { Current = response.Current, Previous = response.Previous };
+		var brandInfo = await brandAgentDividendService.GetAsync(new GetBrandAgentDividendInfoQuery(brandId),
+			HttpContext.RequestAborted);
+
+		return new AgentDividendBeforehandViewModel
+		{
+			AgentDividendType = brandInfo.AgentDividendType,
+			Current = response.Current,
+			Previous = response.Previous
+		};
 	}
 }
