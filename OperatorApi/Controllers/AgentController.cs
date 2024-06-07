@@ -9,14 +9,12 @@ using Tgs.PlayerService.Client;
 using TGS.Services.Agent;
 using TGS.Services.Operator;
 using TGS.Services.Operator.ApplicationServices.Agent;
-using TGS.Services.Operator.ApplicationServices.Brand;
 using TGS.Services.Operator.ApplicationServices.Player;
 using TGS.Services.Operator.ApplicationServices.PlayerPayment;
 using Tgs.VipLevelService.Clients;
 using PlayerStatus = TGS.Core.Models.Enums.PlayerStatus;
 using Tgs.Agent.Client;
 using TGS.Core.Models.Enums;
-
 
 
 #nullable enable
@@ -127,12 +125,17 @@ public class AgentController : ControllerBase
 			};
 		}
 
-		var directPlayers =
-			directPlayersService.QueryAsync(new GetDirectPlayersQuery(brandId, agentId!.Value, request.PlayerUsername,
-				request.PlayerStatus));
+		var directPlayers = await directPlayersService
+			.QueryAsync(
+				new GetDirectPlayersQuery(brandId, agentId!.Value, request.PlayerUsername, request.PlayerStatus))
+			.Where(x => x.Status != (Tgs.PlayerService.Client.PlayerStatus)PlayerStatus.RegisterUndone)
+			.OrderByDescending(x => x.RegisteredOn)
+			.ToArrayAsync();
 
 		var response = await directPlayers
-			.Where(x => x.RegisteredOn != null)
+			.Chunk(request.Rows).Skip(request.Page - 1)
+			.SelectMany(x => x)
+			.ToAsyncEnumerable()
 			.SelectAwait(async x =>
 			{
 				var totalDepositWithdraw =
@@ -157,14 +160,14 @@ public class AgentController : ControllerBase
 					TotalDepositAmount = totalDepositWithdraw.TotalDepositAmount,
 					TotalWithdrawAmount = totalDepositWithdraw.TotalWithdrawAmount
 				};
-			}).OrderByDescending(x => x.RegisteredOn)
+			})
 			.ToArrayAsync(HttpContext.RequestAborted);
 
 		return new PagedResponse<DirectPlayersResponse>
 		{
 			Valid = true,
-			TotalCount = response.Length,
-			Items = response.Chunk(request.Rows).Skip(request.Page - 1).FirstOrDefault() ?? []
+			TotalCount = directPlayers.Length,
+			Items = response
 		};
 	}
 
@@ -191,22 +194,32 @@ public class AgentController : ControllerBase
 			};
 		}
 
-		var childAgentInfos = agentClient.GetChildAgentInfosAsync(new GetChildAgentInfosRequest(agentId.Value), HttpContext.RequestAborted);
-
-		var response = await childAgentInfos
+		var childAgentInfos = await agentClient
+			.GetChildAgentInfosAsync(new GetChildAgentInfosRequest(agentId.Value), HttpContext.RequestAborted)
 			.Where(x => string.IsNullOrEmpty(request.AgentUsername) ||
-			            x.AgentUsername.Contains(request.AgentUsername, StringComparison.OrdinalIgnoreCase))
+				     x.AgentUsername.Contains(request.AgentUsername, StringComparison.OrdinalIgnoreCase))
 			.Where(x => request.AgentStatus == null ||
 			            x.Status == (Tgs.Agent.Client.Models.Enums.AgentStatus)request.AgentStatus)
-			.SelectAwait(async x =>
-			{
-				var agentPlayerCounts =
-					await playerServiceClient
-						.GetPlayerCountInfosByBrandIdAsync(brandId, false, HttpContext.RequestAborted)
-						.ToArrayAsync(HttpContext.RequestAborted);
+			.OrderByDescending(x => x.RegisteredOn)
+			.ToArrayAsync(HttpContext.RequestAborted);
 
-				var directPlayerCountInfo =
-					agentPlayerCounts.FirstOrDefault(a => a.AgentId == agentId);
+		var agentPlayerCounts =
+			await playerServiceClient
+				.GetPlayerCountInfosByBrandIdAsync(brandId, false, HttpContext.RequestAborted)
+				.ToArrayAsync(HttpContext.RequestAborted);
+
+		var totalCount = childAgentInfos.Length;
+
+		var response = childAgentInfos.Chunk(request.Rows).Skip(request.Page - 1).FirstOrDefault()?.Select(x =>
+			{
+				var agentIds = Array.Empty<Guid>();
+
+				GetAgentIds(x.AgentId, childAgentInfos, ref agentIds);
+
+				agentIds = [.. agentIds, x.AgentId];
+
+				var playerCount = agentPlayerCounts.Where(a => agentIds.Contains(a.AgentId.Value))
+					.Sum(s => s.PlayerCount);
 
 				return new DirectAgentsResponse
 				{
@@ -215,17 +228,33 @@ public class AgentController : ControllerBase
 					AgentUsername = x.AgentUsername,
 					RealName = x.RealName,
 					RegisteredOn = x.RegisteredOn,
-					DirectPlayerWithAgentCount = (directPlayerCountInfo?.PlayerCount ?? 0) + 1
+					DirectPlayerWithAgentCount = agentIds.Length + playerCount
 				};
 			})
-			.OrderByDescending(x => x.RegisteredOn)
-			.ToArrayAsync(HttpContext.RequestAborted);
+			.ToArray();
 
 		return new PagedResponse<DirectAgentsResponse>
 		{
 			Valid = true,
-			TotalCount = response.Length,
-			Items = response.Chunk(request.Rows).Skip(request.Page - 1).FirstOrDefault() ?? []
+			TotalCount = totalCount,
+			Items = response
 		};
+	}
+
+	private static void GetAgentIds(Guid id, ChildAgentInfoModel[] models, ref Guid[] agentIds)
+	{
+		var childAgents = models.Where(x => x.ParentAgentId == id).ToArray();
+
+		if (childAgents.Length <= 0)
+			return;
+
+		{
+			agentIds = [.. agentIds, .. childAgents.Select(x => x.AgentId)];
+
+			foreach (var childAgentInfoModel in childAgents)
+			{
+				GetAgentIds(childAgentInfoModel.AgentId, models, ref agentIds);
+			}
+		}
 	}
 }

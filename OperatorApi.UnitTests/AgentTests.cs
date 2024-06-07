@@ -34,7 +34,7 @@ public class AgentTests
 		var fakeAgentClient = Substitute.For<IAgentClient>();
 		var fakeMemoryCache = Substitute.For<IMemoryCache>();
 
-		var sut = new GetAgentInfoQueryService(fakeAgentClient, fakeMemoryCache);
+		var sut = new GetAgentInfoQueryService(fakeAgentClient);
 
 		var query = new GetAgentInfoQuery(Guid.NewGuid());
 
@@ -50,7 +50,7 @@ public class AgentTests
 		var fakeAgentClient = Substitute.For<IAgentClient>();
 		var fakeMemoryCache = Substitute.For<IMemoryCache>();
 
-		var sut = new GetAgentProductFeeInfoQueryService(fakeAgentClient, fakeMemoryCache);
+		var sut = new GetAgentProductFeeInfoQueryService(fakeAgentClient);
 
 		var query = new GetAgentProductFeeInfoQuery(Guid.NewGuid());
 
@@ -85,7 +85,7 @@ public class AgentTests
 		var fakeAgentDividendClient = Substitute.For<IAgentDividendClient>();
 		var fakeMemoryCache = Substitute.For<IMemoryCache>();
 
-		var sut = new GetNegativeAgentDividendQueryService(fakeAgentDividendClient, fakeMemoryCache);
+		var sut = new GetNegativeAgentDividendQueryService(fakeAgentDividendClient);
 
 		var query = new GetNegativeAgentDividendQuery(Guid.NewGuid());
 

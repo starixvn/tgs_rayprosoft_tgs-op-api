@@ -8,24 +8,14 @@ using Tgs.ServiceUtility;
 
 namespace TGS.Services.Operator.ApplicationServices.Agent;
 
-internal class GetAgentInfoQueryService(IAgentClient agentClient, IMemoryCache memoryCache)
+internal class GetAgentInfoQueryService(IAgentClient agentClient)
 	: IGetService<GetAgentInfoQuery, AgentInfoModel?>
 {
 	public async ValueTask<AgentInfoModel?> GetAsync(
 		GetAgentInfoQuery query,
 		CancellationToken cancellationToken = default)
 	{
-		var key = $"AgentInfoModel:{query.AgentId}";
-
-		return await memoryCache.GetOrCreateAsync(
-				key,
-				async entry =>
-				{
-					entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5D);
-
-					return await agentClient.GetAgentInfoAsync(new GetAgentInfoRequest(query.AgentId),
-						cancellationToken);
-				})
-			.ConfigureAwait(false);
+		return await agentClient.GetAgentInfoAsync(new GetAgentInfoRequest(query.AgentId),
+			cancellationToken);
 	}
 }

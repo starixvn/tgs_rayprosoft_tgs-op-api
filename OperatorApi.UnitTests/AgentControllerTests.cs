@@ -29,8 +29,9 @@ public class AgentControllerTests
 
 		var childAgentInfos = new[]
 		{
-			new ChildAgentInfoModel { AgentUsername = "test" }, new ChildAgentInfoModel { AgentUsername = "TEST" },
-			new ChildAgentInfoModel { AgentUsername = "ABCDE" }
+			new ChildAgentInfoModel { AgentUsername = "test", AgentId = Guid.NewGuid(), ParentAgentId = Guid.NewGuid() }, 
+			new ChildAgentInfoModel { AgentUsername = "TEST", AgentId = Guid.NewGuid(), ParentAgentId = Guid.NewGuid() },
+			new ChildAgentInfoModel { AgentUsername = "ABCDE", AgentId = Guid.NewGuid(), ParentAgentId = Guid.NewGuid() }
 		};
 
 		var items = new Dictionary<object, object?> { { "brandId", brandId }, { "playerToken", playerTokenData } };
@@ -68,8 +69,9 @@ public class AgentControllerTests
 
 		var childAgentInfos = new[]
 		{
-			new ChildAgentInfoModel { AgentUsername = "test" }, new ChildAgentInfoModel { AgentUsername = "TEST" },
-			new ChildAgentInfoModel { AgentUsername = "ABCDE" }
+			new ChildAgentInfoModel { AgentUsername = "test", AgentId = Guid.NewGuid(), ParentAgentId = Guid.NewGuid() }, 
+			new ChildAgentInfoModel { AgentUsername = "TEST", AgentId = Guid.NewGuid(), ParentAgentId = Guid.NewGuid() },
+			new ChildAgentInfoModel { AgentUsername = "ABCDE", AgentId = Guid.NewGuid(), ParentAgentId = Guid.NewGuid() }
 		};
 
 		var items = new Dictionary<object, object?> { { "brandId", brandId }, { "playerToken", playerTokenData } };
@@ -107,9 +109,9 @@ public class AgentControllerTests
 
 		var childAgentInfos = new[]
 		{
-			new ChildAgentInfoModel { AgentUsername = "test", Status = AgentStatus.Enabled },
-			new ChildAgentInfoModel { AgentUsername = "TEST", Status = AgentStatus.Disabled },
-			new ChildAgentInfoModel { AgentUsername = "ABCDE", Status = AgentStatus.Enabled }
+			new ChildAgentInfoModel { AgentUsername = "test", Status = AgentStatus.Enabled, AgentId = Guid.NewGuid(), ParentAgentId = Guid.NewGuid() },
+			new ChildAgentInfoModel { AgentUsername = "TEST", Status = AgentStatus.Disabled, AgentId = Guid.NewGuid(), ParentAgentId = Guid.NewGuid() },
+			new ChildAgentInfoModel { AgentUsername = "ABCDE", Status = AgentStatus.Enabled, AgentId = Guid.NewGuid(), ParentAgentId = Guid.NewGuid() }
 		};
 
 		var items = new Dictionary<object, object?> { { "brandId", brandId }, { "playerToken", playerTokenData } };
@@ -148,9 +150,9 @@ public class AgentControllerTests
 
 		var childAgentInfos = new[]
 		{
-			new ChildAgentInfoModel { AgentUsername = "test", Status = AgentStatus.Enabled },
-			new ChildAgentInfoModel { AgentUsername = "TEST", Status = AgentStatus.Disabled },
-			new ChildAgentInfoModel { AgentUsername = "ABCDE", Status = AgentStatus.Enabled }
+			new ChildAgentInfoModel { AgentUsername = "test", Status = AgentStatus.Enabled, AgentId = Guid.NewGuid(), ParentAgentId = Guid.NewGuid() },
+			new ChildAgentInfoModel { AgentUsername = "TEST", Status = AgentStatus.Disabled, AgentId = Guid.NewGuid(), ParentAgentId = Guid.NewGuid() },
+			new ChildAgentInfoModel { AgentUsername = "ABCDE", Status = AgentStatus.Enabled, AgentId = Guid.NewGuid(), ParentAgentId = Guid.NewGuid() }
 		};
 
 		var items = new Dictionary<object, object?> { { "brandId", brandId }, { "playerToken", playerTokenData } };
@@ -172,4 +174,52 @@ public class AgentControllerTests
 
 		Assert.That(response.Items.Length, Is.EqualTo(count));
 	}
+
+	[Test]
+	public async Task Get_Direct_Agents()
+	{
+		var fakeHttpContext = Substitute.For<HttpContext>();
+		var fakePlayerAgentService = Substitute.For<IGetService<GetPlayerAgentQuery, Guid?>>();
+		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
+		var fakeAgentClient = Substitute.For<IAgentClient>();
+
+		var playerTokenData = new PlayerTokenData { PlayerCode = "playerCode" };
+
+		var brandId = Guid.NewGuid();
+		var agentId = Guid.NewGuid();
+		var agentId2 = Guid.NewGuid();
+		var agentId3 = Guid.NewGuid();
+		var agentId4 = Guid.NewGuid();
+		var agentId5 = Guid.NewGuid();
+		var agentId6 = Guid.NewGuid();
+
+		var childAgentInfos = new[]
+		{
+			new ChildAgentInfoModel { AgentUsername = "test", AgentId = agentId6, ParentAgentId = agentId5}, 
+			new ChildAgentInfoModel { AgentUsername = "TEST", AgentId = agentId2, ParentAgentId = agentId },
+			new ChildAgentInfoModel { AgentUsername = "ABCDE", AgentId = agentId3, ParentAgentId = agentId2 },
+			new ChildAgentInfoModel { AgentUsername = "ABCDE22", AgentId = agentId4, ParentAgentId = agentId3 },
+			new ChildAgentInfoModel { AgentUsername = "ABCDEss", AgentId = agentId5, ParentAgentId = agentId4 }
+		};
+
+		var items = new Dictionary<object, object?> { { "brandId", brandId }, { "playerToken", playerTokenData } };
+
+		_ = fakeHttpContext.Items.Returns(items);
+
+		_ = fakePlayerAgentService.GetAsync(Arg.Any<GetPlayerAgentQuery>(), Arg.Any<CancellationToken>())
+			.Returns(agentId);
+
+		_ = fakeAgentClient.GetChildAgentInfosAsync(Arg.Any<GetChildAgentInfosRequest>(), Arg.Any<CancellationToken>())
+			.Returns(childAgentInfos.ToAsyncEnumerable());
+
+		var sut = new AgentController() { ControllerContext = { HttpContext = fakeHttpContext } };
+
+		var query = new GetDirectAgentsRequest { Rows = 10, Page = 1 };
+
+		var response =
+			await sut.GetDirectAgentsAsync(fakePlayerAgentService, fakePlayerServiceClient, fakeAgentClient, query);
+
+		Assert.That(response.Items.Length, Is.EqualTo(5));
+	}
+
 }
