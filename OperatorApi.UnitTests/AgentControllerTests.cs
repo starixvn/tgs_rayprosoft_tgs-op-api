@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http;
+using NSubstitute;
 using Tgs.Agent.Client;
 using Tgs.Agent.Client.Models;
 using Tgs.Agent.Client.Models.Enums;
@@ -204,6 +205,11 @@ public class AgentControllerTests
 
 		var items = new Dictionary<object, object?> { { "brandId", brandId }, { "playerToken", playerTokenData } };
 
+		var playerCountInfos = new PlayerCountInfo[]
+		{
+			new PlayerCountInfo(agentId2, 10), new PlayerCountInfo(null, 10)
+		}.ToAsyncEnumerable();
+
 		_ = fakeHttpContext.Items.Returns(items);
 
 		_ = fakePlayerAgentService.GetAsync(Arg.Any<GetPlayerAgentQuery>(), Arg.Any<CancellationToken>())
@@ -211,6 +217,9 @@ public class AgentControllerTests
 
 		_ = fakeAgentClient.GetChildAgentInfosAsync(Arg.Any<GetChildAgentInfosRequest>(), Arg.Any<CancellationToken>())
 			.Returns(childAgentInfos.ToAsyncEnumerable());
+
+		_ = fakePlayerServiceClient.GetPlayerCountInfosByBrandIdAsync(Arg.Any<Guid>(), Arg.Any<bool>(), Arg.Any<CancellationToken>())
+			.Returns(playerCountInfos);
 
 		var sut = new AgentController() { ControllerContext = { HttpContext = fakeHttpContext } };
 
@@ -221,5 +230,4 @@ public class AgentControllerTests
 
 		Assert.That(response.Items.Length, Is.EqualTo(5));
 	}
-
 }

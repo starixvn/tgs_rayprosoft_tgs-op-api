@@ -218,7 +218,9 @@ public class AgentController : ControllerBase
 
 				agentIds = [.. agentIds, x.AgentId];
 
-				var playerCount = agentPlayerCounts.Where(a => agentIds.Contains(a.AgentId.Value))
+				var playerCount = agentPlayerCounts
+					.Where(a => a.AgentId is not null)
+					.Where(a => agentIds.Contains(a.AgentId.Value))
 					.Sum(s => s.PlayerCount);
 
 				return new DirectAgentsResponse
