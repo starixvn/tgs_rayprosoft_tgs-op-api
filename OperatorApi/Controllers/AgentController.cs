@@ -210,7 +210,7 @@ public class AgentController : ControllerBase
 
 		var totalCount = childAgentInfos.Length;
 
-		var response = childAgentInfos.Chunk(request.Rows).Skip(request.Page - 1).FirstOrDefault()?.Select(x =>
+		var response = (childAgentInfos.Chunk(request.Rows).Skip(request.Page - 1).FirstOrDefault() ?? []).Select(x =>
 			{
 				var agentIds = Array.Empty<Guid>();
 
