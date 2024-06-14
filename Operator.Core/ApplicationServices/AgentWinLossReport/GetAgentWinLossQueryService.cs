@@ -187,7 +187,8 @@ public class
 				cancellationToken).ConfigureAwait(false);
 
 		return Guid.TryParse(playerProperties["AgentId"], out var agentId) &&
-			   await childAgents.AnyAsync(x => x.AgentId == agentId, cancellationToken).ConfigureAwait(false)
+		       (await childAgents.AnyAsync(x => x.AgentId == agentId, cancellationToken).ConfigureAwait(false) ||
+		        request.AgentId == agentId)
 			? await reportClient.GetAgentPlayerWinLossAsync(new GetPlayerWinLossRequest
 			{
 				PlayerCode = player.PlayerCode,
