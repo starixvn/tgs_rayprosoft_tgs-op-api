@@ -30,8 +30,8 @@ public class AgentControllerTests
 
 		var childAgentInfos = new[]
 		{
-			new ChildAgentInfoModel { AgentUsername = "test", AgentId = Guid.NewGuid(), ParentAgentId = Guid.NewGuid() }, 
-			new ChildAgentInfoModel { AgentUsername = "TEST", AgentId = Guid.NewGuid(), ParentAgentId = Guid.NewGuid() },
+			new ChildAgentInfoModel { AgentUsername = "test", AgentId = Guid.NewGuid(), ParentAgentId = agentId }, 
+			new ChildAgentInfoModel { AgentUsername = "TEST", AgentId = Guid.NewGuid(), ParentAgentId = agentId },
 			new ChildAgentInfoModel { AgentUsername = "ABCDE", AgentId = Guid.NewGuid(), ParentAgentId = Guid.NewGuid() }
 		};
 
@@ -70,9 +70,9 @@ public class AgentControllerTests
 
 		var childAgentInfos = new[]
 		{
-			new ChildAgentInfoModel { AgentUsername = "test", AgentId = Guid.NewGuid(), ParentAgentId = Guid.NewGuid() }, 
-			new ChildAgentInfoModel { AgentUsername = "TEST", AgentId = Guid.NewGuid(), ParentAgentId = Guid.NewGuid() },
-			new ChildAgentInfoModel { AgentUsername = "ABCDE", AgentId = Guid.NewGuid(), ParentAgentId = Guid.NewGuid() }
+			new ChildAgentInfoModel { AgentUsername = "test", AgentId = Guid.NewGuid(), ParentAgentId = agentId }, 
+			new ChildAgentInfoModel { AgentUsername = "TEST", AgentId = Guid.NewGuid(), ParentAgentId = agentId },
+			new ChildAgentInfoModel { AgentUsername = "ABCDE", AgentId = Guid.NewGuid(), ParentAgentId = agentId }
 		};
 
 		var items = new Dictionary<object, object?> { { "brandId", brandId }, { "playerToken", playerTokenData } };
@@ -110,8 +110,8 @@ public class AgentControllerTests
 
 		var childAgentInfos = new[]
 		{
-			new ChildAgentInfoModel { AgentUsername = "test", Status = AgentStatus.Enabled, AgentId = Guid.NewGuid(), ParentAgentId = Guid.NewGuid() },
-			new ChildAgentInfoModel { AgentUsername = "TEST", Status = AgentStatus.Disabled, AgentId = Guid.NewGuid(), ParentAgentId = Guid.NewGuid() },
+			new ChildAgentInfoModel { AgentUsername = "test", Status = AgentStatus.Enabled, AgentId = Guid.NewGuid(), ParentAgentId = agentId },
+			new ChildAgentInfoModel { AgentUsername = "TEST", Status = AgentStatus.Disabled, AgentId = Guid.NewGuid(), ParentAgentId = agentId },
 			new ChildAgentInfoModel { AgentUsername = "ABCDE", Status = AgentStatus.Enabled, AgentId = Guid.NewGuid(), ParentAgentId = Guid.NewGuid() }
 		};
 
@@ -151,9 +151,9 @@ public class AgentControllerTests
 
 		var childAgentInfos = new[]
 		{
-			new ChildAgentInfoModel { AgentUsername = "test", Status = AgentStatus.Enabled, AgentId = Guid.NewGuid(), ParentAgentId = Guid.NewGuid() },
-			new ChildAgentInfoModel { AgentUsername = "TEST", Status = AgentStatus.Disabled, AgentId = Guid.NewGuid(), ParentAgentId = Guid.NewGuid() },
-			new ChildAgentInfoModel { AgentUsername = "ABCDE", Status = AgentStatus.Enabled, AgentId = Guid.NewGuid(), ParentAgentId = Guid.NewGuid() }
+			new ChildAgentInfoModel { AgentUsername = "test", Status = AgentStatus.Enabled, AgentId = Guid.NewGuid(), ParentAgentId = agentId },
+			new ChildAgentInfoModel { AgentUsername = "TEST", Status = AgentStatus.Disabled, AgentId = Guid.NewGuid(), ParentAgentId = agentId },
+			new ChildAgentInfoModel { AgentUsername = "ABCDE", Status = AgentStatus.Enabled, AgentId = Guid.NewGuid(), ParentAgentId = agentId }
 		};
 
 		var items = new Dictionary<object, object?> { { "brandId", brandId }, { "playerToken", playerTokenData } };
@@ -228,6 +228,6 @@ public class AgentControllerTests
 		var response =
 			await sut.GetDirectAgentsAsync(fakePlayerAgentService, fakePlayerServiceClient, fakeAgentClient, query);
 
-		Assert.That(response.Items.Length, Is.EqualTo(5));
+		Assert.That(response.Items.Length, Is.EqualTo(1));
 	}
 }

@@ -126,8 +126,7 @@ public class AgentController : ControllerBase
 		}
 
 		var directPlayers = await directPlayersService
-			.QueryAsync(
-				new GetDirectPlayersQuery(brandId, agentId!.Value, request.PlayerUsername, request.PlayerStatus))
+			.QueryAsync(new GetDirectPlayersQuery(brandId, agentId!.Value, request.PlayerUsername, request.PlayerStatus))
 			.Where(x => x.Status != (Tgs.PlayerService.Client.PlayerStatus)PlayerStatus.RegisterUndone)
 			.OrderByDescending(x => x.RegisteredOn)
 			.ToArrayAsync();
@@ -196,6 +195,7 @@ public class AgentController : ControllerBase
 
 		var childAgentInfos = await agentClient
 			.GetChildAgentInfosAsync(new GetChildAgentInfosRequest(agentId.Value), HttpContext.RequestAborted)
+			.Where(x => x.ParentAgentId == agentId.Value)
 			.Where(x => string.IsNullOrEmpty(request.AgentUsername) ||
 				     x.AgentUsername.Contains(request.AgentUsername, StringComparison.OrdinalIgnoreCase))
 			.Where(x => request.AgentStatus == null ||
