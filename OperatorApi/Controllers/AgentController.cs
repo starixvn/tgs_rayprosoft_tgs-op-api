@@ -195,11 +195,6 @@ public class AgentController : ControllerBase
 
 		var childAgentInfos = await agentClient
 			.GetChildAgentInfosAsync(new GetChildAgentInfosRequest(agentId.Value), HttpContext.RequestAborted)
-			.Where(x => string.IsNullOrEmpty(request.AgentUsername) ||
-				     x.AgentUsername.Contains(request.AgentUsername, StringComparison.OrdinalIgnoreCase))
-			.Where(x => request.AgentStatus == null ||
-			            x.Status == (Tgs.Agent.Client.Models.Enums.AgentStatus)request.AgentStatus)
-			.OrderByDescending(x => x.RegisteredOn)
 			.ToArrayAsync(HttpContext.RequestAborted);
 
 		var agentPlayerCounts =
@@ -207,10 +202,17 @@ public class AgentController : ControllerBase
 				.GetPlayerCountInfosByBrandIdAsync(brandId, false, HttpContext.RequestAborted)
 				.ToArrayAsync(HttpContext.RequestAborted);
 
-		var totalCount = childAgentInfos.Count(x => x.ParentAgentId == agentId.Value);
+		var directAgents = childAgentInfos
+			.Where(x => x.ParentAgentId == agentId.Value)
+			.Where(x => string.IsNullOrEmpty(request.AgentUsername) ||
+			            x.AgentUsername.Contains(request.AgentUsername, StringComparison.OrdinalIgnoreCase))
+			.Where(x => request.AgentStatus == null ||
+			            x.Status == (Tgs.Agent.Client.Models.Enums.AgentStatus)request.AgentStatus);
+
+		var totalCount = directAgents.Count();
 
 		var response =
-			(childAgentInfos.Where(x => x.ParentAgentId == agentId.Value).Chunk(request.Rows).Skip(request.Page - 1)
+			(directAgents.OrderByDescending(x => x.RegisteredOn).Chunk(request.Rows).Skip(request.Page - 1)
 				.FirstOrDefault() ?? []).Select(x =>
 			{
 				var agentIds = Array.Empty<Guid>();
