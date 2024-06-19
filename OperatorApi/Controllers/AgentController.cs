@@ -195,7 +195,6 @@ public class AgentController : ControllerBase
 
 		var childAgentInfos = await agentClient
 			.GetChildAgentInfosAsync(new GetChildAgentInfosRequest(agentId.Value), HttpContext.RequestAborted)
-			.Where(x => x.ParentAgentId == agentId.Value)
 			.Where(x => string.IsNullOrEmpty(request.AgentUsername) ||
 				     x.AgentUsername.Contains(request.AgentUsername, StringComparison.OrdinalIgnoreCase))
 			.Where(x => request.AgentStatus == null ||
@@ -208,9 +207,11 @@ public class AgentController : ControllerBase
 				.GetPlayerCountInfosByBrandIdAsync(brandId, false, HttpContext.RequestAborted)
 				.ToArrayAsync(HttpContext.RequestAborted);
 
-		var totalCount = childAgentInfos.Length;
+		var totalCount = childAgentInfos.Count(x => x.ParentAgentId == agentId.Value);
 
-		var response = (childAgentInfos.Chunk(request.Rows).Skip(request.Page - 1).FirstOrDefault() ?? []).Select(x =>
+		var response =
+			(childAgentInfos.Where(x => x.ParentAgentId == agentId.Value).Chunk(request.Rows).Skip(request.Page - 1)
+				.FirstOrDefault() ?? []).Select(x =>
 			{
 				var agentIds = Array.Empty<Guid>();
 
