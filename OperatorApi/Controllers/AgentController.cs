@@ -196,6 +196,7 @@ public class AgentController : ControllerBase
 
 		var childAgentInfos = await agentClient
 			.GetChildAgentInfosAsync(new GetChildAgentInfosRequest(agentId.Value), HttpContext.RequestAborted)
+			.Where(x => x.ParentAgentId == agentId.Value)
 			.Where(x => string.IsNullOrEmpty(request.AgentUsername) ||
 				     x.AgentUsername.Contains(request.AgentUsername, StringComparison.OrdinalIgnoreCase))
 			.Where(x => request.AgentStatus == null ||
