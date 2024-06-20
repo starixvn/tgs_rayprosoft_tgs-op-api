@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Tgs.Agent.Dividend.Client;
+using Tgs.BrandCertificate.Clients;
 using Tgs.ServiceUtility;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
@@ -18,7 +19,7 @@ public class AgentDividendReportController : ControllerBase
 	public async Task<AgentDividendBeforehandViewModel> GetAgentDividendBeforehandAsync(
 		[FromServices] IAgentDividendClient agentDividendClient,
 		[FromServices] IGetService<GetPlayerAgentQuery, Guid?> playerAgentService,
-		[FromServices] IGetService<GetBrandAgentDividendInfoQuery, BrandAgentDividendInfo> brandAgentDividendService)
+		[FromServices] IBrandServiceClient brandServiceClient)
 	{
 		var playerTokenData = HttpContext.Items.GetPlayerTokenData();
 		var brandId = HttpContext.Items.GetBrandId();
@@ -36,10 +37,12 @@ public class AgentDividendReportController : ControllerBase
 			await agentDividendClient.GetAgentDividendBeforehandAsync(brandId, agentId.Value,
 				HttpContext.RequestAborted);
 
-		var brandInfo = await brandAgentDividendService.GetAsync(new GetBrandAgentDividendInfoQuery(brandId),
+		var brandInfo = await brandServiceClient.GetBrandFullInfoAsync(brandId,
 			HttpContext.RequestAborted);
 
-		return new AgentDividendBeforehandViewModel
+		return brandInfo is null
+			? new AgentDividendBeforehandViewModel()
+			: new AgentDividendBeforehandViewModel
 		{
 			SettlementIntervalType = brandInfo.SettlementIntervalType,
 			Current = response.Current,
