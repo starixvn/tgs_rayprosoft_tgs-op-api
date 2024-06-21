@@ -131,9 +131,9 @@ public class AgentController : ControllerBase
 			.OrderByDescending(x => x.RegisteredOn)
 			.ToArrayAsync();
 
-		var response = await directPlayers
+		var response = await (directPlayers
 			.Chunk(request.Rows).Skip(request.Page - 1)
-			.SelectMany(x => x)
+			.FirstOrDefault()?? [])
 			.ToAsyncEnumerable()
 			.SelectAwait(async x =>
 			{
