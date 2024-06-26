@@ -22,8 +22,10 @@ public class
 
         return new AgentPlayerSpecialDetailModel
         {
-            Bonus = response.Bonus,
-            BonusAdjust = response.BonusAdjust
+	        Bonus = response.Bonus,
+	        BonusAdjust = response.BonusAdjust,
+	        CompanyAdjust = response.CompanyAdjust,
+	        AgentAdjust = response.AgentAdjust
         };
     }
 }
