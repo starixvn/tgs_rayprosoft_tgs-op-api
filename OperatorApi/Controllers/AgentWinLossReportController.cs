@@ -6,10 +6,10 @@ using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models.Messages.ReportAgentWinLoss;
 using Tgs.Report.Client.Models.AgentWinLoss;
 using TGS.Services.Operator;
-using TGS.Services.Operator.ApplicationServices.AgentWinLossReport;
 using TGS.Services.Operator.ApplicationServices.Player;
 using AgentPlayerSpecialDetailModel = TGS.Services.Operator.AgentPlayerSpecialDetailModel;
 using CompanyTotalDetailModel = TGS.Services.Operator.CompanyTotalDetailModel;
+using TGS.Services.Operator.ApplicationServices.Report.AgentWinLossReport;
 
 namespace TGS.Apis.OperatorApi.Controllers;
 
@@ -119,7 +119,7 @@ public class AgentWinLossReportController : ControllerBase
 					CompanySpecial = x.CompanySpecial,
 					AgentTotal = x.AgentTotal,
 					CompanyTotal = x.CompanyTotal
-				}).ToArray(),
+				}),
 			Total = new AgentWinLossReportTotalModel
 			{
 				RoundCount = response.Total?.RoundCount ?? default,

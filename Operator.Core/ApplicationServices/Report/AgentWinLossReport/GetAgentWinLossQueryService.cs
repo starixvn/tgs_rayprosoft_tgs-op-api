@@ -11,7 +11,7 @@ using Tgs.Report.Client.Models;
 using Tgs.Report.Client.Models.AgentWinLoss;
 using Tgs.ServiceUtility;
 
-namespace TGS.Services.Operator.ApplicationServices.AgentWinLossReport;
+namespace TGS.Services.Operator.ApplicationServices.Report.AgentWinLossReport;
 
 public class
 	GetAgentWinLossQueryService(
@@ -187,8 +187,8 @@ public class
 				cancellationToken).ConfigureAwait(false);
 
 		return Guid.TryParse(playerProperties["AgentId"], out var agentId) &&
-		       (await childAgents.AnyAsync(x => x.AgentId == agentId, cancellationToken).ConfigureAwait(false) ||
-		        request.AgentId == agentId)
+			   (await childAgents.AnyAsync(x => x.AgentId == agentId, cancellationToken).ConfigureAwait(false) ||
+				request.AgentId == agentId)
 			? await reportClient.GetAgentPlayerWinLossAsync(new GetPlayerWinLossRequest
 			{
 				PlayerCode = player.PlayerCode,

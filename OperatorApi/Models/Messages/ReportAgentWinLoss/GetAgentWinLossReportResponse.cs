@@ -4,7 +4,7 @@ namespace TGS.Apis.OperatorApi.Models.Messages.ReportAgentWinLoss;
 
 public class GetAgentWinLossReportResponse : MessageResponse
 {
-    public AgentWinLossReportModel[] Items { get; init; }
+    public IEnumerable<AgentWinLossReportModel> Items { get; init; }
 
     public AgentWinLossReportTotalModel Total { get; init; }
 
