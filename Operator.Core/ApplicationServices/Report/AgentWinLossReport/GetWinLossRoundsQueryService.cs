@@ -10,7 +10,7 @@ using Tgs.Report.Client;
 using Tgs.Report.Client.Models.Round;
 using Tgs.ServiceUtility;
 
-namespace TGS.Services.Operator.ApplicationServices.AgentWinLossReport;
+namespace TGS.Services.Operator.ApplicationServices.Report.AgentWinLossReport;
 
 public class
 	GetWinLossRoundsQueryService(

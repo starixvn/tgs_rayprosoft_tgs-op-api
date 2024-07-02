@@ -11,7 +11,7 @@ using Tgs.Report.Client;
 using Tgs.Report.Client.Models.AgentWinLoss;
 using Tgs.ServiceUtility;
 
-namespace TGS.Services.Operator.ApplicationServices.AgentWinLossReport;
+namespace TGS.Services.Operator.ApplicationServices.Report.AgentWinLossReport;
 
 public class
 	GetAgentWinLossBreadcrumbQueryService(
