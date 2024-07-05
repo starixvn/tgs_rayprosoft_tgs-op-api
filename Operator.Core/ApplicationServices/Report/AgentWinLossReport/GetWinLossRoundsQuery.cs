@@ -1,9 +1,9 @@
 ﻿using System;
-using TGS.Core.Models.Messages;
+using Tgs.Report.Client.Models;
 
 namespace TGS.Services.Operator.ApplicationServices.Report.AgentWinLossReport;
 
-public class GetWinLossRoundsQuery : PageableRequest
+public record GetWinLossRoundsQuery : PageableRequest
 {
 	public Guid BrandId { get; init; }
 	public Guid AgentId { get; init; }
