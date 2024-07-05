@@ -49,7 +49,7 @@ public class
 			ClosedTo = request.ClosedTo,
 			Page = request.Page,
 			Rows = request.Rows,
-			OrderBy = (short)request.OrderBy,
+			OrderBy = request.OrderBy,
 			SortBy = request.SortBy,
 			ShowAll = request.ShowAll
 		}).ConfigureAwait(false);

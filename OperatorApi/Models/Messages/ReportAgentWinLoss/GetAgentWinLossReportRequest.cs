@@ -1,9 +1,9 @@
 ﻿using TGS.Core.Models.Enums;
-using TGS.Core.Models.Messages;
+using Tgs.Report.Client.Models;
 
 namespace TGS.Apis.OperatorApi.Models.Messages.ReportAgentWinLoss;
 
-public class GetAgentWinLossReportRequest : PageableRequest
+public record GetAgentWinLossReportRequest : PageableRequest
 {
     public string Username { get; init; }
     public AccountType MemberType { get; init; }
