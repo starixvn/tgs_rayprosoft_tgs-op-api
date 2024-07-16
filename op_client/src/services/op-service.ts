@@ -10,7 +10,7 @@ export default class OperatorService {
 
     // #endregion Constructors (1)
 
-    // #region Public Methods (63)
+    // #region Public Methods (65)
 
     public checkPhoneCanUse(request: StartSetPhoneRequest): Promise<SuccessResponse<boolean>> {
         return this.http
@@ -469,6 +469,18 @@ export default class OperatorService {
             .then<SuccessResponse<DepositFormCreatedResponse>>(res => res.data);
     }
 
+    public submitS88BankDepositRequest(request: DepositRequest): Promise<SuccessResponse<DepositFormCreatedResponse>> {
+        return this.http
+            .post("/api/deposit/bank/s88pay", request)
+            .then<SuccessResponse<DepositFormCreatedResponse>>(res => res.data);
+    }
+
+    public submitS88ThirdPartyDepositRequest(request: DepositRequest): Promise<SuccessResponse<DepositFormCreatedResponse>> {
+        return this.http
+            .post("/api/deposit/thirdparty/s88pay", request)
+            .then(res => res.data);
+    }
+
     public submitSBBankDepositRequest(request: DepositRequest): Promise<SuccessResponse<DepositFormCreatedResponse>> {
         return this.http
             .post("/api/deposit/bank/sbpay", request)
@@ -535,5 +547,5 @@ export default class OperatorService {
             .then(res => res.data);
     }
 
-    // #endregion Public Methods (63)
+    // #endregion Public Methods (65)
 }
