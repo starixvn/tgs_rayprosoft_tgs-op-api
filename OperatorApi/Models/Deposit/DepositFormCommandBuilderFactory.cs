@@ -72,6 +72,8 @@ public class DepositFormCommandBuilderFactory(IServiceProvider serviceProvider)
 				=> ActivatorUtilities.GetServiceOrCreateInstance<HaloPayCommandBuilder>(serviceProvider),
 			_ when string.Equals("FuKaiPay", paymentCode, StringComparison.InvariantCultureIgnoreCase)
 				=> ActivatorUtilities.GetServiceOrCreateInstance<FuKaiPayCommandBuilder>(serviceProvider),
+			_ when string.Equals("S88Pay", paymentCode, StringComparison.InvariantCultureIgnoreCase)
+				=> ActivatorUtilities.GetServiceOrCreateInstance<S88PayCommandBuilder>(serviceProvider),
 			_ => throw new NotImplementedException()
 		};
 	}
