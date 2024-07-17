@@ -102,7 +102,7 @@ deploy-staging:
     - kubernetes
     - deploy
   needs:
-    #- deploy-dev
+    - deploy-dev
     - job: push-k8s-template
       artifacts: true
   only:
