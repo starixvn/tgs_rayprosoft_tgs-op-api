@@ -68,7 +68,7 @@ push-k8s-template:
   extends: .push-k8s-template
 
 deploy-dev:
-  extends: .build-k8s-template
+  extends: .deploy-k8s-template
   variables:
     namespace: dev
     kube_config: KubeConfig_Raypro_dev
@@ -90,7 +90,7 @@ deploy-dev:
     - deploy_k8s $TgsSettingKey $HelmTemplateFolderName $namespace
 
 deploy-staging:
-  extends: .build-k8s-template
+  extends: .deploy-k8s-template
   variables:
     namespace: staging
     kube_config: KubeConfig_Raypro_staging
@@ -111,7 +111,7 @@ deploy-staging:
     - deploy_k8s $TgsSettingKey $HelmTemplateFolderName $namespace
 
 deploy-prod:
-  extends: .build-k8s-template
+  extends: .deploy-k8s-template
   variables:
     namespace: prod
     kube_config: KubeConfig_Raypro_prod
