@@ -1,5 +1,4 @@
-﻿using System.Collections.Immutable;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 using System.Text.Json;
 using Jering.Javascript.NodeJS;
 using Microsoft.Extensions.DependencyInjection;
@@ -103,7 +102,7 @@ public class S88PayDepositTests(ITestOutputHelper testOutputHelper)
 				TGS.Core.Models.Enums.LoginStatus.Enabled,
 				TGS.Core.Models.Enums.PlatformType.Desktop,
 				DateTimeOffset.Now,
-				DateTimeOffset.Now.AddDays(1D)));		
+				DateTimeOffset.Now.AddDays(1D)));
 
 		await using var scope = web.Services.CreateAsyncScope();
 
@@ -139,6 +138,7 @@ public class S88PayDepositTests(ITestOutputHelper testOutputHelper)
 				    "apiKey": "apiKey",
 				    "secretKey": "secretKey",
 				    "paymentCode": "paymentCode",
+					"depositType": "EWallet",
 				    "bankCode": "bankCode"
 				}
 				""",
@@ -176,12 +176,17 @@ public class S88PayDepositTests(ITestOutputHelper testOutputHelper)
 				"paymentCode",
 				"test",
 				"VND",
+				Enum.Parse<S88PayDepositType>("EWallet"),
 				"bankCode"),
 			new S88PayDepositV3Response(
 				100M,
 				Guid.NewGuid(),
 				new Uri("http://localhost/test"),
-				ThirdPartyOrderNo: "130d36a1176d42638948161df47f160f"));
+				ThirdPartyOrderNo: "thirdPartyOrderNo",
+				DateTimeOffset.Now,
+				"test phone",
+				"test name",
+				null));
 
 		_ = fakePaymentServiceClient.GetDepositFormAsync(
 			Arg.Any<Guid>(),
@@ -339,6 +344,7 @@ public class S88PayDepositTests(ITestOutputHelper testOutputHelper)
 				    "apiKey": "apiKey",
 				    "secretKey": "secretKey",
 				    "paymentCode": "paymentCode",
+					"depositType": "Bank",
 				    "bankCode": "bankCode"
 				}
 				""",
@@ -376,12 +382,17 @@ public class S88PayDepositTests(ITestOutputHelper testOutputHelper)
 				"paymentCode",
 				"test",
 				"VND",
+				Enum.Parse<S88PayDepositType>("Bank"),
 				"bankCode"),
 			new S88PayDepositV3Response(
 				100M,
 				Guid.NewGuid(),
 				new Uri("http://localhost/test"),
-				ThirdPartyOrderNo: "130d36a1176d42638948161df47f160f"));
+				ThirdPartyOrderNo: "130d36a1176d42638948161df47f160f",
+				DateTimeOffset.Now,
+				"123456789",
+				"TESTING bankCode ACCOUNT",
+				"ACB"));
 
 		_ = fakePaymentServiceClient.GetDepositFormAsync(
 			Arg.Any<Guid>(),

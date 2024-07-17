@@ -30,6 +30,7 @@ public class S88PayCommandBuilder() : IDepositFormCommandBuilder
 					brandPaymentInfo.RootElement.GetProperty("paymentCode").GetString(),
 					requestInfo.PlayerCode,
 					"VND",
+					Enum.Parse<S88PayDepositType>(brandPaymentInfo.RootElement.GetProperty("depositType").GetString()),
 					brandPaymentInfo.RootElement.GetProperty("bankCode").GetString()),
 				S88PayUtility.SerializerOptions));
 
