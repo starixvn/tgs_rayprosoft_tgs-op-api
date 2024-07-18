@@ -256,8 +256,7 @@ public class DepositController : ControllerBase
 		};
 	}
 
-	[System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "ASP0018:Unused route parameter", Justification = "<暫止>")]
-	[HttpGet("{bankType}/s88pay/pay-data/{tokenId}")]
+	[HttpGet("s88pay/pay-data/{tokenId}")]
 	[AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
 	public async ValueTask<DepositCashRegisterViewModel<S88PayInfoViewModel>> GetS88PayDepositCashRegisterAsync(
 		[FromServices] IS88PayRepository repository,

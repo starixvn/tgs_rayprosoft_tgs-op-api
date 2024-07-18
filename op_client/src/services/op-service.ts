@@ -121,11 +121,10 @@ export default class OperatorService {
             .then<PagingResponse<TransactionLog>>(res => res.data);
     }
 
-    public getS88PayDepositCashRegisterRequest(
-        bankType: string,
+    public getS88PayDepositCashRegisterRequest(        
         tokenId: string): Promise<SuccessResponse<DepositCashRegisterViewModel<S88PayInfoViewModel>>> {
         return this.http
-            .get(`/api/deposit/${bankType}/s88pay/pay-data/${tokenId}`)
+            .get(`/api/deposit/s88pay/pay-data/${tokenId}`)
             .then(res => res.data);
     }
 
