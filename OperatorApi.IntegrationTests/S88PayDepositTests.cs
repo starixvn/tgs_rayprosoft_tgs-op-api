@@ -138,7 +138,7 @@ public class S88PayDepositTests(ITestOutputHelper testOutputHelper)
 			null);
 
 		var data = JsonSerializer.Serialize(depositV3Response, S88PayUtility.SerializerOptions);
-		_ = fakeRedisRepository.GetDepositAsync(Arg.Is(tokenId))
+		_ = fakeRedisRepository.GetDepositAsync(Arg.Is(tokenId), Arg.Any<CancellationToken>())
 			.Returns(data);
 
 		var isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "true" : "false";
@@ -382,7 +382,7 @@ public class S88PayDepositTests(ITestOutputHelper testOutputHelper)
 
 		_ = fakeRedisRepository
 			.Received(1)
-			.StoreDepositAsync(Arg.Any<Guid>(), Arg.Any<string>());
+			.StoreDepositAsync(Arg.Any<Guid>(), Arg.Any<string>(), Arg.Any<CancellationToken>());
 	}
 
 	[Fact]
@@ -597,6 +597,6 @@ public class S88PayDepositTests(ITestOutputHelper testOutputHelper)
 
 		_ = fakeRedisRepository
 			.Received(1)
-			.StoreDepositAsync(Arg.Any<Guid>(), Arg.Any<string>());
+			.StoreDepositAsync(Arg.Any<Guid>(), Arg.Any<string>(), Arg.Any<CancellationToken>());
 	}
 }
