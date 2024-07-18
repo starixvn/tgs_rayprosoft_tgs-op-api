@@ -1,6 +1,7 @@
 ﻿using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Tgs.Payment.Clients;
+using Tgs.Payment.S88Pay.Client;
 using Tgs.ServiceUtility;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
@@ -8,6 +9,7 @@ using TGS.Apis.OperatorApi.Models.Deposit;
 using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models.Messages;
+using TGS.Services.Operator;
 using TGS.Services.Operator.ApplicationServices.BrandPayments;
 using TGS.Services.Operator.ApplicationServices.Deposit;
 
@@ -251,6 +253,35 @@ public class DepositController : ControllerBase
 		{
 			FormId = createdFormId,
 			PaymentUrl = applyResponse.PaymentUrl
+		};
+	}
+
+	[System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "ASP0018:Unused route parameter", Justification = "<暫止>")]
+	[HttpGet("{bankType}/s88pay/pay-data/{tokenId}")]
+	[AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+	public async ValueTask<DepositCashRegisterViewModel<S88PayInfoViewModel>> GetS88PayDepositCashRegisterAsync(
+		[FromServices] IS88PayRepository repository,
+		Guid tokenId)
+	{
+		var data = await repository
+			.GetDepositAsync(tokenId, HttpContext.RequestAborted)
+			.ConfigureAwait(false);
+
+		var response = JsonSerializer.Deserialize<S88PayDepositV3Response>(data, S88PayUtility.SerializerOptions);
+
+		return new DepositCashRegisterViewModel<S88PayInfoViewModel>
+		{
+			Amount = response.Amount,
+			Expired = response.ExpiredAt,
+			FormId = response.FormId,
+			PayInfo = new S88PayInfoViewModel
+			{
+				Qr = response.RedirectUrl.ToString(),
+				Account = response.Number,
+				AccountName = response.Name,
+				BankName = response.BankName,
+				MatchCode = response.MatchCode,
+			}
 		};
 	}
 

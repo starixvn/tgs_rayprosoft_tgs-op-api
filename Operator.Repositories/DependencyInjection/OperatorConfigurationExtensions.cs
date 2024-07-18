@@ -31,6 +31,7 @@ public static class OperatorConfigurationExtensions
 			.AddSysRepository<SysRepository>()
 			.AddBrandRepository<BrandRepository>()
 			.AddHelp2PayRedisRepository<Help2PayRedisRepository>(redisDatabaseResolver)
+			.AddS88PayRedisRepository<S88PayRedisRepository>(redisDatabaseResolver)
 			.AddVipLevelRepository<VipLevelRepository>()
 			.AddAgentRepository<AgentRepository>()
 			.AddPlayerLoginRecordRepository<PlayerLoginRecordRepository>()
