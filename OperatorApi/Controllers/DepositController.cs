@@ -256,14 +256,15 @@ public class DepositController : ControllerBase
 		};
 	}
 
-	[HttpGet("~/deposit/transaction/s88pay")]
+	[HttpGet("{bankType}/s88pay/pay-data/{tokenId}")]
 	[AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
 	public async ValueTask<DepositCashRegisterViewModel<S88PayInfoViewModel>> GetS88PayDepositCashRegisterAsync(
 		[FromServices] IS88PayRepository repository,
-		[FromQuery] Guid id)
+		string bankType,
+		Guid tokenId)
 	{
 		var data = await repository
-			.GetDepositAsync(id)
+			.GetDepositAsync(tokenId, HttpContext.RequestAborted)
 			.ConfigureAwait(false);
 
 		var response = JsonSerializer.Deserialize<S88PayDepositV3Response>(data, S88PayUtility.SerializerOptions);

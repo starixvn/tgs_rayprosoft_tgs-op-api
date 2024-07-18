@@ -122,7 +122,9 @@ public class S88PayDepositTests(ITestOutputHelper testOutputHelper)
 			"operator-api");
 
 		var loginResult = await loginService.GetAsync(loginCommand);
-		var id = Guid.NewGuid();
+
+		var bankType = "bank";
+		var tokenId = Guid.NewGuid();
 
 		var depositV3Response = new S88PayDepositV3Response(
 			 10000m,
@@ -136,7 +138,7 @@ public class S88PayDepositTests(ITestOutputHelper testOutputHelper)
 			null);
 
 		var data = JsonSerializer.Serialize(depositV3Response, S88PayUtility.SerializerOptions);
-		_ = fakeRedisRepository.GetDepositAsync(Arg.Is(id))
+		_ = fakeRedisRepository.GetDepositAsync(Arg.Is(tokenId))
 			.Returns(data);
 
 		var isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "true" : "false";
@@ -144,20 +146,20 @@ public class S88PayDepositTests(ITestOutputHelper testOutputHelper)
 			const axiosConfigFactory = require('./models/axios-configuration.js').default;
 			const OperatorService = require('./services/op-service.js').default;
 
-			module.exports = async (brandToken, loginToken, id) =>
+			module.exports = async (brandToken, loginToken, bankType, tokenId) =>
 			{
 				let instance = axiosConfigFactory("{{channelName}}", {{isWindows}}, brandToken, loginToken);
 
 				let svc = new OperatorService(instance);
 
-				return await svc.getS88PayDepositCashRegisterRequest(id);
+				return await svc.getS88PayDepositCashRegisterRequest(bankType,tokenId);
 			};
 			""";
 
 		// Act
 		var response = await StaticNodeJSService.InvokeFromStringAsync<string>(
 			nodeModule,
-			args: [brandToken, loginResult.PlayerToken, id]);
+			args: [brandToken, loginResult.PlayerToken, bankType, tokenId]);
 
 		// Assert
 		var actual = JsonSerializer.Deserialize<SuccessResponse<DepositCashRegisterViewModel<S88PayInfoViewModel>>>(

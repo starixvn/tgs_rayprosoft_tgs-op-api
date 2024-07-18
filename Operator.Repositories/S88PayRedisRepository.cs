@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using StackExchange.Redis;
 using TGS.Services.Operator;
@@ -10,17 +11,17 @@ internal class S88PayRedisRepository(IDatabase database) : IS88PayRepository
 	private static readonly TimeSpan _Expire = TimeSpan.FromHours(1);
 	private static readonly string _KeyPrefix = "S88Pay:Deposit";
 
-	public async ValueTask<string?> GetDepositAsync(Guid id)
+	public async ValueTask<string?> GetDepositAsync(Guid tokenId, CancellationToken cancellationToken = default)
 	{
-		var dataKey = $"{_KeyPrefix}:{id}";
+		var dataKey = $"{_KeyPrefix}:{tokenId}";
 
 		return await database.StringGetAsync(dataKey)
 			.ConfigureAwait(false);
 	}
 
-	public async ValueTask<bool> StoreDepositAsync(Guid id, string json)
+	public async ValueTask<bool> StoreDepositAsync(Guid tokenId, string json, CancellationToken cancellationToken = default)
 	{
-		var dataKey = $"{_KeyPrefix}:{id}";
+		var dataKey = $"{_KeyPrefix}:{tokenId}";
 
 		return await database.StringSetAsync(
 			key: dataKey,
