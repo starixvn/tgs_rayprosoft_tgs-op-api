@@ -123,7 +123,7 @@ export default class OperatorService {
 
     public getS88PayDepositCashRegisterRequest(
         bankType: string,
-        tokenId: string): Promise<DepositCashRegisterViewModel<S88PayInfoViewModel>> {
+        tokenId: string): Promise<SuccessResponse<DepositCashRegisterViewModel<S88PayInfoViewModel>>> {
         return this.http
             .get(`/api/deposit/${bankType}/s88pay/pay-data/${tokenId}`)
             .then(res => res.data);

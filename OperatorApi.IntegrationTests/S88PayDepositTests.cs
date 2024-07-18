@@ -167,6 +167,9 @@ public class S88PayDepositTests(ITestOutputHelper testOutputHelper)
 			web.Services.GetRequiredService<IOptions<JsonOptions>>().Value.JsonSerializerOptions);
 
 		Assert.Equal("name", actual!.Data.PayInfo.AccountName);
+		Assert.Equal("matchCode", actual!.Data.PayInfo.MatchCode);
+		Assert.Equal("number", actual!.Data.PayInfo.Account);
+		Assert.Equal("data:image", actual!.Data.PayInfo.Qr);
 	}
 
 	[Fact]
