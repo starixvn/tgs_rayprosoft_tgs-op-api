@@ -48,7 +48,7 @@ public class S88PayCommandBuilder(IS88PayRepository redisRepository)
 		var id = Guid.NewGuid();
 		var json = JsonSerializer.Serialize(info.Response, S88PayUtility.SerializerOptions);
 
-		_ = await redisRepository.StoreDepositAsync(id, json)
+		_ = await redisRepository.StoreDepositAsync(id, json, cancellationToken)
 			.ConfigureAwait(false);
 
 		return new DepositApplyResponse(
