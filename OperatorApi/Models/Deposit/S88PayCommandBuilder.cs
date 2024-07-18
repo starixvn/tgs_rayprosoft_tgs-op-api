@@ -1,10 +1,12 @@
 ﻿using System.Text.Json;
 using Tgs.Payment.S88Pay.Client;
+using TGS.Services.Operator;
 using TGS.Services.Operator.ApplicationServices.Deposit;
 
 namespace TGS.Apis.OperatorApi.Models.Deposit;
 
-public class S88PayCommandBuilder() : IDepositFormCommandBuilder
+public class S88PayCommandBuilder(IS88PayRepository redisRepository)
+	: IDepositFormCommandBuilder
 {
 	public ValueTask<CreateDepositFormCommand> BuildDepositCommandAsync(
 		string paymentCode,
@@ -37,14 +39,20 @@ public class S88PayCommandBuilder() : IDepositFormCommandBuilder
 		return ValueTask.FromResult(command);
 	}
 
-	public ValueTask<DepositApplyResponse> ReadApplyInfoAsync(string applyInfo, CancellationToken cancellationToken = default)
+	public async ValueTask<DepositApplyResponse> ReadApplyInfoAsync(string applyInfo, CancellationToken cancellationToken = default)
 	{
 		var info = JsonSerializer.Deserialize<S88PayDepositApplyInfo>(
 			applyInfo,
 			S88PayUtility.SerializerOptions);
 
-		return ValueTask.FromResult(new DepositApplyResponse(
+		var id = Guid.NewGuid();
+		var json = JsonSerializer.Serialize(info.Response, S88PayUtility.SerializerOptions);
+
+		_ = await redisRepository.StoreDepositAsync(id, json)
+			.ConfigureAwait(false);
+
+		return new DepositApplyResponse(
 			info.Response.ThirdPartyOrderNo,
-			info.Response.RedirectUrl.ToString()));
+			$"/deposit/transaction/s88pay?id={id}");
 	}
 }

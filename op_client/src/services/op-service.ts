@@ -10,7 +10,7 @@ export default class OperatorService {
 
     // #endregion Constructors (1)
 
-    // #region Public Methods (65)
+    // #region Public Methods (66)
 
     public checkPhoneCanUse(request: StartSetPhoneRequest): Promise<SuccessResponse<boolean>> {
         return this.http
@@ -119,6 +119,12 @@ export default class OperatorService {
                 }
             })
             .then<PagingResponse<TransactionLog>>(res => res.data);
+    }
+
+    public getS88PayDepositCashRegisterRequest(id: string): Promise<DepositCashRegisterViewModel<S88PayInfoViewModel>> {
+        return this.http
+            .get(`/deposit/transaction/s88pay?id=${id}`)
+            .then(res => res.data);
     }
 
     public getUBPayExchangeRate(brandPaymentId: string): Promise<GetUBPayExchangeRateResponse> {
@@ -547,5 +553,5 @@ export default class OperatorService {
             .then(res => res.data);
     }
 
-    // #endregion Public Methods (65)
+    // #endregion Public Methods (66)
 }

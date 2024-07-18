@@ -48,6 +48,16 @@ public class OperatorConfiguration(IServiceCollection services)
 		return this;
 	}
 
+	public OperatorConfiguration AddS88PayRedisRepository<TS88PayRepository>(
+		Func<IServiceProvider, IDatabase> redisDatabaseResolver)
+		where TS88PayRepository : class, IS88PayRepository
+	{
+		_ = Services.AddTransient<IS88PayRepository>(sp =>
+			ActivatorUtilities.CreateInstance<TS88PayRepository>(sp, redisDatabaseResolver(sp)));
+
+		return this;
+	}
+
 	public OperatorConfiguration AddMaintenanceRedisRepository<TMaintenanceRedisRepository>()
 		where TMaintenanceRedisRepository : class, IMaintenanceRedisRepository
 	{
