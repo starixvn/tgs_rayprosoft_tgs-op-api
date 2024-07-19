@@ -33,7 +33,8 @@ public class S88PayCommandBuilder(IS88PayRepository redisRepository)
 					requestInfo.PlayerCode,
 					"VND",
 					Enum.Parse<S88PayDepositType>(brandPaymentInfo.RootElement.GetProperty("depositType").GetString()),
-					brandPaymentInfo.RootElement.GetProperty("bankCode").GetString()),
+					brandPaymentInfo.RootElement.GetProperty("bankCode").GetString(),
+					brandPaymentInfo.RootElement.GetProperty("exchangeRate").GetDecimal()),
 				S88PayUtility.SerializerOptions));
 
 		return ValueTask.FromResult(command);

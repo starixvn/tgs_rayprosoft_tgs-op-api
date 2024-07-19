@@ -122,7 +122,7 @@ public class S88PayDepositTests(ITestOutputHelper testOutputHelper)
 			"operator-api");
 
 		var loginResult = await loginService.GetAsync(loginCommand);
-		
+
 		var tokenId = Guid.NewGuid();
 
 		var depositV3Response = new S88PayDepositV3Response(
@@ -290,7 +290,8 @@ public class S88PayDepositTests(ITestOutputHelper testOutputHelper)
 				    "secretKey": "secretKey",
 				    "paymentCode": "paymentCode",
 					"depositType": "EWallet",
-				    "bankCode": "bankCode"
+				    "bankCode": "bankCode",
+					"exchangeRate": 1
 				}
 				""",
 			PaymentId = Guid.NewGuid(),
@@ -328,7 +329,8 @@ public class S88PayDepositTests(ITestOutputHelper testOutputHelper)
 				"test",
 				"VND",
 				Enum.Parse<S88PayDepositType>("EWallet"),
-				"bankCode"),
+				"bankCode",
+				1m),
 			new S88PayDepositV3Response(
 				100M,
 				Guid.NewGuid(),
@@ -503,7 +505,8 @@ public class S88PayDepositTests(ITestOutputHelper testOutputHelper)
 				    "secretKey": "secretKey",
 				    "paymentCode": "paymentCode",
 					"depositType": "Bank",
-				    "bankCode": "bankCode"
+				    "bankCode": "bankCode",
+					"exchangeRate": 1
 				}
 				""",
 			PaymentId = Guid.NewGuid(),
@@ -552,7 +555,8 @@ public class S88PayDepositTests(ITestOutputHelper testOutputHelper)
 				"test",
 				"VND",
 				Enum.Parse<S88PayDepositType>("Bank"),
-				"bankCode"),
+				"bankCode",
+				1m),
 			s88Response);
 
 		_ = fakePaymentServiceClient.GetDepositFormAsync(
