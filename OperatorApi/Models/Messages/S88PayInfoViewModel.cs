@@ -12,4 +12,6 @@ public class S88PayInfoViewModel
 	public string AccountName { get; set; } = default!;
 
 	public string? BankName { get; set; }
+
+	public string Type { get; set; } = default!;
 }

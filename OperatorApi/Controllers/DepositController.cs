@@ -280,6 +280,7 @@ public class DepositController : ControllerBase
 				AccountName = response.Name,
 				BankName = response.BankName,
 				MatchCode = response.MatchCode,
+				Type = response.Type.ToString(),
 			}
 		};
 	}
