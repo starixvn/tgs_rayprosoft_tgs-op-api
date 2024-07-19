@@ -134,6 +134,7 @@ public class S88PayDepositTests(ITestOutputHelper testOutputHelper)
 			"number",
 			"name",
 			"matchCode",
+			S88PayDepositType.EWallet,
 			null);
 
 		var data = JsonSerializer.Serialize(depositV3Response, S88PayUtility.SerializerOptions);
@@ -340,6 +341,7 @@ public class S88PayDepositTests(ITestOutputHelper testOutputHelper)
 				"test phone",
 				"test name",
 				"232168",
+				S88PayDepositType.EWallet,
 				null));
 
 		_ = fakePaymentServiceClient.GetDepositFormAsync(
@@ -543,6 +545,7 @@ public class S88PayDepositTests(ITestOutputHelper testOutputHelper)
 				"123456789",
 				"TESTING bankCode ACCOUNT",
 				"DP1721182157524",
+				S88PayDepositType.Bank,
 				"ACB");
 
 		var applyInfo = new S88PayDepositApplyInfo(

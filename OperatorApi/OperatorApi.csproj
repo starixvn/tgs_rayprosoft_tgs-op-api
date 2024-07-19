@@ -83,7 +83,7 @@
 		<PackageReference Include="Tgs.Payment.MetaPay.Client" Version="0.0.8" />
 		<PackageReference Include="Tgs.Payment.PhpGoPay.Client" Version="0.0.4" />
 		<PackageReference Include="Tgs.Payment.PrimePay.Client" Version="0.0.6" />
-		<PackageReference Include="Tgs.Payment.S88Pay.Client" Version="0.0.5" />
+		<PackageReference Include="Tgs.Payment.S88Pay.Client" Version="0.0.6" />
 		<PackageReference Include="Tgs.Payment.SBPay.Client" Version="1.0.2" />
 		<PackageReference Include="Tgs.Payment.ShunfaPay.Client" Version="0.0.1" />
 		<PackageReference Include="Tgs.Payment.SkyPay.Client" Version="0.0.6" />
