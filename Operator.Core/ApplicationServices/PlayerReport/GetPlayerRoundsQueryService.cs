@@ -16,6 +16,7 @@ internal class GetPlayerRoundsQueryService(
 	IReportClient reportClient)
 	: IGetService<GetPlayerRoundsQuery, RoundsResponse>
 {
+	private readonly JsonSerializerOptions _options = new(JsonSerializerDefaults.Web);
 	public async ValueTask<RoundsResponse> GetAsync(GetPlayerRoundsQuery query,
 		CancellationToken cancellationToken = default)
 	{
@@ -52,7 +53,7 @@ internal class GetPlayerRoundsQueryService(
 				{
 					GameId = x.Id,
 					Localization = JsonSerializer
-						.Deserialize<IDictionary<string, GameLocalizationData>>(x.Localization)
+						.Deserialize<IDictionary<string, GameLocalizationData>>(string.IsNullOrEmpty(x.Localization) ? "{}" : x.Localization, _options)
 				}).ToDictionaryAsync(x => x.GameId, cancellationToken)
 			.ConfigureAwait(false);
 
