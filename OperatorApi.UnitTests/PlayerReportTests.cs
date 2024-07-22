@@ -14,8 +14,6 @@ using RoundTotalModel = TGS.Services.Operator.RoundTotalModel;
 using TGS.Services.Operator.GameProviders;
 using Tgs.Report.Client.Models.Round;
 using RoundModel = Tgs.Report.Client.Models.Round.RoundModel;
-using NSubstitute;
-using Microsoft.Extensions.Options;
 
 namespace TGS.Tests.OperatorApi.UnitTests;
 
