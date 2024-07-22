@@ -1,11 +1,16 @@
 ﻿using System.ComponentModel;
+using System.Globalization;
 using System.Net.Mime;
 using Microsoft.AspNetCore.Mvc;
 using Tgs.Report.Client;
 using Tgs.Report.Client.Models.Round;
+using Tgs.ServiceUtility;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models.Messages;
+using TGS.Services.Operator;
+using TGS.Services.Operator.ApplicationServices.PlayerReport;
+using RoundTotalModel = Tgs.Report.Client.Models.Round.RoundTotalModel;
 
 namespace TGS.Apis.OperatorApi.Controllers;
 
@@ -20,20 +25,20 @@ public class PlayerReportController(IReportClient client) : ControllerBase
 	[Description("Get rounds")]
 	[Consumes(MediaTypeNames.Application.Json)]
 	[AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-	public async Task<PagingResponse<RoundModel>> GetRoundsAsync(
+	public async Task<RoundsResponse> GetRoundsAsync(
+		[FromServices] IGetService<GetPlayerRoundsQuery, RoundsResponse> playerRoundsService,
 		[FromQuery] GetPlayerRoundReportRequest request)
 	{
 		var playerTokenData = HttpContext.Items.GetPlayerTokenData();
 		var brandId = HttpContext.Items.GetBrandId();
 
-		var roundsRequest = new GetRoundsRequest
+		var roundsRequest = new GetPlayerRoundsQuery
 		{
 			BrandId = brandId,
-			PlayerCode = playerTokenData.PlayerCode,
+			PlayerCode = playerTokenData!.PlayerCode,
 			From = request.From,
 			To = request.To,
-			ClosedFrom = null,
-			ClosedTo = null,
+			CultureName = CultureInfo.CurrentUICulture.Name,
 			Page = request.Page,
 			Rows = request.Rows,
 			OrderBy = (short)(request.IsDesc ? 1 : 0),
@@ -41,12 +46,13 @@ public class PlayerReportController(IReportClient client) : ControllerBase
 			ShowAll = request.ShowAll
 		};
 
-		var response = await client.GetRoundsAsync(roundsRequest);
+		var response = await playerRoundsService.GetAsync(roundsRequest, HttpContext.RequestAborted);
 
-		return new PagingResponse<RoundModel>
+		return new RoundsResponse
 		{
 			TotalCount = response.TotalCount,
-			Items = response.Items ?? []
+			Items = response.Items,
+			Total = response.Total
 		};
 	}
 

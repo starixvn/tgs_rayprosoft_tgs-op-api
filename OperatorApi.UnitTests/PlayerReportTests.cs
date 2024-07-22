@@ -3,10 +3,15 @@ using Microsoft.AspNetCore.Mvc;
 using Tgs.Report.Client;
 using Tgs.Report.Client.Models;
 using Tgs.Report.Client.Models.Round;
+using Tgs.ServiceUtility;
 using TGS.Apis.OperatorApi.Controllers;
 using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Core.Models;
 using TGS.Core.Models.Tokens;
+using TGS.Services.Operator.ApplicationServices.PlayerReport;
+using TGS.Services.Operator;
+using RoundModel = Tgs.Report.Client.Models.Round.RoundModel;
+using RoundTotalModel = TGS.Services.Operator.RoundTotalModel;
 
 namespace TGS.Tests.OperatorApi.UnitTests;
 
@@ -18,6 +23,8 @@ public class PlayerReportTests
 	{
 		// arrange
 		var fakeReportClient = Substitute.For<IReportClient>();
+		var fakeQuery = Substitute.For<IGetService<GetPlayerRoundsQuery, RoundsResponse>>();
+
 		var playerCode = "playerCode";
 		var fakeHttpContext = new DefaultHttpContext();
 		var brandId = Guid.NewGuid();
@@ -35,23 +42,14 @@ public class PlayerReportTests
 			ShowAll = false
 		};
 
-		var roundList = new List<RoundModel>
+		var roundResponse = new RoundsResponse
 		{
-			new()
+			Total = new RoundTotalModel(),
+			TotalCount = 1,
+			Items = new Services.Operator.RoundModel[] { new Services.Operator.RoundModel() }
 		};
 
-		var rounds = roundList.ToArray();
-
-		var resp = new PagedResponse<RoundModel>
-		{
-			Message = string.Empty,
-			TotalCount = rounds.Length,
-			Items = rounds
-		};
-
-		_ = fakeReportClient
-			.GetRoundsAsync(Arg.Any<GetRoundsRequest>())
-			.Returns(resp);
+		_ = fakeQuery.GetAsync(Arg.Any<GetPlayerRoundsQuery>(), Arg.Any<CancellationToken>()).Returns(roundResponse);
 
 		var sut = new PlayerReportController(fakeReportClient)
 		{
@@ -59,10 +57,10 @@ public class PlayerReportTests
 		};
 
 		// act
-		_ = await sut.GetRoundsAsync(playerRoundRequest);
+		_ = await sut.GetRoundsAsync(fakeQuery, playerRoundRequest);
 
 		// assert
-		_ = fakeReportClient.Received(1)
-			.GetRoundsAsync(Arg.Any<GetRoundsRequest>());
+		_ = fakeQuery.Received(1)
+			.GetAsync(Arg.Any<GetPlayerRoundsQuery>(), Arg.Any<CancellationToken>());
 	}
 }
