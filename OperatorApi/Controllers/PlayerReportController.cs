@@ -25,7 +25,7 @@ public class PlayerReportController(IReportClient client) : ControllerBase
 	[Description("Get rounds")]
 	[Consumes(MediaTypeNames.Application.Json)]
 	[AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-	public async Task<RoundsResponse> GetRoundsAsync(
+	public async Task<PlayerRoundsResponse> GetRoundsAsync(
 		[FromServices] IGetService<GetPlayerRoundsQuery, RoundsResponse> playerRoundsService,
 		[FromQuery] GetPlayerRoundReportRequest request)
 	{
@@ -48,7 +48,7 @@ public class PlayerReportController(IReportClient client) : ControllerBase
 
 		var response = await playerRoundsService.GetAsync(roundsRequest, HttpContext.RequestAborted);
 
-		return new RoundsResponse
+		return new PlayerRoundsResponse
 		{
 			TotalCount = response.TotalCount,
 			Items = response.Items,
