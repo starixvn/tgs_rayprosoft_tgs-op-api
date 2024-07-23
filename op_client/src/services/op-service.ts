@@ -10,7 +10,7 @@ export default class OperatorService {
 
     // #endregion Constructors (1)
 
-    // #region Public Methods (66)
+    // #region Public Methods (68)
 
     public checkPhoneCanUse(request: StartSetPhoneRequest): Promise<SuccessResponse<boolean>> {
         return this.http
@@ -268,6 +268,18 @@ export default class OperatorService {
         return this.http
             .post("/api/deposit/zalo/dibaopay", request)
             .then<SuccessResponse<DepositFormCreatedResponse>>(res => res.data);
+    }
+
+    public submitDireBankDepositRequest(request: DepositRequest): Promise<SuccessResponse<DepositFormCreatedResponse>> {
+        return this.http
+            .post("/api/deposit/bank/direpay", request)
+            .then<SuccessResponse<DepositFormCreatedResponse>>(res => res.data);
+    }
+
+    public submitDireThirdPartyDepositRequest(request: DepositRequest): Promise<SuccessResponse<DepositFormCreatedResponse>> {
+        return this.http
+            .post("/api/deposit/thirdparty/direpay", request)
+            .then(res => res.data);
     }
 
     public submitEzThirdPartyDepositRequest(request: DepositRequest): Promise<SuccessResponse<DepositFormCreatedResponse>> {
@@ -554,5 +566,5 @@ export default class OperatorService {
             .then(res => res.data);
     }
 
-    // #endregion Public Methods (66)
+    // #endregion Public Methods (68)
 }
