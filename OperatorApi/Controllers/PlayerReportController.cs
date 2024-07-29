@@ -8,9 +8,9 @@ using Tgs.ServiceUtility;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models.Messages;
+using TGS.Apis.OperatorApi.Models.Messages.ReportPlayerRound;
 using TGS.Services.Operator;
 using TGS.Services.Operator.ApplicationServices.PlayerReport;
-using RoundTotalModel = Tgs.Report.Client.Models.Round.RoundTotalModel;
 
 namespace TGS.Apis.OperatorApi.Controllers;
 
@@ -65,7 +65,7 @@ public class PlayerReportController(IReportClient client) : ControllerBase
 	[Description("Get rounds total about Bet Amount Sum & Valid Bet Amount Sum & Win Loss Sum")]
 	[Consumes(MediaTypeNames.Application.Json)]
 	[AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-	public async Task<RoundTotalModel> GetRoundsTotalAsync(
+	public async Task<RoundTotalResponse> GetRoundsTotalAsync(
 		[FromQuery] GetPlayerRoundTotalReportRequest request)
 	{
 		var playerTokenData = HttpContext.Items.GetPlayerTokenData();
@@ -83,11 +83,11 @@ public class PlayerReportController(IReportClient client) : ControllerBase
 
 		var response = await client.GetRoundsTotalAsync(roundsRequest);
 
-		return new RoundTotalModel
+		return new RoundTotalResponse
 		{
-			BetAmount = response.BetAmount,
-			ValidBetAmount = response.ValidBetAmount,
-			WinLoss = response.WinLoss
+			BetAmount = response.BetAmount ?? 0M,
+			ValidBetAmount = response.ValidBetAmount ?? 0M,
+			WinLoss = response.WinLoss ?? 0M
 		};
 	}
 }
