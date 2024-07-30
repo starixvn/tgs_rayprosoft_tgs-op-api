@@ -38,7 +38,7 @@ public class PlayerReportController(IReportClient client) : ControllerBase
 			PlayerCode = playerTokenData!.PlayerCode,
 			From = request.From,
 			To = request.To,
-			CultureName = request.CultureName ?? CultureInfo.CurrentUICulture.Name,
+			CultureName = request.CultureName,
 			Page = request.Page,
 			Rows = request.Rows,
 			OrderBy = (short)(request.IsDesc ? 1 : 0),
