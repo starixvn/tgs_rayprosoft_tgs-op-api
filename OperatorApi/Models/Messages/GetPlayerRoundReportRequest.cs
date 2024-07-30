@@ -9,4 +9,7 @@ public record GetPlayerRoundReportRequest : PagingRequest
 
 	[JsonPropertyName("to")]
 	public DateTimeOffset To { get; set; }
+
+	[JsonPropertyName("culture")]
+	public string CultureName { get; set; }
 }
