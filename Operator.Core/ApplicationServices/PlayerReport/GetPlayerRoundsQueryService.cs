@@ -63,7 +63,8 @@ internal class GetPlayerRoundsQueryService(
 			{
 				var game = games.FirstOrDefault(g => g.Key == model.GameId);
 
-				var gameName = game.Value.Localization?.TryGetValue(query.CultureName, out var localization) == true
+				var gameName = game.Value is not null &&
+				               game.Value.Localization?.TryGetValue(query.CultureName, out var localization) == true
 					? localization.Name
 					: null;
 
