@@ -10,7 +10,7 @@ export default class OperatorService {
 
     // #endregion Constructors (1)
 
-    // #region Public Methods (68)
+    // #region Public Methods (69)
 
     public checkPhoneCanUse(request: StartSetPhoneRequest): Promise<SuccessResponse<boolean>> {
         return this.http
@@ -174,6 +174,12 @@ export default class OperatorService {
                         take
                     }
                 })
+            .then(res => res.data);
+    }
+
+    public listBrandPlayerContractDisplay(): Promise<SuccessResponse<BrandPlayerContractDisplayViewModel[]>> {
+        return this.http
+            .get(`/api/brand/player-contract`)
             .then(res => res.data);
     }
 
@@ -566,5 +572,5 @@ export default class OperatorService {
             .then(res => res.data);
     }
 
-    // #endregion Public Methods (68)
+    // #endregion Public Methods (69)
 }
