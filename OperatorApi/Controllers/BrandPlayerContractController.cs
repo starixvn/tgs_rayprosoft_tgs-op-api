@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Tgs.ServiceUtility;
-using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Services.Operator.ApplicationServices.Brand;
@@ -12,7 +11,6 @@ namespace TGS.Apis.OperatorApi.Controllers;
 public class BrandPlayerContractController : ControllerBase
 {
 	[HttpGet(Name = "ListBrandPlayerContractDisplayType")]
-	[AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = false)]
 	public async IAsyncEnumerable<BrandPlayerContractDisplayViewModel> ListBrandPlayerContractDisplayTypeAsync(
 		[FromServices] IQueryService<BrandPlayerContractDisplayQuery, BrandPlayerContractDisplayInfo> queryService)
 	{
