@@ -353,17 +353,7 @@ builder.Services
 			c.IncludeXmlComments(path);
 		}
 	});
-builder.Services
-	.AddCors(options =>
-	{
-		var corsDomain = builder.Configuration.GetSection("CorsDomain").Get<CorsDomain>()!;
-
-		options.AddDefaultPolicy(policyBuilder => policyBuilder
-			.WithOrigins(corsDomain.Urls)
-			.AllowAnyHeader()
-			.AllowAnyMethod()
-			.SetIsOriginAllowed(_ => true));
-	});
+builder.Services.AddCors();
 
 var app = builder.Build();
 
@@ -381,10 +371,15 @@ app.UseRequestLocalization(options =>
 	_ = options.SetDefaultCulture(config.GetValue<string>("RequestLocalization:DefaultRequestCulture")!);
 });
 
+app.UseCors(x =>
+	x.AllowAnyMethod()
+		.AllowAnyHeader()
+		.SetIsOriginAllowed(origin => true)
+		.AllowCredentials());
+
 app.UseBrandCertificate();
 app.UseAuthentication();
 app.UseRouting();
-app.UseCors();
 app.UseVerifyJwtTokenMiddlewares(Consts.DefaultBypassRouting);
 
 app.MapControllers();

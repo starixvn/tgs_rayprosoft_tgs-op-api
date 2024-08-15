@@ -12,7 +12,8 @@ namespace TGS.Apis.OperatorApi.Middlewares;
 
 public sealed class VerifyBrandOperationMiddleware(
 	RequestDelegate next,
-	ILogger<VerifyBrandOperationMiddleware> logger)
+	ILogger<VerifyBrandOperationMiddleware> logger,
+	IConfiguration configuration)
 {
 	private static readonly ActivitySource _VerifyCredentialsMiddlewareSource = new(
 		$"TGS.Apis.OperatorApi.Middlewares.{nameof(VerifyBrandOperationMiddleware)}");
