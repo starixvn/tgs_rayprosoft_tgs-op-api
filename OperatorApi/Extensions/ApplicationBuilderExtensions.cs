@@ -11,6 +11,7 @@ public static class ApplicationBuilderExtensions
 
 		_ = app.UseWhen(context => bypass.All(r => !context.Request.Path.StartsWithSegments(r)),
 			builder => builder
+				.UseMiddleware<HardTokenMiddleware>()
 				.UseMiddleware<VerifyBrandOperationMiddleware>()
 				.UseMiddleware<VerifyPlayerTokenMiddleware>());
 
