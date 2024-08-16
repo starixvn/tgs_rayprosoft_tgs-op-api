@@ -20,7 +20,7 @@ public class BrandController : ControllerBase
 		[FromServices] IGetService<BrandQuery, BrandInfo> queryService,
 		[FromHeader(Name = "Agent-Invitation-Code")] string invitationCode)
 	{
-		var brandId = HttpContext.GetBrandId().Value;
+		var brandId = HttpContext.GetTgsBrandId().Value;
 
 		var brandInfo = await queryService
 			.GetAsync(new BrandQuery(brandId))

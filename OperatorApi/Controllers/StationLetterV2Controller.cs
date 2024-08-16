@@ -123,7 +123,7 @@ public class StationLetterV2Controller : ControllerBase
 		CreateStationLetterViewModel viewModel)
 	{
 		var playerTokenData = HttpContext.Items.GetPlayerTokenData()!;
-		var brandId = HttpContext.GetBrandId()!.Value;
+		var brandId = HttpContext.GetTgsBrandId()!.Value;
 
 		var brandInfo = await getBrandService.GetAsync(
 			new(brandId),

@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Primitives;
 using Tgs.BrandCertificate;
 using Tgs.BrandCertificate.Clients;
 using Tgs.BrandGameCredits.Common;
@@ -32,32 +33,7 @@ public sealed class VerifyBrandOperationMiddleware(
 	{
 		using var activity = _VerifyCredentialsMiddlewareSource.StartActivity(nameof(VerifyBrandOperationMiddleware));
 
-		var brandId = context.GetBrandId();
-
-		if (!await CheckBrandIdNotNullAsync(
-			context,
-			brandId).ConfigureAwait(false))
-			return;
-
-		if (!await CheckBrandStatusAsync(
-			context,
-			brandId.Value,
-			brandServiceClient).ConfigureAwait(false))
-			return;
-
-		if (!await CheckRiskAsync(
-			context,
-			brandId.Value,
-			brandServiceClient,
-			brandCreditService).ConfigureAwait(false))
-			return;
-
-		if (!await CheckMaintenanceAsync(
-			context,
-			brandId.Value,
-			maintenanceRedisService).ConfigureAwait(false))
-			return;
-
+		var brandId = context.GetTgsBrandId();
 		context.Items.Add(Core.Models.Consts.ContextItems.BrandId, brandId);
 
 		await next(context);

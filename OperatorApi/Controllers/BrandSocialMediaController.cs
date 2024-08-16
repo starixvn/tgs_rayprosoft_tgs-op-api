@@ -16,7 +16,7 @@ public class BrandSocialMediaController : ControllerBase
 	public IAsyncEnumerable<SocialMediaSettingViewModel> ListSocialMediaSettingsAsync(
 		[FromServices] IQueryService<ListSocialMediaSettingsQuery, SocialMediaSetting> queryService)
 	{
-		var brandId = HttpContext.GetBrandId().Value;
+		var brandId = HttpContext.GetTgsBrandId().Value;
 
 		var query = new ListSocialMediaSettingsQuery(brandId);
 

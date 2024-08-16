@@ -110,7 +110,7 @@ builder.Services
 	.Services
 	.AddControllers(options =>
 	{
-		options.AddBrandCertificateFilters();
+		//options.AddBrandCertificateFilters();
 		_ = options.Filters.Add<CheckPlayerEnabledFilter>();
 		_ = options.Filters.Add<ValidateModelFilter>();
 		options.AddWebApiToolkitFilters();

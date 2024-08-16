@@ -17,7 +17,7 @@ public class PlayerBucketController : ControllerBase
 	public IAsyncEnumerable<TypeBucketResultViewModel> GetAllTypeBucketAmountsAsync(
 		[FromServices] IQueryService<GetRequireBucketAmountQuery, TypeBucketResult> queryService)
 	{
-		var brandId = HttpContext.GetBrandId()!.Value;
+		var brandId = HttpContext.GetTgsBrandId()!.Value;
 		var playerTokenData = HttpContext.Items.GetPlayerTokenData();
 
 		var query = new GetRequireBucketAmountQuery(brandId, playerTokenData.PlayerCode);
@@ -36,7 +36,7 @@ public class PlayerBucketController : ControllerBase
 	public async Task<decimal> GetWithdrawRequireAmountAsync(
 		[FromServices] IGetService<GetRequireBucketAmountQuery, decimal> getService)
 	{
-		var brandId = HttpContext.GetBrandId()!.Value;
+		var brandId = HttpContext.GetTgsBrandId()!.Value;
 		var playerTokenData = HttpContext.Items.GetPlayerTokenData();
 
 		var query = new GetRequireBucketAmountQuery(brandId, playerTokenData.PlayerCode);
