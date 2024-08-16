@@ -386,6 +386,7 @@ app.MapControllers();
 app.MapHub<NotifyHub>("api/notify");
 
 app.MapHealthChecks("/health");
+app.MapHealthChecks("/");
 app.MapProfileViewer();
 
 app.UseSwagger();

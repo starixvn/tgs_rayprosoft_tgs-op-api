@@ -9,5 +9,5 @@ internal class Consts
 
 	public const string Site = "operator-api";
 
-	public static readonly string[] DefaultBypassRouting = ["/health", "/metrics", "/favicon.ico", "/swagger", "/profiler"];
+	public static readonly string[] DefaultBypassRouting = ["/health", "/metrics", "/favicon.ico", "/swagger", "/profiler","/"];
 }
