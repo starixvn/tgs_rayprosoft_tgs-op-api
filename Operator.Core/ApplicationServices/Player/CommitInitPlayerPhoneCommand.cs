@@ -7,4 +7,5 @@ public record CommitInitPlayerPhoneCommand(
 	string ValidateCode,
 	string IpAddress,
 	string HostName,
-	Guid BrandId);
+	Guid BrandId,
+	string playerCode = "");

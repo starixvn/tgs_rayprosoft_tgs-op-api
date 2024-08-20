@@ -25,30 +25,46 @@ public class CommitInitPlayerPhoneCommandService(
 	public async ValueTask ExecuteAsync(CommitInitPlayerPhoneCommand command,
 		CancellationToken cancellationToken = default)
 	{
-		var result = await _validateCodeOperator
-			.GetValidateCodeDataAsync<PhoneValidateData>(command.ValidateCode, command.SecurityKey)
-			.ConfigureAwait(false)
-			?? throw new ValidateCodeNotVerifyException();
+		//to do
+		//var result = await _validateCodeOperator
+		//	.GetValidateCodeDataAsync<PhoneValidateData>(command.ValidateCode, command.SecurityKey)
+		//	.ConfigureAwait(false)
+		//	?? throw new ValidateCodeNotVerifyException();
 
-		var playerCode = result.PlayerCode;
+		//var playerCode = result.PlayerCode;
 
-		var findPlayer = await _playerServiceClient.GetPlayerInfoByPhoneAsync(
-			command.BrandId,
-			result.AreaCode,
-			result.Phone,
-			cancellationToken).ConfigureAwait(false);
+		//var findPlayer = await _playerServiceClient.GetPlayerInfoByPhoneAsync(
+		//	command.BrandId,
+		//	result.AreaCode,
+		//	result.Phone,
+		//	cancellationToken).ConfigureAwait(false);
 
-		var isBrandHasSamePhone = findPlayer is not null && findPlayer.PlayerCode != playerCode;
+		//var isBrandHasSamePhone = findPlayer is not null && findPlayer.PlayerCode != playerCode;
 
-		if (isBrandHasSamePhone)
-			throw new BrandPhoneDuplicateException();
+		//if (isBrandHasSamePhone)
+		//	throw new BrandPhoneDuplicateException();
+
+		//await _playerServiceClient.SetPlayerPropertiesAsync(
+		//	result.PlayerCode,
+		//	new Dictionary<PlayerPropertyName, string?>
+		//	{
+		//		[PlayerPropertyName.AreaCode] = result.AreaCode,
+		//		[PlayerPropertyName.Phone] = result.Phone,
+		//		[PlayerPropertyName.PhoneAuthentication] = true.ToString()
+		//	}.ToImmutableDictionary(),
+		//	null,
+		//	cancellationToken)
+		//	.ConfigureAwait(false);
+
+		//mork valid
+		var playerCode = command.playerCode;
 
 		await _playerServiceClient.SetPlayerPropertiesAsync(
-			result.PlayerCode,
+			playerCode,
 			new Dictionary<PlayerPropertyName, string?>
 			{
-				[PlayerPropertyName.AreaCode] = result.AreaCode,
-				[PlayerPropertyName.Phone] = result.Phone,
+				[PlayerPropertyName.AreaCode] = "+84",
+				[PlayerPropertyName.Phone] = null,
 				[PlayerPropertyName.PhoneAuthentication] = true.ToString()
 			}.ToImmutableDictionary(),
 			null,

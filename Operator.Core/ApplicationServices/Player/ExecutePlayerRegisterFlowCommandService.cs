@@ -24,11 +24,6 @@ internal class ExecutePlayerRegisterFlowCommandService(IBrandRegisterFlowDefinit
 			.ConfirmCompletedAsync(command.LocationInfo.PlayerCode, cancellationToken)
 			.ConfigureAwait(false);
 
-		if (flow.CurrentStep == "InitPhone")
-		{
-			isCompleted = true;
-		}
-
 		if (isCompleted)
 			return new RegisterFlowProcessResult(
 				true,

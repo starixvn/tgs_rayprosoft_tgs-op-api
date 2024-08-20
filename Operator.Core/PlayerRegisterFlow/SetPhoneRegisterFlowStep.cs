@@ -129,7 +129,8 @@ internal class SetPhoneRegisterFlowStep(
 			data.ValidateCode,
 			locationInfo.Ip,
 			locationInfo.HostName!,
-			brandId);
+			brandId,
+			locationInfo.PlayerCode);
 
 		await _commitPlayerInitPhoneService
 			.ExecuteAsync(command, cancellationToken)
