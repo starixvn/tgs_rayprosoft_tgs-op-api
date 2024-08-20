@@ -13,8 +13,7 @@ namespace TGS.Apis.OperatorApi.Middlewares;
 
 public sealed class VerifyBrandOperationMiddleware(
 	RequestDelegate next,
-	ILogger<VerifyBrandOperationMiddleware> logger,
-	IConfiguration configuration)
+	ILogger<VerifyBrandOperationMiddleware> logger)
 {
 	private static readonly ActivitySource _VerifyCredentialsMiddlewareSource = new(
 		$"TGS.Apis.OperatorApi.Middlewares.{nameof(VerifyBrandOperationMiddleware)}");
@@ -33,7 +32,7 @@ public sealed class VerifyBrandOperationMiddleware(
 	{
 		using var activity = _VerifyCredentialsMiddlewareSource.StartActivity(nameof(VerifyBrandOperationMiddleware));
 
-		var brandId = context.GetTgsBrandId();
+		var brandId = context.GetBrandId();
 		context.Items.Add(Core.Models.Consts.ContextItems.BrandId, brandId);
 
 		await next(context);

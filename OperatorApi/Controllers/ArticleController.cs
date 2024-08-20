@@ -19,7 +19,7 @@ public class ArticleController : ControllerBase
 		[FromServices] IQueryService<ListArticlesQuery, ArticleListItem> queryService,
 		[FromQuery(Name = "take")] int? take = null)
 	{
-		var brandId = HttpContext.GetTgsBrandId();
+		var brandId = HttpContext.GetBrandId();
 
 		if (brandId is null)
 			return AsyncEnumerable.Empty<ArticleListItemViewModel>();
@@ -52,7 +52,7 @@ public class ArticleController : ControllerBase
 		[FromServices] IQueryService<ListArticlesQuery, ArticleListItem> queryService,
 		Guid id)
 	{
-		var brandId = HttpContext.GetTgsBrandId();
+		var brandId = HttpContext.GetBrandId();
 
 		if (brandId is null)
 			return null;

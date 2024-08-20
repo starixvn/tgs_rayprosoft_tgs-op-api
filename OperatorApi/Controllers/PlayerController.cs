@@ -47,7 +47,7 @@ public class PlayerController(ILogger<PlayerController> logger) : ControllerBase
 		[FromServices] IGetService<ChangePasswordQuery, ChangePasswordInfo> getChangePasswordQueryService,
 		[FromBody] ChangePasswordRequest request)
 	{
-		var brandId = HttpContext.GetTgsBrandId()!.Value;
+		var brandId = HttpContext.GetBrandId()!.Value;
 		var playerTokenData = HttpContext.Items.GetPlayerTokenData();
 
 		var query = new ChangePasswordQuery(
@@ -163,7 +163,7 @@ public class PlayerController(ILogger<PlayerController> logger) : ControllerBase
 		[FromServices] IGetService<ExecutePlayerRegisterFlowCommand, RegisterFlowProcessResult> executeFlowService,
 		CreateInitBankInfoViewModel viewModel)
 	{
-		var brandId = HttpContext.GetTgsBrandId()!.Value;
+		var brandId = HttpContext.GetBrandId()!.Value;
 		var playerTokenData = HttpContext.Items.GetPlayerTokenData();
 
 		var ipAddress = HttpContext.Connection.RemoteIpAddress;
@@ -273,7 +273,7 @@ public class PlayerController(ILogger<PlayerController> logger) : ControllerBase
 	public ValueTask<string> GetCurrentRegisterStepAsync(
 			[FromServices] IGetService<GetCurrentPlayerRegisterFlowStepQuery, string> getService)
 	{
-		var brandId = HttpContext.GetTgsBrandId() ?? throw new BrandNotFoundException();
+		var brandId = HttpContext.GetBrandId() ?? throw new BrandNotFoundException();
 		var playerTokenData = HttpContext.Items.GetPlayerTokenData();
 
 		var query = new GetCurrentPlayerRegisterFlowStepQuery(brandId, playerTokenData?.PlayerCode);
@@ -385,7 +385,7 @@ public class PlayerController(ILogger<PlayerController> logger) : ControllerBase
 		[FromServices] IGetService<PlayerTokenParserCommand, PlayerTokenData> playerTokenParserCommandService,
 		[FromBody] LoginRequest request)
 	{
-		var brandId = HttpContext.GetTgsBrandId()!.Value;
+		var brandId = HttpContext.GetBrandId()!.Value;
 
 		try
 		{
@@ -448,7 +448,7 @@ public class PlayerController(ILogger<PlayerController> logger) : ControllerBase
 	public async Task<LogoutResponse> LogoutAsync(
 		[FromServices] IGetService<GetLogoutQuery, LogoutInfo> getLogoutQueryService)
 	{
-		var brandId = HttpContext.GetTgsBrandId()!.Value;
+		var brandId = HttpContext.GetBrandId()!.Value;
 		var playerTokenData = HttpContext.Items.GetPlayerTokenData();
 
 		var query = new GetLogoutQuery(brandId, playerTokenData.PlayerCode, playerTokenData.LoginRecordId);
@@ -479,7 +479,7 @@ public class PlayerController(ILogger<PlayerController> logger) : ControllerBase
 		[FromHeader(Name = "Agent-Invitation-Code")] string invitationCode,
 		[FromBody] CreatePlayerRequest request)
 	{
-		var brandId = HttpContext.GetTgsBrandId() ?? throw new BrandNotFoundException();
+		var brandId = HttpContext.GetBrandId() ?? throw new BrandNotFoundException();
 
 		var brand = await getBrandService
 			.GetAsync(new BrandQuery(brandId), HttpContext.RequestAborted)
@@ -525,7 +525,7 @@ public class PlayerController(ILogger<PlayerController> logger) : ControllerBase
 		[FromHeader(Name = "Agent-Invitation-Code")] string invitationCode,
 		[FromBody] PlayerRegisterFlowViewModel model)
 	{
-		var brandId = HttpContext.GetTgsBrandId() ?? throw new BrandNotFoundException();
+		var brandId = HttpContext.GetBrandId() ?? throw new BrandNotFoundException();
 
 		var brand = await getBrandService
 			.GetAsync(new BrandQuery(brandId), HttpContext.RequestAborted)
@@ -808,7 +808,7 @@ public class PlayerController(ILogger<PlayerController> logger) : ControllerBase
 			|| string.IsNullOrWhiteSpace(request.AreaCode))
 			throw new PlayerPhoneRequiredException();
 
-		var brandId = HttpContext.GetTgsBrandId();
+		var brandId = HttpContext.GetBrandId();
 		var playerTokenData = HttpContext.Items.GetPlayerTokenData();
 
 		var brand = await getBrandInfoService.GetAsync(new BrandQuery(brandId!.Value)).ConfigureAwait(false);
@@ -852,7 +852,7 @@ public class PlayerController(ILogger<PlayerController> logger) : ControllerBase
 		[FromServices] IGetService<ExecutePlayerRegisterFlowCommand, RegisterFlowProcessResult> executeFlowService,
 		[FromBody] StartInitEmailRequest request)
 	{
-		var brandId = HttpContext.GetTgsBrandId()!.Value;
+		var brandId = HttpContext.GetBrandId()!.Value;
 		var playerTokenData = HttpContext.Items.GetPlayerTokenData();
 
 		var ipAddress = HttpContext.Connection.RemoteIpAddress;
@@ -897,7 +897,7 @@ public class PlayerController(ILogger<PlayerController> logger) : ControllerBase
 			|| string.IsNullOrWhiteSpace(request.AreaCode))
 			throw new PlayerPhoneRequiredException();
 
-		var brandId = HttpContext.GetTgsBrandId()!.Value;
+		var brandId = HttpContext.GetBrandId()!.Value;
 		var playerTokenData = HttpContext.Items.GetPlayerTokenData();
 
 		var ipAddress = HttpContext.Connection.RemoteIpAddress;

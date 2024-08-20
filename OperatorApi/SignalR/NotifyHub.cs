@@ -39,7 +39,7 @@ public class NotifyHub(INotificationClient notificationClient, ILogger<NotifyHub
 	{
 		var httpContext = Context.GetHttpContext();
 
-		var brandId = httpContext?.GetTgsBrandId();
+		var brandId = httpContext?.GetBrandId();
 		var playerTokenData = httpContext?.Items.GetPlayerTokenData();
 
 		if (playerTokenData is null)
