@@ -1,9 +1,4 @@
-﻿#nullable enable
-
-using System.Linq;
-using Tgs.BrandCertificate.Clients;
-using TGS.Apis.OperatorApi.Extensions;
-using TGS.Core.DataServices.Tgs.Models;
+﻿using Tgs.BrandCertificate.Clients;
 
 namespace TGS.Apis.OperatorApi.Middlewares;
 
@@ -15,15 +10,15 @@ internal class BrandFeature : IBrandFeature
 public sealed class ReadBrandIdMiddleware(
 	RequestDelegate next)
 {
+	private const string brandIdKey = "b-id";
 	private readonly RequestDelegate _next = next ?? throw new ArgumentNullException(nameof(next));
-	const string brandIdKey = "b-id";
 
 	public async Task InvokeAsync(
 		HttpContext context)
 	{
 		try
 		{
-			if (context.Items.GetBrandId() == Guid.Empty && context.Request.Headers.ContainsKey(brandIdKey))
+			if (context.Request.Headers.ContainsKey(brandIdKey))
 			{
 				var brandId = context.Request.Headers[brandIdKey];
 				context.Features.Set<IBrandFeature>(new BrandFeature

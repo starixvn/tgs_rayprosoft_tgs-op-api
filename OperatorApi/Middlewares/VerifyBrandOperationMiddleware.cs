@@ -33,6 +33,7 @@ public sealed class VerifyBrandOperationMiddleware(
 		using var activity = _VerifyCredentialsMiddlewareSource.StartActivity(nameof(VerifyBrandOperationMiddleware));
 
 		var brandId = context.GetBrandId();
+		context.Items.Remove(Core.Models.Consts.ContextItems.BrandId);
 		context.Items.Add(Core.Models.Consts.ContextItems.BrandId, brandId);
 
 		await next(context);
