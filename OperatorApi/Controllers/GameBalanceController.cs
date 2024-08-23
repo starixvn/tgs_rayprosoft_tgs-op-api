@@ -103,8 +103,9 @@ public class GameBalanceController : ControllerBase
 				ErrorMessage = string.Empty
 			};
 		}
-		catch
+		catch(Exception ex)
 		{
+			SentrySdk.CaptureException(ex);
 			return new GetGameBalanceResponse
 			{
 				Balance = 0,

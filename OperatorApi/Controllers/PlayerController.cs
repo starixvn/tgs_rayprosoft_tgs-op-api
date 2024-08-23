@@ -420,6 +420,7 @@ public class PlayerController(ILogger<PlayerController> logger) : ControllerBase
 		}
 		catch (Exception ex)
 		{
+			SentrySdk.CaptureException(ex);
 			switch (ex)
 			{
 				case CoreExceptions.PlayerNotFoundException playerNotFoundException:
