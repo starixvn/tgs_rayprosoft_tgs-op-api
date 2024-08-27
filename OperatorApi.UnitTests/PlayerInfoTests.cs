@@ -256,9 +256,9 @@ public class PlayerInfoTests
 	[Test]
 	public async Task Set_Player_QQ_Number_Should_Success()
 	{
-		var moqPlayerOperations = new Mock<IPlayerOperations>();
+		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
 
-		var sut = new SetQqCommandService(moqPlayerOperations.Object);
+		var sut = new SetQqCommandService(fakePlayerServiceClient);
 
 		var player = new Player
 		{
@@ -270,20 +270,13 @@ public class PlayerInfoTests
 
 		var command = new SetQqCommand(player.PlayerCode, "this_is_qq_number");
 
-		_ = moqPlayerOperations
-			.Setup(fake => fake.GetPlayerByCodeAsync(
-				It.Is<string>(x => x == player.PlayerCode)))
-			.Returns(Task.FromResult(player));
-
 		await sut.ExecuteAsync(command);
 
-		moqPlayerOperations
-			.Verify(
-				fake => fake.SetQqAsync(
-					It.Is<string>(x => x == player.PlayerCode),
-					It.Is<string>(x => x == command.QqId),
-					It.IsAny<DateTimeOffset>()),
-				Times.Exactly(1));
+		_ = fakePlayerServiceClient.Received(1)
+			.SetPlayerPropertiesAsync(
+				Arg.Is(player.PlayerCode),
+				Arg.Is<ImmutableDictionary<PlayerPropertyName, string?>>(
+					props => props[PlayerPropertyName.Qq] == command.QqId));
 	}
 
 	[Test]
