@@ -1,20 +1,25 @@
-﻿using System;
+﻿using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Threading;
 using System.Threading.Tasks;
+using Tgs.PlayerService.Client;
 using Tgs.ServiceUtility;
-using TGS.Services.Operations;
 
 namespace TGS.Services.Operator.ApplicationServices.Player;
 
-internal class SetQqCommandService(IPlayerOperations playerOperations) : ICommandService<SetQqCommand>
+internal class SetQqCommandService(IPlayerServiceClient client) : ICommandService<SetQqCommand>
 {
-	private readonly IPlayerOperations _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
-
-	public async ValueTask ExecuteAsync(SetQqCommand command, CancellationToken cancellationToken = default)
+	public ValueTask ExecuteAsync(SetQqCommand command, CancellationToken cancellationToken = default)
 	{
-		var updatedOn = DateTimeOffset.UtcNow;
-		await _playerOperations
-			.SetQqAsync(command.PlayerCode, command.QqId, updatedOn)
-			.ConfigureAwait(false);
+		var properties = new Dictionary<PlayerPropertyName, string?>
+		{
+			[PlayerPropertyName.Qq] = command.QqId
+		}.ToImmutableDictionary();
+
+		return client.SetPlayerPropertiesAsync(
+			command.PlayerCode,
+			properties,
+			null,
+			cancellationToken);
 	}
 }
