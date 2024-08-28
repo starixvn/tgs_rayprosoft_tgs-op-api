@@ -339,34 +339,27 @@ public class PlayerInfoTests
 	[Test]
 	public async Task Set_Player_WeChat_Number_Should_Success()
 	{
-		var moqPlayerOperations = new Mock<IPlayerOperations>();
+		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
 
-		var sut = new SetWeChatCommandService(moqPlayerOperations.Object);
+		var sut = new SetWeChatCommandService(fakePlayerServiceClient);
 
 		var player = new Player
 		{
 			PlayerCode = "abcdef123456",
 			Username = "Tester",
 			BrandId = Guid.NewGuid(),
-			DefaultWalletCurrencyCode = "THB"
+			DefaultWalletCurrencyCode = "THB",
 		};
 
 		var command = new SetWeChatCommand(player.PlayerCode, "this_is_wechat_number");
 
-		_ = moqPlayerOperations
-			.Setup(fake => fake.GetPlayerByCodeAsync(
-				It.Is<string>(x => x == player.PlayerCode)))
-			.Returns(Task.FromResult(player));
-
 		await sut.ExecuteAsync(command);
 
-		moqPlayerOperations
-			.Verify(
-				fake => fake.SetWeChatAsync(
-					It.Is<string>(x => x == player.PlayerCode),
-					It.Is<string>(x => x == command.WeChatId),
-					It.IsAny<DateTimeOffset>()),
-				Times.Exactly(1));
+		_ = fakePlayerServiceClient.Received(1)
+			.SetPlayerPropertiesAsync(
+				Arg.Is(player.PlayerCode),
+				Arg.Is<ImmutableDictionary<PlayerPropertyName, string?>>(
+					props => props[PlayerPropertyName.Wechat] == command.WeChatId));
 	}
 
 	[Test]

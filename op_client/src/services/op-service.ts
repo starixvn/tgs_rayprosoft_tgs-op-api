@@ -10,7 +10,7 @@ export default class OperatorService {
 
     // #endregion Constructors (1)
 
-    // #region Public Methods (69)
+    // #region Public Methods (70)
 
     public checkPhoneCanUse(request: StartSetPhoneRequest): Promise<SuccessResponse<boolean>> {
         return this.http
@@ -216,6 +216,12 @@ export default class OperatorService {
     public sendStationLetterToCustomService(request: SendStationLetterRequest): Promise<void> {
         return this.http
             .put('/api/station-letter', request)
+            .then(res => res.data);
+    }
+
+    public setPlayerWechat(request: SetWeChatIdRequest): Promise<void> {
+        return this.http
+            .patch(`/api/player/wechat`, request)
             .then(res => res.data);
     }
 
@@ -572,5 +578,5 @@ export default class OperatorService {
             .then(res => res.data);
     }
 
-    // #endregion Public Methods (69)
+    // #endregion Public Methods (70)
 }
