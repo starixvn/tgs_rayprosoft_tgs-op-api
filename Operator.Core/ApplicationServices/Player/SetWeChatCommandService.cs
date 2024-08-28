@@ -1,20 +1,25 @@
-﻿using System;
+﻿using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Threading;
 using System.Threading.Tasks;
+using Tgs.PlayerService.Client;
 using Tgs.ServiceUtility;
-using TGS.Services.Operations;
 
 namespace TGS.Services.Operator.ApplicationServices.Player;
 
-internal class SetWeChatCommandService(IPlayerOperations playerOperations) : ICommandService<SetWeChatCommand>
+internal class SetWeChatCommandService(IPlayerServiceClient client) : ICommandService<SetWeChatCommand>
 {
-	private readonly IPlayerOperations _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
-
-	public async ValueTask ExecuteAsync(SetWeChatCommand command, CancellationToken cancellationToken = default)
+	public ValueTask ExecuteAsync(SetWeChatCommand command, CancellationToken cancellationToken = default)
 	{
-		var updatedOn = DateTimeOffset.UtcNow;
-		await _playerOperations
-			.SetWeChatAsync(command.PlayerCode, command.WeChatId, updatedOn)
-			.ConfigureAwait(false);
+		var properties = new Dictionary<PlayerPropertyName, string?>
+		{
+			[PlayerPropertyName.Wechat] = command.WeChatId,
+		}.ToImmutableDictionary();
+
+		return client.SetPlayerPropertiesAsync(
+			command.PlayerCode,
+			properties,
+			null,
+			cancellationToken);
 	}
 }
