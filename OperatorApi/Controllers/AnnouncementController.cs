@@ -18,9 +18,10 @@ public class AnnouncementController : ControllerBase
 	[HttpGet("announcement/list")]
 	[HttpGet("announcement/list/{language}")]
 	public async ValueTask<AnnouncementResponse> GetAnnouncementsAsync(
-		[FromServices] IQueryService<GetAnnouncementQuery, AnnouncementInfo> getAnnouncementQueryService)
+		[FromServices] IQueryService<GetAnnouncementQuery, AnnouncementInfo> getAnnouncementQueryService,
+		string language)
 	{
-		var currentCultureName = CultureInfo.CurrentUICulture.Name;
+		var currentCultureName = language ?? CultureInfo.CurrentUICulture.Name;
 		var brandId = HttpContext.Items.GetBrandId();
 
 		var query = new GetAnnouncementQuery(brandId);
