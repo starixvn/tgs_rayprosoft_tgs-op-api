@@ -20,7 +20,7 @@ internal class Login3rdService(
 	IPlayerLoginRecordRepository loginRecordRepository,
 	IPlayerServiceClient playerServiceClient,
 	IBrandServiceClient brandServiceClient,
-	IGetService<PlayerPasswordValidateCommand, bool> passwordValidateCommandService) : IGetService<Login3rdCommand, LoginInfo>
+	IGetService<PlayerPasswordValidateCommand, bool> passwordValidateCommandService) : IGetService<Login3rdCommand, Login3rdInfo>
 {
 	private readonly IBrandRepository _brandRepository = brandRepository ?? throw new ArgumentNullException(nameof(brandRepository));
 	private readonly IBrandServiceClient _brandServiceClient = brandServiceClient ?? throw new ArgumentNullException(nameof(brandServiceClient));
@@ -29,7 +29,7 @@ internal class Login3rdService(
 	private readonly IGetService<PlayerPasswordValidateCommand, bool> _passwordValidateCommandService = passwordValidateCommandService ?? throw new ArgumentNullException(nameof(passwordValidateCommandService));
 	private readonly IPlayerServiceClient _playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
 
-	public async ValueTask<LoginInfo> GetAsync(Login3rdCommand command, CancellationToken cancellationToken = default)
+	public async ValueTask<Login3rdInfo> GetAsync(Login3rdCommand command, CancellationToken cancellationToken = default)
 	{
 		var brandStatus = await _brandServiceClient.GetBrandStatusAsync(
 			command.BrandId,
@@ -70,9 +70,7 @@ internal class Login3rdService(
 			command.IpAddress,
 			command.HostName,
 			cancellationToken).ConfigureAwait(false);
-		return new LoginInfo(
-		token,
-		record.CreatedOn);
+		return new Login3rdInfo(playerInfo.PlayerCode, token, record.CreatedOn);
 	}
 
 	private async Task<string> GeneratePlayerJwtTokenAsync(

@@ -377,7 +377,8 @@ public class PlayerController(ILogger<PlayerController> logger) : ControllerBase
 	[HttpPost("login-google", Name = "LoginGoogle")]
 	[Consumes(MediaTypeNames.Application.Json)]
 	[IgnoreUserBlacklistCheck]
-	public async Task<LoginResponse> LoginGoogle([FromServices] IGetService<Login3rdCommand, LoginInfo> login3rdService,
+	public async Task<LoginResponse> LoginGoogle([FromServices] IGetService<Login3rdCommand, Login3rdInfo> login3rdService,
+		[FromServices] IPlayerServiceClient playerServiceClient,
 		[FromServices] IGetService<PlayerTokenParserCommand, PlayerTokenData> playerTokenParserCommandService,
 		[FromServices] IGetService<BrandQuery, BrandInfo> getBrandService,
 		[FromServices] IGetService<ExecutePlayerRegisterFlowCommand, RegisterFlowProcessResult> executeFlowService,
@@ -387,26 +388,16 @@ public class PlayerController(ILogger<PlayerController> logger) : ControllerBase
 		if (jwtSecurityToken is not null)
 		{
 			var brandId = HttpContext.GetBrandId()!.Value;
+			var userName = jwtSecurityToken.Claims.ToList()[3].ToString().Replace("sub: ", "");
 
 			try
 			{
 				var ipAddress = HttpContext.Connection.RemoteIpAddress;
 				var hostName = Request.Host.Host;
+				var login3RdCommand = new Login3rdCommand(brandId, userName, string.Empty, ipAddress.ToString(), hostName, request.PlatformType, Consts.Site, true);
+				var infoPlayer = await login3rdService.GetAsync(login3RdCommand);
 
-				var command = new Login3rdCommand(
-					brandId,
-					"brian.nguyen170799",
-					string.Empty,
-					ipAddress.ToString(),
-					hostName,
-					request.PlatformType,
-					Consts.Site,
-					true);
-
-				var info = await login3rdService
-					.GetAsync(command);
-
-				if (info is null)
+				if (infoPlayer is null)
 				{
 					var brand = await getBrandService
 						.GetAsync(new BrandQuery(brandId), HttpContext.RequestAborted)
@@ -421,43 +412,37 @@ public class PlayerController(ILogger<PlayerController> logger) : ControllerBase
 
 					var playerTokenDataRe = HttpContext.Items.GetPlayerTokenData();
 
-					var locationInfo = new PlayerLocationInfo(
-						playerTokenDataRe?.PlayerCode,
-						ipAddress.ToString(),
-						hostName,
-						string.Empty);
-
-					string jsonString = """
-								{
-								  "username": "brian.nguyen170799",
-								  "testplayer": false,
-								  "pwd": "",
-								  "invitationcode": ""
-								}
-								""";
+					var locationInfo = new PlayerLocationInfo(playerTokenDataRe?.PlayerCode, ipAddress.ToString(), hostName, string.Empty);
 
 					var registerFlowCommand = new ExecutePlayerRegisterFlowCommand(
 						brandId,
 						"CreatePlayer",
-						JsonDocument.Parse(jsonString),
+						JsonSerializer.SerializeToDocument(new Login3rdRegisterFlow
+						{
+							username = userName,
+							testplayer = false,
+							pwd = string.Empty,
+							invitationcode = string.Empty
+						}),
 						locationInfo);
 
-					_ = await executeFlowService
-						.GetAsync(registerFlowCommand, HttpContext.RequestAborted)
-						.ConfigureAwait(false);
-					info = await login3rdService.GetAsync(command);
+					_ = await executeFlowService.GetAsync(registerFlowCommand, HttpContext.RequestAborted).ConfigureAwait(false);
+					infoPlayer = await login3rdService.GetAsync(login3RdCommand);
+					await playerServiceClient.SetPlayerLoginTypeAsync(
+						infoPlayer.PlayerCode,
+						PlayerLoginType.Google,
+						null,
+						HttpContext.RequestAborted).ConfigureAwait(false);
 				}
-				var playerTokenData = await playerTokenParserCommandService
-					.GetAsync(new(brandId, info.PlayerToken), HttpContext.RequestAborted)
-					.ConfigureAwait(false);
+				var playerTokenData = await playerTokenParserCommandService.GetAsync(new(brandId, infoPlayer.PlayerToken), HttpContext.RequestAborted).ConfigureAwait(false);
 
 				if (playerTokenData is not null)
 					HttpContext.Items[ContextItems.PlayerToken] = playerTokenData;
 
 				return new LoginResponse
 				{
-					LoginTime = info.LoginTime.ToUnixTimeMilliseconds(),
-					PlayerToken = info.PlayerToken
+					LoginTime = infoPlayer.LoginTime.ToUnixTimeMilliseconds(),
+					PlayerToken = infoPlayer.PlayerToken
 				};
 			}
 			catch (Exception ex)
@@ -466,7 +451,7 @@ public class PlayerController(ILogger<PlayerController> logger) : ControllerBase
 				switch (ex)
 				{
 					case CoreExceptions.PlayerNotFoundException playerNotFoundException:
-						_logger.LogWarning(playerNotFoundException, "{request.Username} not found.", jwtSecurityToken.Claims.ToList()[4].ToString());
+						_logger.LogWarning(playerNotFoundException, "{request.Username} not found.", userName);
 						break;
 
 					case InvalidCredentialsException invalidCredException:
