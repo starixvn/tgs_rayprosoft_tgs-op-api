@@ -1,5 +1,6 @@
 ﻿using System.Collections.Immutable;
 using System.Globalization;
+using System.IdentityModel.Tokens.Jwt;
 using System.Net.Mime;
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
@@ -23,7 +24,6 @@ using TGS.Services.Operator.ApplicationServices.Player;
 using TGS.Services.Operator.ApplicationServices.Withdraw;
 using TGS.Services.Operator.PlayerRegisterFlow;
 using ContextItems = TGS.Core.Models.Consts.ContextItems;
-
 using CoreExceptions = TGS.Core.Models.Exceptions;
 
 namespace TGS.Apis.OperatorApi.Controllers;
@@ -372,6 +372,117 @@ public class PlayerController(ILogger<PlayerController> logger) : ControllerBase
 		};
 
 		return playerInfo;
+	}
+
+	[HttpPost("login-google", Name = "LoginGoogle")]
+	[Consumes(MediaTypeNames.Application.Json)]
+	[IgnoreUserBlacklistCheck]
+	public async Task<LoginResponse> LoginGoogle([FromServices] IGetService<Login3rdCommand, LoginInfo> login3rdService,
+		[FromServices] IGetService<PlayerTokenParserCommand, PlayerTokenData> playerTokenParserCommandService,
+		[FromServices] IGetService<BrandQuery, BrandInfo> getBrandService,
+		[FromServices] IGetService<ExecutePlayerRegisterFlowCommand, RegisterFlowProcessResult> executeFlowService,
+		[FromBody] LoginGoogleRequest request)
+	{
+		var jwtSecurityToken = new JwtSecurityTokenHandler().ReadJwtToken(request.Token);
+		if (jwtSecurityToken is not null)
+		{
+			var brandId = HttpContext.GetBrandId()!.Value;
+
+			try
+			{
+				var ipAddress = HttpContext.Connection.RemoteIpAddress;
+				var hostName = Request.Host.Host;
+
+				var command = new Login3rdCommand(
+					brandId,
+					"brian.nguyen170799",
+					string.Empty,
+					ipAddress.ToString(),
+					hostName,
+					request.PlatformType,
+					Consts.Site,
+					true);
+
+				var info = await login3rdService
+					.GetAsync(command);
+
+				if (info is null)
+				{
+					var brand = await getBrandService
+						.GetAsync(new BrandQuery(brandId), HttpContext.RequestAborted)
+						.ConfigureAwait(false)
+						?? throw new InvalidStatusException("Brand doesn't exist");
+
+					if (brand.Status == BrandStatus.Maintenance)
+						throw new BrandUnderMaintenanceException("Brand is put into maintenance");
+
+					if (brand.Status != BrandStatus.Active)
+						throw new InvalidStatusException("Brand is not active");
+
+					var playerTokenDataRe = HttpContext.Items.GetPlayerTokenData();
+
+					var locationInfo = new PlayerLocationInfo(
+						playerTokenDataRe?.PlayerCode,
+						ipAddress.ToString(),
+						hostName,
+						string.Empty);
+
+					string jsonString = """
+								{
+								  "username": "brian.nguyen170799",
+								  "testplayer": false,
+								  "pwd": "",
+								  "invitationcode": ""
+								}
+								""";
+
+					var registerFlowCommand = new ExecutePlayerRegisterFlowCommand(
+						brandId,
+						"CreatePlayer",
+						JsonDocument.Parse(jsonString),
+						locationInfo);
+
+					_ = await executeFlowService
+						.GetAsync(registerFlowCommand, HttpContext.RequestAborted)
+						.ConfigureAwait(false);
+					info = await login3rdService.GetAsync(command);
+				}
+				var playerTokenData = await playerTokenParserCommandService
+					.GetAsync(new(brandId, info.PlayerToken), HttpContext.RequestAborted)
+					.ConfigureAwait(false);
+
+				if (playerTokenData is not null)
+					HttpContext.Items[ContextItems.PlayerToken] = playerTokenData;
+
+				return new LoginResponse
+				{
+					LoginTime = info.LoginTime.ToUnixTimeMilliseconds(),
+					PlayerToken = info.PlayerToken
+				};
+			}
+			catch (Exception ex)
+			{
+				SentrySdk.CaptureException(ex);
+				switch (ex)
+				{
+					case CoreExceptions.PlayerNotFoundException playerNotFoundException:
+						_logger.LogWarning(playerNotFoundException, "{request.Username} not found.", jwtSecurityToken.Claims.ToList()[4].ToString());
+						break;
+
+					case InvalidCredentialsException invalidCredException:
+						_logger.LogWarning(invalidCredException, "Password is mismatched.");
+						break;
+
+					default:
+						_logger.LogWarning(ex, "Login fail!");
+						break;
+				}
+
+				throw new LoginFailException();
+			}
+		}
+
+		throw new LoginFailException();
 	}
 
 	/// <summary>
