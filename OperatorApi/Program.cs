@@ -373,7 +373,7 @@ app.UseRequestLocalization(options =>
 });
 
 app.UseCors(x =>
-	x.AllowAnyMethod()
+		x.AllowAnyMethod()
 		.AllowAnyHeader()
 		.SetIsOriginAllowed(origin => true)
 		.AllowCredentials());
