@@ -216,7 +216,8 @@ public class DepositController : ControllerBase
 			brandId,
 			brandPayment,
 			request.Amount,
-			request.PromotionId);
+			request.PromotionId,
+			HttpContext.Connection.RemoteIpAddress);
 
 		var command = await builder.BuildDepositCommandAsync(
 			paymentCode,

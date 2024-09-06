@@ -1,4 +1,5 @@
-﻿using Tgs.Payment.Clients;
+﻿using System.Net;
+using Tgs.Payment.Clients;
 
 namespace TGS.Apis.OperatorApi.Models.Deposit;
 
@@ -7,4 +8,6 @@ public record DepositRequestInfo(
 	Guid BrandId,
 	BrandPaymentInfo BrandPaymentInfo,
 	decimal Amount,
-	Guid? PromotionId);
+	Guid? PromotionId,
+	#nullable enable
+	IPAddress? PlayerIp);

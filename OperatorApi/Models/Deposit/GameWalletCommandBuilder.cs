@@ -29,7 +29,7 @@ public class GameWalletCommandBuilder : IDepositFormCommandBuilder
 					SuccessUrl: "https://dictionary.cambridge.org/vi/dictionary/english/successful",
 					FailUrl: "https://dictionary.cambridge.org/vi/dictionary/english/fail",
 					Language: brandPaymentInfo.RootElement.GetProperty("language").GetString(),
-					ClientIP: "127.0.0.1",
+					ClientIP: requestInfo?.PlayerIp.ToString() ?? "127.0.0.1" ,
 					Method: brandPaymentInfo.RootElement.GetProperty("method").GetString()),
 				GameWalletUtility.SerializerOptions));
 
