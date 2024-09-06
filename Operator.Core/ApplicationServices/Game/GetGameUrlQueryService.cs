@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Tgs.GameProviders.Pluggable.Client;
@@ -63,6 +64,7 @@ internal class GetGameUrlQueryService(
 				query.LanguageCode,
 				query.IpAddress,
 				backUrl,
+				JsonSerializer.Deserialize<object>(extendedData!.RootElement.ToString()),
 				cancellationToken: cancellationToken)
 			.ConfigureAwait(false);
 
