@@ -80,6 +80,8 @@ public class DepositFormCommandBuilderFactory(IServiceProvider serviceProvider)
 				=> ActivatorUtilities.GetServiceOrCreateInstance<BigPayzCommandBuilder>(serviceProvider),
 			_ when string.Equals("GameWallet", paymentCode, StringComparison.InvariantCultureIgnoreCase)
 				=> ActivatorUtilities.GetServiceOrCreateInstance<GameWalletCommandBuilder>(serviceProvider),
+			_ when string.Equals("SpeedPay", paymentCode, StringComparison.InvariantCultureIgnoreCase)
+			=> ActivatorUtilities.GetServiceOrCreateInstance<SpeedPayCommandBuilder>(serviceProvider),
 			_ => throw new NotImplementedException()
 		};
 	}
