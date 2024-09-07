@@ -27,7 +27,7 @@ public class SpeedPayCommandBuilder : IDepositFormCommandBuilder
 					MerchantNo = brandPaymentInfo.RootElement.GetProperty("merchantNo").GetString(),
 					OrderNo = formId,
 					PaymentCode = brandPaymentInfo.RootElement.GetProperty("paymentCode").GetString(),
-					ReturnUrl = brandPaymentInfo.RootElement.GetProperty("merchantCode").GetString(),
+					ReturnUrl = brandPaymentInfo.RootElement.GetProperty("returnUrl").GetString(),
 					Version = brandPaymentInfo.RootElement.GetProperty("version").GetString()
 
 				},
