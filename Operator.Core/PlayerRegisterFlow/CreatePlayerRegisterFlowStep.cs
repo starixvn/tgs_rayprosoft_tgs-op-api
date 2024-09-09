@@ -126,11 +126,19 @@ internal class CreatePlayerRegisterFlowStep(
 			var info = await _createPlayerService.GetAsync(query, cancellationToken).ConfigureAwait(false);
 
 			if (info.IsNew)
+			{
 				await _playerServiceClient.SetPlayerStatusAsync(
 					info.PlayerCode,
-					PlayerStatus.RegisterUndone,
+					PlayerStatus.Enabled,
 					null,
 					cancellationToken).ConfigureAwait(false);
+
+				await _playerServiceClient.RecordRegisterIpAsync(
+					info.PlayerCode,
+					locationInfo.Ip,
+					locationInfo.HostName,
+					cancellationToken).ConfigureAwait(false);
+			}
 
 			return new RegisterFlowProcessResult(
 				info.IsNew,
