@@ -38,6 +38,14 @@ public class OperatorConfiguration(IServiceCollection services)
 		return this;
 	}
 
+	public OperatorConfiguration AddCategoryRepository<TCategoryRepository>()
+		where TCategoryRepository : class, ICategoryRepository
+	{
+		_ = Services.AddTransient<ICategoryRepository, TCategoryRepository>();
+
+		return this;
+	}
+
 	public OperatorConfiguration AddHelp2PayRedisRepository<THelp2PayRepository>(
 		Func<IServiceProvider, IDatabase> redisDatabaseResolver)
 		where THelp2PayRepository : class, IHelp2PayRepository

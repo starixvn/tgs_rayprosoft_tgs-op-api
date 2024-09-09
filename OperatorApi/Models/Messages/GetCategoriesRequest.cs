@@ -25,5 +25,5 @@ public record GetCategoriesRequest
 	public string CurrencyCode { get; init; }
 
 	[BindProperty(Name = "gametype")]
-	public GameType? Type { get; init; }
+	public GameType[] Types { get; init; }
 }

@@ -6,6 +6,7 @@ public record GetCategoriesQuery(
 	Guid BrandId,
 	PlayerType PlayerType,
 	PlatformType PlatformType,
-	GameType Type,
+	string CultureCode,
 	int PageSize,
-	int PageIndex);
+	int PageIndex,
+	GameType[] Types);

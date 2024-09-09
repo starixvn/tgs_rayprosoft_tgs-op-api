@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using TGS.Core.Models.Enums;
 
 namespace TGS.Services.Operator.GameProviders;
 
@@ -13,10 +12,6 @@ public interface IGameProviderRepository
 	IAsyncEnumerable<GameProviderStatus> ListNotActiveSubGameProvidersAsync(Guid brandId, CancellationToken cancellationToken = default);
 
 	IAsyncEnumerable<BrandGameInfo> QueryAllGamesAsync(Guid brandId);
-
-	IAsyncEnumerable<GameInfo> QueryGameByGameTypeAsync(Guid brandId, GamePlatformType[] gamePlatformTypes, GameType type);
-
-	Task<int> TotalGameByGameTypeAsync(Guid brandId, GamePlatformType[] gamePlatformTypes, GameType type);
 
 	IAsyncEnumerable<BrandSubGameProviderInfo> QueryAllSubGameProvidersAsync(Guid brandId);
 

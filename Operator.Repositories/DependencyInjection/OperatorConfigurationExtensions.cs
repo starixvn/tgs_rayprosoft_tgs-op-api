@@ -27,6 +27,7 @@ public static class OperatorConfigurationExtensions
 			.AddWalletRepository<PlayerRepository>()
 			.AddStationLetterRepository<StationLetterRepository>()
 			.AddGameProviderRepository<GameProviderRepository>()
+			.AddCategoryRepository<CategoryRepository>()
 			.AddMaintenanceRedisRepository<MaintenanceRedisRepository>()
 			.AddSysRepository<SysRepository>()
 			.AddBrandRepository<BrandRepository>()
