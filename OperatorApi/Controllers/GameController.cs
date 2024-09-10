@@ -392,6 +392,73 @@ public class GameController : ControllerBase
 		};
 	}
 
+	[HttpGet("by-tag")]
+	[AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = false)]
+	public async IAsyncEnumerable<GameTagModel> GetTopGamesByTypesAsync(
+		[FromServices] IBrandLanguageCodeMapper brandLanguageCodeMapper,
+		[FromServices] IGetService<GetTopGamesByTagQuery, IEnumerable<GameTagInfo>> queryAllGameService,
+		[FromQuery] GetTopGamesByTagRequest request)
+	{
+		var brandId = HttpContext.Items.GetBrandId();
+		var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+		var platformType = request.PlatformType;
+
+		if (playerTokenData != null)
+		{
+			platformType = playerTokenData.PlatformType;
+		}
+
+		var currentCultureInfo = CultureInfo.CurrentUICulture;
+
+		var cultureCode = await brandLanguageCodeMapper
+			.ExternalToInternalAsync(currentCultureInfo.Name, brandId)
+			.ConfigureAwait(false);
+
+
+		var query = new GetTopGamesByTagQuery(
+			brandId,
+			platformType,
+			cultureCode,
+			request.Limit,
+			request.Tags);
+
+		var gameTagInfos = await queryAllGameService.GetAsync(query);
+
+
+		foreach (var info in gameTagInfos)
+		{
+			yield return new GameTagModel
+			{
+				Tag = info.Tag,
+				Limit = query.Limit,
+				Games = info.games.Select(game =>
+				{
+					var lang = game.Localization.TryGetValue(cultureCode, out var value)
+						? value
+						: JsonDocument.Parse("{}");
+					return new GameModel
+					{
+						Code = game.Code,
+						GameProviderCode = game.GameProviderCode,
+						Description = GetLocalization(
+							lang.RootElement,
+							"description",
+							game.Description),
+						DisplayOrder = game.DisplayOrder,
+						Id = game.Id,
+						IsActive = game.IsActive,
+						Name = GetLocalization(
+							lang.RootElement,
+							"name",
+							game.Name),
+						Tag = new Tag { Hot = game.Tag.Hot, New = game.Tag.New, Recommend = game.Tag.Recommend },
+						Type = game.Type
+					};
+				})
+			};
+		}
+	}
+
 	private static string GetLocalization(JsonElement element, string propertyName, string defaultValue)
 	{
 		if (!element.TryGetProperty(propertyName, out var value))

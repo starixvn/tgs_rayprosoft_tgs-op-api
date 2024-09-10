@@ -19,13 +19,13 @@ namespace TGS.Apis.OperatorApi.Controllers
 		/// <summary>
 		/// Get Categories
 		/// </summary>
-		[HttpGet]
+		[HttpPost]
 		[AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = false)]
 		public async IAsyncEnumerable<CategoryResponse> GetGamesAsync(
 			[FromServices] IBrandLanguageCodeMapper brandLanguageCodeMapper,
 			[FromServices] IGetService<GetCategoriesQuery, IEnumerable<Category>> queryAllGameService,
 			[FromServices] IPlayerOperations playerOperations,
-			[FromQuery] GetCategoriesRequest request)
+			[FromBody] GetCategoriesRequest request)
 		{
 			var brandId = HttpContext.Items.GetBrandId();
 			var playerTokenData = HttpContext.Items.GetPlayerTokenData();
@@ -56,7 +56,8 @@ namespace TGS.Apis.OperatorApi.Controllers
 				cultureCode,
 				request.PageSize,
 				request.PageIndex,
-				request.Types ?? []);
+				request.GameTypes,
+				request.Tag);
 
 			var categories = await queryAllGameService.GetAsync(query);
 
@@ -68,73 +69,7 @@ namespace TGS.Apis.OperatorApi.Controllers
 					PageIndex = query.PageIndex,
 					Total = category.Total,
 					CategoryName = category.CategoryName,
-					Games = category.Games.Select(game => new GameModel
-					{
-						Id = game.Id,
-						Code = game.Code,
-						Name = game.Name,
-						Description = game.Description,
-						GameProviderCode = game.GameProviderCode,
-						IsActive = game.IsActive,
-						Type = game.Type,
-						Tag = new Tag
-						{
-							Hot = game.Tag.Hot,
-							New = game.Tag.New,
-							Recommend = game.Tag.Recommend,
-						}
-
-					})
-				};
-			}
-		}
-
-		[HttpGet("recommended")]
-		[AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = false)]
-		public async IAsyncEnumerable<CategoryResponse> GetRecommendedGamesByTypes(
-			[FromServices] IBrandLanguageCodeMapper brandLanguageCodeMapper,
-			[FromServices] IGetService<GetRecommendedGamesByTypesQuery, IEnumerable<Category>> queryAllGameService,
-			[FromServices] IPlayerOperations playerOperations,
-			[FromQuery] GetRecommendedGamesByTypesRequest request)
-		{
-			var brandId = HttpContext.Items.GetBrandId();
-			var playerTokenData = HttpContext.Items.GetPlayerTokenData();
-
-			var playerType = PlayerType.RealPlayer;
-			var platformType = request.PlatformType;
-
-			if (playerTokenData != null)
-			{
-				var cachedPlayer = await playerOperations
-					.GetCachedPlayerAsync(playerTokenData.PlayerCode)
-					.ConfigureAwait(false);
-
-				playerType = cachedPlayer.Type;
-				platformType = playerTokenData.PlatformType;
-			}
-
-			var currentCultureInfo = CultureInfo.CurrentUICulture;
-
-			var cultureCode = await brandLanguageCodeMapper
-				.ExternalToInternalAsync(currentCultureInfo.Name, brandId)
-				.ConfigureAwait(false);
-
-			var query = new GetRecommendedGamesByTypesQuery(
-				brandId,
-				request.Limit,
-				cultureCode,
-				platformType,
-				request.Types ?? []);
-
-			var categories = await queryAllGameService.GetAsync(query);
-
-			foreach (var category in categories)
-			{
-				yield return new CategoryResponse
-				{
-					PageSize = query.Limit,
-					Total = category.Total,
-					CategoryName = category.CategoryName,
+					GameType = category.GameType,
 					Games = category.Games.Select(game => new GameModel
 					{
 						Id = game.Id,

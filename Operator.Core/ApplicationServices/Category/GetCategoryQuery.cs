@@ -9,4 +9,5 @@ public record GetCategoriesQuery(
 	string CultureCode,
 	int PageSize,
 	int PageIndex,
-	GameType[] Types);
+	GameType[] Types,
+	GameTag Tag);

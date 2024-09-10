@@ -4,7 +4,7 @@ using TGS.Core.Models.Enums;
 
 namespace TGS.Apis.OperatorApi.Models.Messages;
 
-public class GetRecommendedGamesByTypesRequest
+public class GetTopGamesByTagRequest
 {
 	[BindProperty(Name = "limit", SupportsGet = true)]
 	public int Limit { get; init; }
@@ -13,6 +13,6 @@ public class GetRecommendedGamesByTypesRequest
 	[BindProperty(Name = "platformtype", SupportsGet = true)]
 	public PlatformType PlatformType { get; init; }
 
-	[BindProperty(Name = "gametype")]
-	public GameType[] Types { get; init; }
+	[Required]
+	public GameTag[] Tags { get; init; }
 }

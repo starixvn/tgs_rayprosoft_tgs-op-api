@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Castle.Core.Internal;
 using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
@@ -23,14 +24,15 @@ namespace TGS.Operator.Repositories
 		{
 			var groupedGames = _tgsRepository.BrandGames
 				.Include(bg => bg.Game)
-				.ThenInclude(g => g.SubGameProvider)
-				.ThenInclude(sgp => sgp.GameProvider)
+					.ThenInclude(g => g.SubGameProvider)
+					.ThenInclude(sgp => sgp.GameProvider)
 				.Where(bg => bg.BrandId == query.BrandId &&
 							 bg.Game.AvailableToBrand &&
 							 platformTypes.Contains(bg.Game.PlatformType) &&
 							 _statuses.Contains(bg.Status) &&
 							 _statuses.Contains(bg.Game.Status) &&
-							 (query.Types.IsEmpty() || query.Types.Contains(bg.Game.Type)))
+							 (query.Types.IsNullOrEmpty() || query.Types.Contains(bg.Game.Type)) &&
+							 (query.Tag == GameTag.None || query.Tag == bg.Tag))
 				.AsNoTracking()
 				.GroupBy(bg => bg.Game.Type);
 
@@ -39,7 +41,11 @@ namespace TGS.Operator.Repositories
 				{
 					GameType = g.Key,
 					total = g.Count(),
-					Games = g.OrderBy(g => g.DisplayOrder).ThenBy(g => g.Game.Code).Skip((query.PageIndex - 1) * query.PageSize).Take(query.PageSize).ToList()
+					Games = g
+						.OrderBy(bg => bg.DisplayOrder)
+						.ThenBy(bg => bg.Game.Code)
+						.Skip((query.PageIndex - 1) * query.PageSize)
+						.Take(query.PageSize).ToList()
 				})
 				.ToListAsync();
 
@@ -47,43 +53,13 @@ namespace TGS.Operator.Repositories
 			return paginatedResults.Select(info => MapCategory(info.GameType, info.total, info.Games, query.CultureCode));
 
 		}
-
-		public async Task<IEnumerable<Category>> QueryRecommendedGamesByTypesAsync(GetRecommendedGamesByTypesQuery query, GamePlatformType[] gamePlatformTypes)
-		{
-			var groupedGames = _tgsRepository.BrandGames
-				.Include(bg => bg.Game)
-				.ThenInclude(g => g.SubGameProvider)
-				.ThenInclude(sgp => sgp.GameProvider)
-				.Where(bg => bg.BrandId == query.BrandId &&
-							 bg.Game.AvailableToBrand &&
-							 gamePlatformTypes.Contains(bg.Game.PlatformType) &&
-							 _statuses.Contains(bg.Status) &&
-							 _statuses.Contains(bg.Game.Status) &&
-							 ((bg.Tag & GameTag.Recommend) != 0) &&
-							 (query.Types.IsEmpty() || query.Types.Contains(bg.Game.Type)))
-				.AsNoTracking()
-				.GroupBy(bg => bg.Game.Type);
-
-			var paginatedResults = await groupedGames
-				.Select(g => new
-				{
-					GameType = g.Key,
-					total = g.Count(),
-					Games = g.OrderBy(g => g.DisplayOrder).ThenBy(g => g.Game.Code).Take(query.Limit).ToList()
-				})
-				.ToListAsync();
-
-
-			return paginatedResults.Select(info => MapCategory(info.GameType, info.total, info.Games, query.CultureCode));
-
-		}
-
 		private Category MapCategory(GameType type, int total, IEnumerable<BrandGame> games, string cultureCode)
 		{
 			return new Category
 			{
 				Total = total,
 				CategoryName = type.ToString(),
+				GameType = type,
 				Games = games.Select(i =>
 				{
 					var gameStatus = GetGameStatus(i.Status, i.Game.Status);
@@ -116,12 +92,7 @@ namespace TGS.Operator.Repositories
 
 		private IDictionary<string, JsonDocument> DeserializeLocalization(string localization)
 		{
-			if (string.IsNullOrEmpty(localization))
-			{
-				return new Dictionary<string, JsonDocument>();
-			}
-
-			return JsonSerializer.Deserialize<Dictionary<string, JsonDocument>>(localization);
+			return (string.IsNullOrEmpty(localization) ? new Dictionary<string, JsonDocument>() : JsonSerializer.Deserialize<Dictionary<string, JsonDocument>>(localization))!;
 		}
 
 		private static string GetLocalization(JsonElement element, string propertyName, string defaultValue)

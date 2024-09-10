@@ -6,14 +6,11 @@ namespace TGS.Apis.OperatorApi.Models.Messages;
 
 public record GetCategoriesRequest
 {
-	[BindProperty(Name = "pageindex", SupportsGet = true)]
 	public int PageIndex { get; init; }
 
-	[BindProperty(Name = "pagesize", SupportsGet = true)]
 	public int PageSize { get; init; }
 
 	[Required]
-	[BindProperty(Name = "platformtype", SupportsGet = true)]
 	public PlatformType PlatformType { get; init; }
 
 	[Required]
@@ -21,9 +18,11 @@ public record GetCategoriesRequest
 	public string LanguageCode { get; init; }
 
 	[Required]
-	[BindProperty(Name = "currency", SupportsGet = true)]
 	public string CurrencyCode { get; init; }
 
-	[BindProperty(Name = "gametype")]
-	public GameType[] Types { get; init; }
+	public GameType[] GameTypes { get; set; }
+
+	public GameTag Tag { get; init; } = GameTag.None;
+
+	public byte OrderBy { get; init; }
 }

@@ -1,4 +1,6 @@
-﻿namespace TGS.Apis.OperatorApi.Models.Messages;
+﻿using TGS.Core.Models.Enums;
+
+namespace TGS.Apis.OperatorApi.Models.Messages;
 
 public class CategoryResponse
 {
@@ -10,6 +12,8 @@ public class CategoryResponse
 	public int Total { get; init; } = default!;
 
 	public string CategoryName { get; init; } = default;
+
+	public GameType GameType { get; init; }
 
 	public IEnumerable<GameModel> Games { get; init; } = default!;
 }

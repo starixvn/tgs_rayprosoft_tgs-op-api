@@ -343,7 +343,7 @@ builder.Services
 
 		c.AddBrandCertificateSecurityDefinition();
 		c.OperationFilter<SwaggerHeaderFilter>();
-		c.SchemaFilter<SwaggerEnumDescriptionFilter>();
+		//c.SchemaFilter<SwaggerEnumDescriptionFilter>();
 		c.OperationFilter<SwaggerTgsResponseWrapperFilter>();
 
 		var xml = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";

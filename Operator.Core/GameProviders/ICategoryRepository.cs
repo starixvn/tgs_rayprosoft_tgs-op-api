@@ -8,6 +8,4 @@ public interface ICategoryRepository
 {
 
 	Task<IEnumerable<Category>> QueryGameByGameTypesAsync(GetCategoriesQuery query, GamePlatformType[] gamePlatformTypes);
-
-	Task<IEnumerable<Category>> QueryRecommendedGamesByTypesAsync(GetRecommendedGamesByTypesQuery query, GamePlatformType[] gamePlatformTypes);
 }
