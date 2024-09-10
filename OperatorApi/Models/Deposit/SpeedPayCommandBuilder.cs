@@ -9,7 +9,7 @@ public class SpeedPayCommandBuilder : IDepositFormCommandBuilder
 {
 	public ValueTask<CreateDepositFormCommand> BuildDepositCommandAsync(string paymentCode, string bankType, DepositRequestInfo requestInfo, CancellationToken cancellationToken = default)
 	{
-		var brandPaymentInfo = JsonDocument.Parse(requestInfo.BrandPaymentInfo.ExtendedData);
+		var speedPaySetting = JsonSerializer.Deserialize<SpeedPayDepositSettings>(requestInfo.BrandPaymentInfo.ExtendedData);
 
 		var command = new CreateDepositFormCommand(
 			requestInfo.PlayerCode,
@@ -18,20 +18,11 @@ public class SpeedPayCommandBuilder : IDepositFormCommandBuilder
 			requestInfo.Amount,
 			"tgs.payment.speedpay.deposit",
 			requestInfo.PromotionId,
-			formId => JsonSerializer.Serialize(
-				new SpeedPayDepositSettings
-				{
-					MemberCode = brandPaymentInfo.RootElement.GetProperty("memberCode").GetString(),
-					BankCode = brandPaymentInfo.RootElement.GetProperty("bankCode").GetString(),
-					Key = brandPaymentInfo.RootElement.GetProperty("key").GetString(),
-					MerchantNo = brandPaymentInfo.RootElement.GetProperty("merchantNo").GetString(),
-					OrderNo = formId,
-					PaymentCode = brandPaymentInfo.RootElement.GetProperty("paymentCode").GetString(),
-					ReturnUrl = brandPaymentInfo.RootElement.GetProperty("returnUrl").GetString(),
-					Version = brandPaymentInfo.RootElement.GetProperty("version").GetString()
-
-				},
-				GameWalletUtility.SerializerOptions));
+			formId =>
+			{
+				speedPaySetting.OrderNo = formId;
+				return JsonSerializer.Serialize(speedPaySetting, SpeedPayUtility.SerializerOptions);
+			});
 
 		return ValueTask.FromResult(command);
 	}
