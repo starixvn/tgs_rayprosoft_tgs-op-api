@@ -394,7 +394,7 @@ public class GameTests
 				evoGp.Id,
 				"EVO",
 				GameStatus.Active,
-				GameType.LiveDealer,
+				Core.Models.Enums.GameType.LiveDealer,
 				GamePlatformType.Desktop,
 				true,
 				string.Empty,
@@ -410,7 +410,7 @@ public class GameTests
 				evoGp.Id,
 				"EVO",
 				GameStatus.Active,
-				GameType.Slot,
+				Core.Models.Enums.GameType.Slot,
 				GamePlatformType.Desktop,
 				true,
 				string.Empty,
@@ -426,7 +426,7 @@ public class GameTests
 				evoGp.Id,
 				"EVO",
 				GameStatus.Active,
-				GameType.Slot,
+				Core.Models.Enums.GameType.Slot,
 				GamePlatformType.Desktop,
 				true,
 				string.Empty,
@@ -442,7 +442,7 @@ public class GameTests
 				sboGp.Id,
 				"SBO",
 				GameStatus.Active,
-				GameType.Sportsbook,
+				Core.Models.Enums.GameType.Sportsbook,
 				GamePlatformType.Desktop,
 				true,
 				string.Empty,
@@ -540,7 +540,7 @@ public class GameTests
 				evoGp.Id,
 				"EVO",
 				GameStatus.Active,
-				GameType.LiveDealer,
+				Core.Models.Enums.GameType.LiveDealer,
 				GamePlatformType.Desktop,
 				true,
 				string.Empty,
@@ -556,7 +556,7 @@ public class GameTests
 				evoGp.Id,
 				"EVO",
 				GameStatus.Active,
-				GameType.Slot,
+				Core.Models.Enums.GameType.Slot,
 				GamePlatformType.Desktop,
 				true,
 				string.Empty,
@@ -572,7 +572,7 @@ public class GameTests
 				evoGp.Id,
 				"EVO",
 				GameStatus.Active,
-				GameType.Slot,
+				Core.Models.Enums.GameType.Slot,
 				GamePlatformType.Desktop,
 				true,
 				string.Empty,
@@ -588,7 +588,7 @@ public class GameTests
 				sboGp.Id,
 				"SBO",
 				GameStatus.Active,
-				GameType.Sportsbook,
+				Core.Models.Enums.GameType.Sportsbook,
 				GamePlatformType.Desktop,
 				true,
 				string.Empty,
@@ -722,7 +722,7 @@ public class GameTests
 				evoGp.Id,
 				"EVO",
 				GameStatus.Active,
-				GameType.LiveDealer,
+				Core.Models.Enums.GameType.LiveDealer,
 				GamePlatformType.Desktop,
 				true,
 				string.Empty,
@@ -738,7 +738,7 @@ public class GameTests
 				evoGp.Id,
 				"EVO",
 				GameStatus.Active,
-				GameType.Slot,
+				Core.Models.Enums.GameType.Slot,
 				GamePlatformType.Desktop,
 				true,
 				string.Empty,
@@ -754,7 +754,7 @@ public class GameTests
 				evoGp.Id,
 				"EVO",
 				GameStatus.Active,
-				GameType.Slot,
+				Core.Models.Enums.GameType.Slot,
 				GamePlatformType.Desktop,
 				true,
 				string.Empty,
@@ -770,7 +770,7 @@ public class GameTests
 				sboGp.Id,
 				"SBO",
 				GameStatus.Active,
-				GameType.Sportsbook,
+				Core.Models.Enums.GameType.Sportsbook,
 				GamePlatformType.Desktop,
 				true,
 				string.Empty,
@@ -790,7 +790,7 @@ public class GameTests
 
 		var gameTypes = new[]
 		{
-			GameType.Slot
+			Core.Models.Enums.GameType.Slot
 		};
 
 		var query = new GetAllGamesByGameTypeQuery(
@@ -858,7 +858,7 @@ public class GameTests
 				gameProviderId,
 				"EVO",
 				GameStatus.Active,
-				GameType.LiveDealer,
+				Core.Models.Enums.GameType.LiveDealer,
 				GamePlatformType.Desktop,
 				true,
 				string.Empty,
@@ -874,7 +874,7 @@ public class GameTests
 				gameProviderId,
 				"EVO",
 				GameStatus.Active,
-				GameType.Slot,
+				Core.Models.Enums.GameType.Slot,
 				GamePlatformType.Desktop,
 				true,
 				string.Empty,
@@ -890,7 +890,7 @@ public class GameTests
 				gameProviderId,
 				"EVO",
 				GameStatus.Active,
-				GameType.Slot,
+				Core.Models.Enums.GameType.Slot,
 				GamePlatformType.Desktop,
 				true,
 				string.Empty,
@@ -940,7 +940,7 @@ public class GameTests
 	{
 		// arrange
 		var playerCode = "playerCode";
-		var gameType = GameType.CardGameLobby;
+		var gameType = Core.Models.Enums.GameType.CardGameLobby;
 
 		var playerToken = new PlayerTokenData
 		{
@@ -978,7 +978,7 @@ public class GameTests
 				gameProviderId,
 				"KY",
 				GameStatus.Active,
-				GameType.CardGameLobby,
+				Core.Models.Enums.GameType.CardGameLobby,
 				GamePlatformType.Desktop,
 				true,
 				string.Empty,
@@ -994,7 +994,7 @@ public class GameTests
 				gameProviderId,
 				"KY",
 				GameStatus.Active,
-				GameType.CardGame,
+				Core.Models.Enums.GameType.CardGame,
 				GamePlatformType.Desktop,
 				true,
 				string.Empty,
@@ -1010,7 +1010,7 @@ public class GameTests
 				gameProviderId,
 				"KY",
 				GameStatus.Active,
-				GameType.CardGame,
+				Core.Models.Enums.GameType.CardGame,
 				GamePlatformType.Desktop,
 				true,
 				string.Empty,
@@ -1051,7 +1051,7 @@ public class GameTests
 			1000);
 
 		_ = fakeGameProviderRepository.QueryAllGamesAsync(Arg.Is(command.BrandId))
-			.Returns(new[]
+			.Returns((new[]
 			{
 				new BrandGameInfo(
 					command.GameId,
@@ -1062,14 +1062,14 @@ public class GameTests
 					Guid.NewGuid(),
 					"gp1",
 					GameStatus.Active,
-					GameType.Arcade,
+					Core.Models.Enums.GameType.Arcade,
 					GamePlatformType.Desktop,
 					true,
 					string.Empty,
 					"{}",
 					GameTag.New,
 					0)
-			}.ToAsyncEnumerable());
+			}).ToAsyncEnumerable());
 
 		await sut.ExecuteAsync(command);
 
@@ -1087,7 +1087,7 @@ public class GameTests
 		var query = new ListFavoriteGameIdsQuery(
 			Guid.NewGuid(),
 			"ThisIsPlayerCode",
-			GameType.Arcade);
+			Core.Models.Enums.GameType.Arcade);
 
 		_ = sut.QueryAsync(query);
 

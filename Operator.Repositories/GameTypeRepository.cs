@@ -10,17 +10,17 @@ using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Extensions;
 using TGS.Services.Operator;
-using TGS.Services.Operator.ApplicationServices.Category;
+using TGS.Services.Operator.ApplicationServices.GameTypes;
 using TGS.Services.Operator.GameProviders;
 
 namespace TGS.Operator.Repositories
 {
-	public class CategoryRepository(ITgsRepository tgsRepository) : ICategoryRepository
+	public class GameTypeRepository(ITgsRepository tgsRepository) : IGameTypeRepository
 	{
 		private readonly ITgsRepository _tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
 
 		private readonly GameStatus[] _statuses = { GameStatus.Active, GameStatus.Maintenance, GameStatus.Testing };
-		public async Task<IEnumerable<Category>> QueryGameByGameTypesAsync(GetCategoriesQuery query, GamePlatformType[] platformTypes)
+		public async Task<IEnumerable<GameTypeModel>> QueryGameByGameTypesAsync(GetGameTypesQuery query, GamePlatformType[] platformTypes)
 		{
 			var groupedGames = _tgsRepository.BrandGames
 				.Include(bg => bg.Game)
@@ -32,7 +32,7 @@ namespace TGS.Operator.Repositories
 							 _statuses.Contains(bg.Status) &&
 							 _statuses.Contains(bg.Game.Status) &&
 							 (query.Types.IsNullOrEmpty() || query.Types.Contains(bg.Game.Type)) &&
-							 (query.Tag == GameTag.None || query.Tag == bg.Tag))
+							 (query.Tag == GameTag.None || (bg.Tag & query.Tag) != 0))
 				.AsNoTracking()
 				.GroupBy(bg => bg.Game.Type);
 
@@ -53,9 +53,9 @@ namespace TGS.Operator.Repositories
 			return paginatedResults.Select(info => MapCategory(info.GameType, info.total, info.Games, query.CultureCode));
 
 		}
-		private Category MapCategory(GameType type, int total, IEnumerable<BrandGame> games, string cultureCode)
+		private GameTypeModel MapCategory(GameType type, int total, IEnumerable<BrandGame> games, string cultureCode)
 		{
-			return new Category
+			return new GameTypeModel
 			{
 				Total = total,
 				CategoryName = type.ToString(),
@@ -80,7 +80,8 @@ namespace TGS.Operator.Repositories
 							lang.RootElement,
 							"description",
 							i.Game.Description),
-						GameProviderCode = i.Game.SubGameProvider.Code,
+						GameProviderCode = i.Game.SubGameProvider.GameProvider.Code,
+						GameProviderName = i.Game.SubGameProvider.GameProvider.Name,
 						IsActive = isActive,
 						DisplayOrder = i.DisplayOrder,
 						Type = type,

@@ -2,7 +2,7 @@
 
 namespace TGS.Apis.OperatorApi.Models.Messages;
 
-public class CategoryResponse
+public class GameTypeResponse
 {
 
 	public int PageIndex { get; init; } = default!;
@@ -11,7 +11,7 @@ public class CategoryResponse
 
 	public int Total { get; init; } = default!;
 
-	public string CategoryName { get; init; } = default;
+	public string GameTypeName { get; init; } = default;
 
 	public GameType GameType { get; init; }
 

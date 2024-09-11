@@ -11,8 +11,9 @@ public record GameInfo
 	public string Name { get; init; } = default!;
 	public string Description { get; init; } = default!;
 	public string GameProviderCode { get; init; } = default!;
+	public string GameProviderName { get; init; }
 	public bool IsActive { get; init; }
-	public GameType Type { get; init; }
+	public Core.Models.Enums.GameType Type { get; init; }
 	public TagInfo Tag { get; init; } = default!;
 	public int DisplayOrder { get; init; }
 

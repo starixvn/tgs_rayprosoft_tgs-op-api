@@ -8,24 +8,24 @@ using TGS.Core.Models.Enums;
 using TGS.Services.Operations;
 using TGS.Services.Operations.CodeMappers;
 using TGS.Services.Operator;
-using TGS.Services.Operator.ApplicationServices.Category;
+using TGS.Services.Operator.ApplicationServices.GameTypes;
 
 namespace TGS.Apis.OperatorApi.Controllers
 {
 	[Route("api/[controller]")]
 	[ApiController]
-	public class CategoryController : ControllerBase
+	public class GameTypeController : ControllerBase
 	{
 		/// <summary>
 		/// Get Categories
 		/// </summary>
 		[HttpPost]
 		[AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = false)]
-		public async IAsyncEnumerable<CategoryResponse> GetGamesAsync(
+		public async IAsyncEnumerable<GameTypeResponse> GetGamesAsync(
 			[FromServices] IBrandLanguageCodeMapper brandLanguageCodeMapper,
-			[FromServices] IGetService<GetCategoriesQuery, IEnumerable<Category>> queryAllGameService,
+			[FromServices] IGetService<GetGameTypesQuery, IEnumerable<GameTypeModel>> queryAllGameService,
 			[FromServices] IPlayerOperations playerOperations,
-			[FromBody] GetCategoriesRequest request)
+			[FromBody] GetGameTypesRequest request)
 		{
 			var brandId = HttpContext.Items.GetBrandId();
 			var playerTokenData = HttpContext.Items.GetPlayerTokenData();
@@ -49,7 +49,7 @@ namespace TGS.Apis.OperatorApi.Controllers
 				.ExternalToInternalAsync(currentCultureInfo.Name, brandId)
 				.ConfigureAwait(false);
 
-			var query = new GetCategoriesQuery(
+			var query = new GetGameTypesQuery(
 				brandId,
 				playerType,
 				platformType,
@@ -59,24 +59,25 @@ namespace TGS.Apis.OperatorApi.Controllers
 				request.GameTypes,
 				request.Tag);
 
-			var categories = await queryAllGameService.GetAsync(query);
+			var gameTypes = await queryAllGameService.GetAsync(query);
 
-			foreach (var category in categories)
+			foreach (var gameType in gameTypes)
 			{
-				yield return new CategoryResponse
+				yield return new GameTypeResponse
 				{
 					PageSize = query.PageSize,
 					PageIndex = query.PageIndex,
-					Total = category.Total,
-					CategoryName = category.CategoryName,
-					GameType = category.GameType,
-					Games = category.Games.Select(game => new GameModel
+					Total = gameType.Total,
+					GameTypeName = gameType.CategoryName,
+					GameType = gameType.GameType,
+					Games = gameType.Games.Select(game => new GameModel
 					{
 						Id = game.Id,
 						Code = game.Code,
 						Name = game.Name,
 						Description = game.Description,
 						GameProviderCode = game.GameProviderCode,
+						GameProviderName = game.GameProviderName,
 						IsActive = game.IsActive,
 						Type = game.Type,
 						Tag = new Tag

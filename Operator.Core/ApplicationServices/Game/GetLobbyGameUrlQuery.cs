@@ -9,7 +9,7 @@ public record GetLobbyGameUrlQuery(
 	Guid BrandId,
 	Guid GameProviderId,
 	PlayerTokenData PlayerTokenData,
-	GameType GameType,
+	Core.Models.Enums.GameType GameType,
 	string LanguageCode,
 	string IpAddress,
 	JsonDocument? Extends);

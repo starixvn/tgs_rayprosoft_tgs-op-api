@@ -9,7 +9,7 @@ public record GameDataInfo(
 	string Description,
 	string SubGameProviderCode,
 	GameStatus Status,
-	GameType Type,
+	Core.Models.Enums.GameType Type,
 	GamePlatformType PlatformType,
 	bool AvailableToBrand,
 	string AvailableCurrencies,

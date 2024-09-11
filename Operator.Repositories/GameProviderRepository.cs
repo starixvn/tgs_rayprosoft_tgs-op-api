@@ -202,6 +202,7 @@ internal class GameProviderRepository(
 
 	public IAsyncEnumerable<GameTagInfo> QueryGameByTagsAsync(Guid brandId, GameTag[] tags, GamePlatformType[] gamePlatformTypes, int limit)
 	{
+		var tagQuery = (GameTag)tags.Sum(t => (byte)t);
 		var groupedGames = _tgsRepository.BrandGames
 			.Include(bg => bg.Game)
 			.ThenInclude(g => g.SubGameProvider)
@@ -211,7 +212,7 @@ internal class GameProviderRepository(
 						 gamePlatformTypes.Contains(bg.Game.PlatformType) &&
 						 _statuses.Contains(bg.Status) &&
 						 _statuses.Contains(bg.Game.Status) &&
-						 tags.Contains(bg.Tag))
+						 (bg.Tag & tagQuery) != 0)
 			.AsNoTracking()
 			.GroupBy(bg => bg.Tag);
 
@@ -236,7 +237,8 @@ internal class GameProviderRepository(
 					Code = g.Game.Code,
 					Name = g.Game.Name,
 					Description = g.Game.Description,
-					GameProviderCode = g.Game.SubGameProvider.Code,
+					GameProviderCode = g.Game.SubGameProvider.GameProvider.Code,
+					GameProviderName = g.Game.SubGameProvider.GameProvider.Name,
 					IsActive = isActive,
 					DisplayOrder = g.DisplayOrder,
 					Type = g.Game.Type,

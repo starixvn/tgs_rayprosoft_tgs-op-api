@@ -1,13 +1,14 @@
 ﻿using System;
 using TGS.Core.Models.Enums;
 
-namespace TGS.Services.Operator.ApplicationServices.Category;
-public record GetCategoriesQuery(
+namespace TGS.Services.Operator.ApplicationServices.GameTypes;
+
+public record GetGameTypesQuery(
 	Guid BrandId,
 	PlayerType PlayerType,
 	PlatformType PlatformType,
 	string CultureCode,
 	int PageSize,
 	int PageIndex,
-	GameType[] Types,
+	Core.Models.Enums.GameType[] Types,
 	GameTag Tag);

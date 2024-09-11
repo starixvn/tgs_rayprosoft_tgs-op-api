@@ -39,9 +39,9 @@ public class OperatorConfiguration(IServiceCollection services)
 	}
 
 	public OperatorConfiguration AddCategoryRepository<TCategoryRepository>()
-		where TCategoryRepository : class, ICategoryRepository
+		where TCategoryRepository : class, IGameTypeRepository
 	{
-		_ = Services.AddTransient<ICategoryRepository, TCategoryRepository>();
+		_ = Services.AddTransient<IGameTypeRepository, TCategoryRepository>();
 
 		return this;
 	}

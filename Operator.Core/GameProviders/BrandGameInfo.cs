@@ -12,7 +12,7 @@ public record BrandGameInfo(
 	Guid GpId,
 	string GpCode,
 	GameStatus Status,
-	GameType Type,
+	Core.Models.Enums.GameType Type,
 	GamePlatformType PlatformType,
 	bool AvailableToBrand,
 	string AvailableCurrencies,

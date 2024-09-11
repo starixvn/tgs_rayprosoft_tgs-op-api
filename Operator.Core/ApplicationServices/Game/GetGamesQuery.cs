@@ -8,4 +8,4 @@ public record GetGamesQuery(
 	string SubGameProviderCode,
 	PlayerType PlayerType,
 	PlatformType PlatformType,
-	GameType[] Types);
+	Core.Models.Enums.GameType[] Types);

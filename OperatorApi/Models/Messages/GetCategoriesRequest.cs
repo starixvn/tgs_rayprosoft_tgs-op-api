@@ -4,7 +4,7 @@ using TGS.Core.Models.Enums;
 
 namespace TGS.Apis.OperatorApi.Models.Messages;
 
-public record GetCategoriesRequest
+public record GetGameTypesRequest
 {
 	public int PageIndex { get; init; }
 

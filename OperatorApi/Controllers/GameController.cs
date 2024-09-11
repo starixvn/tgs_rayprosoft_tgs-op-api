@@ -440,6 +440,7 @@ public class GameController : ControllerBase
 					{
 						Code = game.Code,
 						GameProviderCode = game.GameProviderCode,
+						GameProviderName = game.GameProviderName,
 						Description = GetLocalization(
 							lang.RootElement,
 							"description",

@@ -111,7 +111,7 @@ public class PlayerReportTests
 
 		var games = new BrandGameInfo[]
 		{
-			new(1, "bg1", "bg1", "", "", Guid.NewGuid(), "bg1", GameStatus.Active, GameType.Slot,
+			new(1, "bg1", "bg1", "", "", Guid.NewGuid(), "bg1", GameStatus.Active, Core.Models.Enums.GameType.Slot,
 				GamePlatformType.Desktop, true, "",
 				"""
 				{
@@ -142,7 +142,7 @@ public class PlayerReportTests
 				}
 				""",
 				GameTag.Hot, 1),
-			new(2, "bg2", "bg2", "", "", Guid.NewGuid(), "bg2", GameStatus.Active, GameType.Slot,
+			new(2, "bg2", "bg2", "", "", Guid.NewGuid(), "bg2", GameStatus.Active, Core.Models.Enums.GameType.Slot,
 				GamePlatformType.Desktop, true, "",
 				"",
 				GameTag.Hot, 1)

@@ -2,7 +2,8 @@
 using TGS.Core.Models.Enums;
 
 namespace TGS.Services.Operator;
-public record Category
+
+public record GameTypeModel
 {
 	public int PageIndex { get; init; } = default!;
 

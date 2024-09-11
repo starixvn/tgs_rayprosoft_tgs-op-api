@@ -5,5 +5,5 @@ namespace TGS.Services.Operator;
 public record FavoriteGameInfo(
 	string PlayerCode,
 	int GameId,
-	GameType GameType,
+	Core.Models.Enums.GameType GameType,
 	string SubGpCode);

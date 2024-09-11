@@ -7,27 +7,27 @@ using Tgs.ServiceUtility;
 using TGS.Core.Models.Extensions;
 using TGS.Services.Operator.GameProviders;
 
-namespace TGS.Services.Operator.ApplicationServices.Category;
-public class GetCategoryQueryService(ICategoryRepository categoryRepository, IMemoryCache memoryCache) : IGetService<GetCategoriesQuery, IEnumerable<Operator.Category>>
+namespace TGS.Services.Operator.ApplicationServices.GameTypes;
+public class GetGameTypesQueryService(IGameTypeRepository categoryRepository, IMemoryCache memoryCache) : IGetService<GetGameTypesQuery, IEnumerable<GameTypeModel>>
 {
-	private readonly ICategoryRepository _categoryRepository =
+	private readonly IGameTypeRepository _categoryRepository =
 		categoryRepository ?? throw new ArgumentNullException(nameof(categoryRepository));
 	private readonly IMemoryCache _memoryCache = memoryCache ?? throw new ArgumentNullException(nameof(memoryCache));
 
-	public async ValueTask<IEnumerable<Operator.Category>> GetAsync(GetCategoriesQuery query, CancellationToken cancellationToken = default)
+	public async ValueTask<IEnumerable<GameTypeModel>> GetAsync(GetGameTypesQuery query, CancellationToken cancellationToken = default)
 	{
 		var hashKey = HashCode.Combine(query.BrandId, query.PlayerType, query.PlatformType, query.CultureCode,
 			query.PageSize, query.PageIndex, query.Types, query.Tag);
-		var categories = await _memoryCache.GetOrCreateAsync($"GetCategory_{hashKey}", async entry =>
+		var categories = await _memoryCache.GetOrCreateAsync($"GetGameType_{hashKey}", async entry =>
 		{
 			entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5);
-			return await GetCategoryAsync(query, cancellationToken);
+			return await GetGameTypeAsync(query, cancellationToken);
 		}).ConfigureAwait(false);
 
-		return categories ?? new List<Operator.Category>();
+		return categories ?? new List<GameTypeModel>();
 	}
 
-	private async Task<IEnumerable<Operator.Category>> GetCategoryAsync(GetCategoriesQuery query, CancellationToken cancellationToken = default)
+	private async Task<IEnumerable<GameTypeModel>> GetGameTypeAsync(GetGameTypesQuery query, CancellationToken cancellationToken = default)
 	{
 		var gamePlatformTypes = query.PlatformType.ToGamePlatformTypes();
 
