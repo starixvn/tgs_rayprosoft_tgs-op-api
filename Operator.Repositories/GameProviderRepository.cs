@@ -203,12 +203,16 @@ internal class GameProviderRepository(
 	public IAsyncEnumerable<GameTagInfo> QueryGameByTagsAsync(Guid brandId, GameTag[] tags, GamePlatformType[] gamePlatformTypes, int limit)
 	{
 		var tagQuery = (GameTag)tags.Sum(t => (byte)t);
+		var providersActivated = _tgsRepository.BrandGameProviders
+			.Where(bp => bp.BrandId == brandId && bp.Status == Status.Active).Select(bg => bg.GameProviderId).ToList();
+
 		var groupedGames = _tgsRepository.BrandGames
 			.Include(bg => bg.Game)
 			.ThenInclude(g => g.SubGameProvider)
 			.ThenInclude(sgp => sgp.GameProvider)
 			.Where(bg => bg.BrandId == brandId &&
 						 bg.Game.AvailableToBrand &&
+						 providersActivated.Contains(bg.Game.GameProviderId) &&
 						 gamePlatformTypes.Contains(bg.Game.PlatformType) &&
 						 _statuses.Contains(bg.Status) &&
 						 _statuses.Contains(bg.Game.Status) &&

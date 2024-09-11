@@ -22,11 +22,15 @@ namespace TGS.Operator.Repositories
 		private readonly GameStatus[] _statuses = { GameStatus.Active, GameStatus.Maintenance, GameStatus.Testing };
 		public async Task<IEnumerable<GameTypeModel>> QueryGameByGameTypesAsync(GetGameTypesQuery query, GamePlatformType[] platformTypes)
 		{
+			var providersActivated = _tgsRepository.BrandGameProviders
+				.Where(bp => bp.BrandId == query.BrandId && bp.Status == Status.Active).Select(bg => bg.GameProviderId).ToList();
+
 			var groupedGames = _tgsRepository.BrandGames
 				.Include(bg => bg.Game)
 					.ThenInclude(g => g.SubGameProvider)
 					.ThenInclude(sgp => sgp.GameProvider)
 				.Where(bg => bg.BrandId == query.BrandId &&
+							 providersActivated.Contains(bg.Game.GameProviderId) &&
 							 bg.Game.AvailableToBrand &&
 							 platformTypes.Contains(bg.Game.PlatformType) &&
 							 _statuses.Contains(bg.Status) &&
