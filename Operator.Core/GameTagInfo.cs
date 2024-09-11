@@ -6,5 +6,5 @@ public class GameTagInfo
 {
 	public GameTag Tag { get; set; }
 
-	public IEnumerable<GameInfo> games { get; set; }
+	public IEnumerable<GameInfo> Games { get; set; }
 }

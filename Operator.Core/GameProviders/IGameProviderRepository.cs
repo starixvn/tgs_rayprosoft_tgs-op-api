@@ -14,7 +14,7 @@ public interface IGameProviderRepository
 
 	IAsyncEnumerable<BrandGameInfo> QueryAllGamesAsync(Guid brandId);
 
-	IAsyncEnumerable<GameTagInfo> QueryGameByTagsAsync(Guid brandId, GameTag[] tags, GamePlatformType[] gamePlatformTypes, int limit);
+	Task<IEnumerable<GameTagInfo>> QueryGameByTagsAsync(Guid brandId, GameTag[] tags, GamePlatformType[] gamePlatformTypes, int limit);
 
 	IAsyncEnumerable<BrandSubGameProviderInfo> QueryAllSubGameProvidersAsync(Guid brandId);
 

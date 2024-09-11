@@ -431,7 +431,7 @@ public class GameController : ControllerBase
 			{
 				Tag = info.Tag,
 				Limit = query.Limit,
-				Games = info.games.Select(game =>
+				Games = info.Games.Select(game =>
 				{
 					var lang = game.Localization.TryGetValue(cultureCode, out var value)
 						? value

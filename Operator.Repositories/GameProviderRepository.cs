@@ -200,58 +200,88 @@ internal class GameProviderRepository(
 	}
 
 
-	public IAsyncEnumerable<GameTagInfo> QueryGameByTagsAsync(Guid brandId, GameTag[] tags, GamePlatformType[] gamePlatformTypes, int limit)
+	public async Task<IEnumerable<GameTagInfo>> QueryGameByTagsAsync(Guid brandId, GameTag[] tags, GamePlatformType[] gamePlatformTypes, int limit)
 	{
-		var tagQuery = (GameTag)tags.Sum(t => (byte)t);
-		var providersActivated = _tgsRepository.BrandGameProviders
-			.Where(bp => bp.BrandId == brandId && bp.Status == Status.Active).Select(bg => bg.GameProviderId).ToList();
+		var providersActivated = new HashSet<Guid>(
+			await _tgsRepository.BrandGameProviders
+			.Where(bp => bp.BrandId == brandId && bp.Status == Status.Active)
+			.Select(bg => bg.GameProviderId)
+			.ToListAsync()
+		);
 
-		var groupedGames = _tgsRepository.BrandGames
+		var gamesQuery = _tgsRepository.BrandGames
 			.Include(bg => bg.Game)
-			.ThenInclude(g => g.SubGameProvider)
-			.ThenInclude(sgp => sgp.GameProvider)
+				.ThenInclude(g => g.SubGameProvider)
+					.ThenInclude(sgp => sgp.GameProvider)
 			.Where(bg => bg.BrandId == brandId &&
 						 bg.Game.AvailableToBrand &&
 						 providersActivated.Contains(bg.Game.GameProviderId) &&
 						 gamePlatformTypes.Contains(bg.Game.PlatformType) &&
 						 _statuses.Contains(bg.Status) &&
-						 _statuses.Contains(bg.Game.Status) &&
-						 (bg.Tag & tagQuery) != 0)
+						 _statuses.Contains(bg.Game.Status))
 			.AsNoTracking()
-			.GroupBy(bg => bg.Tag);
-
-		var paginatedResults = groupedGames
 			.Select(g => new
 			{
-				GameTag = g.Key,
-				Games = g.OrderBy(g => g.DisplayOrder).ThenBy(g => g.Game.Code).Take(limit)
-			}).AsAsyncEnumerable();
+				g.Game.Id,
+				g.Game.Code,
+				g.Game.Name,
+				g.Game.Description,
+				GameProviderCode = g.Game.SubGameProvider.GameProvider.Code,
+				GameProviderName = g.Game.SubGameProvider.GameProvider.Name,
+				GameProviderStatus = g.Game.SubGameProvider.GameProvider.Status,
+				g.Status,
+				GameStatus = g.Game.Status,
+				g.DisplayOrder,
+				g.Game.Type,
+				g.Game.Localization,
+				g.Tag
+			});
 
-		return paginatedResults.Select(info => new GameTagInfo
+		var groupedGames = new List<GameTagInfo>();
+
+		foreach (var tag in tags)
 		{
-			Tag = info.GameTag,
-			games = info.Games.Select(g =>
+			var games = await gamesQuery
+				.Where(g => (g.Tag & tag) != 0)
+				.OrderBy(g => g.DisplayOrder)
+				.ThenBy(g => g.Code)
+				.Take(limit)
+				.ToListAsync();
+
+			groupedGames.Add(new GameTagInfo
 			{
-				var gameStatus = GetGameStatus(g.Status, g.Game.Status);
-				var isActive = g.Game.SubGameProvider.GameProvider.Status == Status.Active &&
-							   gameStatus == GameStatus.Active;
-				return new GameInfo
+				Tag = tag,
+				Games = games.Select(g =>
 				{
-					Id = g.Game.Id,
-					Code = g.Game.Code,
-					Name = g.Game.Name,
-					Description = g.Game.Description,
-					GameProviderCode = g.Game.SubGameProvider.GameProvider.Code,
-					GameProviderName = g.Game.SubGameProvider.GameProvider.Name,
-					IsActive = isActive,
-					DisplayOrder = g.DisplayOrder,
-					Type = g.Game.Type,
-					Localization = string.IsNullOrEmpty(g.Game.Localization) ? new Dictionary<string, JsonDocument>() : JsonSerializer.Deserialize<Dictionary<string, JsonDocument>>(g.Game.Localization),
-					Tag = new TagInfo { New = g.Tag.IsNew(), Hot = g.Tag.IsHot(), Recommend = g.Tag.IsRecommend() },
-				};
-			}).OrderByDescending(g => g.IsActive).ThenBy(g => g.DisplayOrder)
-		});
+					var gameStatus = GetGameStatus(g.Status, g.GameStatus);
+					var isActive = g.GameProviderStatus == Status.Active && gameStatus == GameStatus.Active;
+
+					return new GameInfo
+					{
+						Id = g.Id,
+						Code = g.Code,
+						Name = g.Name,
+						Description = g.Description,
+						GameProviderCode = g.GameProviderCode,
+						GameProviderName = g.GameProviderName,
+						IsActive = isActive,
+						DisplayOrder = g.DisplayOrder,
+						Type = g.Type,
+						Localization = string.IsNullOrEmpty(g.Localization)
+							? new Dictionary<string, JsonDocument>()
+							: JsonSerializer.Deserialize<Dictionary<string, JsonDocument>>(g.Localization),
+						Tag = new TagInfo { New = g.Tag.IsNew(), Hot = g.Tag.IsHot(), Recommend = g.Tag.IsRecommend() }
+					};
+				})
+				.OrderByDescending(g => g.IsActive)
+				.ThenBy(g => g.DisplayOrder)
+			});
+		}
+
+		return groupedGames;
 	}
+
+
 
 	private static GameStatus GetGameStatus(GameStatus brandGameStatus, GameStatus gameStatus)
 		=> brandGameStatus == GameStatus.Inactive || gameStatus == GameStatus.Inactive

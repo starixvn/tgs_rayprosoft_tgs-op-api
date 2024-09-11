@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Memory;
@@ -17,22 +16,26 @@ public class GetTopGamesByTagQueryService(IGameProviderRepository gameProviderRe
 
 	public async ValueTask<IEnumerable<GameTagInfo>> GetAsync(GetTopGamesByTagQuery query, CancellationToken cancellationToken = default)
 	{
-		var hashKey = HashCode.Combine(query.BrandId, query.PlatformType, query.CultureCode, query.Limit, query.Tags);
-		var gameTagInfos = await _memoryCache.GetOrCreateAsync($"GetGameTag_{hashKey}", async entry =>
-		{
-			entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5);
-			return await GetTopGameByTagAsync(query, cancellationToken);
-		}).ConfigureAwait(false);
 
-		return gameTagInfos ?? new List<GameTagInfo>();
+		//memoryCache
+		//var hashKey = HashCode.Combine(query.BrandId, query.PlatformType, query.CultureCode, query.Limit, query.Tags);
+		//var gameTagInfos = await _memoryCache.GetOrCreateAsync($"GetGameTag_{hashKey}", async entry =>
+		//{
+		//	entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5);
+		//	return await GetTopGameByTagAsync(query, cancellationToken);
+		//}).ConfigureAwait(false);
+
+		//	return gameTagInfos ?? new List<GameTagInfo>();
+
+		return await GetTopGameByTagAsync(query, cancellationToken);
 	}
 
 	private async Task<IEnumerable<GameTagInfo>> GetTopGameByTagAsync(GetTopGamesByTagQuery query, CancellationToken cancellationToken = default)
 	{
 		var gamePlatformTypes = query.PlatformType.ToGamePlatformTypes();
 
-		var gamesByTag = _gameProviderRepository.QueryGameByTagsAsync(query.BrandId, query.Tags, gamePlatformTypes, query.Limit);
+		var gamesByTag = await _gameProviderRepository.QueryGameByTagsAsync(query.BrandId, query.Tags, gamePlatformTypes, query.Limit);
 
-		return await gamesByTag.ToListAsync(cancellationToken: cancellationToken);
+		return gamesByTag;
 	}
 }
