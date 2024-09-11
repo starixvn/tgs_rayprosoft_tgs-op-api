@@ -220,7 +220,7 @@ internal class GameProviderRepository(
 			.Select(g => new
 			{
 				GameTag = g.Key,
-				Games = g.OrderBy(g => g.DisplayOrder).ThenBy(g => g.Game.Code).Take(limit).ToList()
+				Games = g.OrderBy(g => g.DisplayOrder).ThenBy(g => g.Game.Code).Take(limit)
 			}).AsAsyncEnumerable();
 
 		return paginatedResults.Select(info => new GameTagInfo
@@ -245,7 +245,7 @@ internal class GameProviderRepository(
 					Localization = string.IsNullOrEmpty(g.Game.Localization) ? new Dictionary<string, JsonDocument>() : JsonSerializer.Deserialize<Dictionary<string, JsonDocument>>(g.Game.Localization),
 					Tag = new TagInfo { New = g.Tag.IsNew(), Hot = g.Tag.IsHot(), Recommend = g.Tag.IsRecommend() },
 				};
-			})
+			}).OrderByDescending(g => g.IsActive).ThenBy(g => g.DisplayOrder)
 		});
 	}
 

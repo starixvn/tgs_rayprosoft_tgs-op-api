@@ -87,7 +87,7 @@ namespace TGS.Operator.Repositories
 						Type = type,
 						Tag = new TagInfo { New = i.Tag.IsNew(), Hot = i.Tag.IsHot(), Recommend = i.Tag.IsRecommend() },
 					};
-				})
+				}).OrderByDescending(g => g.IsActive).ThenBy(g => g.DisplayOrder)
 			};
 		}
 
