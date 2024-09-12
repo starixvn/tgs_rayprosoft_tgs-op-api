@@ -7,4 +7,4 @@ public record GetAllGamesByGameTypeQuery(
 	Guid BrandId,
 	PlayerType PlayerType,
 	PlatformType PlatformType,
-	Core.Models.Enums.GameType[] Types);
+	GameType[] Types);

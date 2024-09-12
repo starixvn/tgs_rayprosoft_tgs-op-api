@@ -173,6 +173,48 @@ internal class GameProviderRepository(
 			});
 	}
 
+	public IAsyncEnumerable<BrandGameProviderInfo> QueryAllGameProvidersAsync(Guid brandId)
+	{
+		var status = new[]
+		{
+			Status.Active,
+			Status.Maintenance
+		};
+
+		var query = from brandGp in _tgsRepository.BrandGameProviders.AsQueryable()
+					from gp in _tgsRepository.GameProviders
+					where brandGp.GameProviderId == gp.Id
+						  && brandGp.BrandId == brandId
+						  && status.Contains(gp.Status)
+						  && status.Contains(brandGp.Status)
+					select new
+					{
+						gp.Code,
+						gp.Name,
+						gp.Description,
+						gp.TransferWallet,
+						gp.Status,
+						BrandGpStatus = brandGp.Status,
+						gp.Localization
+					};
+
+		return query.ToAsyncEnumerable()
+			.Select(info =>
+			{
+				var gpStatus = info.BrandGpStatus == Status.Maintenance || info.Status == Status.Maintenance
+					? Status.Maintenance
+					: Status.Active;
+
+				return new BrandGameProviderInfo(
+					info.Code,
+					info.Name,
+					info.Description,
+					info.TransferWallet,
+					gpStatus,
+					info.Localization);
+			});
+	}
+
 	public IAsyncEnumerable<FavoriteGameInfo> QueryPlayerFavoriteGamesAsync(Guid brandId, string playerCode)
 	{
 		var query = from fg in _tgsRepository.PlayerFavoriteGames.AsQueryable()

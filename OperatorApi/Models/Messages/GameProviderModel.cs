@@ -11,11 +11,11 @@ public record GameProviderModel
 	[JsonPropertyName("description")]
 	public string Description { get; init; }
 
-	[JsonPropertyName("gametypes")]
-	public GameType[] GameTypes { get; init; }
-
 	[JsonPropertyName("transferwallet")]
 	public bool IsTransferWallet { get; init; }
+
+	[JsonPropertyName("gametypes")]
+	public GameType[] GameTypes { get; init; }
 
 	[JsonPropertyName("name")]
 	public string Name { get; init; }

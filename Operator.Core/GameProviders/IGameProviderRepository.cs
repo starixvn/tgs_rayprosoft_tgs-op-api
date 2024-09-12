@@ -18,6 +18,8 @@ public interface IGameProviderRepository
 
 	IAsyncEnumerable<BrandSubGameProviderInfo> QueryAllSubGameProvidersAsync(Guid brandId);
 
+	IAsyncEnumerable<BrandGameProviderInfo> QueryAllGameProvidersAsync(Guid brandId);
+
 	IAsyncEnumerable<FavoriteGameInfo> QueryPlayerFavoriteGamesAsync(Guid brandId, string playerCode);
 
 	ValueTask RemoveFavoriteGameAsync(string playerCode, int gameId);

@@ -10,11 +10,11 @@ public record GameProviderInfo
 
 	public string Description { get; init; } = default!;
 
-	public Core.Models.Enums.GameType[] GameTypes { get; init; } = default!;
-
 	public bool IsTransferWallet { get; init; }
 
 	public IDictionary<string, JsonDocument>? Localization { get; init; }
+
+	public GameType[] GameTypes { get; init; } = default!;
 
 	public string Name { get; init; } = default!;
 
