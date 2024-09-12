@@ -10,7 +10,7 @@ public record GetGameUrlRequest
 	[Required]
 	[JsonPropertyName("gpcode")]
 	[BindProperty(Name = "gpcode")]
-	public string SubGameProviderCode { get; init; }
+	public string GameProviderCode { get; init; }
 
 	[Required]
 	[JsonPropertyName("gid")]

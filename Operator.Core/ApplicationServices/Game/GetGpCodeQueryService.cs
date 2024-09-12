@@ -15,12 +15,12 @@ internal class GetGpCodeQueryService(
 	public async ValueTask<BrandSubGameProviderInfo> GetAsync(
 		GetGpCodeQuery query,
 		CancellationToken cancellationToken = default)
+
 	{
 		var subGp = await _gameProviderRepository
 			.QueryAllSubGameProvidersAsync(query.BrandId)
-			.Where(bgp => bgp.Code == query.SubGpCode)
-			.FirstOrDefaultAsync(cancellationToken: cancellationToken)
-			.ConfigureAwait(false);
+			.Where(bgp => bgp.GpCode == query.SubGpCode)
+			.FirstOrDefaultAsync(cancellationToken: cancellationToken);
 
 		return subGp ?? throw new ArgumentException(
 			$"No game provider of code '{query.SubGpCode}' is found");

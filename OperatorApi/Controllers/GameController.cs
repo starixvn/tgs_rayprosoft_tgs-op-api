@@ -204,7 +204,7 @@ public class GameController : ControllerBase
 		var brandId = HttpContext.Items.GetBrandId();
 
 		var subGp = await getGpCodeService
-			.GetAsync(new GetGpCodeQuery(brandId, request.SubGameProviderCode))
+			.GetAsync(new GetGpCodeQuery(brandId, request.GameProviderCode))
 			.ConfigureAwait(false);
 
 		await fundInAllService

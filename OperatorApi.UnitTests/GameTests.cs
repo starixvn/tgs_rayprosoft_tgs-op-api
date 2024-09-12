@@ -1144,7 +1144,7 @@ public class GameTests
 
 		var request = new GetGameUrlRequest
 		{
-			SubGameProviderCode = "sub1",
+			GameProviderCode = "sub1",
 			GameId = 10,
 			LanguageCode = "zh-cn"
 		};

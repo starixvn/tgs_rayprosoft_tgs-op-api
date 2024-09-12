@@ -7,7 +7,7 @@ public sealed class GetGameUrlRequestValidator : AbstractValidator<GetGameUrlReq
 {
 	public GetGameUrlRequestValidator()
 	{
-		_ = RuleFor(x => x.SubGameProviderCode)
+		_ = RuleFor(x => x.GameProviderCode)
 			.NotEmpty();
 
 		_ = RuleFor(x => x.LanguageCode)
