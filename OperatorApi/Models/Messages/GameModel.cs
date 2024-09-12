@@ -23,6 +23,9 @@ public record GameModel
 	[JsonPropertyName("gpname")]
 	public string GameProviderName { get; init; }
 
+	[JsonPropertyName("sgpcode")]
+	public string SubGameProviderCode { get; init; }
+
 	[JsonPropertyName("isactive")]
 	public bool IsActive { get; init; }
 

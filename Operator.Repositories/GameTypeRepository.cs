@@ -86,6 +86,7 @@ namespace TGS.Operator.Repositories
 							i.Game.Description),
 						GameProviderCode = i.Game.SubGameProvider.GameProvider.Code,
 						GameProviderName = i.Game.SubGameProvider.GameProvider.Name,
+						SubGameProviderCode = i.Game.SubGameProviderCode,
 						IsActive = isActive,
 						DisplayOrder = i.DisplayOrder,
 						Type = type,

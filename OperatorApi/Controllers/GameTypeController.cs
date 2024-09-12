@@ -78,6 +78,7 @@ namespace TGS.Apis.OperatorApi.Controllers
 						Description = game.Description,
 						GameProviderCode = game.GameProviderCode,
 						GameProviderName = game.GameProviderName,
+						SubGameProviderCode = game.SubGameProviderCode,
 						IsActive = game.IsActive,
 						Type = game.Type,
 						Tag = new Tag
