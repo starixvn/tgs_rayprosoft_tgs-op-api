@@ -431,31 +431,19 @@ public class GameController : ControllerBase
 			{
 				Tag = info.Tag,
 				Limit = query.Limit,
-				Games = info.Games.Select(game =>
+				Games = info.Games.Select(game => new GameModel
 				{
-					var lang = game.Localization.TryGetValue(cultureCode, out var value)
-						? value
-						: JsonDocument.Parse("{}");
-					return new GameModel
-					{
-						Code = game.Code,
-						GameProviderCode = game.GameProviderCode,
-						GameProviderName = game.GameProviderName,
-						SubGameProviderCode = game.SubGameProviderCode,
-						Description = GetLocalization(
-							lang.RootElement,
-							"description",
-							game.Description),
-						DisplayOrder = game.DisplayOrder,
-						Id = game.Id,
-						IsActive = game.IsActive,
-						Name = GetLocalization(
-							lang.RootElement,
-							"name",
-							game.Name),
-						Tag = new Tag { Hot = game.Tag.Hot, New = game.Tag.New, Recommend = game.Tag.Recommend },
-						Type = game.Type
-					};
+					Code = game.Code,
+					GameProviderCode = game.GameProviderCode,
+					GameProviderName = game.GameProviderName,
+					SubGameProviderCode = game.SubGameProviderCode,
+					Description = game.Description,
+					DisplayOrder = game.DisplayOrder,
+					Id = game.Id,
+					IsActive = game.IsActive,
+					Name = game.Name,
+					Tag = new Tag { Hot = game.Tag.Hot, New = game.Tag.New, Recommend = game.Tag.Recommend },
+					Type = game.Type
 				})
 			};
 		}

@@ -10,6 +10,8 @@ using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Extensions;
 using TGS.Services.Operator;
+using TGS.Services.Operator.ApplicationServices.Game;
+using TGS.Services.Operator.ApplicationServices.GameProvider;
 using TGS.Services.Operator.GameProviders;
 
 namespace TGS.Operator.Repositories;
@@ -242,81 +244,42 @@ internal class GameProviderRepository(
 	}
 
 
-	public async Task<IEnumerable<GameTagInfo>> QueryGameByTagsAsync(Guid brandId, GameTag[] tags, GamePlatformType[] gamePlatformTypes, int limit)
+	public async Task<IEnumerable<GameTagInfo>> QueryGameByTagsAsync(GetTopGamesByTagQuery query, GamePlatformType[] gamePlatformTypes)
 	{
 		var providersActivated = new HashSet<Guid>(
 			await _tgsRepository.BrandGameProviders
-			.Where(bp => bp.BrandId == brandId && bp.Status == Status.Active)
+			.Where(bp => bp.BrandId == query.BrandId && bp.Status == Status.Active)
 			.Select(bg => bg.GameProviderId)
 			.ToListAsync()
 		);
 
 		var gamesQuery = _tgsRepository.BrandGames
 			.Include(bg => bg.Game)
-				.ThenInclude(g => g.SubGameProvider)
-					.ThenInclude(sgp => sgp.GameProvider)
-			.Where(bg => bg.BrandId == brandId &&
+			.ThenInclude(g => g.SubGameProvider)
+			.ThenInclude(sgp => sgp.GameProvider)
+			.Where(bg => bg.BrandId == query.BrandId &&
 						 bg.Game.AvailableToBrand &&
 						 providersActivated.Contains(bg.Game.GameProviderId) &&
 						 gamePlatformTypes.Contains(bg.Game.PlatformType) &&
 						 _statuses.Contains(bg.Status) &&
 						 _statuses.Contains(bg.Game.Status))
-			.AsNoTracking()
-			.Select(g => new
-			{
-				g.Game.Id,
-				g.Game.Code,
-				g.Game.Name,
-				g.Game.Description,
-				GameProviderCode = g.Game.SubGameProvider.GameProvider.Code,
-				SubGameProvidercode = g.Game.SubGameProviderCode,
-				GameProviderName = g.Game.SubGameProvider.GameProvider.Name,
-				GameProviderStatus = g.Game.SubGameProvider.GameProvider.Status,
-				g.Status,
-				GameStatus = g.Game.Status,
-				g.DisplayOrder,
-				g.Game.Type,
-				g.Game.Localization,
-				g.Tag
-			});
+			.AsNoTracking();
 
 		var groupedGames = new List<GameTagInfo>();
 
-		foreach (var tag in tags)
+		foreach (var tag in query.Tags)
 		{
 			var games = await gamesQuery
 				.Where(g => (g.Tag & tag) != 0)
 				.OrderBy(g => g.DisplayOrder)
-				.ThenBy(g => g.Code)
-				.Take(limit)
+				.ThenBy(g => g.Game.Code)
+				.Take(query.Limit)
 				.ToListAsync();
 
 			groupedGames.Add(new GameTagInfo
 			{
 				Tag = tag,
-				Games = games.Select(g =>
-				{
-					var gameStatus = GetGameStatus(g.Status, g.GameStatus);
-					var isActive = g.GameProviderStatus == Status.Active && gameStatus == GameStatus.Active;
-
-					return new GameInfo
-					{
-						Id = g.Id,
-						Code = g.Code,
-						Name = g.Name,
-						Description = g.Description,
-						GameProviderCode = g.GameProviderCode,
-						GameProviderName = g.GameProviderName,
-						SubGameProviderCode = g.SubGameProvidercode,
-						IsActive = isActive,
-						DisplayOrder = g.DisplayOrder,
-						Type = g.Type,
-						Localization = string.IsNullOrEmpty(g.Localization)
-							? new Dictionary<string, JsonDocument>()
-							: JsonSerializer.Deserialize<Dictionary<string, JsonDocument>>(g.Localization),
-						Tag = new TagInfo { New = g.Tag.IsNew(), Hot = g.Tag.IsHot(), Recommend = g.Tag.IsRecommend() }
-					};
-				})
+				Games = games.Select(g => MapGameInfo(g, query.CultureCode))
 				.OrderByDescending(g => g.IsActive)
 				.ThenBy(g => g.DisplayOrder)
 			});
@@ -326,6 +289,79 @@ internal class GameProviderRepository(
 	}
 
 
+	public async Task<IEnumerable<ProviderGameListInfo>> QueryGamesByProviderAsync(GetGamesByProviderQuery query, GamePlatformType[] gamePlatformTypes)
+	{
+		var groupedGames = _tgsRepository.BrandGames
+			.Include(bg => bg.Game)
+			.ThenInclude(g => g.SubGameProvider)
+			.ThenInclude(sgp => sgp.GameProvider)
+			.Where(bg => bg.BrandId == query.BrandId &&
+						 bg.Game.AvailableToBrand &&
+						 gamePlatformTypes.Contains(bg.Game.PlatformType) &&
+						 query.ProviderCodes.Contains(bg.Game.SubGameProvider.GameProvider.Code) &&
+						 _statuses.Contains(bg.Status) &&
+						 _statuses.Contains(bg.Game.Status))
+			.AsNoTracking()
+			.GroupBy(bg => bg.Game.SubGameProvider.GameProvider.Code);
+
+		var paginatedResults = await groupedGames
+			.Select(g => new
+			{
+				ProviderCode = g.Key,
+				total = g.Count(),
+				Games = g
+					.OrderBy(bg => bg.DisplayOrder)
+					.ThenBy(bg => bg.Game.Code)
+					.Skip((query.PageIndex - 1) * query.PageSize)
+					.Take(query.PageSize).ToList()
+			}).ToListAsync();
+
+		return paginatedResults.Select(p => new ProviderGameListInfo
+		{
+			ProviderCode = p.ProviderCode,
+			Total = p.total,
+			Games = p.Games.Select(g => MapGameInfo(g, query.cultureCode)).OrderByDescending(g => g.IsActive).ThenBy(g => g.DisplayOrder)
+		});
+	}
+
+
+	private static GameInfo MapGameInfo(BrandGame info, string cultureCode)
+	{
+		var gameStatus = GetGameStatus(info.Status, info.Game.Status);
+		var isActive = info.Game.SubGameProvider.GameProvider.Status == Status.Active && gameStatus == GameStatus.Active;
+		var lang = DeserializeLocalization(info.Game.Localization).TryGetValue(cultureCode, out var value) ? value : JsonDocument.Parse("{}");
+
+		return new GameInfo
+		{
+			Id = info.GameId,
+			Code = info.Game.Code,
+			Name = GetLocalization(lang.RootElement, "name", info.Game.Name),
+			Description = GetLocalization(lang.RootElement, "description", info.Game.Description),
+			GameProviderCode = info.Game.SubGameProvider.GameProvider.Code,
+			GameProviderName = info.Game.SubGameProvider.GameProvider.Name,
+			SubGameProviderCode = info.Game.SubGameProvider.Code,
+			IsActive = isActive,
+			DisplayOrder = info.DisplayOrder,
+			Type = info.Game.Type,
+			Tag = new TagInfo { New = info.Tag.IsNew(), Hot = info.Tag.IsHot(), Recommend = info.Tag.IsRecommend() }
+		};
+	}
+
+	private static IDictionary<string, JsonDocument> DeserializeLocalization(string localization)
+	{
+		return (string.IsNullOrEmpty(localization) ? new Dictionary<string, JsonDocument>() : JsonSerializer.Deserialize<Dictionary<string, JsonDocument>>(localization))!;
+	}
+
+	private static string GetLocalization(JsonElement element, string propertyName, string defaultValue)
+	{
+		if (!element.TryGetProperty(propertyName, out var value))
+		{
+			return defaultValue;
+		}
+
+		var val = value.GetString();
+		return string.IsNullOrEmpty(val) ? defaultValue : val;
+	}
 
 	private static GameStatus GetGameStatus(GameStatus brandGameStatus, GameStatus gameStatus)
 		=> brandGameStatus == GameStatus.Inactive || gameStatus == GameStatus.Inactive

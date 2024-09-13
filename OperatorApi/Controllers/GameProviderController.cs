@@ -115,6 +115,56 @@ public class GameProviderController : ControllerBase
 		}
 	}
 
+	[HttpGet("games")]
+	[AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = false)]
+	public async IAsyncEnumerable<ProviderGameListModel> GetGamesByProvidersAsync(
+		[FromServices] IGetService<GetGamesByProviderQuery, IEnumerable<ProviderGameListInfo>> getGameProviderQueryService,
+		[FromQuery] GetGamesByProviderRequest request)
+	{
+		var brandId = HttpContext.Items.GetBrandId();
+		var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+
+		var currentCultureInfo = CultureInfo.CurrentUICulture;
+		var cultureCode = currentCultureInfo.Name;
+
+		var query = new GetGamesByProviderQuery(
+			brandId,
+			request.CurrencyCode,
+			cultureCode,
+			playerTokenData,
+			request.PlatformType,
+			request.PageSize,
+			request.PageIndex,
+			request.ProviderCodes,
+			request.OrderBy);
+
+		var infos = await getGameProviderQueryService.GetAsync(query).ConfigureAwait(false);
+
+		foreach (var info in infos)
+		{
+			yield return new ProviderGameListModel()
+			{
+				ProviderCode = info.ProviderCode,
+				Total = info.Total,
+				PageIndex = query.PageIndex,
+				Games = info.Games.Select(game => new GameModel
+				{
+					Code = game.Code,
+					GameProviderCode = game.GameProviderCode,
+					GameProviderName = game.GameProviderName,
+					SubGameProviderCode = game.SubGameProviderCode,
+					Description = game.Description,
+					DisplayOrder = game.DisplayOrder,
+					Id = game.Id,
+					IsActive = game.IsActive,
+					Name = game.Name,
+					Tag = new Tag { Hot = game.Tag.Hot, New = game.Tag.New, Recommend = game.Tag.Recommend },
+					Type = game.Type
+				})
+			};
+		}
+	}
+
 	[HttpGet("maintain", Name = "GetMaintainGameProviders")]
 	public IAsyncEnumerable<GameProviderStatusModel> GetMaintainGameProvidersAsync(
 		[FromServices] IQueryService<GetNotActiveGameProvidersQuery, GameProviderStatus> queryService)

@@ -34,7 +34,7 @@ public class GetTopGamesByTagQueryService(IGameProviderRepository gameProviderRe
 	{
 		var gamePlatformTypes = query.PlatformType.ToGamePlatformTypes();
 
-		var gamesByTag = await _gameProviderRepository.QueryGameByTagsAsync(query.BrandId, query.Tags, gamePlatformTypes, query.Limit);
+		var gamesByTag = await _gameProviderRepository.QueryGameByTagsAsync(query, gamePlatformTypes);
 
 		return gamesByTag;
 	}

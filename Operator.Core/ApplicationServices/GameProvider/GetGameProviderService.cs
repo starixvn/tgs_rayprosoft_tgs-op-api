@@ -6,18 +6,14 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Tgs.ServiceUtility;
-using TGS.Services.Operations;
 using TGS.Services.Operator.GameProviders;
 
 namespace TGS.Services.Operator.ApplicationServices.GameProvider;
 internal class GetGameProvidersService(
-	IPlayerOperations playerOperations,
 	IGameProviderRepository gameProviderRepository) : IGetService<GetGameProvidersQuery, IEnumerable<GameProviderInfo>>
 {
 	private readonly IGameProviderRepository _gameProviderRepository =
 		gameProviderRepository ?? throw new ArgumentNullException(nameof(gameProviderRepository));
-
-	private readonly IPlayerOperations _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
 
 	public async ValueTask<IEnumerable<GameProviderInfo>> GetAsync(
 		GetGameProvidersQuery query,

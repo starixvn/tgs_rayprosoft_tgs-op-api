@@ -10,5 +10,5 @@ public record GetGameTypesQuery(
 	string CultureCode,
 	int PageSize,
 	int PageIndex,
-	Core.Models.Enums.GameType[] Types,
+	GameType[] Types,
 	GameTag Tag);
