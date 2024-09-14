@@ -1,5 +1,6 @@
 ﻿using System.Globalization;
 using System.Net.Mime;
+using System.Text;
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Tgs.ServiceUtility;
@@ -225,7 +226,7 @@ public class GameController : ControllerBase
 				brandId,
 				playerType,
 				platformType,
-				[]);
+				[GameType.Sportsbook, GameType.ESports, GameType.TableGame]);
 
 		var games = from info in queryAllGameService.QueryAsync(query)
 					let lang = info.Localization.TryGetValue(cultureCode, out var value)
@@ -240,15 +241,34 @@ public class GameController : ControllerBase
 						GameType = info.Type,
 						GameProviderCode = info.GameProviderCode,
 						CreateTime = DateTime.UtcNow,
-						CurrencyName = "CurrencyName",
-						PlayerName = "PlayerName",
-						PlayerCode = "PlayerCode",
+						CurrencyName = "",
+						PlayerName = RandomString(5),
+						PlayerCode = "",
 						PlayerVipLevel = 0,
-						WinAmount = new Random().Next(1, 99999)
+						WinAmount = new Random().Next(99999, 99999999)
 					};
 
-		await foreach (var game in games)
+		await foreach (var game in games.Take(50))
 			yield return game;
+	}
+
+	/// <summary>
+	/// random player name for test fake data recent big wins
+	/// </summary>
+	private string RandomString(int size, bool lowerCase = false)
+	{
+		var builder = new StringBuilder(size);
+		var _random = new Random();
+		char offset = lowerCase ? 'a' : 'A';
+		const int lettersOffset = 26; // A...Z or a..z: length=26
+
+		for (var i = 0; i < size; i++)
+		{
+			var @char = (char)_random.Next(offset, offset + lettersOffset);
+			builder.Append(@char);
+		}
+
+		return lowerCase ? builder.ToString().ToLower() : builder.ToString();
 	}
 
 	/// <summary>
