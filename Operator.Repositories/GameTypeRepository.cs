@@ -20,18 +20,21 @@ namespace TGS.Operator.Repositories
 		private readonly ITgsRepository _tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
 
 		private readonly GameStatus[] _statuses = { GameStatus.Active, GameStatus.Maintenance, GameStatus.Testing };
+
 		public async Task<IEnumerable<GameTypeModel>> QueryGameByGameTypesAsync(GetGameTypesQuery query, GamePlatformType[] platformTypes)
 		{
 			var providersActivated = _tgsRepository.BrandGameProviders
-				.Where(bp => bp.BrandId == query.BrandId && bp.Status == Status.Active).Select(bg => bg.GameProviderId).ToList();
+				.Where(bp => bp.BrandId == query.BrandId && bp.Status == Status.Active)
+				.Where(bp => query.ProviderCode.IsNullOrEmpty() || query.ProviderCode.Contains(bp.GameProvider.Code))
+				.Select(bg => bg.GameProviderId).ToList();
 
 			var groupedGames = _tgsRepository.BrandGames
 				.Include(bg => bg.Game)
 					.ThenInclude(g => g.SubGameProvider)
 					.ThenInclude(sgp => sgp.GameProvider)
 				.Where(bg => bg.BrandId == query.BrandId &&
-							 providersActivated.Contains(bg.Game.GameProviderId) &&
 							 bg.Game.AvailableToBrand &&
+							 providersActivated.Contains(bg.Game.GameProviderId) &&
 							 platformTypes.Contains(bg.Game.PlatformType) &&
 							 _statuses.Contains(bg.Status) &&
 							 _statuses.Contains(bg.Game.Status) &&
@@ -45,17 +48,26 @@ namespace TGS.Operator.Repositories
 				{
 					GameType = g.Key,
 					total = g.Count(),
-					Games = g
-						.OrderBy(bg => bg.DisplayOrder)
-						.ThenBy(bg => bg.Game.Code)
-						.Skip((query.PageIndex - 1) * query.PageSize)
-						.Take(query.PageSize).ToList()
-				})
-				.ToListAsync();
+					Games = OrderBy(g.ToList(), query.OrderType, query.PageIndex, query.PageSize)
 
+				}).ToListAsync();
 
 			return paginatedResults.Select(info => MapCategory(info.GameType, info.total, info.Games, query.CultureCode));
 
+		}
+
+		private static IEnumerable<BrandGame> OrderBy(IEnumerable<BrandGame> query, OrderType? orderType, int pageIndex, int pageSize)
+		{
+			var orderedList = orderType switch
+			{
+				OrderType.Hot => query.OrderBy(g => g.Tag & GameTag.Hot).ThenBy(g => g.DisplayOrder),
+				OrderType.Ascending => query.OrderBy(g => g.Game.Name),
+				OrderType.Descending => query.OrderByDescending(g => g.Game.Name),
+				OrderType.New => query.OrderBy(g => g.Tag & GameTag.New).ThenBy(g => g.DisplayOrder),
+				_ => query.OrderBy(g => g.DisplayOrder).ThenBy(g => g.Game.Name),
+			};
+
+			return orderedList.Skip((pageIndex - 1) * pageSize).Take(pageSize);
 		}
 		private GameTypeModel MapCategory(GameType type, int total, IEnumerable<BrandGame> games, string cultureCode)
 		{

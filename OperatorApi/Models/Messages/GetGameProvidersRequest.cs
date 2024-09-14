@@ -17,4 +17,6 @@ public record GetGameProvidersRequest
 	[Required]
 	[BindProperty(Name = "currency", SupportsGet = true)]
 	public string CurrencyCode { get; init; }
+
+	public GameType? GameType { get; init; }
 }

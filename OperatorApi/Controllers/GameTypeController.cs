@@ -56,8 +56,10 @@ namespace TGS.Apis.OperatorApi.Controllers
 				cultureCode,
 				request.PageSize,
 				request.PageIndex,
+				request.ProviderCode,
 				request.GameTypes,
-				request.Tag);
+				request.Tag,
+				request.OrderType);
 
 			var gameTypes = await queryAllGameService.GetAsync(query);
 

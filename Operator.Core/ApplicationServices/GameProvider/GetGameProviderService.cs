@@ -21,17 +21,6 @@ internal class GetGameProvidersService(
 	{
 		var brandId = query.BrandId;
 
-		var playerTokenData = query.PlayerTokenData;
-		var platformType = query.PlatformType;
-
-		if (playerTokenData != null)
-		{
-			if (playerTokenData.PlatformType != platformType)
-			{
-				throw new InvalidOperationException("request platform is not matched with player login platform.");
-			}
-		}
-
 		var brandGps = _gameProviderRepository.QueryAllGameProvidersAsync(brandId);
 
 		return await brandGps.Select(gp => new GameProviderInfo

@@ -216,7 +216,6 @@ internal class GameProviderRepository(
 					info.Localization);
 			});
 	}
-
 	public IAsyncEnumerable<FavoriteGameInfo> QueryPlayerFavoriteGamesAsync(Guid brandId, string playerCode)
 	{
 		var query = from fg in _tgsRepository.PlayerFavoriteGames.AsQueryable()

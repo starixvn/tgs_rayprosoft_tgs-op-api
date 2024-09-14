@@ -10,5 +10,7 @@ public record GetGameTypesQuery(
 	string CultureCode,
 	int PageSize,
 	int PageIndex,
+	string[] ProviderCode,
 	GameType[] Types,
-	GameTag Tag);
+	GameTag Tag,
+	OrderType? OrderType);
