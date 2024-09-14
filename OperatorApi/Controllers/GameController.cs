@@ -188,6 +188,70 @@ public class GameController : ControllerBase
 	}
 
 	/// <summary>
+	/// get recent big wins
+	/// </summary>
+	[HttpGet("rencent-big-wins")]
+	[AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = false)]
+	public async IAsyncEnumerable<RecentBigWinModel> GetRecentBigWinsAsync(
+		[FromServices] IBrandLanguageCodeMapper brandLanguageCodeMapper,
+		[FromServices] IQueryService<GetGamesQuery, GameInfo> getGamesQueryService,
+		[FromServices] IQueryService<GetAllGamesByGameTypeQuery, GameInfo> queryAllGameService,
+		[FromServices] IPlayerOperations playerOperations,
+		[FromQuery] GetRecentBigWinRequest request)
+	{
+		var brandId = HttpContext.Items.GetBrandId();
+		var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+
+		var currentCultureInfo = CultureInfo.CurrentUICulture;
+
+		var cultureCode = await brandLanguageCodeMapper
+			.ExternalToInternalAsync(currentCultureInfo.Name, brandId)
+			.ConfigureAwait(false);
+
+		var playerType = PlayerType.RealPlayer;
+		var platformType = request.PlatformType;
+
+		if (playerTokenData != null)
+		{
+			var cachedPlayer = await playerOperations
+				.GetCachedPlayerAsync(playerTokenData.PlayerCode)
+				.ConfigureAwait(false);
+
+			playerType = cachedPlayer.Type;
+			platformType = playerTokenData.PlatformType;
+		}
+
+		var query = new GetAllGamesByGameTypeQuery(
+				brandId,
+				playerType,
+				platformType,
+				[]);
+
+		var games = from info in queryAllGameService.QueryAsync(query)
+					let lang = info.Localization.TryGetValue(cultureCode, out var value)
+						? value
+						: JsonDocument.Parse("{}")
+					orderby info.DisplayOrder, info.Code
+					select new RecentBigWinModel
+					{
+						GameId = info.Id,
+						GameName = info.Name,
+						GameCode = info.Code,
+						GameType = info.Type,
+						GameProviderCode = info.GameProviderCode,
+						CreateTime = DateTime.UtcNow,
+						CurrencyName = "CurrencyName",
+						PlayerName = "PlayerName",
+						PlayerCode = "PlayerCode",
+						PlayerVipLevel = 0,
+						WinAmount = new Random().Next(1, 99999)
+					};
+
+		await foreach (var game in games)
+			yield return game;
+	}
+
+	/// <summary>
 	/// get game launch url via game id
 	/// </summary>
 	[HttpPost("geturl")]

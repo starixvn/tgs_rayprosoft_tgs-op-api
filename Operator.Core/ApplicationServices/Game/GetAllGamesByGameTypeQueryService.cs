@@ -45,7 +45,7 @@ internal class GetAllGamesByGameTypeQueryService(
 						g.Code,
 						g.Name,
 						g.Description,
-						GameProviderCode = g.SubGpCode,
+						GameProviderCode = g.GpCode,
 						g.Type,
 						IsActive = isActive,
 						g.Tag,
