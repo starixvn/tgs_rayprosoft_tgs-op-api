@@ -15,6 +15,7 @@ using TGS.Services.Operations.CodeMappers;
 using TGS.Services.Operator;
 using TGS.Services.Operator.ApplicationServices.Game;
 using TGS.Services.Operator.ApplicationServices.GameBalance;
+using TGS.Services.Operator.ApplicationServices.GameTypes;
 
 namespace TGS.Apis.OperatorApi.Controllers;
 
@@ -195,20 +196,14 @@ public class GameController(IConfiguration configuration) : ControllerBase
 	[HttpGet("rencent-big-wins")]
 	[AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = false)]
 	public async IAsyncEnumerable<RecentBigWinModel> GetRecentBigWinsAsync(
-		[FromServices] IBrandLanguageCodeMapper brandLanguageCodeMapper,
-		[FromServices] IQueryService<GetGamesQuery, GameInfo> getGamesQueryService,
-		[FromServices] IQueryService<GetAllGamesByGameTypeQuery, GameInfo> queryAllGameService,
-		[FromServices] IPlayerOperations playerOperations,
+			[FromServices] IBrandLanguageCodeMapper brandLanguageCodeMapper,
+			[FromServices] IGetService<GetGameTypesQuery,
+				IEnumerable<GameTypeModel>> queryAllGameService,
+			[FromServices] IPlayerOperations playerOperations,
 		[FromQuery] GetRecentBigWinRequest request)
 	{
 		var brandId = HttpContext.Items.GetBrandId();
 		var playerTokenData = HttpContext.Items.GetPlayerTokenData();
-
-		var currentCultureInfo = CultureInfo.CurrentUICulture;
-
-		var cultureCode = await brandLanguageCodeMapper
-			.ExternalToInternalAsync(currentCultureInfo.Name, brandId)
-			.ConfigureAwait(false);
 
 		var playerType = PlayerType.RealPlayer;
 		var platformType = request.PlatformType;
@@ -223,34 +218,46 @@ public class GameController(IConfiguration configuration) : ControllerBase
 			platformType = playerTokenData.PlatformType;
 		}
 
-		var query = new GetAllGamesByGameTypeQuery(
-				brandId,
-				playerType,
-				platformType,
-				[GameType.Sportsbook, GameType.ESports, GameType.TableGame]);
+		var currentCultureInfo = CultureInfo.CurrentUICulture;
 
-		var games = from info in queryAllGameService.QueryAsync(query)
-					let lang = info.Localization.TryGetValue(cultureCode, out var value)
-						? value
-						: JsonDocument.Parse("{}")
-					orderby info.DisplayOrder, info.Code
-					select new RecentBigWinModel
-					{
-						GameId = info.Id,
-						GameName = info.Name,
-						GameCode = info.Code,
-						GameType = info.Type,
-						GameProviderCode = info.GameProviderCode,
-						CreateTime = DateTime.UtcNow,
-						CurrencyName = "",
-						PlayerName = RandomString(5),
-						PlayerCode = "",
-						PlayerVipLevel = 0,
-						WinAmount = new Random().Next(99999, 99999999)
-					};
+		var cultureCode = await brandLanguageCodeMapper
+			.ExternalToInternalAsync(currentCultureInfo.Name, brandId)
+			.ConfigureAwait(false);
 
-		await foreach (var game in games.Take(50))
-			yield return game;
+		var query = new GetGameTypesQuery(
+			brandId,
+			playerType,
+			platformType,
+			cultureCode,
+			50,
+			1,
+			[],
+			[GameType.Sportsbook, GameType.ESports, GameType.TableGame],
+			GameTag.Recommend,
+			0);
+
+		var gameTypes = await queryAllGameService.GetAsync(query);
+
+		foreach (var gameType in gameTypes)
+		{
+			foreach (var game in gameType.Games)
+			{
+				yield return new RecentBigWinModel
+				{
+					GameId = game.Id,
+					GameName = game.Name,
+					GameCode = game.Code,
+					GameType = game.Type,
+					GameProviderCode = game.GameProviderCode,
+					CreateTime = DateTime.UtcNow,
+					CurrencyName = "",
+					PlayerName = RandomString(5),
+					PlayerCode = "",
+					PlayerVipLevel = 0,
+					WinAmount = new Random().Next(99999, 99999999)
+				};
+			}
+		}
 	}
 
 	/// <summary>
