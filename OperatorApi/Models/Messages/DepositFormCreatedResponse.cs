@@ -11,6 +11,6 @@ public class DepositFormCreatedResponse
 	public string PaymentUrl { get; init; }
 
 	[JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-	[JsonPropertyName("paymenturl")]
+	[JsonPropertyName("expirationtime")]
 	public double? ExpirationTime { get; set; }
 }
