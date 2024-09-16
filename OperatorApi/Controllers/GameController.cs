@@ -8,6 +8,7 @@ using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models;
 using TGS.Apis.OperatorApi.Models.Messages;
+using TGS.Apis.OperatorApi.Utils;
 using TGS.Core.Models.Enums;
 using TGS.Services.Operations;
 using TGS.Services.Operations.CodeMappers;
@@ -284,12 +285,7 @@ public class GameController : ControllerBase
 	{
 		var playerTokenData = HttpContext.Items.GetPlayerTokenData();
 		var brandId = HttpContext.Items.GetBrandId();
-
-		var subGp = await getGpCodeService
-			.GetAsync(new GetGpCodeQuery(brandId, request.GameProviderCode))
-			.ConfigureAwait(false);
-
-		var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? string.Empty;
+		var ipAddress = IPUtils.GetRequestIP(HttpContext) ?? string.Empty;
 
 		var query = new GetGameUrlQuery(
 			brandId,
