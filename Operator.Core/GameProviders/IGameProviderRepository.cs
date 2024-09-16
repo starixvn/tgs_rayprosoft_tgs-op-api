@@ -4,7 +4,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using TGS.Core.Models.Enums;
 using TGS.Services.Operator.ApplicationServices.Game;
-using TGS.Services.Operator.ApplicationServices.GameProvider;
 
 namespace TGS.Services.Operator.GameProviders;
 
@@ -21,8 +20,6 @@ public interface IGameProviderRepository
 	IAsyncEnumerable<BrandSubGameProviderInfo> QueryAllSubGameProvidersAsync(Guid brandId);
 
 	IAsyncEnumerable<BrandGameProviderInfo> QueryAllGameProvidersAsync(Guid brandId);
-
-	Task<IEnumerable<ProviderGameListInfo>> QueryGamesByProviderAsync(GetGamesByProviderQuery query, GamePlatformType[] gamePlatformTypes);
 
 	IAsyncEnumerable<FavoriteGameInfo> QueryPlayerFavoriteGamesAsync(Guid brandId, string playerCode);
 

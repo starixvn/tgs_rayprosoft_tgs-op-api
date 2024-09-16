@@ -16,7 +16,7 @@ public class GetGameTypesQueryService(IGameTypeRepository categoryRepository, IM
 
 	public async ValueTask<IEnumerable<GameTypeModel>> GetAsync(GetGameTypesQuery query, CancellationToken cancellationToken = default)
 	{
-		var hashKey = HashCode.Combine(query.BrandId, query.PlatformType, query.PageSize, query.PageIndex, query.Types, query.Tag, query.OrderType, string.Join(",", query.ProviderCode));
+		var hashKey = HashCode.Combine(query.BrandId, query.PlatformType, query.PageSize, query.PageIndex, string.Join(',', query.Types), query.Tag, query.OrderType, string.Join(",", query.ProviderCode));
 		var categories = await _memoryCache.GetOrCreateAsync(
 			$"{query.BrandId}_GetGameType_{hashKey}",
 			() => GetGameTypeAsync(query, cancellationToken),

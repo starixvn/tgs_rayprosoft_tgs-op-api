@@ -11,7 +11,6 @@ using TGS.Core.Models.Enums;
 using TGS.Core.Models.Extensions;
 using TGS.Services.Operator;
 using TGS.Services.Operator.ApplicationServices.Game;
-using TGS.Services.Operator.ApplicationServices.GameProvider;
 using TGS.Services.Operator.GameProviders;
 
 namespace TGS.Operator.Repositories;
@@ -286,43 +285,6 @@ internal class GameProviderRepository(
 
 		return groupedGames;
 	}
-
-
-	public async Task<IEnumerable<ProviderGameListInfo>> QueryGamesByProviderAsync(GetGamesByProviderQuery query, GamePlatformType[] gamePlatformTypes)
-	{
-		var groupedGames = _tgsRepository.BrandGames
-			.Include(bg => bg.Game)
-			.ThenInclude(g => g.SubGameProvider)
-			.ThenInclude(sgp => sgp.GameProvider)
-			.Where(bg => bg.BrandId == query.BrandId &&
-						 bg.Game.AvailableToBrand &&
-						 gamePlatformTypes.Contains(bg.Game.PlatformType) &&
-						 query.ProviderCodes.Contains(bg.Game.SubGameProvider.GameProvider.Code) &&
-						 _statuses.Contains(bg.Status) &&
-						 _statuses.Contains(bg.Game.Status))
-			.AsNoTracking()
-			.GroupBy(bg => bg.Game.SubGameProvider.GameProvider.Code);
-
-		var paginatedResults = await groupedGames
-			.Select(g => new
-			{
-				ProviderCode = g.Key,
-				total = g.Count(),
-				Games = g
-					.OrderBy(bg => bg.DisplayOrder)
-					.ThenBy(bg => bg.Game.Code)
-					.Skip((query.PageIndex - 1) * query.PageSize)
-					.Take(query.PageSize).ToList()
-			}).ToListAsync();
-
-		return paginatedResults.Select(p => new ProviderGameListInfo
-		{
-			ProviderCode = p.ProviderCode,
-			Total = p.total,
-			Games = p.Games.Select(g => MapGameInfo(g, query.cultureCode)).OrderByDescending(g => g.IsActive).ThenBy(g => g.DisplayOrder)
-		});
-	}
-
 
 	private static GameInfo MapGameInfo(BrandGame info, string cultureCode)
 	{
