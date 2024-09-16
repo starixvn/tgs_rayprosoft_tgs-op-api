@@ -1,20 +1,17 @@
 ﻿using System.Net;
-using System.Net.Http;
 using System.Net.Sockets;
 using System.Reflection;
 using System.Text.Json;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Apis.OperatorApi.Utils;
 
 namespace TGS.Apis.OperatorApi.Controllers;
 
-
 [Route("api/[controller]")]
 [ApiController]
 [AllowAnonymous]
-public class InfoController(IConfiguration configuration) :ControllerBase
+public class InfoController(IConfiguration configuration) : ControllerBase
 {
 	[HttpGet]
 	public async Task<IActionResult> Index([FromServices] IWebHostEnvironment _hostingEnvironment)
@@ -39,6 +36,19 @@ public class InfoController(IConfiguration configuration) :ControllerBase
 			XForwardFor = IPUtils.GetHeaderValueAs<string>(HttpContext, "X-Forwarded-For"),
 			RemoteAddress = IPUtils.GetHeaderValueAs<string>(HttpContext, "REMOTE_ADDR"),
 			DotNetRemoteIpAddress = HttpContext.Connection?.RemoteIpAddress?.ToString() ?? string.Empty,
+			RequestHeader = GetAllRequestHeaders()
 		}));
+	}
+
+	private string GetAllRequestHeaders()
+	{
+		string headerOutput = "";
+
+		foreach (var header in HttpContext.Request.Headers)
+		{
+			headerOutput += $"{header.Key}: {header.Value} |";
+		}
+
+		return headerOutput;
 	}
 }
