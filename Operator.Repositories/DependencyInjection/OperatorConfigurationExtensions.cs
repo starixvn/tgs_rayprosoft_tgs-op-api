@@ -4,6 +4,7 @@ using System;
 using StackExchange.Redis;
 using TGS.Operator.Repositories;
 using TGS.Services.Operator;
+using TGS.Services.Operator.ApplicationServices.MemoryCache;
 using TGS.Services.Operator.Configuration;
 
 namespace Microsoft.Extensions.DependencyInjection;
@@ -36,6 +37,7 @@ public static class OperatorConfigurationExtensions
 			.AddVipLevelRepository<VipLevelRepository>()
 			.AddAgentRepository<AgentRepository>()
 			.AddPlayerLoginRecordRepository<PlayerLoginRecordRepository>()
-			.AddPlayerAgentRepository<PlayerAgentRepository>();
+			.AddPlayerAgentRepository<PlayerAgentRepository>()
+			.AddMemoryCacheService<MemoryCacheService>();
 	}
 }

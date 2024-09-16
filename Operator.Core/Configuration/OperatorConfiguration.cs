@@ -4,6 +4,7 @@ using StackExchange.Redis;
 using Tgs.CashService.Client;
 using TGS.Core.Infrastructures.Mail;
 using TGS.Core.Infrastructures.Redis;
+using TGS.Services.Operator.ApplicationServices.MemoryCache;
 using TGS.Services.Operator.GameProviders;
 using TGS.Services.Operator.StationLetters;
 
@@ -164,6 +165,14 @@ public class OperatorConfiguration(IServiceCollection services)
 	{
 		_ = Services.AddTransient<IPlayerAgentRepository, T>()
 			.Decorate<IPlayerAgentRepository, MemoryCachedPlayerAgentRepository>();
+
+		return this;
+	}
+
+	public OperatorConfiguration AddMemoryCacheService<TMemoryCacheService>()
+		where TMemoryCacheService : class, IMemoryCacheService
+	{
+		_ = Services.AddTransient<IMemoryCacheService, TMemoryCacheService>();
 
 		return this;
 	}
