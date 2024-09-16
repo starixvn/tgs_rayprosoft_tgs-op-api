@@ -31,7 +31,7 @@ public class SpeedPayCommandBuilder : IDepositFormCommandBuilder
 			applyInfo,
 			SpeedPayUtility.SerializerOptions);
 
-		var response = new DepositApplyResponse(info.Response.RedirectUrl.ToString(), info.Response.ThirdPartyOrderNo)
+		var response = new DepositApplyResponse(info.Response.ThirdPartyOrderNo, info.Response.RedirectUrl.ToString())
 		{
 			ExpirationTime = info.Settings.ExpirationTime
 		};
