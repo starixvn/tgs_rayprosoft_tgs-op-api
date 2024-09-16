@@ -10,4 +10,4 @@ public record DepositRequestInfo(
 	decimal Amount,
 	Guid? PromotionId,
 	#nullable enable
-	IPAddress? PlayerIp);
+	string? PlayerIp);

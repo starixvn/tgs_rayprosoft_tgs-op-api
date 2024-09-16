@@ -7,6 +7,7 @@ using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models.Deposit;
 using TGS.Apis.OperatorApi.Models.Messages;
+using TGS.Apis.OperatorApi.Utils;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models.Messages;
 using TGS.Services.Operator;
@@ -217,7 +218,7 @@ public class DepositController : ControllerBase
 			brandPayment,
 			request.Amount,
 			request.PromotionId,
-			HttpContext.Connection.RemoteIpAddress);
+			IPUtils.GetRequestIP(HttpContext));
 
 		var command = await builder.BuildDepositCommandAsync(
 			paymentCode,

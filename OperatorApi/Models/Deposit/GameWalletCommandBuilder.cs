@@ -28,7 +28,7 @@ public class GameWalletCommandBuilder : IDepositFormCommandBuilder
 					SuccessUrl: "https://dictionary.cambridge.org/vi/dictionary/english/successful",
 					FailUrl: "https://dictionary.cambridge.org/vi/dictionary/english/fail",
 					Language: brandPaymentInfo.RootElement.GetProperty("language").GetString(),
-					ClientIP: brandPaymentInfo.RootElement.GetProperty("PlayerIp").GetString(),
+					ClientIP: requestInfo.PlayerIp,
 					Method: brandPaymentInfo.RootElement.GetProperty("method").GetString(),
 					ExpirationTime: brandPaymentInfo.RootElement.GetProperty("expirationTime").GetDouble()),
 				GameWalletUtility.SerializerOptions));

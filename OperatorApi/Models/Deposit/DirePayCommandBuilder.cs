@@ -51,7 +51,7 @@ public class DirePayCommandBuilder(IPlayerServiceClient playerServiceClient)
 			DirePayUtility.SerializerOptions);
 
 		return ValueTask.FromResult(new DepositApplyResponse(
-			ThirdPartyOrderNo: info.Response.FormId.ToString(),
+			thirdPartyOrderNo: info.Response.FormId.ToString(),
 			info.Response.RedirectUrl.ToString()));
 	}
 
