@@ -1,8 +1,10 @@
 ﻿using System.Net;
+using System.Net.Http;
 using System.Net.Sockets;
 using System.Reflection;
 using System.Text.Json;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Apis.OperatorApi.Utils;
 
@@ -33,7 +35,10 @@ public class InfoController(IConfiguration configuration) :ControllerBase
 			ProcessCount = Environment.ProcessorCount,
 			ReleaseNamespace = configuration.GetValue<string>("RELEASE_NAMESPACE"),
 			PodIPAddress = configuration.GetValue<string>("POD_IP"),
-			PlayerIp = IPUtils.GetRequestIP(HttpContext)
+			PlayerIp = IPUtils.GetRequestIP(HttpContext),
+			XForwardFor = IPUtils.GetHeaderValueAs<string>(HttpContext, "X-Forwarded-For"),
+			RemoteAddress = IPUtils.GetHeaderValueAs<string>(HttpContext, "REMOTE_ADDR"),
+			DotNetRemoteIpAddress = HttpContext.Connection?.RemoteIpAddress?.ToString() ?? string.Empty,
 		}));
 	}
 }
