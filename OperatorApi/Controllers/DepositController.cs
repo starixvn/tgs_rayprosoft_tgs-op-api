@@ -253,7 +253,8 @@ public class DepositController : ControllerBase
 		return new DepositFormCreatedResponse
 		{
 			FormId = createdFormId,
-			PaymentUrl = applyResponse.PaymentUrl
+			PaymentUrl = applyResponse.PaymentUrl,
+			ExpirationTime = applyResponse.ExpirationTime
 		};
 	}
 

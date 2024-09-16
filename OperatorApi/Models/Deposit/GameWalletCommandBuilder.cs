@@ -1,6 +1,5 @@
 ﻿using System.Text.Json;
 using Payment.GameWallet.Client;
-using Tgs.Payment.U2Pay.Client;
 using TGS.Services.Operator.ApplicationServices.Deposit;
 
 namespace TGS.Apis.OperatorApi.Models.Deposit;
@@ -30,19 +29,24 @@ public class GameWalletCommandBuilder : IDepositFormCommandBuilder
 					FailUrl: "https://dictionary.cambridge.org/vi/dictionary/english/fail",
 					Language: brandPaymentInfo.RootElement.GetProperty("language").GetString(),
 					ClientIP: brandPaymentInfo.RootElement.GetProperty("PlayerIp").GetString(),
-					Method: brandPaymentInfo.RootElement.GetProperty("method").GetString()),
+					Method: brandPaymentInfo.RootElement.GetProperty("method").GetString(),
+					ExpirationTime: brandPaymentInfo.RootElement.GetProperty("expirationTime").GetDouble()),
 				GameWalletUtility.SerializerOptions));
 
 		return ValueTask.FromResult(command);
 	}
 	public ValueTask<DepositApplyResponse> ReadApplyInfoAsync(string applyInfo, CancellationToken cancellationToken = default)
 	{
-		var info = JsonSerializer.Deserialize<U2PayDepositApplyInfo>(
+		var info = JsonSerializer.Deserialize<GameWalletDepositApplyInfo>(
 			applyInfo,
-			U2PayUtility.SerializerOptions);
+			GameWalletUtility.SerializerOptions);
+		var response = new DepositApplyResponse(
+			"",
+			info.Response.RedirectUrl.ToString())
+		{
+			ExpirationTime = info.Settings.ExpirationTime
+		};
 
-		return ValueTask.FromResult(new DepositApplyResponse(
-			info.Response.ThirdPartyOrderNo,
-			info.Response.RedirectUrl.ToString()));
+		return ValueTask.FromResult(response);
 	}
 }

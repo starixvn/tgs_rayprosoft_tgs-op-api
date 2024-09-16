@@ -1,5 +1,4 @@
 ﻿using System.Text.Json;
-using Payment.GameWallet.Client;
 using Payment.SpeedPay.Client;
 using TGS.Services.Operator.ApplicationServices.Deposit;
 
@@ -32,8 +31,11 @@ public class SpeedPayCommandBuilder : IDepositFormCommandBuilder
 			applyInfo,
 			SpeedPayUtility.SerializerOptions);
 
-		return ValueTask.FromResult(new DepositApplyResponse(
-			info.Response.FormId.ToString(),
-			info.Response.RedirectUrl.ToString()));
+		var response = new DepositApplyResponse(info.Response.RedirectUrl.ToString(), info.Response.ThirdPartyOrderNo)
+		{
+			ExpirationTime = info.Settings.ExpirationTime
+		};
+
+		return ValueTask.FromResult(response);
 	}
 }
