@@ -36,8 +36,9 @@ public class InfoController(IConfiguration configuration) : ControllerBase
 			XForwardFor = IPUtils.GetHeaderValueAs<string>(HttpContext, "X-Forwarded-For"),
 			RemoteAddress = IPUtils.GetHeaderValueAs<string>(HttpContext, "REMOTE_ADDR"),
 			DotNetRemoteIpAddress = HttpContext.Connection?.RemoteIpAddress?.ToString() ?? string.Empty,
-			RequestHeader = GetAllRequestHeaders()
-		}));
+			RequestHeader = GetAllRequestHeaders(),
+			HardCodePlayerId = configuration.GetValue<string>("HardCodePlayerIP")
+	}));
 	}
 
 	private string GetAllRequestHeaders()
@@ -46,7 +47,7 @@ public class InfoController(IConfiguration configuration) : ControllerBase
 
 		foreach (var header in HttpContext.Request.Headers)
 		{
-			headerOutput += $"{header.Key}: {header.Value} |";
+			headerOutput += $"{header.Key}: {header.Value} | ";
 		}
 
 		return headerOutput;

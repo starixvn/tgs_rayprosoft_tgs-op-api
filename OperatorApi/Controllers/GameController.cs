@@ -21,7 +21,7 @@ namespace TGS.Apis.OperatorApi.Controllers;
 [Route("api/[controller]")]
 [ApiController]
 [Produces(MediaTypeNames.Application.Json)]
-public class GameController : ControllerBase
+public class GameController(IConfiguration configuration) : ControllerBase
 {
 	[HttpGet("bc")]
 	[AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
@@ -283,9 +283,10 @@ public class GameController : ControllerBase
 		[FromServices] IGetService<GetGameUrlQuery, Uri> getGameUrlQueryService,
 		[FromBody] GetGameUrlRequest request)
 	{
+		var hardCodePlayerIp = configuration.GetValue<string>("HardCodePlayerIP");
 		var playerTokenData = HttpContext.Items.GetPlayerTokenData();
 		var brandId = HttpContext.Items.GetBrandId();
-		var ipAddress = IPUtils.GetRequestIP(HttpContext) ?? string.Empty;
+		var ipAddress = hardCodePlayerIp ?? IPUtils.GetRequestIP(HttpContext) ?? string.Empty;
 
 		var query = new GetGameUrlQuery(
 			brandId,
