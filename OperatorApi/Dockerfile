@@ -1,7 +1,14 @@
-#See https://aka.ms/customizecontainer to learn how to customize your debug container and how Visual Studio uses this Dockerfile to build your images for faster debugging.
+ARG CI_REGISTRY_IMAGE
 
+FROM $CI_REGISTRY_IMAGE:builder as deps
 
-FROM hub.lumigame.com/base/dotnet/core/sdk:8.0 AS build
+RUN mkdir -p /src/packages
+
+FROM hub.nexdev.net/base/dotnet/core/sdk:8.0-alpine AS builder
+
+ENV NUGET_PACKAGES=/src/packages
+COPY --from=deps $NUGET_PACKAGES/. $NUGET_PACKAGES/
+
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["nuget.config", "."]
@@ -11,14 +18,14 @@ COPY ["Operator.Core/Operator.Core.csproj", "Operator.Core/"]
 COPY ["Operations/Operations.csproj", "Operations/"]
 COPY ["Operator.Client/Operator.Client.csproj", "Operator.Client/"]
 COPY ["Operator.Repositories/Operator.Repositories.csproj", "Operator.Repositories/"]
-RUN dotnet restore "./OperatorApi/./OperatorApi.csproj"
+RUN dotnet restore -v n -r linux-x64 "./OperatorApi/./OperatorApi.csproj"
 COPY . .
 WORKDIR "/src/OperatorApi"
 RUN dotnet build "./OperatorApi.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
-FROM build AS publish
+FROM builder AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./OperatorApi.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish -r linux-x64 --self-contained false "./OperatorApi.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 FROM hub.lumigame.com/base/dotnet/core/aspnet:8.0-alpine-24h1.1 AS base
 WORKDIR /app
