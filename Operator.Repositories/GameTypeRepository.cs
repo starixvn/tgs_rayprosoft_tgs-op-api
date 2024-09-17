@@ -41,18 +41,18 @@ namespace TGS.Operator.Repositories
 							 (query.Types.IsNullOrEmpty() || query.Types.Contains(bg.Game.Type)) &&
 							 (query.Tag == GameTag.None || (bg.Tag & query.Tag) != 0))
 				.AsNoTracking()
-				.GroupBy(bg => bg.Game.Type);
+				.GroupBy(bg => query.Types.IsNullOrEmpty() ? bg.Game.SubGameProvider.GameProvider.Code : (object)bg.Game.Type);
 
 			var paginatedResults = await groupedGames
 				.Select(g => new
 				{
-					GameType = g.Key,
+					key = g.Key,
 					total = g.Count(),
 					Games = OrderBy(g.ToList(), query.OrderType, query.PageIndex, query.PageSize)
 
 				}).ToListAsync();
 
-			return paginatedResults.Select(info => MapCategory(info.GameType, info.total, info.Games, query.CultureCode));
+			return paginatedResults.Select(info => MapCategory(info.key, info.total, info.Games, query.CultureCode));
 
 		}
 
@@ -69,13 +69,12 @@ namespace TGS.Operator.Repositories
 
 			return orderedList.Skip((pageIndex - 1) * pageSize).Take(pageSize);
 		}
-		private GameTypeModel MapCategory(GameType type, int total, IEnumerable<BrandGame> games, string cultureCode)
+		private GameTypeModel MapCategory(object key, int total, IEnumerable<BrandGame> games, string cultureCode)
 		{
 			return new GameTypeModel
 			{
 				Total = total,
-				CategoryName = type.ToString(),
-				GameType = type,
+				Key = key,
 				Games = games.Select(i =>
 				{
 					var gameStatus = GetGameStatus(i.Status, i.Game.Status);
@@ -101,7 +100,7 @@ namespace TGS.Operator.Repositories
 						SubGameProviderCode = i.Game.SubGameProviderCode,
 						IsActive = isActive,
 						DisplayOrder = i.DisplayOrder,
-						Type = type,
+						Type = i.Game.Type,
 						Tag = new TagInfo { New = i.Tag.IsNew(), Hot = i.Tag.IsHot(), Recommend = i.Tag.IsRecommend() },
 					};
 				}).OrderByDescending(g => g.IsActive)

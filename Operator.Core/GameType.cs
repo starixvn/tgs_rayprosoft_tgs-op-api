@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using TGS.Core.Models.Enums;
 
 namespace TGS.Services.Operator;
 
@@ -11,9 +10,7 @@ public record GameTypeModel
 
 	public int Total { get; init; } = default!;
 
-	public string CategoryName { get; init; } = default;
-
-	public GameType GameType { get; init; } = default;
+	public object Key { get; init; } = default!;
 
 	public IEnumerable<GameInfo> Games { get; init; } = default!;
 }

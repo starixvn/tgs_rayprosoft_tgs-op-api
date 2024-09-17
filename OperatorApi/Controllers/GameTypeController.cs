@@ -1,4 +1,5 @@
 ﻿using System.Globalization;
+using Castle.Core.Internal;
 using Microsoft.AspNetCore.Mvc;
 using Tgs.ServiceUtility;
 using TGS.Apis.OperatorApi.Attributes;
@@ -61,18 +62,19 @@ namespace TGS.Apis.OperatorApi.Controllers
 				request.Tag,
 				request.OrderType);
 
-			var gameTypes = await queryAllGameService.GetAsync(query);
+			var gameGrouped = await queryAllGameService.GetAsync(query);
 
-			foreach (var gameType in gameTypes)
+			foreach (var group in gameGrouped)
 			{
 				yield return new GameTypeResponse
 				{
 					PageSize = query.PageSize,
 					PageIndex = query.PageIndex,
-					Total = gameType.Total,
-					GameTypeName = gameType.CategoryName,
-					GameType = gameType.GameType,
-					Games = gameType.Games.Select(game => new GameModel
+					Total = group.Total,
+					GameTypeName = query.Types.IsNullOrEmpty() ? string.Empty : group.Key.ToString(),
+					GameType = query.Types.IsNullOrEmpty() ? null : (GameType)group.Key,
+					ProviderCode = query.Types.IsNullOrEmpty() ? group.Key.ToString() : string.Empty,
+					Games = group.Games.Select(game => new GameModel
 					{
 						Id = game.Id,
 						Code = game.Code,
