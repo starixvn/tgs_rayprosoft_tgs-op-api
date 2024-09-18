@@ -9,6 +9,7 @@ using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Extensions;
+using TGS.Operator.Repositories.Extensions;
 using TGS.Services.Operator;
 using TGS.Services.Operator.ApplicationServices.GameTypes;
 using TGS.Services.Operator.GameProviders;
@@ -21,17 +22,19 @@ namespace TGS.Operator.Repositories
 
 		private readonly GameStatus[] _statuses = { GameStatus.Active, GameStatus.Maintenance, GameStatus.Testing };
 
-		public async Task<IEnumerable<GameTypeModel>> QueryGameByGameTypesAsync(GetGameTypesQuery query, GamePlatformType[] platformTypes)
+		public async Task<IEnumerable<GamesModel>> QueryGameByGameTypesAsync(GetGamesQuery query, GamePlatformType[] platformTypes)
 		{
 			var providersActivated = _tgsRepository.BrandGameProviders
 				.Where(bp => bp.BrandId == query.BrandId && bp.Status == Status.Active)
 				.Where(bp => query.ProviderCode.IsNullOrEmpty() || query.ProviderCode.Contains(bp.GameProvider.Code))
 				.Select(bg => bg.GameProviderId).ToList();
 
+			var tagQuery = query.Tag.Sum(t => (byte)t);
+
 			var groupedGames = _tgsRepository.BrandGames
 				.Include(bg => bg.Game)
-					.ThenInclude(g => g.SubGameProvider)
-					.ThenInclude(sgp => sgp.GameProvider)
+				.ThenInclude(g => g.SubGameProvider)
+				.ThenInclude(sgp => sgp.GameProvider)
 				.Where(bg => bg.BrandId == query.BrandId &&
 							 bg.Game.AvailableToBrand &&
 							 providersActivated.Contains(bg.Game.GameProviderId) &&
@@ -39,10 +42,11 @@ namespace TGS.Operator.Repositories
 							 _statuses.Contains(bg.Status) &&
 							 _statuses.Contains(bg.Game.Status) &&
 							 (query.Types.IsNullOrEmpty() || query.Types.Contains(bg.Game.Type)) &&
-							 (query.Tag == GameTag.None || (bg.Tag & query.Tag) != 0))
+							 (query.Tag.IsNullOrEmpty() || (tagQuery & (byte)bg.Tag) > 0))
 				.AsNoTracking()
-				.GroupBy(bg => query.Types.IsNullOrEmpty() ? bg.Game.SubGameProvider.GameProvider.Code : (object)bg.Game.Type);
-
+				.GroupByGameQuery(
+								  (query.Types, bg => bg.Game.Type),
+								  (query.ProviderCode, bg => bg.Game.SubGameProvider.GameProvider.Code));
 			var paginatedResults = await groupedGames
 				.Select(g => new
 				{
@@ -69,9 +73,9 @@ namespace TGS.Operator.Repositories
 
 			return orderedList.Skip((pageIndex - 1) * pageSize).Take(pageSize);
 		}
-		private GameTypeModel MapCategory(object key, int total, IEnumerable<BrandGame> games, string cultureCode)
+		private GamesModel MapCategory(object key, int total, IEnumerable<BrandGame> games, string cultureCode)
 		{
-			return new GameTypeModel
+			return new GamesModel
 			{
 				Total = total,
 				Key = key,

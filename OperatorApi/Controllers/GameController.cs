@@ -15,7 +15,8 @@ using TGS.Services.Operations.CodeMappers;
 using TGS.Services.Operator;
 using TGS.Services.Operator.ApplicationServices.Game;
 using TGS.Services.Operator.ApplicationServices.GameBalance;
-using TGS.Services.Operator.ApplicationServices.GameTypes;
+using GetGamesQuery = TGS.Services.Operator.ApplicationServices.Game.GetGamesQuery;
+using GetRecentBigWin = TGS.Services.Operator.ApplicationServices.GameTypes.GetGamesQuery;
 
 namespace TGS.Apis.OperatorApi.Controllers;
 
@@ -197,8 +198,8 @@ public class GameController(IConfiguration configuration) : ControllerBase
 	[AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = false)]
 	public async IAsyncEnumerable<RecentBigWinModel> GetRecentBigWinsAsync(
 			[FromServices] IBrandLanguageCodeMapper brandLanguageCodeMapper,
-			[FromServices] IGetService<GetGameTypesQuery,
-				IEnumerable<GameTypeModel>> queryAllGameService,
+			[FromServices] IGetService<GetRecentBigWin,
+				IEnumerable<GamesModel>> queryAllGameService,
 			[FromServices] IPlayerOperations playerOperations,
 		[FromQuery] GetRecentBigWinRequest request)
 	{
@@ -224,7 +225,7 @@ public class GameController(IConfiguration configuration) : ControllerBase
 			.ExternalToInternalAsync(currentCultureInfo.Name, brandId)
 			.ConfigureAwait(false);
 
-		var query = new GetGameTypesQuery(
+		var query = new GetRecentBigWin(
 			brandId,
 			playerType,
 			platformType,
@@ -233,7 +234,7 @@ public class GameController(IConfiguration configuration) : ControllerBase
 			1,
 			[],
 			[GameType.Sportsbook, GameType.ESports, GameType.TableGame],
-			GameTag.Recommend,
+			[GameTag.Recommend],
 			0);
 
 		var gameTypes = await queryAllGameService.GetAsync(query);
@@ -440,63 +441,6 @@ public class GameController(IConfiguration configuration) : ControllerBase
 			ContentType = "text/html",
 			StatusCode = StatusCodes.Status200OK
 		};
-	}
-
-	[HttpGet("by-tag")]
-	[AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = false)]
-	public async IAsyncEnumerable<GameTagModel> GetTopGamesByTypesAsync(
-		[FromServices] IBrandLanguageCodeMapper brandLanguageCodeMapper,
-		[FromServices] IGetService<GetTopGamesByTagQuery, IEnumerable<GameTagInfo>> queryAllGameService,
-		[FromQuery] GetTopGamesByTagRequest request)
-	{
-		var brandId = HttpContext.Items.GetBrandId();
-		var playerTokenData = HttpContext.Items.GetPlayerTokenData();
-		var platformType = request.PlatformType;
-
-		if (playerTokenData != null)
-		{
-			platformType = playerTokenData.PlatformType;
-		}
-
-		var currentCultureInfo = CultureInfo.CurrentUICulture;
-
-		var cultureCode = await brandLanguageCodeMapper
-			.ExternalToInternalAsync(currentCultureInfo.Name, brandId)
-			.ConfigureAwait(false);
-
-
-		var query = new GetTopGamesByTagQuery(
-			brandId,
-			platformType,
-			cultureCode,
-			request.Limit,
-			request.Tags);
-
-		var gameTagInfos = await queryAllGameService.GetAsync(query);
-
-
-		foreach (var info in gameTagInfos)
-		{
-			yield return new GameTagModel
-			{
-				Tag = info.Tag,
-				Limit = query.Limit,
-				Games = info.Games.Select(game => new GameModel
-				{
-					Code = game.Code,
-					GameProviderCode = game.GameProviderCode,
-					GameProviderName = game.GameProviderName,
-					SubGameProviderCode = game.SubGameProviderCode,
-					Description = game.Description,
-					DisplayOrder = game.DisplayOrder,
-					Id = game.Id,
-					IsActive = game.IsActive,
-					Name = game.Name,
-					Tag = new Tag { Hot = game.Tag.Hot, New = game.Tag.New, Recommend = game.Tag.Recommend },
-					Type = game.Type
-				})
-			};
-		}
 	}
 
 	private static string GetLocalization(JsonElement element, string propertyName, string defaultValue)

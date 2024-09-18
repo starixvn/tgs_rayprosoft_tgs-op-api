@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Castle.Core.Internal;
 using Tgs.ServiceUtility;
 using TGS.Core.Models.Extensions;
 using TGS.Services.Operator.ApplicationServices.MemoryCache;
@@ -16,7 +17,14 @@ public class GetTopGamesByTagQueryService(IGameProviderRepository gameProviderRe
 
 	public async ValueTask<IEnumerable<GameTagInfo>> GetAsync(GetTopGamesByTagQuery query, CancellationToken cancellationToken = default)
 	{
-		var hashKey = HashCode.Combine(query.BrandId, query.PlatformType, query.CultureCode, query.Limit, string.Join(",", query.Tags));
+		var hashKey = HashCode.Combine(
+										query.BrandId,
+										query.PlatformType,
+										query.CultureCode,
+										query.PageSize,
+										query.PageIndex,
+										string.Join(",", query.Tags),
+										string.Join(",", query.ProviderCode.IsNullOrEmpty() ? Array.Empty<string>() : query.ProviderCode));
 		var gameTagInfos = await _memoryCache.GetOrCreateAsync($"" +
 			$"{query.BrandId}_GetGameTag_{hashKey}",
 			() => GetTopGameByTagAsync(query, cancellationToken), new List<GameTagInfo>());

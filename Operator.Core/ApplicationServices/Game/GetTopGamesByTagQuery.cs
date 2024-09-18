@@ -7,6 +7,8 @@ namespace TGS.Services.Operator.ApplicationServices.Game
 		Guid BrandId,
 		PlatformType PlatformType,
 		string CultureCode,
-		int Limit,
-		GameTag[] Tags);
+		int PageIndex,
+		int PageSize,
+		GameTag[] Tags,
+		string[] ProviderCode);
 }

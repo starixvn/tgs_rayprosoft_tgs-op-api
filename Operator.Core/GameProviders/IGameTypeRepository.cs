@@ -7,5 +7,5 @@ namespace TGS.Services.Operator.GameProviders;
 public interface IGameTypeRepository
 {
 
-	Task<IEnumerable<GameTypeModel>> QueryGameByGameTypesAsync(GetGameTypesQuery query, GamePlatformType[] gamePlatformTypes);
+	Task<IEnumerable<GamesModel>> QueryGameByGameTypesAsync(GetGamesQuery query, GamePlatformType[] gamePlatformTypes);
 }

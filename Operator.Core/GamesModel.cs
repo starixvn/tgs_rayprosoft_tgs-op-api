@@ -2,7 +2,7 @@
 
 namespace TGS.Services.Operator;
 
-public record GameTypeModel
+public record GamesModel
 {
 	public int PageIndex { get; init; } = default!;
 

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using Castle.Core.Internal;
 using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
@@ -247,6 +248,7 @@ internal class GameProviderRepository(
 		var providersActivated = new HashSet<Guid>(
 			await _tgsRepository.BrandGameProviders
 			.Where(bp => bp.BrandId == query.BrandId && bp.Status == Status.Active)
+			.Where(bp => query.ProviderCode.IsNullOrEmpty() || query.ProviderCode.Contains(bp.GameProvider.Code))
 			.Select(bg => bg.GameProviderId)
 			.ToListAsync()
 		);
@@ -267,16 +269,20 @@ internal class GameProviderRepository(
 
 		foreach (var tag in query.Tags)
 		{
-			var games = await gamesQuery
-				.Where(g => (g.Tag & tag) != 0)
-				.OrderBy(g => g.DisplayOrder)
+			var tagQuery = gamesQuery
+				.Where(g => (g.Tag & tag) != 0);
+
+			var games = await tagQuery.OrderBy(g => g.DisplayOrder)
 				.ThenBy(g => g.Game.Code)
-				.Take(query.Limit)
+				.Skip((query.PageIndex - 1) * query.PageSize).Take(query.PageSize)
 				.ToListAsync();
+
+			var gameCount = await tagQuery.CountAsync();
 
 			groupedGames.Add(new GameTagInfo
 			{
 				Tag = tag,
+				Total = gameCount,
 				Games = games.Select(g => MapGameInfo(g, query.CultureCode))
 				.OrderByDescending(g => g.IsActive)
 				.ThenBy(g => g.DisplayOrder)

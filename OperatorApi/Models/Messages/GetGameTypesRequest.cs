@@ -23,7 +23,7 @@ public record GetGameTypesRequest
 
 	public GameType[] GameTypes { get; set; }
 
-	public GameTag Tag { get; init; } = GameTag.None;
+	public GameTag[] Tag { get; init; }
 
 	public OrderType? OrderType { get; init; }
 }

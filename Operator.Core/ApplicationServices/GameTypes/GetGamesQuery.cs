@@ -3,7 +3,7 @@ using TGS.Core.Models.Enums;
 
 namespace TGS.Services.Operator.ApplicationServices.GameTypes;
 
-public record GetGameTypesQuery(
+public record GetGamesQuery(
 	Guid BrandId,
 	PlayerType PlayerType,
 	PlatformType PlatformType,
@@ -12,5 +12,5 @@ public record GetGameTypesQuery(
 	int PageIndex,
 	string[] ProviderCode,
 	GameType[] Types,
-	GameTag Tag,
+	GameTag[] Tag,
 	OrderType? OrderType);
