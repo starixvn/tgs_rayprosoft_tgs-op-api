@@ -310,6 +310,7 @@ internal class GameProviderRepository(
 			IsActive = isActive,
 			DisplayOrder = info.DisplayOrder,
 			Type = info.Game.Type,
+			GameStatus = info.Game.Status,
 			Tag = new TagInfo { New = info.Tag.IsNew(), Hot = info.Tag.IsHot(), Recommend = info.Tag.IsRecommend() }
 		};
 	}

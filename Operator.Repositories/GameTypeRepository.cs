@@ -82,8 +82,7 @@ namespace TGS.Operator.Repositories
 				Games = games.Select(i =>
 				{
 					var gameStatus = GetGameStatus(i.Status, i.Game.Status);
-					var isActive = i.Game.SubGameProvider.GameProvider.Status == Status.Active &&
-								   gameStatus == GameStatus.Active;
+					var isActive = i.Game.SubGameProvider.GameProvider.Status == Status.Active && gameStatus == GameStatus.Active;
 					var lang = DeserializeLocalization(i.Game.Localization).TryGetValue(cultureCode, out var value)
 						? value
 						: JsonDocument.Parse("{}");
@@ -103,6 +102,7 @@ namespace TGS.Operator.Repositories
 						GameProviderName = i.Game.SubGameProvider.GameProvider.Name,
 						SubGameProviderCode = i.Game.SubGameProviderCode,
 						IsActive = isActive,
+						GameStatus = i.Game.Status,
 						DisplayOrder = i.DisplayOrder,
 						Type = i.Game.Type,
 						Tag = new TagInfo { New = i.Tag.IsNew(), Hot = i.Tag.IsHot(), Recommend = i.Tag.IsRecommend() },

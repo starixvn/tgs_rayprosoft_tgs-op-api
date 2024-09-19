@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Text.Json;
+using TGS.Core.Models.Enums;
 
 namespace TGS.Services.Operator;
 
@@ -17,5 +18,6 @@ public record GameInfo
 	public TagInfo Tag { get; init; } = default!;
 	public int DisplayOrder { get; init; }
 
+	public GameStatus GameStatus { get; init; }
 	public IDictionary<string, JsonDocument>? Localization { get; init; }
 }
