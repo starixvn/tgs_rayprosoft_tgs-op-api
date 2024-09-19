@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using System.Text.Json.Nodes;
 using Payment.GameWallet.Client;
 using TGS.Services.Operator.ApplicationServices.Deposit;
 
@@ -8,7 +9,7 @@ public class GameWalletCommandBuilder : IDepositFormCommandBuilder
 {
 	public ValueTask<CreateDepositFormCommand> BuildDepositCommandAsync(string paymentCode, string bankType, DepositRequestInfo requestInfo, CancellationToken cancellationToken = default)
 	{
-		var brandPaymentInfo = JsonDocument.Parse(requestInfo.BrandPaymentInfo.ExtendedData);
+		var brandPaymentInfo = JsonNode.Parse(requestInfo.BrandPaymentInfo.ExtendedData);
 
 		var command = new CreateDepositFormCommand(
 			requestInfo.PlayerCode,
@@ -19,22 +20,28 @@ public class GameWalletCommandBuilder : IDepositFormCommandBuilder
 			requestInfo.PromotionId,
 			formId => JsonSerializer.Serialize(
 				new GameWalletDepositSettings(
-					MerchantCode: brandPaymentInfo.RootElement.GetProperty("merchantCode").GetString(),
-					MerchantSecurityCode: brandPaymentInfo.RootElement.GetProperty("securityCode").GetString(),
-					CurrencyCode: brandPaymentInfo.RootElement.GetProperty("currencyCode").GetString(),
-					BankCode: brandPaymentInfo.RootElement.GetProperty("bankCode").GetString(),
+					MerchantCode: GetValueOrThrow<string>(brandPaymentInfo, "merchantCode"),
+					MerchantSecurityCode: GetValueOrThrow<string>(brandPaymentInfo, "securityCode"),
+					CurrencyCode: GetValueOrThrow<string>(brandPaymentInfo, "currencyCode"),
+					BankCode: GetValueOrThrow<string>(brandPaymentInfo, "bankCode"),
 					Customer: requestInfo.PlayerCode,
 					Reference: formId,
 					SuccessUrl: "https://dictionary.cambridge.org/vi/dictionary/english/successful",
 					FailUrl: "https://dictionary.cambridge.org/vi/dictionary/english/fail",
-					Language: brandPaymentInfo.RootElement.GetProperty("language").GetString(),
+					Language: GetValueOrThrow<string>(brandPaymentInfo, "language"),
 					ClientIP: requestInfo.PlayerIp,
-					Method: brandPaymentInfo.RootElement.GetProperty("method").GetString(),
-					ExpirationTime: brandPaymentInfo.RootElement.GetProperty("expirationTime").GetDouble()),
+					Method: GetValueOrThrow<string>(brandPaymentInfo, "method"),
+					FeExpirationTime: brandPaymentInfo["feExpirationTime"]?.GetValue<double>(),
+					BeExpirationTime: brandPaymentInfo["beExpirationTime"]?.GetValue<double>()),
 				GameWalletUtility.SerializerOptions));
 
 		return ValueTask.FromResult(command);
 	}
+
+	private static T GetValueOrThrow<T>(JsonNode jsonNode, string key)
+		=> jsonNode[key] == null ? throw new ArgumentException($"Missing required field: {key}") : jsonNode[key]!.GetValue<T>();
+
+
 	public ValueTask<DepositApplyResponse> ReadApplyInfoAsync(string applyInfo, CancellationToken cancellationToken = default)
 	{
 		var info = JsonSerializer.Deserialize<GameWalletDepositApplyInfo>(
@@ -44,7 +51,7 @@ public class GameWalletCommandBuilder : IDepositFormCommandBuilder
 			"",
 			info.Response.RedirectUrl.ToString())
 		{
-			ExpirationTime = info.Settings.ExpirationTime
+			ExpirationTime = info.Settings.FeExpirationTime,
 		};
 
 		return ValueTask.FromResult(response);
