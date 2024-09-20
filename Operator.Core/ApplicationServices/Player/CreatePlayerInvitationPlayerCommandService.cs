@@ -64,7 +64,7 @@ internal class CreatePlayerInvitationPlayerCommandService(
 	}
 
 	private async Task<string> CreatePlayerByUpperPlayerAsync(
-			CreatePlayerWithPlayerInvitationCommand command,
+		CreatePlayerWithPlayerInvitationCommand command,
 		string currency,
 		int betLimitId,
 		Guid vipId,
@@ -92,6 +92,7 @@ internal class CreatePlayerInvitationPlayerCommandService(
 				vipId,
 				currency,
 				command.UserName,
+				command.Email,
 				command.Password,
 				upperPlayer.PlayerCode,
 				betLimitId,

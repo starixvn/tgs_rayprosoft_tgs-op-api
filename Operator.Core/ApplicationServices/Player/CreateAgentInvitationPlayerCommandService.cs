@@ -87,6 +87,7 @@ internal class CreateAgentInvitationPlayerCommandService(
 				vipId,
 				currency,
 				command.UserName,
+				command.Email,
 				command.Password,
 				null,
 				betLimitId,

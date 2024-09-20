@@ -8,6 +8,7 @@ public record CreatePlayerWithAgentInvitationCodeCommand(
 	Guid BrandId,
 	string UserName,
 	string Password,
+	string Email,
 	string CurrencyCode,
 	string AgentInvitationCode,
 	bool IsTestPlayer);

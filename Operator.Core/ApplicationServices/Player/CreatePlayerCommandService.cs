@@ -73,6 +73,7 @@ internal class CreatePlayerCommandService(
 				vipId,
 				currency,
 				command.UserName,
+				command.Email,
 				command.Password,
 				null,
 				betLimitId,

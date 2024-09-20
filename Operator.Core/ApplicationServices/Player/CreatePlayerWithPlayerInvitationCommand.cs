@@ -8,6 +8,7 @@ public record CreatePlayerWithPlayerInvitationCommand(
 	Guid BrandId,
 	string UserName,
 	string Password,
+	string Email,
 	string CurrencyCode,
 	string UpperPlayerCode,
 	bool IsTestPlayer);

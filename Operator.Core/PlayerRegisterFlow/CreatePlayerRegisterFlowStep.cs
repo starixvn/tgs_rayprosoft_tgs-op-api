@@ -58,6 +58,7 @@ internal class CreatePlayerRegisterFlowStep(
 				brandId,
 				request.UserName,
 				request.Password,
+				request.Email,
 				brand!.Currency,
 				request.UpperPlayerCode,
 				request.IsTestPlayer);
@@ -89,6 +90,7 @@ internal class CreatePlayerRegisterFlowStep(
 				brandId,
 				request.UserName,
 				request.Password,
+				request.Email,
 				brand!.Currency,
 				agentInvitationCode,
 				request.IsTestPlayer);
@@ -120,6 +122,7 @@ internal class CreatePlayerRegisterFlowStep(
 				brandId,
 				request.UserName,
 				request.Password,
+				request.Email,
 				brand!.Currency,
 				request.IsTestPlayer);
 
@@ -169,6 +172,9 @@ internal class CreatePlayerRegisterFlowStep(
 		[Required]
 		[JsonPropertyName("username")]
 		public string UserName { get; init; } = default!;
+		[Required]
+		[JsonPropertyName("email")]
+		public string Email { get; init; } = default!;
 	}
 
 	internal record CreatePlayerResponse
