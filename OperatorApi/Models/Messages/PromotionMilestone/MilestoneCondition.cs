@@ -2,6 +2,7 @@
 
 public class MilestoneCondition
 {
+	public int Level { get; init; }
 	public decimal DepositAmount { get; init; }
 	public decimal ValidBetAmount { get; init; }
 	public decimal Bonus { get; init; }

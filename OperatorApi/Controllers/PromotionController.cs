@@ -127,16 +127,16 @@ public class PromotionController(IPromotionClient promotionClient) : ControllerB
 		var brandId = HttpContext.Items.GetBrandId();
 		var playerTokenData = HttpContext.Items.GetPlayerTokenData();
 
-		var milestones = promotionServiceClient
+		var milestonePromotions = promotionServiceClient
 			.ListPromotionsAsync(brandId, playerTokenData!.PlayerCode, HttpContext.RequestAborted)
 			.Where(x => x.PromotionType is "Milestone");
 
-		await foreach (var promotionMilestoneModel in milestones.SelectAwait(async x =>
+		await foreach (var promotionMilestoneModel in milestonePromotions.SelectAwait(async x =>
 		               {
 			               var playerCondition = await promotionMilestoneClient.GetPlayerConditionAsync(brandId, playerTokenData!.PlayerCode,
 				               x.EventDuring.From, x.EventDuring.To, HttpContext.RequestAborted);
 
-			               var validMilestones =
+			               var milestones =
 				               await promotionMilestoneClient.GetConditionsIncludeCompletedListAsync(x.Id, playerTokenData!.PlayerCode)
 					               .ToArrayAsync(HttpContext.RequestAborted);
 
@@ -148,8 +148,9 @@ public class PromotionController(IPromotionClient promotionClient) : ControllerB
 				               To = x.EventDuring.To,
 				               TotalDepositAmount = playerCondition.DepositAmount,
 				               TotalValidBetAmount = playerCondition.ValidBetAmount,
-				               Conditions = validMilestones.Select(s => new MilestoneCondition
+				               Conditions = milestones.Select(s => new MilestoneCondition
 				               {
+								   Level = s.Level,
 					               Bonus = s.Bonus,
 					               DepositAmount = s.MinimumDeposit,
 					               ValidBetAmount = s.MinimumValidBet,
