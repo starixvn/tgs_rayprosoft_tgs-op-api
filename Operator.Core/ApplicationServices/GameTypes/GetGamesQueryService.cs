@@ -10,9 +10,9 @@ using TGS.Services.Operator.ApplicationServices.MemoryCache;
 using TGS.Services.Operator.GameProviders;
 
 namespace TGS.Services.Operator.ApplicationServices.GameTypes;
-public class GetGamesQueryService(IGameTypeRepository categoryRepository, IMemoryCacheService memoryCache) : IGetService<GetGamesQuery, IEnumerable<GamesModel>>
+public class GetGamesQueryService(IGamesRepository categoryRepository, IMemoryCacheService memoryCache) : IGetService<GetGamesQuery, IEnumerable<GamesModel>>
 {
-	private readonly IGameTypeRepository _categoryRepository =
+	private readonly IGamesRepository _categoryRepository =
 		categoryRepository ?? throw new ArgumentNullException(nameof(categoryRepository));
 	private readonly IMemoryCacheService _memoryCache = memoryCache ?? throw new ArgumentNullException(nameof(memoryCache));
 

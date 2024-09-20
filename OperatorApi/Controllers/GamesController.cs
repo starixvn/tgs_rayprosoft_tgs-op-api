@@ -81,7 +81,6 @@ namespace TGS.Apis.OperatorApi.Controllers
 						GameProviderCode = game.GameProviderCode,
 						GameProviderName = game.GameProviderName,
 						SubGameProviderCode = game.SubGameProviderCode,
-						IsActive = game.IsActive,
 						Type = game.Type,
 						GameStatus = game.GameStatus,
 						Tag = new Tag
@@ -148,7 +147,6 @@ namespace TGS.Apis.OperatorApi.Controllers
 						Description = game.Description,
 						DisplayOrder = game.DisplayOrder,
 						Id = game.Id,
-						IsActive = game.IsActive,
 						Name = game.Name,
 						Tag = new Tag { Hot = game.Tag.Hot, New = game.Tag.New, Recommend = game.Tag.Recommend },
 						Type = game.Type,

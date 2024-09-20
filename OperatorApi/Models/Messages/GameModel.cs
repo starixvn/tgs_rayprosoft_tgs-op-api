@@ -32,11 +32,11 @@ public record GameModel
 	[JsonPropertyName("type")]
 	public GameType Type { get; init; }
 
-	[JsonPropertyName("tag")]
-	public Tag Tag { get; init; }
-
 	[JsonPropertyName("gamestatus")]
 	public GameStatus GameStatus { get; init; }
+
+	[JsonPropertyName("tag")]
+	public Tag Tag { get; init; }
 
 	[JsonIgnore]
 	public int DisplayOrder { get; init; }

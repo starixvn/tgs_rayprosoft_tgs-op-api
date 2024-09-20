@@ -9,9 +9,9 @@ using TGS.Services.Operator.ApplicationServices.MemoryCache;
 using TGS.Services.Operator.GameProviders;
 
 namespace TGS.Services.Operator.ApplicationServices.Game;
-public class GetTopGamesByTagQueryService(IGameProviderRepository gameProviderRepository, IMemoryCacheService memoryCache) : IGetService<GetTopGamesByTagQuery, IEnumerable<GameTagInfo>>
+public class GetTopGamesByTagQueryService(IGamesRepository gamesRepository, IMemoryCacheService memoryCache) : IGetService<GetTopGamesByTagQuery, IEnumerable<GameTagInfo>>
 {
-	private readonly IGameProviderRepository _gameProviderRepository = gameProviderRepository ?? throw new ArgumentNullException(nameof(gameProviderRepository));
+	private readonly IGamesRepository _gamesRepository = gamesRepository ?? throw new ArgumentNullException(nameof(gamesRepository));
 
 	private readonly IMemoryCacheService _memoryCache = memoryCache ?? throw new ArgumentNullException(nameof(memoryCache));
 
@@ -36,7 +36,7 @@ public class GetTopGamesByTagQueryService(IGameProviderRepository gameProviderRe
 	{
 		var gamePlatformTypes = query.PlatformType.ToGamePlatformTypes();
 
-		var gamesByTag = await _gameProviderRepository.QueryGameByTagsAsync(query, gamePlatformTypes);
+		var gamesByTag = await _gamesRepository.QueryGameByTagsAsync(query, gamePlatformTypes);
 
 		return gamesByTag;
 	}
