@@ -1,5 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
-using NSubstitute;
+﻿#nullable enable
+using Microsoft.AspNetCore.Http;
 using Tgs.Agent.Client;
 using Tgs.Agent.Client.Models;
 using Tgs.Agent.Client.Models.Enums;

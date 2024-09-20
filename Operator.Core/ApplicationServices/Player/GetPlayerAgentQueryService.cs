@@ -7,8 +7,7 @@ using Tgs.ServiceUtility;
 namespace TGS.Services.Operator.ApplicationServices.Player;
 
 internal class GetPlayerAgentQueryService(
-	IPlayerAgentRepository playerAgentRepository,
-	IMemoryCache memoryCache) : IGetService<GetPlayerAgentQuery, Guid?>
+	IPlayerAgentRepository playerAgentRepository) : IGetService<GetPlayerAgentQuery, Guid?>
 {
 	public async ValueTask<Guid?> GetAsync(
 		GetPlayerAgentQuery query,

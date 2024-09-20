@@ -40,6 +40,7 @@ using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Infrastructures.WebApiServices;
 using TGS.Payment.ManualDeposit;
 using Tgs.Player.All.Agent.Client.DependencyInjection;
+using Tgs.Promotion.Milestone.Client.DependencyInjection;
 using TGS.Services.Operations.Extensions;
 using TGS.Services.Operator;
 using TGS.Services.Operator.ApplicationServices.Game;
@@ -227,6 +228,9 @@ builder.Services
 	.AddVipLevelServiceClient(httpBuilder => httpBuilder
 		.ConfigureHttpClient(httpClient => httpClient.BaseAddress =
 			builder.Configuration.GetValue<Uri>("Operator:VipLevelServiceBaseUrl")!))
+	.AddPromotionMilestoneClient(httpBuilder => httpBuilder
+		.ConfigureHttpClient(httpClient => httpClient.BaseAddress =
+			builder.Configuration.GetValue<Uri>("Operator:PromotionMilestoneBaseUrl")!))
 	.AddBrandGameCreditsClient((options, sp) =>
 	{
 		var config = sp.GetRequiredService<IConfiguration>();

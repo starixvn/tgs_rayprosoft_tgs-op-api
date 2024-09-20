@@ -9,6 +9,8 @@ using Tgs.Promotion.Clients.Protos;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models.Messages;
+using TGS.Apis.OperatorApi.Models.Messages.PromotionMilestone;
+using Tgs.Promotion.Milestone.Client;
 using Valhalla.MessageQueue;
 
 namespace TGS.Apis.OperatorApi.Controllers;
@@ -19,66 +21,6 @@ namespace TGS.Apis.OperatorApi.Controllers;
 public class PromotionController(IPromotionClient promotionClient) : ControllerBase
 {
 	private readonly IPromotionClient _promotionClient = promotionClient ?? throw new ArgumentNullException(nameof(promotionClient));
-
-	//[HttpGet("{language}", Name = "GetPromotions")]
-	//[Description("Get promotions")]
-	//[Consumes(MediaTypeNames.Application.Json)]
-	//[AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = false)]
-	//[Obsolete("預計淘汰")]
-	//public async ValueTask<PagingResponse<PromotionResponse>> GetPromotionsAsync(string language,
-	//	[FromQuery] PagingRequest request)
-	//{
-	//	var brandId = HttpContext.Items.GetBrandId();
-
-	//	var promotionsRequest = new GetValidPromotionsRequest
-	//	{
-	//		BrandId = brandId,
-	//		Language = language,
-	//		Page = request.Page,
-	//		Rows = request.Rows,
-	//		OrderBy = request.IsDesc ? (short)SortOrder.Descending : (short)SortOrder.Ascending,
-	//		SortBy = "Number",
-	//		ShowAll = request.ShowAll
-	//	};
-	//	var response = await _promotionClient.GetValidPromotionsAsync(promotionsRequest);
-
-	//	return new PagingResponse<PromotionResponse>
-	//	{
-	//		TotalCount = response.TotalCount,
-	//		Items = response.Items.Select(item => new PromotionResponse
-	//		{
-	//			AmountUsed = item.AmountUsed,
-	//			AutoSentPlayerBonus = item.AutoSentPlayerBonus,
-	//			BonusAmountLimit = item.BonusAmountLimit,
-	//			BrandId = item.BrandId,
-	//			Content = item.Content,
-	//			CreatedByUsername = item.CreatedByUsername,
-	//			CreatedOn = item.CreatedOn,
-	//			DesktopBanner = item.DesktopBanner,
-	//			From = item.From,
-	//			GameProviderIds = item.GameProviderIds,
-	//			GameType = (GameType?)item.GameType,
-	//			Id = item.Id,
-	//			Localization = item.Localization?.ContainsKey(language) == true
-	//				? item.Localization[language]
-	//				: JsonDocument.Parse("{}"),
-	//			MobileBanner = item.MobileBanner,
-	//			Name = item.Name,
-	//			Percentage = item.Percentage,
-	//			PromotionType = item.PromotionType,
-	//			Status = (SwitchStatus)item.Status,
-	//			SubSubject = item.SubSubject,
-	//			Terms = item.Terms,
-	//			To = item.To,
-	//			TotalAmountLimit = item.TotalAmountLimit,
-	//			TurnoverMultiple = item.TurnoverMultiple,
-	//			Unlimited = item.Unlimited,
-	//			UpdatedByUsername = item.UpdatedByUsername,
-	//			UpdatedOn = item.UpdatedOn,
-	//			VipLevels = item.VipLevels
-	//		})
-	//	};
-	//}
 
 	[HttpPost("{promotionId}/join", Name = "JoinPromotion")]
 	[Description("Join a promotion")]
@@ -174,5 +116,50 @@ public class PromotionController(IPromotionClient promotionClient) : ControllerB
 
 		foreach (var item in rouletteCountItems)
 			yield return item;
+	}
+
+	[HttpGet("milestone-list", Name = "ListMilestone")]
+	[AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+	public async IAsyncEnumerable<PromotionMilestoneModel> GetMilestonesAsync(
+		[FromServices] IPromotionServiceClient promotionServiceClient,
+		[FromServices] IPromotionMilestoneClient promotionMilestoneClient)
+	{
+		var brandId = HttpContext.Items.GetBrandId();
+		var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+
+		var milestonePromotions = promotionServiceClient
+			.ListPromotionsAsync(brandId, playerTokenData!.PlayerCode, HttpContext.RequestAborted)
+			.Where(x => x.PromotionType is "Milestone");
+
+		await foreach (var promotionMilestoneModel in milestonePromotions.SelectAwait(async x =>
+		               {
+			               var playerCondition = await promotionMilestoneClient.GetPlayerConditionAsync(brandId, playerTokenData!.PlayerCode,
+				               x.EventDuring.From, x.EventDuring.To, HttpContext.RequestAborted);
+
+			               var milestones =
+				               await promotionMilestoneClient.GetConditionsIncludeCompletedListAsync(x.Id, playerTokenData!.PlayerCode)
+					               .ToArrayAsync(HttpContext.RequestAborted);
+
+			               return new PromotionMilestoneModel
+			               {
+				               Name = x.Name,
+				               SubSubject = x.SubSubject,
+				               From = x.EventDuring.From,
+				               To = x.EventDuring.To,
+				               TotalDepositAmount = playerCondition.DepositAmount,
+				               TotalValidBetAmount = playerCondition.ValidBetAmount,
+				               Conditions = milestones.Select(s => new MilestoneCondition
+				               {
+								   Level = s.Level,
+					               Bonus = s.Bonus,
+					               DepositAmount = s.MinimumDeposit,
+					               ValidBetAmount = s.MinimumValidBet,
+					               IsSent = s.IsSent
+				               })
+			               };
+		               }))
+		{
+			yield return promotionMilestoneModel;
+		}
 	}
 }
