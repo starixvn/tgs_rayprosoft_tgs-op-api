@@ -18,10 +18,10 @@ public static class GameService
 	{
 		var orderedList = orderType switch
 		{
-			OrderType.Hot => query.OrderBy(g => g.Tag & GameTag.Hot).ThenBy(g => g.DisplayOrder),
+			OrderType.Hot => query.OrderByDescending(g => g.Tag & GameTag.Hot).ThenBy(g => g.DisplayOrder),
 			OrderType.Ascending => query.OrderBy(g => g.Game.Name),
 			OrderType.Descending => query.OrderByDescending(g => g.Game.Name),
-			OrderType.New => query.OrderBy(g => g.Tag & GameTag.New).ThenBy(g => g.DisplayOrder),
+			OrderType.New => query.OrderByDescending(g => g.Tag & GameTag.New).ThenBy(g => g.DisplayOrder),
 			_ => query.OrderBy(g => g.DisplayOrder).ThenBy(g => g.Game.Name),
 		};
 
