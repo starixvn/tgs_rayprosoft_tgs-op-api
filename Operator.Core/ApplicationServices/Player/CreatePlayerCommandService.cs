@@ -26,7 +26,22 @@ internal class CreatePlayerCommandService(
 			.ConfigureAwait(false);
 
 		if (player != null)
-			return new CreatePlayerInfo(player.PlayerCode, false);
+			return new CreatePlayerInfo(player.PlayerCode, false, "username-existed");
+
+		var isEmailValid = await _playerServiceClient
+		.CheckPlayerInfoEmailAsync(command.Email, cancellationToken)
+		.ConfigureAwait(false);
+
+		if (isEmailValid == false)
+			return new CreatePlayerInfo("", false, "email-invalid");
+
+		var emailPlayer = await _playerServiceClient
+			.GetPlayerInfoByEmailAsync(command.BrandId, command.Email, cancellationToken)
+			.ConfigureAwait(false);
+
+		if (emailPlayer != null)
+			return new CreatePlayerInfo(emailPlayer.PlayerCode, false, "email-existed");
+
 
 		_ = await _brandServiceClient
 			.GetBrandInfoAsync(command.BrandId, cancellationToken)
@@ -58,7 +73,7 @@ internal class CreatePlayerCommandService(
 			cancellationToken: cancellationToken)
 			.ConfigureAwait(false);
 
-		return new CreatePlayerInfo(resultPlayerCode, true);
+		return new CreatePlayerInfo(resultPlayerCode, true, "valid");
 	}
 
 	private ValueTask<string> CreatePlayerAsync(
@@ -73,8 +88,8 @@ internal class CreatePlayerCommandService(
 				vipId,
 				currency,
 				command.UserName,
-				command.Email,
 				command.Password,
+				command.Email,
 				null,
 				betLimitId,
 				command.IsTestPlayer

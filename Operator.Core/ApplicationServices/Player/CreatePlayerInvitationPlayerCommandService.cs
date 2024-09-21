@@ -27,7 +27,7 @@ internal class CreatePlayerInvitationPlayerCommandService(
 			.ConfigureAwait(false);
 
 		if (player != null)
-			return new CreatePlayerInfo(player.PlayerCode, false);
+			return new CreatePlayerInfo(player.PlayerCode, false, "username-existed");
 
 		_ = await _brandServiceClient
 			.GetBrandInfoAsync(command.BrandId, cancellationToken)
@@ -60,7 +60,7 @@ internal class CreatePlayerInvitationPlayerCommandService(
 			cancellationToken: cancellationToken)
 			.ConfigureAwait(false);
 
-		return new CreatePlayerInfo(resultPlayerCode, true);
+		return new CreatePlayerInfo(resultPlayerCode, true, "valid");
 	}
 
 	private async Task<string> CreatePlayerByUpperPlayerAsync(
@@ -92,8 +92,8 @@ internal class CreatePlayerInvitationPlayerCommandService(
 				vipId,
 				currency,
 				command.UserName,
-				command.Email,
 				command.Password,
+				command.Email,
 				upperPlayer.PlayerCode,
 				betLimitId,
 				command.IsTestPlayer

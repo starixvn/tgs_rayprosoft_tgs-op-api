@@ -121,8 +121,8 @@ internal class CreatePlayerRegisterFlowStep(
 			var query = new CreatePlayerCommand(
 				brandId,
 				request.UserName,
-				request.Password,
 				request.Email,
+				request.Password,
 				brand!.Currency,
 				request.IsTestPlayer);
 
@@ -150,7 +150,8 @@ internal class CreatePlayerRegisterFlowStep(
 					new CreatePlayerResponse
 					{
 						PlayerCode = info.PlayerCode,
-						IsNew = info.IsNew
+						IsNew = info.IsNew,
+						StepStatus = info.StepStatus,
 					}));
 		}
 	}
@@ -166,15 +167,16 @@ internal class CreatePlayerRegisterFlowStep(
 		[JsonPropertyName("pwd")]
 		public string Password { get; init; } = default!;
 
+		[Required]
+		[JsonPropertyName("email")]
+		public string Email { get; init; } = default!;
+
 		[JsonPropertyName("upper")]
 		public string? UpperPlayerCode { get; init; }
 
 		[Required]
 		[JsonPropertyName("username")]
 		public string UserName { get; init; } = default!;
-		[Required]
-		[JsonPropertyName("email")]
-		public string Email { get; init; } = default!;
 	}
 
 	internal record CreatePlayerResponse
@@ -184,6 +186,10 @@ internal class CreatePlayerRegisterFlowStep(
 
 		[JsonPropertyName("isnew")]
 		public bool IsNew { get; init; }
+
+		[JsonPropertyName("stepstatus")]
+		public string StepStatus { get; init;}
+		
 	}
 
 	public void SetupStep(JsonElement jsonElement) => throw new NotImplementedException();
