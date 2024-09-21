@@ -5,6 +5,7 @@ using Tgs.BrandCertificate.Clients;
 using Tgs.PlayerService.Client;
 using Tgs.ServiceUtility;
 using Tgs.VipLevelService.Clients;
+using TGS.Services.Operator.ApplicationServices.Auth;
 
 namespace TGS.Services.Operator.ApplicationServices.Player;
 
@@ -26,21 +27,21 @@ internal class CreatePlayerCommandService(
 			.ConfigureAwait(false);
 
 		if (player != null)
-			return new CreatePlayerInfo(player.PlayerCode, false, "username-existed");
+			return new CreatePlayerInfo(player.PlayerCode, false, StepStatus.UsernameExisted);
 
 		var isEmailValid = await _playerServiceClient
 		.CheckPlayerInfoEmailAsync(command.Email, cancellationToken)
 		.ConfigureAwait(false);
 
 		if (isEmailValid == false)
-			return new CreatePlayerInfo("", false, "email-invalid");
+			return new CreatePlayerInfo(string.Empty, false, StepStatus.EmailInvalid);
 
 		var emailPlayer = await _playerServiceClient
 			.GetPlayerInfoByEmailAsync(command.BrandId, command.Email, cancellationToken)
 			.ConfigureAwait(false);
 
 		if (emailPlayer != null)
-			return new CreatePlayerInfo(emailPlayer.PlayerCode, false, "email-existed");
+			return new CreatePlayerInfo(emailPlayer.PlayerCode, false, StepStatus.EmailExisted);
 
 
 		_ = await _brandServiceClient
@@ -73,7 +74,7 @@ internal class CreatePlayerCommandService(
 			cancellationToken: cancellationToken)
 			.ConfigureAwait(false);
 
-		return new CreatePlayerInfo(resultPlayerCode, true, "valid");
+		return new CreatePlayerInfo(resultPlayerCode, true, StepStatus.Valid);
 	}
 
 	private ValueTask<string> CreatePlayerAsync(

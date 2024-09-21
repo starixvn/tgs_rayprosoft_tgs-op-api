@@ -6,6 +6,7 @@ using Tgs.PlayerService.Client;
 using Tgs.ServiceUtility;
 using Tgs.VipLevelService.Clients;
 using TGS.Core.Models.Exceptions;
+using TGS.Services.Operator.ApplicationServices.Auth;
 
 namespace TGS.Services.Operator.ApplicationServices.Player;
 
@@ -27,7 +28,21 @@ internal class CreatePlayerInvitationPlayerCommandService(
 			.ConfigureAwait(false);
 
 		if (player != null)
-			return new CreatePlayerInfo(player.PlayerCode, false, "username-existed");
+			return new CreatePlayerInfo(player.PlayerCode, false, StepStatus.UsernameExisted);
+
+		var isEmailValid = await _playerServiceClient
+		.CheckPlayerInfoEmailAsync(command.Email, cancellationToken)
+		.ConfigureAwait(false);
+
+		if (isEmailValid == false)
+			return new CreatePlayerInfo(string.Empty, false, StepStatus.EmailInvalid);
+
+		var emailPlayer = await _playerServiceClient
+			.GetPlayerInfoByEmailAsync(command.BrandId, command.Email, cancellationToken)
+			.ConfigureAwait(false);
+
+		if (emailPlayer != null)
+			return new CreatePlayerInfo(emailPlayer.PlayerCode, false, StepStatus.EmailExisted);
 
 		_ = await _brandServiceClient
 			.GetBrandInfoAsync(command.BrandId, cancellationToken)
@@ -60,7 +75,7 @@ internal class CreatePlayerInvitationPlayerCommandService(
 			cancellationToken: cancellationToken)
 			.ConfigureAwait(false);
 
-		return new CreatePlayerInfo(resultPlayerCode, true, "valid");
+		return new CreatePlayerInfo(resultPlayerCode, true, StepStatus.Valid);
 	}
 
 	private async Task<string> CreatePlayerByUpperPlayerAsync(
