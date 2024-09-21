@@ -1,6 +1,7 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Nodes;
 using Payment.GameWallet.Client;
+using TGS.Apis.OperatorApi.Utils;
 using TGS.Services.Operator.ApplicationServices.Deposit;
 
 namespace TGS.Apis.OperatorApi.Models.Deposit;
@@ -20,27 +21,23 @@ public class GameWalletCommandBuilder : IDepositFormCommandBuilder
 			requestInfo.PromotionId,
 			formId => JsonSerializer.Serialize(
 				new GameWalletDepositSettings(
-					MerchantCode: GetValueOrThrow<string>(brandPaymentInfo, "merchantCode"),
-					MerchantSecurityCode: GetValueOrThrow<string>(brandPaymentInfo, "securityCode"),
-					CurrencyCode: GetValueOrThrow<string>(brandPaymentInfo, "currencyCode"),
-					BankCode: GetValueOrThrow<string>(brandPaymentInfo, "bankCode"),
+					MerchantCode: brandPaymentInfo.GetValueOrThrow<string>("merchantCode"),
+					MerchantSecurityCode: brandPaymentInfo.GetValueOrThrow<string>("securityCode"),
+					CurrencyCode: brandPaymentInfo.GetValueOrThrow<string>("currencyCode"),
+					BankCode: brandPaymentInfo.GetValueOrThrow<string>("bankCode"),
 					Customer: requestInfo.PlayerCode,
 					Reference: formId,
-					SuccessUrl: "https://dictionary.cambridge.org/vi/dictionary/english/successful",
-					FailUrl: "https://dictionary.cambridge.org/vi/dictionary/english/fail",
-					Language: GetValueOrThrow<string>(brandPaymentInfo, "language"),
+					SuccessUrl: brandPaymentInfo.GetValueOrDefault("successUrl", string.Empty),
+					FailUrl: brandPaymentInfo.GetValueOrDefault("failUrl", string.Empty),
+					Language: brandPaymentInfo.GetValueOrThrow<string>("language"),
 					ClientIP: requestInfo.PlayerIp,
-					Method: GetValueOrThrow<string>(brandPaymentInfo, "method"),
+					Method: brandPaymentInfo.GetValueOrThrow<string>("method"),
 					FeExpirationTime: brandPaymentInfo["feExpirationTime"]?.GetValue<double>(),
 					BeExpirationTime: brandPaymentInfo["beExpirationTime"]?.GetValue<double>()),
 				GameWalletUtility.SerializerOptions));
 
 		return ValueTask.FromResult(command);
 	}
-
-	private static T GetValueOrThrow<T>(JsonNode jsonNode, string key)
-		=> jsonNode[key] == null ? throw new ArgumentException($"Missing required field: {key}") : jsonNode[key]!.GetValue<T>();
-
 
 	public ValueTask<DepositApplyResponse> ReadApplyInfoAsync(string applyInfo, CancellationToken cancellationToken = default)
 	{
