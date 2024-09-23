@@ -1,6 +1,8 @@
 ﻿using System.Text.Json;
+using System.Text.Json.Nodes;
 using Tgs.Payment.DirePay.Client;
 using Tgs.PlayerService.Client;
+using TGS.Apis.OperatorApi.Utils;
 using TGS.Services.Operator.ApplicationServices.Deposit;
 
 namespace TGS.Apis.OperatorApi.Models.Deposit;
@@ -14,7 +16,7 @@ public class DirePayCommandBuilder(IPlayerServiceClient playerServiceClient)
 		DepositRequestInfo requestInfo,
 		CancellationToken cancellationToken = default)
 	{
-		var brandPaymentInfo = JsonDocument.Parse(requestInfo.BrandPaymentInfo.ExtendedData);
+		var brandPaymentInfo = JsonNode.Parse(requestInfo.BrandPaymentInfo.ExtendedData);
 
 		var playerRealName = GetPlayerRealNameAsync(requestInfo.PlayerCode).ToAsyncEnumerable().ToEnumerable().First();
 
@@ -27,18 +29,18 @@ public class DirePayCommandBuilder(IPlayerServiceClient playerServiceClient)
 			requestInfo.PromotionId,
 			formId => JsonSerializer.Serialize(
 				new DirePayDepositSettings(
-					brandPaymentInfo.RootElement.GetProperty("email").GetString(),
-					brandPaymentInfo.RootElement.GetProperty("password").GetString(),
-					brandPaymentInfo.RootElement.GetProperty("secret").GetString(),
+					brandPaymentInfo.GetValueOrThrow<string>("email"),
+					brandPaymentInfo.GetValueOrThrow<string>("password"),
+					brandPaymentInfo.GetValueOrThrow<string>("secret"),
 					formId,
-					new Uri("https://localhost"),
-					brandPaymentInfo.RootElement.GetProperty("currencyCode").GetString(),
-					brandPaymentInfo.RootElement.GetProperty("method").GetString(),
+					brandPaymentInfo.GetValueOrDefault("redirectUrl", new Uri("https://www.google.com/search?q=success")),
+					brandPaymentInfo.GetValueOrThrow<string>("currencyCode"),
+					brandPaymentInfo.GetValueOrThrow<string>("method"),
 					requestInfo.PlayerCode,
-					String.IsNullOrEmpty(playerRealName) ? "UserTest" : playerRealName,
-					brandPaymentInfo.RootElement.GetProperty("bankCode").GetString(),
+					string.IsNullOrEmpty(playerRealName) ? "UserTest" : playerRealName,
+					brandPaymentInfo.GetValueOrThrow<string>("bankCode"),
 					PhoneNumber: null,
-					brandPaymentInfo.RootElement.GetProperty("exchangeRate").GetDecimal()),
+					brandPaymentInfo.GetValueOrThrow<decimal>("exchangeRate")),
 				DirePayUtility.SerializerOptions));
 
 		return ValueTask.FromResult(command);
