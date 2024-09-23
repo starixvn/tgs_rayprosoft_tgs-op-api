@@ -13,6 +13,7 @@ using Tgs.Promotion.Clients;
 using Tgs.ServiceUtility;
 using TGS.Core.Infrastructures.Redis;
 using TGS.Services.Operator;
+using TGS.Services.Operator.ApplicationServices.Auth;
 using TGS.Services.Operator.ApplicationServices.Player;
 using TGS.Services.Operator.ApplicationServices.Withdraw;
 using TGS.Services.Operator.PlayerRegisterFlow;
@@ -191,7 +192,7 @@ public class RegisterFlowTests
 				&& x.UserName == input.UserName
 				&& x.Password == input.Password
 				&& x.AgentInvitationCode == input.AgentInvitationCode))
-			.Returns(new CreatePlayerInfo("test", true));
+			.Returns(new CreatePlayerInfo("test", true, StepStatus.Valid));
 
 		var actual = await sut.ProcessInputAsync(
 			brandId,
@@ -249,7 +250,7 @@ public class RegisterFlowTests
 				&& x.UserName == input.UserName
 				&& x.Password == input.Password
 				&& x.AgentInvitationCode == locationInfo.AgentInvitationCode))
-			.Returns(new CreatePlayerInfo("test", true));
+			.Returns(new CreatePlayerInfo("test", true, StepStatus.Valid));
 
 		var actual = await sut.ProcessInputAsync(
 			brandId,
@@ -308,7 +309,7 @@ public class RegisterFlowTests
 				&& x.UserName == input.UserName
 				&& x.Password == input.Password
 				&& x.UpperPlayerCode == input.UpperPlayerCode))
-			.Returns(new CreatePlayerInfo("test", true));
+			.Returns(new CreatePlayerInfo("test", true, StepStatus.Valid));
 
 		var actual = await sut.ProcessInputAsync(
 			brandId,
@@ -365,7 +366,7 @@ public class RegisterFlowTests
 				&& x.IsTestPlayer == input.IsTestPlayer
 				&& x.UserName == input.UserName
 				&& x.Password == input.Password))
-			.Returns(new CreatePlayerInfo("test", true));
+			.Returns(new CreatePlayerInfo("test", true, StepStatus.Valid));
 
 		var actual = await sut.ProcessInputAsync(
 			brandId,
@@ -435,7 +436,7 @@ public class RegisterFlowTests
 		_ = fakeCreatePlayerService.GetAsync(Arg.Is<CreatePlayerCommand>(
 			cmd => cmd.UserName == inputData.UserName
 				&& cmd.BrandId == brandId))
-			.Returns(new CreatePlayerInfo("aabbcc", true));
+			.Returns(new CreatePlayerInfo("aabbcc", true, StepStatus.Valid));
 
 		var expectedResponse = new CreatePlayerResponse
 		{
@@ -747,7 +748,7 @@ public class RegisterFlowTests
 		_ = fakeCreatePlayerService.GetAsync(Arg.Is<CreatePlayerCommand>(
 			cmd => cmd.UserName == inputData.UserName
 				&& cmd.BrandId == brandId))
-			.Returns(new CreatePlayerInfo("aabbcc", true));
+			.Returns(new CreatePlayerInfo("aabbcc", true, StepStatus.Valid));
 
 		var expectedResponse = new CreatePlayerResponse
 		{
@@ -1222,7 +1223,7 @@ public class RegisterFlowTests
 		_ = fakeCreatePlayerService.GetAsync(Arg.Is<CreatePlayerCommand>(
 			cmd => cmd.UserName == inputData.UserName
 				&& cmd.BrandId == brandId))
-			.Returns(new CreatePlayerInfo("aabbcc", true));
+			.Returns(new CreatePlayerInfo("aabbcc", true, StepStatus.Valid));
 
 		var expectedResponse = new CreatePlayerResponse
 		{
