@@ -22,9 +22,8 @@ internal class CreateIdentityAuthenticationFormCommandService(
 			.GetBrandInfoAsync(command.BrandId, cancellationToken)
 			.ConfigureAwait(false);
 
-		//TODO: remove for phase 1
-		//if (!brandInfo!.PlayerIdentityEnabled)
-		//	throw new BrandEnablePlayerIdentityNotSetException();
+		if (!brandInfo!.PlayerIdentityEnabled)
+			throw new BrandEnablePlayerIdentityNotSetException();
 
 		var data = JsonSerializer.Serialize(new PlayerAuthenticationFormData(command.FileId));
 
