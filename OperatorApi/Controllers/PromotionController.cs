@@ -127,37 +127,42 @@ public class PromotionController(IPromotionClient promotionClient) : ControllerB
 		var brandId = HttpContext.Items.GetBrandId();
 		var playerTokenData = HttpContext.Items.GetPlayerTokenData();
 
-		var milestonePromotions = promotionServiceClient
+		var milestonePromotions = await promotionServiceClient
 			.ListPromotionsAsync(brandId, playerTokenData!.PlayerCode, HttpContext.RequestAborted)
-			.Where(x => x.PromotionType is "Milestone");
+			.Where(x => x.PromotionType is "Milestone")
+			.ToArrayAsync(HttpContext.RequestAborted);
 
-		await foreach (var promotionMilestoneModel in milestonePromotions.SelectAwait(async x =>
-		               {
-			               var playerCondition = await promotionMilestoneClient.GetPlayerConditionAsync(brandId, playerTokenData!.PlayerCode,
-				               x.EventDuring.From, x.EventDuring.To, HttpContext.RequestAborted);
+		var list = new List<PromotionMilestoneModel>();
 
-			               var milestones =
-				               await promotionMilestoneClient.GetConditionsIncludeCompletedListAsync(x.Id, playerTokenData!.PlayerCode)
-					               .ToArrayAsync(HttpContext.RequestAborted);
+		foreach (var item in milestonePromotions)
+		{
+			var playerCondition = await promotionMilestoneClient.GetPlayerConditionAsync(brandId, playerTokenData!.PlayerCode,
+				item.EventDuring.From, item.EventDuring.To, HttpContext.RequestAborted);
 
-			               return new PromotionMilestoneModel
-			               {
-				               Name = x.Name,
-				               SubSubject = x.SubSubject,
-				               From = x.EventDuring.From,
-				               To = x.EventDuring.To,
-				               TotalDepositAmount = playerCondition.DepositAmount,
-				               TotalValidBetAmount = playerCondition.ValidBetAmount,
-				               Conditions = milestones.Select(s => new MilestoneCondition
-				               {
-								   Level = s.Level,
-					               Bonus = s.Bonus,
-					               DepositAmount = s.MinimumDeposit,
-					               ValidBetAmount = s.MinimumValidBet,
-					               IsSent = s.IsSent
-				               })
-			               };
-		               }))
+			var milestoneConditions =
+				await promotionMilestoneClient.GetConditionsIncludeCompletedListAsync(item.Id, playerTokenData!.PlayerCode)
+					.ToArrayAsync(HttpContext.RequestAborted);
+
+			list.Add(new PromotionMilestoneModel
+			{
+				Name = item.Name,
+				SubSubject = item.SubSubject,
+				From = item.EventDuring.From,
+				To = item.EventDuring.To,
+				TotalDepositAmount = playerCondition.DepositAmount,
+				TotalValidBetAmount = playerCondition.ValidBetAmount,
+				Conditions = milestoneConditions.Select(s => new MilestoneCondition
+				{
+					Level = s.Level,
+					Bonus = s.Bonus,
+					DepositAmount = s.MinimumDeposit,
+					ValidBetAmount = s.MinimumValidBet,
+					IsSent = s.IsSent
+				})
+			});
+		}
+
+		foreach (var promotionMilestoneModel in list)
 		{
 			yield return promotionMilestoneModel;
 		}
