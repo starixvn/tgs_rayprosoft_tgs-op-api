@@ -682,6 +682,23 @@ public class PlayerController(ILogger<PlayerController> logger) : ControllerBase
 			.ConfigureAwait(false);
 
 	/// <summary>
+	/// Check if validate code is existed.
+	/// </summary>
+	[HttpPost("validate-code/check")]
+	[ProducesResponseType(StatusCodes.Status200OK)]
+	public async Task<IActionResult> CheckValidateCodeAsync(
+			[FromServices] IGetService<CheckValidateCodeQuery, bool> checkService,
+			[FromBody] ValidateCodeCheckRequest request,
+			CancellationToken cancellationToken = default)
+	{
+		var isValid = await checkService
+			.GetAsync(new CheckValidateCodeQuery(request.SecurityKey, request.ValidateCode), cancellationToken)
+			.ConfigureAwait(false);
+
+		return Ok(isValid);
+	}
+
+	/// <summary>
 	/// Sets the birthdate asynchronous.
 	/// </summary>
 	/// <param name="setBirthdateService">The set birthdate service.</param>

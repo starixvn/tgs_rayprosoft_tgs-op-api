@@ -26,6 +26,13 @@ internal class RestValidateCodeOperator(
 		return string.IsNullOrEmpty(result) ? default : DeserializeValidateCodeData<TData>(result);
 	}
 
+	public async ValueTask<bool> CheckValidateCodeDataExistedAsync(string validateCode, string token)
+	{
+		return await validateCodeServiceClient
+			.CheckValidateCodeExistedAsync(validateCode, token)
+			.ConfigureAwait(false);
+	}
+
 	public ValueTask<bool> SaveValidateDataAsync<TData>(string validateCode, string token, TData data)
 	{
 		return validateCodeServiceClient
@@ -52,4 +59,5 @@ internal class RestValidateCodeOperator(
 	private static TData? DeserializeValidateCodeData<TData>(string json) => JsonSerializer.Deserialize<TData>(json);
 
 	private static string SerializeValidateCodeData<TData>(TData data) => JsonSerializer.Serialize(data);
+	
 }

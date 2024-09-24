@@ -8,6 +8,8 @@ public interface IValidateCodeOperator
 {
 	ValueTask<TData?> GetValidateCodeDataAsync<TData>(string validateCode, string token);
 
+	ValueTask<bool> CheckValidateCodeDataExistedAsync(string validateCode, string token);
+
 	ValueTask<bool> SaveValidateDataAsync<TData>(string validateCode, string token, TData data);
 
 	ValueTask SendEmailAsync(CultureInfo cultureInfo, string email, string validateCode);
