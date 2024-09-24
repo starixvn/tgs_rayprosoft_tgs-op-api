@@ -276,6 +276,8 @@ builder.Services
 	.AddErrorMapper()
 	.AddErrorMapper<OperatorApiErrorMapper>();
 
+var natPrefix = builder.Configuration.GetValue<string>("NatPrefix");
+
 builder.Services
 	.AddKeyedSingleton(
 		"Nats",
@@ -288,16 +290,16 @@ builder.Services
 		.ConfigureResolveConnection(sp => sp.GetRequiredKeyedService<NatsConnection>("Nats"))
 		.AddHandler(
 			ProcessorTypes.BrandFrontendInfoChangedEventHandlerType,
-			"tgs.brand.frontendinfo.changed")
+			natPrefix + "tgs.brand.frontendinfo.changed")
 		.AddHandler(
 			ProcessorTypes.DepositFormStatusChangedHandlerType,
-			"tgs.payment.deposit.status_ex")
+			natPrefix + "tgs.payment.deposit.status_ex")
 		.AddHandler(
 			ProcessorTypes.WithdrawFormStatusChangedEventHandlerType,
-			"tgs.payment.withdraw.status_ex")
+			natPrefix + "tgs.payment.withdraw.status_ex")
 		.AddHandler(
 			ProcessorTypes.NotificationHandlerType,
-			"tgs.notify.broadcast"))
+			natPrefix + "tgs.notify.broadcast"))
 	.AddNatsGlobPatternExchange("*");
 
 builder.Services
