@@ -125,7 +125,8 @@ namespace TGS.Apis.OperatorApi.Controllers
 				request.PageIndex,
 				request.PageSize,
 				request.Tags,
-				request.ProviderCode);
+				request.ProviderCode,
+				request.GameTypeExclude);
 
 			var gameTagInfos = await queryAllGameService.GetAsync(query);
 

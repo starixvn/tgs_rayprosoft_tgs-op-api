@@ -6,7 +6,7 @@ using Castle.Core.Internal;
 using TGS.Core.DataServices.Tgs.Models;
 
 namespace TGS.Operator.Repositories.Extensions;
-public static class GamesGroupByExtension
+public static class GamesExtension
 {
 	public static IQueryable<IGrouping<object, BrandGame>> GroupByGameQuery(this IQueryable<BrandGame> source, params (IEnumerable, Expression<Func<BrandGame, object>>)[] keySelectors)
 	{

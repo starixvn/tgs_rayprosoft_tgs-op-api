@@ -72,7 +72,8 @@ namespace TGS.Operator.Repositories
 							 providersAvailable.Contains(bg.Game.GameProviderId) &&
 							 gamePlatformTypes.Contains(bg.Game.PlatformType) &&
 							 _statuses.Contains(bg.Status) &&
-							 _statuses.Contains(bg.Game.Status))
+							 _statuses.Contains(bg.Game.Status) &&
+							 !query.GameTypeExclude.Contains(bg.Game.Type))
 				.AsNoTracking();
 
 			return await GetGroupGameTag(query, gamesQuery, providersActivated);

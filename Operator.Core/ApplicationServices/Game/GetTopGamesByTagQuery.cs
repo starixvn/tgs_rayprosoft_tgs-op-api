@@ -10,5 +10,6 @@ namespace TGS.Services.Operator.ApplicationServices.Game
 		int PageIndex,
 		int PageSize,
 		GameTag[] Tags,
-		string[] ProviderCode);
+		string[] ProviderCode,
+		GameType[] GameTypeExclude);
 }
