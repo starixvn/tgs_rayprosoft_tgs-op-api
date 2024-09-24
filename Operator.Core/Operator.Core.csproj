@@ -39,6 +39,7 @@
     <PackageReference Include="TGS.FileService.Client" Version="0.0.5" />
     <PackageReference Include="Tgs.GameProviders.Pluggable.Client" Version="1.0.4" />
     <PackageReference Include="Tgs.Notification.Client" Version="0.1.0" />
+    <PackageReference Include="Tgs.Notification.Email.Client" Version="0.0.6" />
     <PackageReference Include="Tgs.Paging.AsyncEnumerable" Version="1.2.1" />
     <PackageReference Include="Tgs.Payment.Client" Version="0.6.8" />
     <PackageReference Include="Tgs.PaymentService.Client" Version="0.8.8" />

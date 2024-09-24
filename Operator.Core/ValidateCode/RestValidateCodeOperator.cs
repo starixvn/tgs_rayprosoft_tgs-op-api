@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Globalization;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
-using TGS.Core.Infrastructures.Mail;
+using Tgs.Email.Client;
 using TGS.Services.Operator.Properties;
 using TGS.Services.ValidateCode.Clients;
 using TGS.SmsService.Client;
@@ -12,7 +13,8 @@ namespace TGS.Services.Operator.ValidateCode;
 internal class RestValidateCodeOperator(
 	IValidateCodeServiceClient validateCodeServiceClient,
 	ISmsServiceClient smsServiceClient,
-	IEmailClient emailClient)
+	INotificationEmailClient notificationEmailClient
+	)
 	: IValidateCodeOperator
 {
 	public async ValueTask<TData?> GetValidateCodeDataAsync<TData>(string validateCode, string token)
@@ -37,12 +39,11 @@ internal class RestValidateCodeOperator(
 			Resources.ResourceManager.GetString(nameof(Resources.ValidateCodeMailBody), cultureInfo)!,
 			validateCode);
 
-		var mailMessage = new SendEmailRequest(
-			[email],
-			mailSubject,
-			mailBody);
-
-		_ = await emailClient.SendAsync(mailMessage).ConfigureAwait(false);
+		await notificationEmailClient.PublishTextAsync(
+			recipients: [email],
+			subject: mailSubject,
+			content: mailBody
+		).ConfigureAwait(false);
 	}
 
 	public ValueTask SendMessageAsync(string phone, string shortMessage, string currency, Guid brandId)

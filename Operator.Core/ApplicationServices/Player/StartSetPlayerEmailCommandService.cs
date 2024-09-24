@@ -2,20 +2,20 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Polly;
+using Tgs.Email.Client;
 using Tgs.ServiceUtility;
-using TGS.Core.Infrastructures.Mail;
 using TGS.Services.Operator.Properties;
 using TGS.Services.Operator.ValidateCode;
 
 namespace TGS.Services.Operator.ApplicationServices.Player;
 
 internal class StartSetPlayerEmailCommandService(
-	IEmailClient emailClient,
+	INotificationEmailClient notificationEmailClient,
 	IValidateCodeGenerator codeGenerator,
 	IValidateCodeOperator validateCodeOperator) : IGetService<StartSetPlayerEmailCommand, string>
 {
 	private readonly IValidateCodeGenerator _codeGenerator = codeGenerator ?? throw new ArgumentNullException(nameof(codeGenerator));
-	private readonly IEmailClient _emailClient = emailClient ?? throw new ArgumentNullException(nameof(emailClient));
+	private readonly INotificationEmailClient _notificationEmailClient = notificationEmailClient ?? throw new ArgumentNullException(nameof(notificationEmailClient));
 	private readonly IValidateCodeOperator _validateCodeOperator = validateCodeOperator ?? throw new ArgumentNullException(nameof(validateCodeOperator));
 
 	public async ValueTask<string> GetAsync(StartSetPlayerEmailCommand command, CancellationToken cancellationToken = default)
@@ -56,12 +56,12 @@ internal class StartSetPlayerEmailCommandService(
 			Resources.ResourceManager.GetString(nameof(Resources.ValidateCodeMailBody), command.CultureInfo)!,
 			saveResult.ValidateCode);
 
-		var mailMessage = new SendEmailRequest(
-			[command.Email],
-			mailSubject,
-			mailBody);
-
-		_ = await _emailClient.SendAsync(mailMessage).ConfigureAwait(false);
+		await _notificationEmailClient.PublishTextAsync(
+			recipients: [command.Email], 
+			subject: mailSubject,                
+			content: mailBody,                  
+			cancellationToken: cancellationToken
+		).ConfigureAwait(false);
 
 		return saveResult.SecurityKey;
 	}

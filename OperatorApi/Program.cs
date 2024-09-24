@@ -257,7 +257,12 @@ builder.Services
 	.Decorate<IValidateCodeGenerator, ConstValidateCodeGenerator>()
 	.AddHostedService<PaymentNotifyConsumer>()
 	.AddHostedService<PushNotifyfConsumer>()
-	.AddNotificationClient();
+	.AddNotificationClient()
+	.AddNotificationEmailClient(httpBuilder =>
+	{
+		var config = builder.Configuration;
+		_ = httpBuilder.ConfigureHttpClient(client => client.BaseAddress = new Uri(config.GetValue<string>("Email:Url")));
+	});
 
 builder.Services
 	.AddRedis((options, sp) =>
