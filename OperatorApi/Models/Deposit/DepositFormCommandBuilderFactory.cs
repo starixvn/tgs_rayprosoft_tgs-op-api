@@ -76,6 +76,8 @@ public class DepositFormCommandBuilderFactory(IServiceProvider serviceProvider)
 				=> ActivatorUtilities.GetServiceOrCreateInstance<S88PayCommandBuilder>(serviceProvider),
 			_ when string.Equals("DirePay", paymentCode, StringComparison.InvariantCultureIgnoreCase)
 				=> ActivatorUtilities.GetServiceOrCreateInstance<DirePayCommandBuilder>(serviceProvider),
+			_ when string.Equals("AntPay", paymentCode, StringComparison.InvariantCultureIgnoreCase)
+			=> ActivatorUtilities.GetServiceOrCreateInstance<AntPayCommandBuilder>(serviceProvider),
 			_ => throw new NotImplementedException()
 		};
 	}
