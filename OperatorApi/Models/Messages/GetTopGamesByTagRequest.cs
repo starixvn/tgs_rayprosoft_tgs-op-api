@@ -16,4 +16,6 @@ public class GetTopGamesByTagRequest
 	public GameTag[] Tags { get; init; }
 
 	public string[] ProviderCode { get; init; }
+
+	public GameType[] GameTypeExclude { get; init; }
 }
