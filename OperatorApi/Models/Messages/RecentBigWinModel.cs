@@ -18,5 +18,5 @@ public record RecentBigWinModel()
 	public double WinAmount { get; init; }
 	public double BetAmount { get; init; }
 	public double Profit { get; init; }
-	public string Payout { get; init; }
+	public double Payout { get; init; }
 }

@@ -250,12 +250,17 @@ public class GameController(IConfiguration configuration) : ControllerBase
 					GameCode = game.Code,
 					GameType = game.Type,
 					GameProviderCode = game.GameProviderCode,
+					GameProviderName = game.GameProviderName,
 					CreateTime = DateTime.UtcNow,
 					CurrencyName = "",
 					PlayerName = RandomString(5),
 					PlayerCode = "",
 					PlayerVipLevel = 0,
-					WinAmount = new Random().Next(99999, 99999999)
+					BetId = new Random().Next(999999, 999999999).ToString(),
+					WinAmount = new Random().Next(99999, 99999999),
+					BetAmount = new Random().Next(99999, 99999999),
+					Profit = new Random().Next(99999, 99999999),
+					Payout = new Random().Next(9999, 999999)
 				};
 			}
 		}
