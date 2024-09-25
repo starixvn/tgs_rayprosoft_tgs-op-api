@@ -137,11 +137,11 @@ public class PromotionController(IPromotionClient promotionClient) : ControllerB
 
 		foreach (var item in milestonePromotions)
 		{
-			var playerCondition = await promotionMilestoneClient.GetPlayerConditionAsync(new GetPlayerConditionRequest(brandId, item.Id, playerTokenData!.PlayerCode));
-
 			var milestoneConditions =
 				await promotionMilestoneClient.GetConditionsIncludeCompletedListAsync(item.Id, playerTokenData!.PlayerCode)
 					.ToArrayAsync();
+
+			var playerCondition = await promotionMilestoneClient.GetPlayerConditionAsync(new GetPlayerConditionRequest(brandId, item.Id, playerTokenData!.PlayerCode));
 
 			list.Add(new PromotionMilestoneModel
 			{
