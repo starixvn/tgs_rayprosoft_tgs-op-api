@@ -9,6 +9,7 @@ using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models;
 using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Apis.OperatorApi.Utils;
+using TGS.Core.Infrastructures.Utility;
 using TGS.Core.Models.Enums;
 using TGS.Services.Operations;
 using TGS.Services.Operations.CodeMappers;
@@ -233,17 +234,18 @@ public class GameController(IConfiguration configuration) : ControllerBase
 			50,
 			1,
 			[],
-			[GameType.Sportsbook, GameType.ESports, GameType.TableGame],
+			[GameType.Sportsbook, GameType.ESports, GameType.TableGame, GameType.Slot],
 			[GameTag.Recommend],
 			0);
 
 		var gameTypes = await queryAllGameService.GetAsync(query);
+		var games = new List<RecentBigWinModel>();
 
 		foreach (var gameType in gameTypes)
 		{
 			foreach (var game in gameType.Games)
 			{
-				yield return new RecentBigWinModel
+				games.Add(new RecentBigWinModel
 				{
 					GameId = game.Id,
 					GameName = game.Name,
@@ -254,16 +256,18 @@ public class GameController(IConfiguration configuration) : ControllerBase
 					CreateTime = DateTime.UtcNow,
 					CurrencyName = "",
 					PlayerName = RandomString(5),
-					PlayerCode = "",
+					PlayerCode = PlayerCodeGenerator.NewId(),
 					PlayerVipLevel = 0,
 					BetId = new Random().Next(999999, 999999999).ToString(),
 					WinAmount = new Random().Next(99999, 99999999),
 					BetAmount = new Random().Next(99999, 99999999),
 					Profit = new Random().Next(99999, 99999999),
 					Payout = new Random().Next(9999, 999999)
-				};
+				});
 			}
 		}
+		foreach (var game in games.Take(50))
+			yield return game;
 	}
 
 	/// <summary>
