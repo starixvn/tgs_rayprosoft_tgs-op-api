@@ -11,6 +11,7 @@ using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Apis.OperatorApi.Models.Messages.PromotionMilestone;
 using Tgs.Promotion.Milestone.Client;
+using Tgs.Promotion.Milestone.Client.Models;
 using Valhalla.MessageQueue;
 
 namespace TGS.Apis.OperatorApi.Controllers;
@@ -136,8 +137,7 @@ public class PromotionController(IPromotionClient promotionClient) : ControllerB
 
 		foreach (var item in milestonePromotions)
 		{
-			var playerCondition = await promotionMilestoneClient.GetPlayerConditionAsync(brandId, playerTokenData!.PlayerCode,
-				item.EventDuring.From, item.EventDuring.To, default);
+			var playerCondition = await promotionMilestoneClient.GetPlayerConditionAsync(new GetPlayerConditionRequest(brandId, item.Id, playerTokenData!.PlayerCode));
 
 			var milestoneConditions =
 				await promotionMilestoneClient.GetConditionsIncludeCompletedListAsync(item.Id, playerTokenData!.PlayerCode)
