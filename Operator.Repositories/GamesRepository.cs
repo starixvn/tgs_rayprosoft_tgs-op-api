@@ -8,6 +8,7 @@ using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Models.Enums;
 using TGS.Operator.Repositories.Extensions;
+using TGS.Operator.Repositories.Models;
 using TGS.Operator.Repositories.Services;
 using TGS.Services.Operator;
 using TGS.Services.Operator.ApplicationServices.Game;
@@ -33,21 +34,15 @@ namespace TGS.Operator.Repositories
 			}
 
 			var providersAvailableForBrand = await GetProviderActiveForBrand(query.BrandId, query.ProviderCode);
-			var groupedGames = await GetAndGroupGamesAsync(query, platformTypes, providersAvailableForBrand);
-			var paginatedResults = await groupedGames
-				.Select(g => new
-				{
-					key = g.Key,
-					total = g.Count(),
-					Games = GameService.OrderBy(g.ToList(), query.OrderType, query.PageIndex, query.PageSize)
+			var groupedGamesQuery = GetAndGroupGames(query, platformTypes, providersAvailableForBrand);
+			var paginatedResults = GameService.OrderAndPagination(groupedGamesQuery, query.OrderType, query.PageIndex, query.PageSize);
+			var providerDictionary = providersAvailableForBrand.ToDictionary(bp => bp.GameProviderId, bp => bp.Status);
 
-				}).ToListAsync();
-
-			return paginatedResults.Select(info => new GamesModel
+			return paginatedResults.ToList().Select(info => new GamesModel
 			{
-				Total = info.total,
-				Key = info.key,
-				Games = GameService.MapCategory(info.Games, query.CultureCode, providersAvailableForBrand.ToDictionary(bp => bp.GameProviderId, bp => bp.Status))
+				Total = info.Total,
+				Key = info.Key,
+				Games = GameService.MapCategory(info.Games, query.CultureCode, providerDictionary)
 			});
 		}
 
@@ -64,9 +59,6 @@ namespace TGS.Operator.Repositories
 			var providersAvailable = providersActivated.Select(bp => bp.GameProviderId);
 
 			var gamesQuery = _tgsRepository.BrandGames
-				.Include(bg => bg.Game)
-				.ThenInclude(g => g.SubGameProvider)
-				.ThenInclude(sgp => sgp.GameProvider)
 				.Where(bg => bg.BrandId == query.BrandId &&
 							 bg.Game.AvailableToBrand &&
 							 providersAvailable.Contains(bg.Game.GameProviderId) &&
@@ -74,20 +66,19 @@ namespace TGS.Operator.Repositories
 							 _statuses.Contains(bg.Status) &&
 							 _statuses.Contains(bg.Game.Status) &&
 							 !query.GameTypeExclude.Contains(bg.Game.Type))
+
+				.SelectGameInfo()
 				.AsNoTracking();
 
 			return await GetGroupGameTag(query, gamesQuery, providersActivated);
 		}
 
-		private async Task<IQueryable<IGrouping<object, BrandGame>>> GetAndGroupGamesAsync(GetGamesQuery query, GamePlatformType[] platformTypes, IEnumerable<BrandGameProvider> gameProviders)
+		private IQueryable<IGrouping<object, GameDto>> GetAndGroupGames(GetGamesQuery query, GamePlatformType[] platformTypes, IEnumerable<BrandGameProvider> gameProviders)
 		{
 			var providersAvailable = gameProviders.Select(bp => bp.GameProviderId);
 			var tagQuery = query.Tag.Sum(t => (byte)t);
 
 			return _tgsRepository.BrandGames
-				.Include(bg => bg.Game)
-				.ThenInclude(g => g.SubGameProvider)
-				.ThenInclude(sgp => sgp.GameProvider)
 				.Where(bg => bg.BrandId == query.BrandId &&
 							 bg.Game.AvailableToBrand &&
 							 providersAvailable.Contains(bg.Game.GameProviderId) &&
@@ -97,13 +88,15 @@ namespace TGS.Operator.Repositories
 							 _statuses.Contains(bg.Game.Status) &&
 							 (query.Types.IsNullOrEmpty() || query.Types.Contains(bg.Game.Type)) &&
 							 (query.Tag.IsNullOrEmpty() || (tagQuery & (byte)bg.Tag) > 0))
-				.AsNoTracking()
+				.SelectGameInfo()
 				.GroupByGameQuery(
-					(query.Types, bg => bg.Game.Type),
-					(query.ProviderCode, bg => bg.Game.SubGameProvider.GameProvider.Code));
+					(query.Types, bg => bg.Type),
+					(query.ProviderCode, bg => bg.GameProviderCode))
+				.AsNoTracking();
 		}
 
-		private async Task<IEnumerable<GameTagInfo>> GetGroupGameTag(GetTopGamesByTagQuery query, IQueryable<BrandGame> gamesQuery, IEnumerable<BrandGameProvider> providersActivated)
+		private async Task<IEnumerable<GameTagInfo>> GetGroupGameTag(GetTopGamesByTagQuery query,
+			IQueryable<GameDto> gamesQuery, IEnumerable<BrandGameProvider> providersActivated)
 		{
 			var groupedGames = new List<GameTagInfo>();
 
@@ -113,7 +106,7 @@ namespace TGS.Operator.Repositories
 					.Where(g => (g.Tag & tag) != 0);
 
 				var games = await tagQuery.OrderBy(g => g.DisplayOrder)
-				.ThenBy(g => g.Game.Code)
+				.ThenBy(g => g.Code)
 				.Skip((query.PageIndex - 1) * query.PageSize).Take(query.PageSize)
 				.ToListAsync();
 				var gameCount = await tagQuery.CountAsync();
@@ -129,7 +122,7 @@ namespace TGS.Operator.Repositories
 			return groupedGames;
 		}
 
-		private async Task<List<BrandGameProvider>> GetProviderActiveForBrand(Guid brandId, string[] providerCodes)
+		private async Task<IEnumerable<BrandGameProvider>> GetProviderActiveForBrand(Guid brandId, string[] providerCodes)
 		{
 			return await _tgsRepository.BrandGameProviders
 				.Where(bp => bp.BrandId == brandId && _providerStatuses.Contains(bp.Status))

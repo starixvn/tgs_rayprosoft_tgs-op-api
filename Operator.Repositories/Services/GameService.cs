@@ -5,6 +5,7 @@ using System.Text.Json;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Extensions;
+using TGS.Operator.Repositories.Models;
 using TGS.Services.Operator;
 using TGS.Services.Operator.ApplicationServices.GameTypes;
 
@@ -14,55 +15,135 @@ namespace TGS.Operator.Repositories.Services;
 public static class GameService
 {
 
-	public static IEnumerable<BrandGame> OrderBy(IEnumerable<BrandGame> query, OrderType? orderType, int pageIndex, int pageSize)
+	public static IQueryable<GroupGameDto> OrderAndPagination(IQueryable<IGrouping<object, GameDto>> query,
+		OrderType? orderType, int pageIndex, int pageSize)
 	{
-		var orderedList = orderType switch
+		return orderType switch
 		{
-			OrderType.Hot => query.OrderByDescending(g => g.Tag & GameTag.Hot).ThenBy(g => g.DisplayOrder),
-			OrderType.Ascending => query.OrderBy(g => g.Game.Name),
-			OrderType.Descending => query.OrderByDescending(g => g.Game.Name),
-			OrderType.New => query.OrderByDescending(g => g.Tag & GameTag.New).ThenBy(g => g.DisplayOrder),
-			_ => query.OrderBy(g => g.DisplayOrder).ThenBy(g => g.Game.Name),
+			OrderType.Hot => query
+				.Select(g => new GroupGameDto()
+				{
+					Key = g.Key,
+					Total = g.Count(),
+					Games = g.OrderByDescending(bg => bg.Tag & GameTag.Hot)
+						.ThenBy(bg => bg.DisplayOrder)
+						.Skip((pageIndex - 1) * pageSize)
+						.Take(pageSize)
+				}),
+			OrderType.Ascending => query
+				.Select(g => new GroupGameDto
+				{
+					Key = g.Key,
+					Total = g.Count(),
+					Games = g.OrderBy(bg => bg.Name)
+						.Skip((pageIndex - 1) * pageSize)
+						.Take(pageSize)
+				}),
+			OrderType.Descending => query
+				.Select(g => new GroupGameDto
+				{
+					Key = g.Key,
+					Total = g.Count(),
+					Games = g.OrderByDescending(bg => bg.Name)
+						.Skip((pageIndex - 1) * pageSize)
+						.Take(pageSize)
+				}),
+			OrderType.New => query
+				.Select(g => new GroupGameDto
+				{
+					Key = g.Key,
+					Total = g.Count(),
+					Games = g.OrderByDescending(bg => bg.Tag & GameTag.New)
+						.ThenBy(bg => bg.DisplayOrder)
+						.Skip((pageIndex - 1) * pageSize)
+						.Take(pageSize)
+				}),
+			_ => query
+				.Select(g => new GroupGameDto
+				{
+					Key = g.Key,
+					Total = g.Count(),
+					Games = g.OrderBy(bg => bg.DisplayOrder)
+						.ThenBy(bg => bg.Name)
+						.Skip((pageIndex - 1) * pageSize)
+						.Take(pageSize)
+				})
 		};
-
-		return orderedList.Skip((pageIndex - 1) * pageSize).Take(pageSize);
 	}
-
-	public static IEnumerable<GameInfo> MapCategory(IEnumerable<BrandGame> games, string cultureCode, IDictionary<Guid, Status> brandProviderStatus)
+	public static IEnumerable<GameInfo> MapCategory(IEnumerable<GameDto> games, string cultureCode, IDictionary<Guid, Status> brandProviderStatus)
 	{
 		return games.Select(i =>
 		{
-			brandProviderStatus.TryGetValue(i.Game.GameProviderId, out Status status);
+			brandProviderStatus.TryGetValue(i.GameProviderId, out Status status);
 			var gameStatus = GetGameStatus(i.Status,
-				i.Game.Status,
-				i.Game.SubGameProvider.GameProvider.Status,
+				i.Status,
+				i.GameProviderStatus,
 				status);
-			var lang = DeserializeLocalization(i.Game.Localization).TryGetValue(cultureCode, out var value)
+			var lang = DeserializeLocalization(i.Localization).TryGetValue(cultureCode, out var value)
 				? value
 				: JsonDocument.Parse("{}");
 			return new GameInfo
 			{
-				Id = i.Game.Id,
-				Code = i.Game.Code,
+				Id = i.Id,
+				Code = i.Code,
 				Name = GetLocalization(
 					lang.RootElement,
 					"name",
-					i.Game.Name),
+					i.Name),
 				Description = GetLocalization(
 					lang.RootElement,
 					"description",
-					i.Game.Description),
-				GameProviderCode = i.Game.SubGameProvider.GameProvider.Code,
-				GameProviderName = i.Game.SubGameProvider.GameProvider.Name,
-				SubGameProviderCode = i.Game.SubGameProviderCode,
+					i.Description),
+				GameProviderCode = i.GameProviderCode,
+				GameProviderName = i.GameProviderName,
 				GameStatus = gameStatus,
 				DisplayOrder = i.DisplayOrder,
-				Type = i.Game.Type,
+				Type = i.Type,
 				Tag = new TagInfo { New = i.Tag.IsNew(), Hot = i.Tag.IsHot(), Recommend = i.Tag.IsRecommend() },
 			};
 		}).OrderByDescending(g => g.GameStatus == GameStatus.Active);
 	}
 
+	public static IEnumerable<GameDto> SelectGame(this IEnumerable<BrandGame> query)
+	{
+		return query.Select(bg => new GameDto
+		{
+			Id = bg.Game.Id,
+			Code = bg.Game.Code,
+			Name = bg.Game.Name,
+			Description = bg.Game.Description,
+			GameProviderCode = bg.Game.GameProvider.Code,
+			GameProviderName = bg.Game.GameProvider.Name,
+			GameProviderId = bg.Game.GameProvider.Id,
+			GameProviderStatus = bg.Game.GameProvider.Status,
+			BranGameStatus = bg.Status,
+			Localization = bg.Game.Localization,
+			DisplayOrder = bg.DisplayOrder,
+			Type = bg.Game.Type,
+			Tag = bg.Tag
+		});
+	}
+
+	public static IQueryable<GameDto> SelectGameInfo(this IQueryable<BrandGame> query)
+	{
+		return query.Select(bg => new GameDto
+		{
+			Id = bg.Game.Id,
+			Code = bg.Game.Code,
+			Name = bg.Game.Name,
+			Description = bg.Game.Description,
+			GameProviderCode = bg.Game.SubGameProvider.GameProvider.Code,
+			GameProviderName = bg.Game.SubGameProvider.GameProvider.Name,
+			GameProviderId = bg.Game.SubGameProvider.GameProvider.Id,
+			GameProviderStatus = bg.Game.SubGameProvider.GameProvider.Status,
+			SubGameProviderCode = bg.Game.SubGameProvider.Code,
+			BranGameStatus = bg.Status,
+			Localization = bg.Game.Localization,
+			DisplayOrder = bg.DisplayOrder,
+			Type = bg.Game.Type,
+			Tag = bg.Tag
+		});
+	}
 
 	private static GameStatus GetGameStatus(GameStatus brandGameStatus, GameStatus gameStatus, Status providerStatus, Status brandProviderStatus)
 		=> brandGameStatus == GameStatus.Maintenance || gameStatus == GameStatus.Maintenance || providerStatus == Status.Maintenance || brandProviderStatus == Status.Maintenance

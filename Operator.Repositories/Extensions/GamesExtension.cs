@@ -3,12 +3,12 @@ using System.Collections;
 using System.Linq;
 using System.Linq.Expressions;
 using Castle.Core.Internal;
-using TGS.Core.DataServices.Tgs.Models;
+using TGS.Operator.Repositories.Models;
 
 namespace TGS.Operator.Repositories.Extensions;
 public static class GamesExtension
 {
-	public static IQueryable<IGrouping<object, BrandGame>> GroupByGameQuery(this IQueryable<BrandGame> source, params (IEnumerable, Expression<Func<BrandGame, object>>)[] keySelectors)
+	public static IQueryable<IGrouping<object, GameDto>> GroupByGameQuery(this IQueryable<GameDto> source, params (IEnumerable, Expression<Func<GameDto, object>>)[] keySelectors)
 	{
 		foreach (var selector in keySelectors)
 		{
@@ -18,6 +18,6 @@ public static class GamesExtension
 			}
 		}
 
-		return source.GroupBy(s => (object)s.Game.Type);
+		return source.GroupBy(s => (object)s.Type);
 	}
 }
