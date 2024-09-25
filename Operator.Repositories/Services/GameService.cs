@@ -27,6 +27,7 @@ public static class GameService
 					Total = g.Count(),
 					Games = g.OrderByDescending(bg => bg.Tag & GameTag.Hot)
 						.ThenBy(bg => bg.DisplayOrder)
+						.ThenBy(bg => bg.Name)
 						.Skip((pageIndex - 1) * pageSize)
 						.Take(pageSize)
 				}),
@@ -55,6 +56,7 @@ public static class GameService
 					Total = g.Count(),
 					Games = g.OrderByDescending(bg => bg.Tag & GameTag.New)
 						.ThenBy(bg => bg.DisplayOrder)
+						.ThenBy(bg => bg.Name)
 						.Skip((pageIndex - 1) * pageSize)
 						.Take(pageSize)
 				}),

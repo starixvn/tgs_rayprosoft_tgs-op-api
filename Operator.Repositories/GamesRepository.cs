@@ -63,6 +63,7 @@ namespace TGS.Operator.Repositories
 							 bg.Game.AvailableToBrand &&
 							 providersAvailable.Contains(bg.Game.GameProviderId) &&
 							 gamePlatformTypes.Contains(bg.Game.PlatformType) &&
+							 _providerStatuses.Contains(bg.Game.GameProvider.Status) &&
 							 _statuses.Contains(bg.Status) &&
 							 _statuses.Contains(bg.Game.Status) &&
 							 !query.GameTypeExclude.Contains(bg.Game.Type))
@@ -83,7 +84,7 @@ namespace TGS.Operator.Repositories
 							 bg.Game.AvailableToBrand &&
 							 providersAvailable.Contains(bg.Game.GameProviderId) &&
 							 platformTypes.Contains(bg.Game.PlatformType) &&
-							 _providerStatuses.Contains(bg.Game.SubGameProvider.GameProvider.Status) &&
+							 _providerStatuses.Contains(bg.Game.GameProvider.Status) &&
 							 _statuses.Contains(bg.Status) &&
 							 _statuses.Contains(bg.Game.Status) &&
 							 (query.Types.IsNullOrEmpty() || query.Types.Contains(bg.Game.Type)) &&
