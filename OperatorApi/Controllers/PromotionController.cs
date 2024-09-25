@@ -145,6 +145,7 @@ public class PromotionController(IPromotionClient promotionClient) : ControllerB
 
 			list.Add(new PromotionMilestoneModel
 			{
+				PromotionId = item.Id,
 				Name = item.Name,
 				SubSubject = item.SubSubject,
 				From = item.EventDuring.From,
