@@ -140,6 +140,7 @@ public static class GameService
 			GameProviderStatus = bg.Game.SubGameProvider.GameProvider.Status,
 			SubGameProviderCode = bg.Game.SubGameProvider.Code,
 			BranGameStatus = bg.Status,
+			Status = bg.Game.Status,
 			Localization = bg.Game.Localization,
 			DisplayOrder = bg.DisplayOrder,
 			Type = bg.Game.Type,
