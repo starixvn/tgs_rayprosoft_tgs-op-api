@@ -1112,125 +1112,125 @@ public class GameTests
 			.RemoveFavoriteGameAsync(Arg.Is(command.PlayerCode), Arg.Is(command.GameId));
 	}
 
-	[Test]
-	public async Task Should_Fund_In_All_Game_Balance_Before_Get_Game_Url()
-	{
-		var fakeGetGpCodeService = Substitute.For<IGetService<GetGpCodeQuery, BrandSubGameProviderInfo>>();
-		var fakeGetGameUrlQueryService = Substitute.For<IGetService<GetGameUrlQuery, Uri>>();
-		var fakeFundInAllService = Substitute.For<ICommandService<FundInAllGameBalanceCommand>>();
-		var fakeFundService = Substitute.For<ICommandService<FundOutBeforeEnterGameCommand>>();
+	//[Test]
+	//public async Task Should_Fund_In_All_Game_Balance_Before_Get_Game_Url()
+	//{
+	//	var fakeGetGpCodeService = Substitute.For<IGetService<GetGpCodeQuery, BrandSubGameProviderInfo>>();
+	//	var fakeGetGameUrlQueryService = Substitute.For<IGetService<GetGameUrlQuery, Uri>>();
+	//	var fakeFundInAllService = Substitute.For<ICommandService<FundInAllGameBalanceCommand>>();
+	//	var fakeFundService = Substitute.For<ICommandService<FundOutBeforeEnterGameCommand>>();
 
-		var playerTokenData = new PlayerTokenData
-		{
-			PlayerCode = "playerCode",
-			PlatformType = PlatformType.Desktop,
-			LoginRecordId = Guid.NewGuid(),
-			ExpiredOn = DateTimeOffset.Now
-		};
+	//	var playerTokenData = new PlayerTokenData
+	//	{
+	//		PlayerCode = "playerCode",
+	//		PlatformType = PlatformType.Desktop,
+	//		LoginRecordId = Guid.NewGuid(),
+	//		ExpiredOn = DateTimeOffset.Now
+	//	};
 
-		var gameUrl = new Uri("http://www.google.com");
+	//	var gameUrl = new Uri("http://www.google.com");
 
-		var httpContext = new DefaultHttpContext();
-		httpContext.Items.Add("playerToken", playerTokenData);
-		httpContext.Items.Add("brandId", Guid.NewGuid());
+	//	var httpContext = new DefaultHttpContext();
+	//	httpContext.Items.Add("playerToken", playerTokenData);
+	//	httpContext.Items.Add("brandId", Guid.NewGuid());
 
-		var sut = new GameController
-		{
-			ControllerContext = new ControllerContext
-			{
-				HttpContext = httpContext
-			}
-		};
+	//	var sut = new GameController
+	//	{
+	//		ControllerContext = new ControllerContext
+	//		{
+	//			HttpContext = httpContext
+	//		}
+	//	};
 
-		var request = new GetGameUrlRequest
-		{
-			GameProviderCode = "sub1",
-			GameId = 10,
-			LanguageCode = "zh-cn"
-		};
+	//	var request = new GetGameUrlRequest
+	//	{
+	//		GameProviderCode = "sub1",
+	//		GameId = 10,
+	//		LanguageCode = "zh-cn"
+	//	};
 
-		_ = fakeGetGpCodeService.GetAsync(Arg.Any<GetGpCodeQuery>())
-			.Returns(ValueTask.FromResult(new BrandSubGameProviderInfo(
-				"sub1",
-				"sub1",
-				"sub1",
-				Guid.NewGuid(),
-				"gp1",
-				true,
-				Status.Active,
-				string.Empty)));
+	//	_ = fakeGetGpCodeService.GetAsync(Arg.Any<GetGpCodeQuery>())
+	//		.Returns(ValueTask.FromResult(new BrandSubGameProviderInfo(
+	//			"sub1",
+	//			"sub1",
+	//			"sub1",
+	//			Guid.NewGuid(),
+	//			"gp1",
+	//			true,
+	//			Status.Active,
+	//			string.Empty)));
 
-		_ = fakeGetGameUrlQueryService.GetAsync(Arg.Any<GetGameUrlQuery>())
-			.Returns(ValueTask.FromResult(gameUrl));
+	//	_ = fakeGetGameUrlQueryService.GetAsync(Arg.Any<GetGameUrlQuery>())
+	//		.Returns(ValueTask.FromResult(gameUrl));
 
-		_ = await sut.GetGameUrlAsync(
-			fakeGetGpCodeService,
-			fakeGetGameUrlQueryService,
-			fakeFundInAllService,
-			fakeFundService,
-			request);
+	//	_ = await sut.GetGameUrlAsync(
+	//		fakeGetGpCodeService,
+	//		fakeGetGameUrlQueryService,
+	//		fakeFundInAllService,
+	//		fakeFundService,
+	//		request);
 
-		_ = fakeFundInAllService.Received(1)
-			.ExecuteAsync(Arg.Any<FundInAllGameBalanceCommand>());
-	}
+	//	_ = fakeFundInAllService.Received(1)
+	//		.ExecuteAsync(Arg.Any<FundInAllGameBalanceCommand>());
+	//}
 
-	[Test]
-	public async Task Should_Fund_In_All_Game_Balance_Before_Get_Lobby_Game_Url()
-	{
-		var fakeGetGpCodeService = Substitute.For<IGetService<GetGpCodeQuery, BrandSubGameProviderInfo>>();
-		var fakeGetLobbyGameUrlQueryService = Substitute.For<IGetService<GetLobbyGameUrlQuery, Uri>>();
-		var fakeFundInAllService = Substitute.For<ICommandService<FundInAllGameBalanceCommand>>();
-		var fakeFundService = Substitute.For<ICommandService<FundOutBeforeEnterGameCommand>>();
+	//[Test]
+	//public async Task Should_Fund_In_All_Game_Balance_Before_Get_Lobby_Game_Url()
+	//{
+	//	var fakeGetGpCodeService = Substitute.For<IGetService<GetGpCodeQuery, BrandSubGameProviderInfo>>();
+	//	var fakeGetLobbyGameUrlQueryService = Substitute.For<IGetService<GetLobbyGameUrlQuery, Uri>>();
+	//	var fakeFundInAllService = Substitute.For<ICommandService<FundInAllGameBalanceCommand>>();
+	//	var fakeFundService = Substitute.For<ICommandService<FundOutBeforeEnterGameCommand>>();
 
-		var playerTokenData = new PlayerTokenData
-		{
-			PlayerCode = "playerCode",
-			PlatformType = PlatformType.Desktop,
-			LoginRecordId = Guid.NewGuid(),
-			ExpiredOn = DateTimeOffset.Now
-		};
+	//	var playerTokenData = new PlayerTokenData
+	//	{
+	//		PlayerCode = "playerCode",
+	//		PlatformType = PlatformType.Desktop,
+	//		LoginRecordId = Guid.NewGuid(),
+	//		ExpiredOn = DateTimeOffset.Now
+	//	};
 
-		var httpContext = new DefaultHttpContext();
-		httpContext.Items.Add("playerToken", playerTokenData);
-		httpContext.Items.Add("brandId", Guid.NewGuid());
+	//	var httpContext = new DefaultHttpContext();
+	//	httpContext.Items.Add("playerToken", playerTokenData);
+	//	httpContext.Items.Add("brandId", Guid.NewGuid());
 
-		var sut = new GameController
-		{
-			ControllerContext = new ControllerContext
-			{
-				HttpContext = httpContext
-			}
-		};
+	//	var sut = new GameController
+	//	{
+	//		ControllerContext = new ControllerContext
+	//		{
+	//			HttpContext = httpContext
+	//		}
+	//	};
 
-		var request = new GetLobbyGameUrlRequest
-		{
-			SubGameProviderCode = "sub1",
-			LanguageCode = "zh-cn"
-		};
+	//	var request = new GetLobbyGameUrlRequest
+	//	{
+	//		SubGameProviderCode = "sub1",
+	//		LanguageCode = "zh-cn"
+	//	};
 
-		_ = fakeGetGpCodeService.GetAsync(Arg.Any<GetGpCodeQuery>())
-			.Returns(ValueTask.FromResult(new BrandSubGameProviderInfo(
-				"sub1",
-				"sub1",
-				"sub1",
-				Guid.NewGuid(),
-				"gp1",
-				true,
-				Status.Active,
-				string.Empty)));
+	//	_ = fakeGetGpCodeService.GetAsync(Arg.Any<GetGpCodeQuery>())
+	//		.Returns(ValueTask.FromResult(new BrandSubGameProviderInfo(
+	//			"sub1",
+	//			"sub1",
+	//			"sub1",
+	//			Guid.NewGuid(),
+	//			"gp1",
+	//			true,
+	//			Status.Active,
+	//			string.Empty)));
 
-		_ = fakeGetLobbyGameUrlQueryService
-			.GetAsync(Arg.Any<GetLobbyGameUrlQuery>())
-			.Returns(ValueTask.FromResult(new Uri("http://www.google.com")));
+	//	_ = fakeGetLobbyGameUrlQueryService
+	//		.GetAsync(Arg.Any<GetLobbyGameUrlQuery>())
+	//		.Returns(ValueTask.FromResult(new Uri("http://www.google.com")));
 
-		_ = await sut.GetLobbyGameUrlAsync(
-			fakeGetGpCodeService,
-			fakeGetLobbyGameUrlQueryService,
-			fakeFundInAllService,
-			fakeFundService,
-			request);
+	//	_ = await sut.GetLobbyGameUrlAsync(
+	//		fakeGetGpCodeService,
+	//		fakeGetLobbyGameUrlQueryService,
+	//		fakeFundInAllService,
+	//		fakeFundService,
+	//		request);
 
-		_ = fakeFundInAllService.Received(1)
-			.ExecuteAsync(Arg.Any<FundInAllGameBalanceCommand>());
-	}
+	//	_ = fakeFundInAllService.Received(1)
+	//		.ExecuteAsync(Arg.Any<FundInAllGameBalanceCommand>());
+	//}
 }

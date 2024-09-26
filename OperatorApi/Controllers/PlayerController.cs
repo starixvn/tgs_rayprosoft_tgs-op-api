@@ -684,7 +684,7 @@ public class PlayerController(ILogger<PlayerController> logger) : ControllerBase
 	/// <summary>
 	/// Check if validate code is existed.
 	/// </summary>
-	[HttpGet("validate-code/check")]
+	[HttpPost("validate-code/check")]
 	[ProducesResponseType(StatusCodes.Status200OK)]
 	public async Task<IActionResult> CheckValidateCodeAsync(
 			[FromServices] IGetService<CheckValidateCodeQuery, bool> checkService,

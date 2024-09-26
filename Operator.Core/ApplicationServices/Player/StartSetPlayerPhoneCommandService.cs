@@ -5,7 +5,6 @@ using Polly;
 using Tgs.BrandCertificate.Clients;
 using Tgs.PlayerService.Client;
 using Tgs.ServiceUtility;
-using TGS.Core.Models.Messages.HealthCheck;
 using TGS.Services.Operator.Properties;
 using TGS.Services.Operator.ValidateCode;
 using TGS.SmsService.Client;
@@ -16,7 +15,6 @@ internal class StartSetPlayerPhoneCommandService(
 	IPlayerServiceClient playerServiceClient,
 	IBrandServiceClient brandServiceClient,
 	IValidateCodeGenerator codeGenerator,
-	IPlayerRepository playerRepository,
 	IValidateCodeOperator validateCodeOperator,
 	ISmsServiceClient smsServiceClient) : IGetService<StartSetPlayerPhoneCommand, string>
 {
@@ -24,7 +22,6 @@ internal class StartSetPlayerPhoneCommandService(
 	private readonly IValidateCodeGenerator _codeGenerator = codeGenerator ?? throw new ArgumentNullException(nameof(codeGenerator));
 	private readonly IPlayerServiceClient _playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
 	private readonly ISmsServiceClient _smsServiceClient = smsServiceClient ?? throw new ArgumentNullException(nameof(smsServiceClient));
-	private readonly IPlayerRepository _playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
 	private readonly IValidateCodeOperator _validateCodeOperator = validateCodeOperator ?? throw new ArgumentNullException(nameof(validateCodeOperator));
 
 	public async ValueTask<string> GetAsync(

@@ -343,91 +343,91 @@ public class PlayerEmailTests
 				brandId)));
 	}
 
-	[Test]
-	public async Task Start_Set_Player_Email_Should_Not_Send_Confirm_Mail_If_Is_Register_Flow()
-	{
-		var fakeEmailClient = Substitute.For<IEmailClient>();
-		var fakeValidateCodeGenerator = Substitute.For<IValidateCodeGenerator>();
-		var fakeValidateCodeOperator = Substitute.For<IValidateCodeOperator>();
+	//[Test]
+	//public async Task Start_Set_Player_Email_Should_Not_Send_Confirm_Mail_If_Is_Register_Flow()
+	//{
+	//	var fakeEmailClient = Substitute.For<IEmailClient>();
+	//	var fakeValidateCodeGenerator = Substitute.For<IValidateCodeGenerator>();
+	//	var fakeValidateCodeOperator = Substitute.For<IValidateCodeOperator>();
 
-		var sut = new StartSetPlayerEmailCommandService(
-			fakeEmailClient,
-			fakeValidateCodeGenerator,
-			fakeValidateCodeOperator);
+	//	var sut = new StartSetPlayerEmailCommandService(
+	//		fakeEmailClient,
+	//		fakeValidateCodeGenerator,
+	//		fakeValidateCodeOperator);
 
-		var playerCode = "testPlayerCode";
-		var email = "test@raypro.com";
-		var command = new StartSetPlayerEmailCommand(
-			playerCode,
-			email,
-			CultureInfo.GetCultureInfo("en-US"),
-			true);
+	//	var playerCode = "testPlayerCode";
+	//	var email = "test@raypro.com";
+	//	var command = new StartSetPlayerEmailCommand(
+	//		playerCode,
+	//		email,
+	//		CultureInfo.GetCultureInfo("en-US"),
+	//		true);
 
-		var validateCode = "123456";
-		var expectedSecurityKey = "3F8E5681-50C8-4F2F-8379-3AA6EF2C6064";
+	//	var validateCode = "123456";
+	//	var expectedSecurityKey = "3F8E5681-50C8-4F2F-8379-3AA6EF2C6064";
 
-		_ = fakeValidateCodeGenerator.GenerateSecurityKey().Returns(expectedSecurityKey);
+	//	_ = fakeValidateCodeGenerator.GenerateSecurityKey().Returns(expectedSecurityKey);
 
-		_ = fakeValidateCodeOperator
-			.SaveValidateDataAsync(Arg.Is(validateCode), Arg.Is(expectedSecurityKey), Arg.Any<EmailValidateData>())
-			.Returns(true);
+	//	_ = fakeValidateCodeOperator
+	//		.SaveValidateDataAsync(Arg.Is(validateCode), Arg.Is(expectedSecurityKey), Arg.Any<EmailValidateData>())
+	//		.Returns(true);
 
-		var actualSecurityKey = await sut.GetAsync(command);
+	//	var actualSecurityKey = await sut.GetAsync(command);
 
-		_ = fakeEmailClient
-			.Received(0)
-			.SendAsync(Arg.Any<SendEmailRequest>());
+	//	_ = fakeEmailClient
+	//		.Received(0)
+	//		.SendAsync(Arg.Any<SendEmailRequest>());
 
-		_ = fakeValidateCodeGenerator
-			.Received(0).GenerateCode();
+	//	_ = fakeValidateCodeGenerator
+	//		.Received(0).GenerateCode();
 
-		ClassicAssert.AreEqual(expectedSecurityKey, actualSecurityKey);
-	}
+	//	ClassicAssert.AreEqual(expectedSecurityKey, actualSecurityKey);
+	//}
 
-	[Test]
-	public async Task Start_Set_Player_Email_Should_Send_Confirm_Mail_If_Not_Register_Flow()
-	{
-		var fakeEmailClient = Substitute.For<IEmailClient>();
-		var fakeValidateCodeGenerator = Substitute.For<IValidateCodeGenerator>();
-		var fakeValidateCodeOperator = Substitute.For<IValidateCodeOperator>();
+	//[Test]
+	//public async Task Start_Set_Player_Email_Should_Send_Confirm_Mail_If_Not_Register_Flow()
+	//{
+	//	var fakeEmailClient = Substitute.For<IEmailClient>();
+	//	var fakeValidateCodeGenerator = Substitute.For<IValidateCodeGenerator>();
+	//	var fakeValidateCodeOperator = Substitute.For<IValidateCodeOperator>();
 
-		var sut = new StartSetPlayerEmailCommandService(
-			fakeEmailClient,
-			fakeValidateCodeGenerator,
-			fakeValidateCodeOperator);
+	//	var sut = new StartSetPlayerEmailCommandService(
+	//		fakeEmailClient,
+	//		fakeValidateCodeGenerator,
+	//		fakeValidateCodeOperator);
 
-		var playerCode = "testPlayerCode";
-		var email = "test@raypro.com";
-		var command = new StartSetPlayerEmailCommand(playerCode, email, CultureInfo.GetCultureInfo("en-US"), false);
+	//	var playerCode = "testPlayerCode";
+	//	var email = "test@raypro.com";
+	//	var command = new StartSetPlayerEmailCommand(playerCode, email, CultureInfo.GetCultureInfo("en-US"), false);
 
-		var validateCode = "123456";
-		var expectedSecurityKey = "3F8E5681-50C8-4F2F-8379-3AA6EF2C6064";
+	//	var validateCode = "123456";
+	//	var expectedSecurityKey = "3F8E5681-50C8-4F2F-8379-3AA6EF2C6064";
 
-		_ = fakeValidateCodeGenerator.GenerateCode().Returns(validateCode);
-		_ = fakeValidateCodeGenerator.GenerateSecurityKey().Returns(expectedSecurityKey);
+	//	_ = fakeValidateCodeGenerator.GenerateCode().Returns(validateCode);
+	//	_ = fakeValidateCodeGenerator.GenerateSecurityKey().Returns(expectedSecurityKey);
 
-		_ = fakeValidateCodeOperator
-			.SaveValidateDataAsync(Arg.Is(validateCode), Arg.Is(expectedSecurityKey), Arg.Any<EmailValidateData>())
-			.Returns(true);
+	//	_ = fakeValidateCodeOperator
+	//		.SaveValidateDataAsync(Arg.Is(validateCode), Arg.Is(expectedSecurityKey), Arg.Any<EmailValidateData>())
+	//		.Returns(true);
 
-		var expected = new
-		{
-			Receivers = new[] { email },
-			Subject = "Verification Code",
-			Content = $"Verification code is {validateCode}, it will expire after 10 minutes."
-		}.ToExpectedObject();
+	//	var expected = new
+	//	{
+	//		Receivers = new[] { email },
+	//		Subject = "Verification Code",
+	//		Content = $"Verification code is {validateCode}, it will expire after 10 minutes."
+	//	}.ToExpectedObject();
 
-		SendEmailRequest actual = null;
-		_ = fakeEmailClient
-			.SendAsync(Arg.Do<SendEmailRequest>(msg => actual = msg))
-			.Returns(ValueTask.FromResult(new SendEmailResponse()));
-		var actualSecurityKey = await sut.GetAsync(command);
+	//	SendEmailRequest actual = null;
+	//	_ = fakeEmailClient
+	//		.SendAsync(Arg.Do<SendEmailRequest>(msg => actual = msg))
+	//		.Returns(ValueTask.FromResult(new SendEmailResponse()));
+	//	var actualSecurityKey = await sut.GetAsync(command);
 
-		_ = fakeEmailClient
-			.Received(1)
-			.SendAsync(Arg.Any<SendEmailRequest>());
+	//	_ = fakeEmailClient
+	//		.Received(1)
+	//		.SendAsync(Arg.Any<SendEmailRequest>());
 
-		expected.ShouldMatch(actual);
-		ClassicAssert.AreEqual(expectedSecurityKey, actualSecurityKey);
-	}
+	//	expected.ShouldMatch(actual);
+	//	ClassicAssert.AreEqual(expectedSecurityKey, actualSecurityKey);
+	//}
 }

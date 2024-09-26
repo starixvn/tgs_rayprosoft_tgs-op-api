@@ -72,6 +72,7 @@ public class PlayerCreateTests
 			brandId,
 			"username",
 			"password",
+			"email@gmail.com",
 			"CNY",
 			invitationCode,
 			false);
@@ -146,6 +147,7 @@ public class PlayerCreateTests
 			brandId,
 			"username",
 			"password",
+			"email@gmail.com",
 			"CNY",
 			invitationCode,
 			false);
@@ -236,6 +238,7 @@ public class PlayerCreateTests
 			brandId,
 			"username",
 			"password",
+			"email@gmail.com",
 			"CNY",
 			upperPlayerCode,
 			false);
@@ -322,6 +325,7 @@ public class PlayerCreateTests
 		var command = new CreatePlayerCommand(
 			brandId,
 			"username",
+			"email@gmail.com",
 			password,
 			"CNY",
 			false);
@@ -405,6 +409,7 @@ public class PlayerCreateTests
 			brandId,
 			"username",
 			password,
+			"email@gmail.com",
 			"CNY",
 			invitationCode,
 			false);
@@ -467,6 +472,7 @@ public class PlayerCreateTests
 			brandId,
 			"username",
 			"password",
+			"email@gmail.com",
 			"CNY",
 			upperPlayerCode,
 			false);
@@ -529,6 +535,7 @@ public class PlayerCreateTests
 			brandId,
 			"username",
 			"password",
+			"email@gmail.com",
 			"CNY",
 			upperPlayerCode,
 			false);
