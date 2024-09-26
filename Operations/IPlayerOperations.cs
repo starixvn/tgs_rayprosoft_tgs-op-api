@@ -24,6 +24,8 @@ public interface IPlayerOperations
 
 	Task SetEmailAsync(string playerCode, string email, DateTimeOffset updatedOn);
 
+	Task SetPhoneAsync(string playerCode, string areaCode, string phone, DateTimeOffset updatedOn);
+
 	Task SetIdentityAsync(
 		string playerCode,
 		string realName,

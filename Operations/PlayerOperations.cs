@@ -71,6 +71,9 @@ public sealed class PlayerOperations(
 	public Task SetEmailAsync(string playerCode, string email, DateTimeOffset updatedOn)
 		=> playerCommands.SetEmailAsync(playerCode, email, updatedOn);
 
+	public Task SetPhoneAsync(string playerCode, string areaCode, string phone, DateTimeOffset updatedOn) 
+		=> playerCommands.SetPhoneAsync(playerCode, areaCode, phone, updatedOn);
+
 	public Task SetIdentityAsync(
 		string playerCode,
 		string realName,

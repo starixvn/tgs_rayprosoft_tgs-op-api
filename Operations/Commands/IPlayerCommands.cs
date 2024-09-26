@@ -27,7 +27,7 @@ public interface IPlayerCommands
 
 	Task SetPayPasswordAsync(string playerCode, byte[] newPassword, byte[] newSalt, DateTimeOffset updatedOn);
 
-	Task SetPhoneAsync(string playerCode, string phone, DateTimeOffset updatedOn);
+	Task SetPhoneAsync(string playerCode, string areaCode, string phone, DateTimeOffset updatedOn);
 
 	Task SetQqAsync(string playerCode, string qqId, DateTimeOffset updatedOn);
 

@@ -117,11 +117,12 @@ public sealed class PlayerCommands(
 		_ = await _repository.SaveChangesAsync().ConfigureAwait(false);
 	}
 
-	public async Task SetPhoneAsync(string playerCode, string phone, DateTimeOffset updatedOn)
+	public async Task SetPhoneAsync(string playerCode, string areaCode, string phone, DateTimeOffset updatedOn)
 	{
 		var player = await _repository.Players.FindAsync(playerCode).ConfigureAwait(false);
 
 		player.Phone = phone;
+		player.AreaCode = areaCode;
 		player.PhoneAuthentication = true;
 		player.UpdatedOn = updatedOn;
 

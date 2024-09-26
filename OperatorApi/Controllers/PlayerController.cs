@@ -684,7 +684,7 @@ public class PlayerController(ILogger<PlayerController> logger) : ControllerBase
 	/// <summary>
 	/// Check if validate code is existed.
 	/// </summary>
-	[HttpPost("validate-code/check")]
+	[HttpGet("validate-code/check")]
 	[ProducesResponseType(StatusCodes.Status200OK)]
 	public async Task<IActionResult> CheckValidateCodeAsync(
 			[FromServices] IGetService<CheckValidateCodeQuery, bool> checkService,
@@ -850,6 +850,25 @@ public class PlayerController(ILogger<PlayerController> logger) : ControllerBase
 	}
 
 	/// <summary>
+	/// Sets the Phone.
+	/// </summary>
+	/// <param name="setPhoneService">The set Phone service.</param>
+	/// <param name="request">The request.</param>
+	[HttpPatch("phone", Name = "SetPhone")]
+	[AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+	public async Task SetPhoneAsync(
+		[FromServices] ICommandService<SetPhoneCommand> setPhoneService,
+		[FromBody] StartSetPhoneRequest request)
+	{
+		var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+
+		var command = new SetPhoneCommand(playerTokenData.PlayerCode, request.AreaCode, request.Phone);
+
+		await setPhoneService.ExecuteAsync(command).ConfigureAwait(false);
+	}
+
+
+	/// <summary>
 	/// Sets the WhatsApp id.
 	/// </summary>
 	/// <param name="setWhatsAppService">The set line service.</param>
@@ -902,6 +921,7 @@ public class PlayerController(ILogger<PlayerController> logger) : ControllerBase
 
 		return setPlayerEmailService.GetAsync(command);
 	}
+
 
 	/// <summary>
 	/// Starts the change phone.
