@@ -38,7 +38,7 @@ public class WithdrawController : ControllerBase
 				.ConfigureAwait(false);
 
 			if (playerCanWithdraw is false)
-				throw new PlayerCanNotWithdrawException();
+				throw new IdNotVerifyException();
 
 			var command = new CreateWithdrawFormCommand(
 				playerData.PlayerCode,

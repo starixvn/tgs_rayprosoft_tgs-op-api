@@ -47,6 +47,7 @@ public enum OpApiError
 	PreviousDepositStillProcessing = 414,
 	BankInfoDuplicate = 415,
 	WandaPayDepositNeedRealName = 416,
+	PlayerIdNotVerify = 417,
 	DividendConditionError = 600,
 	DividendPercentageError = 601,
 	SystemError = 900,
