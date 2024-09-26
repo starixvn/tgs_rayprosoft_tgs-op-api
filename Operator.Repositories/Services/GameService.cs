@@ -77,7 +77,7 @@ public static class GameService
 		return games.Select(i =>
 		{
 			brandProviderStatus.TryGetValue(i.GameProviderId, out Status status);
-			var gameStatus = GetGameStatus(i.Status,
+			var gameStatus = GetGameStatus(i.BranGameStatus,
 				i.Status,
 				i.GameProviderStatus,
 				status);
