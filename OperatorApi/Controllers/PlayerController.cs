@@ -867,6 +867,25 @@ public class PlayerController(ILogger<PlayerController> logger) : ControllerBase
 		await setPhoneService.ExecuteAsync(command).ConfigureAwait(false);
 	}
 
+	/// <summary>
+	/// Sets the Email.
+	/// </summary>
+	/// <param name="setEmailService">The set Email service.</param>
+	/// <param name="request">The request.</param>
+	[HttpPatch("email", Name = "SetEmail")]
+	[AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+	public async Task<SetEmailResponse> SetEmailAsync(
+		[FromServices] IGetService<SetEmailCommand, SetEmailResponse> setEmailService,
+		[FromBody] StartSetEmailRequest request)
+	{
+		var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+		var brandId = HttpContext.GetBrandId() ?? throw new BrandNotFoundException();
+
+		var command = new SetEmailCommand(brandId, playerTokenData.PlayerCode, request.Email);
+
+		return await setEmailService.GetAsync(command).ConfigureAwait(false);
+	}
+
 
 	/// <summary>
 	/// Sets the WhatsApp id.
