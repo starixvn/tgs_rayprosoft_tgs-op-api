@@ -129,4 +129,24 @@
     <value>Verification code is {0}, it will expire after 10 minutes.</value>
     <comment>驗證碼</comment>
   </data>
+  <data name="ForgotPasswordMailBody" xml:space="preserve">
+    <value>&lt;data name="ValidateCodeMailBody" xml:space="preserve"&gt;
+    &lt;value&gt;
+        &amp;lt;html&amp;gt;
+            &amp;lt;body style='font-family: Arial, sans-serif;'&amp;gt;
+                &amp;lt;p&amp;gt;Dear Player,&amp;lt;/p&amp;gt;
+                &amp;lt;p&amp;gt;We got a request from you to reset the password for your account. Please use the following 6-digit verification code:&amp;lt;/p&amp;gt;
+                &amp;lt;strong&amp;gt;&amp;lt;h3 style=&amp;quot;margin-left: 80px&amp;quot;&amp;gt;{0}&amp;lt;/h3&amp;gt;&amp;lt;/strong&amp;gt;
+                &amp;lt;p&amp;gt;This code is only valid for 10 minutes after it's been requested.&amp;lt;/p&amp;gt;
+                &amp;lt;p&amp;gt;--------------------------------------------------------------------------------------&amp;lt;/p&amp;gt;
+                &amp;lt;p&amp;gt;If you did not make this request, please ignore this email or contact our customer service center &amp;lt;span&amp;gt;&amp;lt;a href='mailto:support@nova88solutions.com'&amp;gt;support@nova88solutions.com&amp;lt;/a&amp;gt;&amp;lt;/span&amp;gt; for further assistance.&amp;lt;/p&amp;gt;
+                &amp;lt;p&amp;gt;© 2024 Nova88 Solutions. All Rights Reserved. 18+&amp;lt;/p&amp;gt;
+            &amp;lt;/body&amp;gt;
+        &amp;lt;/html&amp;gt;
+    &lt;/value&gt;
+&lt;/data&gt;</value>
+  </data>
+  <data name="ForgotPasswordMailSubject" xml:space="preserve">
+    <value>Your Verification Code to Reset Password</value>
+  </data>
 </root>

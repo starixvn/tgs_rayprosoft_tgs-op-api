@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Globalization;
+using System.Net;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -41,15 +42,16 @@ internal class RestValidateCodeOperator(
 
 	public async ValueTask SendEmailAsync(CultureInfo cultureInfo, string email, string validateCode)
 	{
-		var mailSubject = Resources.ResourceManager.GetString(nameof(Resources.ValidateCodeMailSubject), cultureInfo)!;
+		var mailSubject = Resources.ResourceManager.GetString(nameof(Resources.ForgotPasswordMailSubject), cultureInfo)!;
 		var mailBody = string.Format(
-			Resources.ResourceManager.GetString(nameof(Resources.ValidateCodeMailBody), cultureInfo)!,
+			Resources.ResourceManager.GetString(nameof(Resources.ForgotPasswordMailBody), cultureInfo)!,
 			validateCode);
+		var decodedMailBody = WebUtility.HtmlDecode(mailBody);
 
-		await notificationEmailClient.PublishTextAsync(
+		await notificationEmailClient.PublishHtmlAsync(
 			recipients: [email],
 			subject: mailSubject,
-			content: mailBody
+			content: decodedMailBody
 		).ConfigureAwait(false);
 	}
 
