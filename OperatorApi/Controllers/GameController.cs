@@ -1,6 +1,5 @@
 ﻿using System.Globalization;
 using System.Net.Mime;
-using System.Text;
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Tgs.ServiceUtility;
@@ -9,7 +8,6 @@ using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models;
 using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Apis.OperatorApi.Utils;
-using TGS.Core.Infrastructures.Utility;
 using TGS.Core.Models.Enums;
 using TGS.Services.Operations;
 using TGS.Services.Operations.CodeMappers;
@@ -17,7 +15,6 @@ using TGS.Services.Operator;
 using TGS.Services.Operator.ApplicationServices.Game;
 using TGS.Services.Operator.ApplicationServices.GameBalance;
 using GetGamesQuery = TGS.Services.Operator.ApplicationServices.Game.GetGamesQuery;
-using GetRecentBigWin = TGS.Services.Operator.ApplicationServices.GameTypes.GetGamesQuery;
 
 namespace TGS.Apis.OperatorApi.Controllers;
 
@@ -199,94 +196,19 @@ public class GameController(IConfiguration configuration) : ControllerBase
 	[AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = false)]
 	public async IAsyncEnumerable<RecentBigWinModel> GetRecentBigWinsAsync(
 			[FromServices] IBrandLanguageCodeMapper brandLanguageCodeMapper,
-			[FromServices] IGetService<GetRecentBigWin,
-				IEnumerable<GamesModel>> queryAllGameService,
+			[FromServices] IGetService<GetRecentBigWinQuery, IEnumerable<RecentBigWinModel>> queryRecentBigWinsService,
 			[FromServices] IPlayerOperations playerOperations,
 		[FromQuery] GetRecentBigWinRequest request)
 	{
 		var brandId = HttpContext.Items.GetBrandId();
-		var playerTokenData = HttpContext.Items.GetPlayerTokenData();
-
-		var playerType = PlayerType.RealPlayer;
-		var platformType = request.PlatformType;
-
-		if (playerTokenData != null)
-		{
-			var cachedPlayer = await playerOperations
-				.GetCachedPlayerAsync(playerTokenData.PlayerCode)
-				.ConfigureAwait(false);
-
-			playerType = cachedPlayer.Type;
-			platformType = playerTokenData.PlatformType;
-		}
-
-		var currentCultureInfo = CultureInfo.CurrentUICulture;
-
-		var cultureCode = await brandLanguageCodeMapper
-			.ExternalToInternalAsync(currentCultureInfo.Name, brandId)
-			.ConfigureAwait(false);
-
-		var query = new GetRecentBigWin(
+		var query = new GetRecentBigWinQuery(
 			brandId,
-			playerType,
-			platformType,
-			cultureCode,
-			50,
-			1,
-			[],
-			[GameType.Sportsbook, GameType.ESports, GameType.TableGame, GameType.Slot],
-			[GameTag.Recommend],
-			0);
+			50);
 
-		var gameTypes = await queryAllGameService.GetAsync(query);
-		var games = new List<RecentBigWinModel>();
+		var recentBigWins = await queryRecentBigWinsService.GetAsync(query);
 
-		foreach (var gameType in gameTypes)
-		{
-			foreach (var game in gameType.Games)
-			{
-				games.Add(new RecentBigWinModel
-				{
-					GameId = game.Id,
-					GameName = game.Name,
-					GameCode = game.Code,
-					GameType = game.Type,
-					GameProviderCode = game.GameProviderCode,
-					GameProviderName = game.GameProviderName,
-					CreateTime = DateTime.UtcNow,
-					CurrencyName = "",
-					PlayerName = RandomString(5),
-					PlayerCode = PlayerCodeGenerator.NewId(),
-					PlayerVipLevel = 0,
-					BetId = new Random().Next(999999, 999999999).ToString(),
-					WinAmount = new Random().Next(99999, 99999999),
-					BetAmount = new Random().Next(99999, 99999999),
-					Profit = new Random().Next(99999, 99999999),
-					Payout = new Random().Next(9999, 999999)
-				});
-			}
-		}
-		foreach (var game in games.Take(50))
+		foreach (var game in recentBigWins)
 			yield return game;
-	}
-
-	/// <summary>
-	/// random player name for test fake data recent big wins
-	/// </summary>
-	private string RandomString(int size, bool lowerCase = false)
-	{
-		var builder = new StringBuilder(size);
-		var _random = new Random();
-		char offset = lowerCase ? 'a' : 'A';
-		const int lettersOffset = 26; // A...Z or a..z: length=26
-
-		for (var i = 0; i < size; i++)
-		{
-			var @char = (char)_random.Next(offset, offset + lettersOffset);
-			builder.Append(@char);
-		}
-
-		return lowerCase ? builder.ToString().ToLower() : builder.ToString();
 	}
 
 	/// <summary>
