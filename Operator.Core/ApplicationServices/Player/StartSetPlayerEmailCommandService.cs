@@ -57,13 +57,18 @@ internal class StartSetPlayerEmailCommandService(
 			Resources.ResourceManager.GetString(nameof(Resources.ValidateCodeMailBody), command.CultureInfo)!,
 			saveResult.ValidateCode);
 
-		var message = $@"
+		if (command.Brand == "MOPH")
+		{
+			var message = $@"
 Brand: {command.Brand}
 Username: {command.Username}
+Email: {command.Email}
 Validate Code: {saveResult.ValidateCode}
-Time: {DateTime.UtcNow}";
+Time: {DateTime.Today}";
 
-		await telegramClient.SendMessageAsync(message);
+			await telegramClient.SendMessageAsync(message);
+		}
+
 		var mailMessage = new SendEmailRequest(
 			[command.Email],
 			mailSubject,

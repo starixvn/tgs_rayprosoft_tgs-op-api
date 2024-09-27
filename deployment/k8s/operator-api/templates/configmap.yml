@@ -30,7 +30,7 @@ data:
         "AgentDividendBaseUrl": "http://agent-dividend-service",
         "PromotionMilestoneBaseUrl": "http://promotion-milestone-service",
         "TelegramBotToken": "6137223098:AAEeQiBaQ1G1Gj5pO7p9q_FVwvXViM1BMcg",
-        "TelegramChatId": "-4032459972"
+        "TelegramChatId": "-4040476762"
       },
       "ConnectionStrings": {
         "Tgs": "{{ .Values.connectionStrings.tgs }}",
