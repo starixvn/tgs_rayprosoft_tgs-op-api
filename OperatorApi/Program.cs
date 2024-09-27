@@ -46,6 +46,7 @@ using TGS.Services.Operator;
 using TGS.Services.Operator.ApplicationServices.Game;
 using TGS.Services.Operator.MessageQueue;
 using TGS.Services.Operator.ValidateCode;
+using static Microsoft.IO.RecyclableMemoryStreamManager;
 
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 ValidatorOptions.Global.LanguageManager.Enabled = false;
@@ -235,6 +236,13 @@ builder.Services
 	{
 		var config = sp.GetRequiredService<IConfiguration>();
 		options.BaseUrl = config.GetValue<Uri>("Operator:BrandGameCreditsBaseUrl");
+	})
+	.AddTransient<ITelegramClient, TelegramClient>()
+	.AddTelegramClient((options, sp) =>
+	{
+		var configuration = sp.GetRequiredService<IConfiguration>();
+		options.BotToken = configuration["Operator:TelegramBotToken"];
+		options.ChatId = configuration["Operator:TelegramChatId"];
 	})
 	.AddHttpClient<IEmailClient, EmailClient>((sp, c) =>
 	{
