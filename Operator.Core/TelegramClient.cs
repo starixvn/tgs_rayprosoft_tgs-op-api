@@ -4,6 +4,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using static Microsoft.IO.RecyclableMemoryStreamManager;
 
 namespace TGS.Services.Operator;
 public interface ITelegramClient
@@ -14,14 +15,12 @@ public interface ITelegramClient
 public class TelegramClient : ITelegramClient
 {
 	private readonly HttpClient _httpClient;
-	private readonly string _botToken;
-	private readonly string _chatId;
-	private readonly string _telegramApiUrl;
+	private readonly TelegramServiceOptions _options;
 
-	public TelegramClient(HttpClient httpClient, TelegramServiceOptions options)
+	public TelegramClient(HttpClient httpClient, IOptions<TelegramServiceOptions> options)
 	{
 		_httpClient = httpClient;
-		_chatId = options.ChatId ?? throw new ArgumentNullException(nameof(options.ChatId));
+		_options = options.Value ?? throw new ArgumentNullException(nameof(options));
 	}
 
 	public async Task SendMessageAsync(string message)
@@ -31,11 +30,11 @@ public class TelegramClient : ITelegramClient
 
 		var payload = new FormUrlEncodedContent(new[]
 		{
-		 new KeyValuePair<string, string>("chat_id", _chatId),
+		 new KeyValuePair<string, string>("chat_id", _options.ChatId),
 		 new KeyValuePair<string, string>("text", message)
 	 });
 
-		HttpResponseMessage response = await _httpClient.PostAsync(_telegramApiUrl, payload);
+		HttpResponseMessage response = await _httpClient.PostAsync("sendMessage", payload);
 
 		if (!response.IsSuccessStatusCode)
 		{
