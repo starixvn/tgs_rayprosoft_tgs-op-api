@@ -91,6 +91,8 @@ internal class SetEmailRegisterFlowStep(
 		var command = new StartSetPlayerEmailCommand(
 			locationInfo.PlayerCode,
 			data.Email,
+			brand.Code,
+			findPlayer?.UserName,
 			CultureInfo.CurrentUICulture,
 			true);
 

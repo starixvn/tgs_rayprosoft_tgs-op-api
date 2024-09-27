@@ -9,6 +9,7 @@ using TGS.Core.Infrastructures.Mail;
 using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Models.Enums;
 using TGS.Services.Operations;
+using TGS.Services.Operator;
 using TGS.Services.Operator.ApplicationServices.Player;
 using TGS.Services.Operator.ValidateCode;
 
@@ -276,7 +277,7 @@ public class PlayerEmailTests
 			.GetPlayerInfoByEmailAsync(
 				Arg.Is(query.BrandId),
 				Arg.Is(query.Email))
-			.Returns(new PlayerInfo
+			.Returns(new Tgs.PlayerService.Client.PlayerInfo
 			{
 				BrandId = query.BrandId,
 				PlayerCode = query.PlayerCode
@@ -303,7 +304,7 @@ public class PlayerEmailTests
 			.GetPlayerInfoByEmailAsync(
 				Arg.Is(query.BrandId),
 				Arg.Is(query.Email))
-			.Returns(new PlayerInfo
+			.Returns(new Tgs.PlayerService.Client.PlayerInfo
 			{
 				BrandId = query.BrandId,
 				PlayerCode = "playerCode"
@@ -347,19 +348,25 @@ public class PlayerEmailTests
 	public async Task Start_Set_Player_Email_Should_Not_Send_Confirm_Mail_If_Is_Register_Flow()
 	{
 		var fakeEmailClient = Substitute.For<IEmailClient>();
+		var fakeTelegramClient = Substitute.For<ITelegramClient>();
 		var fakeValidateCodeGenerator = Substitute.For<IValidateCodeGenerator>();
 		var fakeValidateCodeOperator = Substitute.For<IValidateCodeOperator>();
 
 		var sut = new StartSetPlayerEmailCommandService(
 			fakeEmailClient,
+			fakeTelegramClient,
 			fakeValidateCodeGenerator,
 			fakeValidateCodeOperator);
 
 		var playerCode = "testPlayerCode";
 		var email = "test@raypro.com";
+		var brand = "GPI";
+		var username = "test123";
 		var command = new StartSetPlayerEmailCommand(
 			playerCode,
 			email,
+			brand,
+			username,
 			CultureInfo.GetCultureInfo("en-US"),
 			true);
 
@@ -388,17 +395,21 @@ public class PlayerEmailTests
 	public async Task Start_Set_Player_Email_Should_Send_Confirm_Mail_If_Not_Register_Flow()
 	{
 		var fakeEmailClient = Substitute.For<IEmailClient>();
+		var fakeTelegramClient = Substitute.For<ITelegramClient>();
 		var fakeValidateCodeGenerator = Substitute.For<IValidateCodeGenerator>();
 		var fakeValidateCodeOperator = Substitute.For<IValidateCodeOperator>();
 
 		var sut = new StartSetPlayerEmailCommandService(
 			fakeEmailClient,
+			fakeTelegramClient,
 			fakeValidateCodeGenerator,
 			fakeValidateCodeOperator);
 
 		var playerCode = "testPlayerCode";
 		var email = "test@raypro.com";
-		var command = new StartSetPlayerEmailCommand(playerCode, email, CultureInfo.GetCultureInfo("en-US"), false);
+		var brand = "GPI";
+		var username = "test123";
+		var command = new StartSetPlayerEmailCommand(playerCode, email, brand, username,CultureInfo.GetCultureInfo("en-US"), false);
 
 		var validateCode = "123456";
 		var expectedSecurityKey = "3F8E5681-50C8-4F2F-8379-3AA6EF2C6064";
