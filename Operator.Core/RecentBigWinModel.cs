@@ -2,12 +2,13 @@
 
 namespace TGS.Services.Operator;
 
-public record RecentBigWinModel()
+public record RecentBigWinModel
 {
 	public int GameId { get; init; }
 	public string GameName { get; init; }
 	public string GameCode { get; init; }
 	public string GameProviderCode { get; init; }
+	public string GameProviderName { get; init; }
 	public DateTime CreateTime { get; init; }
 	public string CurrencyCode { get; init; }
 	public string PlayerName { get; init; }
