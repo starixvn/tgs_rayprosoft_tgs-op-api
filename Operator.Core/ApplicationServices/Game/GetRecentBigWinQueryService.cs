@@ -44,8 +44,8 @@ public class GetRecentBigWinQueryService(IGamesRepository categoryRepository, IM
                     @top
                 )";
 		var recentReal = await db.QueryAsync<RecentBigWinModel>(sqlQuery, parameters);
-		var recenBot = GenerateRandomGames(50);
-		return recentReal.Concat(recenBot).OrderByDescending(x => x.Profit).Take(50);
+		var recenBot = GenerateRandomGames(50 - recentReal.Count());
+		return recentReal.Concat(recenBot.Where(x => x.Profit > 1000)).OrderByDescending(x => x.Profit);
 	}
 
 	public static IEnumerable<RecentBigWinModel> GenerateRandomGames(int count)
@@ -71,8 +71,8 @@ public class GetRecentBigWinQueryService(IGamesRepository categoryRepository, IM
 		};
 		for (int i = 0; i < count; i++)
 		{
-			double betAmount = Math.Round(random.NextDouble() * 100, 2);
-			double payout = Math.Round(betAmount + random.NextDouble() * 5000, 2);
+			double betAmount = random.Next(50000, 100000);
+			double payout = random.Next(500000, 1000000);
 			var indexGame = random.Next(gameBots.Length);
 			var game = new RecentBigWinModel
 			{
