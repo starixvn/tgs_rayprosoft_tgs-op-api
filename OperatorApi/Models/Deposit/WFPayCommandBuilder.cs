@@ -41,7 +41,7 @@ public class WFPayCommandBuilder()
 			WFPayUtility.SerializerOptions);
 
 		return ValueTask.FromResult(new DepositApplyResponse(
-			ThirdPartyOrderNo: info.Response.FormId.ToString(),
+			ThirdPartyOrderNo: info.Response.ThirdPartyOrderNo.ToString(),
 			info.Response.RedirectUrl.ToString()));
 	}
 }
