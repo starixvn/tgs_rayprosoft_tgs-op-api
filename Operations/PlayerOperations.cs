@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
 using StackExchange.Redis;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Redis;
@@ -17,7 +20,8 @@ public sealed class PlayerOperations(
 	IRedisCacheManager cacheManager,
 	Func<IWalletQueries> walletQueriesFactory,
 	Func<IPlayerQueries> playerQueriesFactory,
-	IPlayerCommands playerCommands) : IPlayerOperations
+	IPlayerCommands playerCommands,
+	IConfiguration configuration) : IPlayerOperations
 {
 	public async Task ChangePlayerPasswordAsync(ChangePlayerPasswordData data)
 	{
@@ -91,6 +95,18 @@ public sealed class PlayerOperations(
 
 	public Task SetWeChatAsync(string playerCode, string weChatId, DateTimeOffset updatedOn)
 		=> playerCommands.SetWeChatAsync(playerCode, weChatId, updatedOn);
+
+	public string DecryptPassword(string encryptedPassword) {
+		string privateKeyPem = configuration.GetSection("RSAKeys:PrivateKey").Value;
+
+		using RSA rsa = RSA.Create();
+		rsa.ImportFromPem(privateKeyPem.ToCharArray());
+
+		byte[] encryptedBytes = Convert.FromBase64String(encryptedPassword);
+		byte[] decryptedBytes = rsa.Decrypt(encryptedBytes, RSAEncryptionPadding.OaepSHA256);
+
+		return Encoding.UTF8.GetString(decryptedBytes);
+	}
 
 	private async Task CachePlayerAsync(string playerCode, CachedPlayer player)
 	{

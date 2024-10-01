@@ -5,6 +5,7 @@ using Tgs.BrandCertificate.Clients;
 using Tgs.PlayerService.Client;
 using Tgs.ServiceUtility;
 using Tgs.VipLevelService.Clients;
+using TGS.Services.Operations;
 using TGS.Services.Operator.ApplicationServices.Auth;
 
 namespace TGS.Services.Operator.ApplicationServices.Player;
@@ -12,14 +13,15 @@ namespace TGS.Services.Operator.ApplicationServices.Player;
 internal class CreatePlayerCommandService(
 	IPlayerServiceClient playerServiceClient,
 	IBrandServiceClient brandServiceClient,
-	IVipLevelServiceClient vipLevelServiceClient) : IGetService<CreatePlayerCommand, CreatePlayerInfo>
+	IVipLevelServiceClient vipLevelServiceClient,
+	IPlayerOperations playerOperations) : IGetService<CreatePlayerCommand, CreatePlayerInfo>
 {
 	private readonly IBrandServiceClient _brandServiceClient = brandServiceClient ?? throw new ArgumentNullException(nameof(brandServiceClient));
 	private readonly IVipLevelServiceClient _vipLevelServiceClient = vipLevelServiceClient ?? throw new ArgumentNullException(nameof(vipLevelServiceClient));
 	private readonly IPlayerServiceClient _playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
-
+	private readonly IPlayerOperations _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
 	public async ValueTask<CreatePlayerInfo> GetAsync(
-		CreatePlayerCommand command,
+	CreatePlayerCommand command,
 		CancellationToken cancellationToken = default)
 	{
 		var player = await _playerServiceClient
@@ -61,8 +63,11 @@ internal class CreatePlayerCommandService(
 			.ConfigureAwait(false)
 			?? throw new NullReferenceException($"The VIP level for this brand does not exist.(1)");
 
+		var password = _playerOperations.DecryptPassword(command.Password);
+
 		var resultPlayerCode = await CreatePlayerAsync(
 			command,
+			password,
 			command.CurrencyCode,
 			betLimitId.Value,
 			vipInfo!.Id).ConfigureAwait(false);
@@ -79,6 +84,7 @@ internal class CreatePlayerCommandService(
 
 	private ValueTask<string> CreatePlayerAsync(
 		CreatePlayerCommand command,
+		string password,
 		string currency,
 		int betLimitId,
 		Guid vipId)
@@ -89,7 +95,7 @@ internal class CreatePlayerCommandService(
 				vipId,
 				currency,
 				command.UserName,
-				command.Password,
+				password,
 				command.Email,
 				null,
 				betLimitId,

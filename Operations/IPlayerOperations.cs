@@ -38,4 +38,6 @@ public interface IPlayerOperations
 	Task SetQqAsync(string playerCode, string qqId, DateTimeOffset updatedOn);
 
 	Task SetWeChatAsync(string playerCode, string weChatId, DateTimeOffset updatedOn);
+
+	string DecryptPassword(string encryptedPassword);
 }

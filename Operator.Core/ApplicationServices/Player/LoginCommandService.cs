@@ -10,6 +10,7 @@ using Tgs.PlayerService.Client;
 using Tgs.ServiceUtility;
 using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.Tokens;
+using TGS.Services.Operations;
 using BrandStatus = Tgs.BrandCertificate.BrandStatus;
 
 namespace TGS.Services.Operator.ApplicationServices.Player;
@@ -20,10 +21,12 @@ internal class LoginCommandService(
 	IPlayerLoginRecordRepository loginRecordRepository,
 	IPlayerServiceClient playerServiceClient,
 	IBrandServiceClient brandServiceClient,
+	IPlayerOperations playerOperations, 
 	IGetService<PlayerPasswordValidateCommand, bool> passwordValidateCommandService) : IGetService<LoginCommand, LoginInfo>
 {
 	private readonly IBrandRepository _brandRepository = brandRepository ?? throw new ArgumentNullException(nameof(brandRepository));
 	private readonly IBrandServiceClient _brandServiceClient = brandServiceClient ?? throw new ArgumentNullException(nameof(brandServiceClient));
+	private readonly IPlayerOperations _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(_playerOperations));
 	private readonly IJwtTokenHandler _jwtTokenHandler = jwtTokenHandler ?? throw new ArgumentNullException(nameof(jwtTokenHandler));
 	private readonly IPlayerLoginRecordRepository _loginRecordRepository = loginRecordRepository ?? throw new ArgumentNullException(nameof(loginRecordRepository));
 	private readonly IGetService<PlayerPasswordValidateCommand, bool> _passwordValidateCommandService = passwordValidateCommandService ?? throw new ArgumentNullException(nameof(passwordValidateCommandService));
@@ -43,8 +46,10 @@ internal class LoginCommandService(
 			.ConfigureAwait(false)
 			?? throw new PlayerNotFoundException("");
 
+		var password = _playerOperations.DecryptPassword(command.Password);
+
 		var isValid = await _passwordValidateCommandService.GetAsync(
-			new PlayerPasswordValidateCommand(playerInfo.PlayerCode, command.Password),
+			new PlayerPasswordValidateCommand(playerInfo.PlayerCode, password),
 			cancellationToken)
 			.ConfigureAwait(false);
 
