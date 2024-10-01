@@ -394,10 +394,10 @@ app.MapControllers();
 app.MapHub<NotifyHub>("api/notify");
 
 app.MapHealthChecks("/health");
+SentrySdk.CaptureMessage($"Started result ReportAggregate service at {DateTime.Now.ToString()}");
 app.MapHealthChecks("/");
 app.MapProfileViewer();
 
 app.UseSwagger();
 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "TGS Operator API"));
-
 app.Run();
