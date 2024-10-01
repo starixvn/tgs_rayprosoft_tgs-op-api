@@ -188,7 +188,7 @@ public class WithdrawController : ControllerBase
 	{
 		var dict = Enum.GetValues(typeof(FlowState))
 		   .Cast<FlowState>()
-		   .Where(x => x is not (FlowState.Unknown or FlowState.Approved))
+		   .Where(x => x is not (FlowState.Unknown or FlowState.Approved or FlowState.WaitingPayment))
 		   .ToDictionary(t => (int)t, t => t.ToString());
 		return Task.FromResult(dict);
 	}
