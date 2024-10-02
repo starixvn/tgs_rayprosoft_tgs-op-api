@@ -14,6 +14,7 @@ using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models;
 using TGS.Apis.OperatorApi.Models.Messages;
+using TGS.Apis.OperatorApi.Utils;
 using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.Tokens;
 using TGS.IdentityVerifiers;
@@ -166,7 +167,7 @@ public class PlayerController(ILogger<PlayerController> logger) : ControllerBase
 		var brandId = HttpContext.GetBrandId()!.Value;
 		var playerTokenData = HttpContext.Items.GetPlayerTokenData();
 
-		var ipAddress = HttpContext.Connection.RemoteIpAddress;
+		var ipAddress = IPUtils.GetRequestIP(HttpContext);
 		var hostName = Request.Host.Host;
 
 		var locationInfo = new PlayerLocationInfo(
@@ -392,7 +393,7 @@ public class PlayerController(ILogger<PlayerController> logger) : ControllerBase
 
 			try
 			{
-				var ipAddress = HttpContext.Connection.RemoteIpAddress;
+				var ipAddress = IPUtils.GetRequestIP(HttpContext);
 				var hostName = Request.Host.Host;
 				var login3RdCommand = new Login3rdCommand(brandId, userName, string.Empty, ipAddress.ToString(), hostName, request.PlatformType, Consts.Site, true);
 				var infoPlayer = await login3rdService.GetAsync(login3RdCommand);
@@ -485,7 +486,7 @@ public class PlayerController(ILogger<PlayerController> logger) : ControllerBase
 
 		try
 		{
-			var ipAddress = HttpContext.Connection.RemoteIpAddress;
+			var ipAddress = IPUtils.GetRequestIP(HttpContext);
 			var hostName = Request.Host.Host;
 
 			var command = new LoginCommand(
@@ -589,7 +590,7 @@ public class PlayerController(ILogger<PlayerController> logger) : ControllerBase
 		if (brand.Status != BrandStatus.Active)
 			throw new InvalidStatusException("Brand is not active");
 
-		var ipAddress = HttpContext.Connection.RemoteIpAddress;
+		var ipAddress = IPUtils.GetRequestIP(HttpContext);
 		var hostName = Request.Host.Host;
 
 		var playerTokenData = HttpContext.Items.GetPlayerTokenData();
@@ -635,7 +636,7 @@ public class PlayerController(ILogger<PlayerController> logger) : ControllerBase
 		if (brand.Status != BrandStatus.Active)
 			throw new InvalidStatusException("Brand is not active");
 
-		var ipAddress = HttpContext.Connection.RemoteIpAddress;
+		var ipAddress = IPUtils.GetRequestIP(HttpContext);
 		var hostName = Request.Host.Host;
 
 		var playerTokenData = HttpContext.Items.GetPlayerTokenData();
@@ -1008,7 +1009,7 @@ public class PlayerController(ILogger<PlayerController> logger) : ControllerBase
 		var brandId = HttpContext.GetBrandId()!.Value;
 		var playerTokenData = HttpContext.Items.GetPlayerTokenData();
 
-		var ipAddress = HttpContext.Connection.RemoteIpAddress;
+		var ipAddress = IPUtils.GetRequestIP(HttpContext);
 		var hostName = Request.Host.Host;
 
 		var locationInfo = new PlayerLocationInfo(
@@ -1053,7 +1054,7 @@ public class PlayerController(ILogger<PlayerController> logger) : ControllerBase
 		var brandId = HttpContext.GetBrandId()!.Value;
 		var playerTokenData = HttpContext.Items.GetPlayerTokenData();
 
-		var ipAddress = HttpContext.Connection.RemoteIpAddress;
+		var ipAddress = IPUtils.GetRequestIP(HttpContext);
 		var hostName = Request.Host.Host;
 
 		var locationInfo = new PlayerLocationInfo(
@@ -1090,7 +1091,7 @@ public class PlayerController(ILogger<PlayerController> logger) : ControllerBase
 		var brandId = HttpContext.Items.GetBrandId();
 		var playerTokenData = HttpContext.Items.GetPlayerTokenData();
 
-		var ipAddress = HttpContext.Connection.RemoteIpAddress;
+		var ipAddress = IPUtils.GetRequestIP(HttpContext);
 		var hostName = Request.Host.Host;
 
 		var locationInfo = new PlayerLocationInfo(
@@ -1181,7 +1182,7 @@ public class PlayerController(ILogger<PlayerController> logger) : ControllerBase
 		var brandId = HttpContext.Items.GetBrandId();
 		var playerTokenData = HttpContext.Items.GetPlayerTokenData();
 
-		var ipAddress = HttpContext.Connection.RemoteIpAddress;
+		var ipAddress = IPUtils.GetRequestIP(HttpContext);
 		var hostName = Request.Host.Host;
 
 		var locationInfo = new PlayerLocationInfo(

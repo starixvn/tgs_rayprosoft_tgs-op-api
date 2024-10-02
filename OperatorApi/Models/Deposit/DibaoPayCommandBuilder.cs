@@ -1,5 +1,6 @@
 ﻿using System.Text.Json;
 using Tgs.Payment.DibaoPay.Client;
+using TGS.Apis.OperatorApi.Utils;
 using TGS.Services.Operator.ApplicationServices.Deposit;
 
 namespace TGS.Apis.OperatorApi.Models.Deposit;
@@ -27,7 +28,7 @@ public class DibaoPayCommandBuilder(IHttpContextAccessor httpContextAccessor) : 
 					brandPaymentInfo.RootElement.GetProperty("privateKey").GetString(),
 					formId,
 					brandPaymentInfo.RootElement.GetProperty("channel").GetString(),
-					httpContextAccessor.HttpContext.Connection.RemoteIpAddress.ToString(),
+					IPUtils.GetRequestIP(httpContextAccessor.HttpContext),
 					brandPaymentInfo.RootElement.GetProperty("exchangeRate").GetDecimal()),
 				DibaoPayUtility.SerializerOptions));
 

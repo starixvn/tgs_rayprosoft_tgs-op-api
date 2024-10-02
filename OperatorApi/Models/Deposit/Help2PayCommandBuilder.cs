@@ -1,5 +1,6 @@
 ﻿using System.Text.Json;
 using Tgs.Payment.Help2Pay;
+using TGS.Apis.OperatorApi.Utils;
 using TGS.Services.Operator;
 using TGS.Services.Operator.ApplicationServices.Deposit;
 
@@ -18,7 +19,7 @@ public class Help2PayCommandBuilder(
 	{
 		var brandPaymentInfo = JsonDocument.Parse(requestInfo.BrandPaymentInfo.ExtendedData!);
 
-		var clientIp = httpContextAccessor.HttpContext.Connection.RemoteIpAddress?.ToString() ?? string.Empty;
+		var clientIp = IPUtils.GetRequestIP(httpContextAccessor.HttpContext) ?? string.Empty;
 
 		var command = new CreateDepositFormCommand(
 			requestInfo.PlayerCode,

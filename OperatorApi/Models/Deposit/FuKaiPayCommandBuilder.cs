@@ -1,5 +1,6 @@
 ﻿using System.Text.Json;
 using Tgs.Payment.FuKaiPay.Client;
+using TGS.Apis.OperatorApi.Utils;
 using TGS.Services.Operator.ApplicationServices.Deposit;
 
 namespace TGS.Apis.OperatorApi.Models.Deposit;
@@ -29,7 +30,7 @@ public class FuKaiPayCommandBuilder(IHttpContextAccessor httpContextAccessor) : 
 					brandPaymentInfo.RootElement.GetProperty("channelCode").GetString(),
 					requestInfo.PlayerCode,
 					"PHP",
-					httpContextAccessor.HttpContext.Connection.RemoteIpAddress.ToString()),
+					IPUtils.GetRequestIP(httpContextAccessor.HttpContext)),
 				FuKaiPayUtility.SerializerOptions));
 
 		return ValueTask.FromResult(command);

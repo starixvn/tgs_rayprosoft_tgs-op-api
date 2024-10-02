@@ -33,7 +33,7 @@ public class GameController(IConfiguration configuration) : ControllerBase
 
 		var playerTokenData = HttpContext.Items.GetPlayerTokenData();
 		var brandId = HttpContext.Items.GetBrandId();
-		var ip = HttpContext.Connection.RemoteIpAddress?.ToString() ?? string.Empty;
+		var ip = IPUtils.GetRequestIP(HttpContext) ?? string.Empty;
 
 		await fundInAllService
 			.ExecuteAsync(new FundInAllGameBalanceCommand(
@@ -263,7 +263,7 @@ public class GameController(IConfiguration configuration) : ControllerBase
 			.GetAsync(new GetGpCodeQuery(brandId, request.SubGameProviderCode))
 			.ConfigureAwait(false);
 
-		var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? string.Empty;
+		var ipAddress = IPUtils.GetRequestIP(HttpContext) ?? string.Empty;
 
 		var query = new GetLobbyGameUrlQuery(
 			brandId,
