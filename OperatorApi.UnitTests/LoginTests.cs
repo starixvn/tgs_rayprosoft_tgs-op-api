@@ -12,6 +12,7 @@ using Tgs.PlayerService.Client;
 using Tgs.ServiceUtility;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
+using TGS.Services.Operations;
 using TGS.Services.Operator;
 using TGS.Services.Operator.ApplicationServices.Player;
 using Valhalla.MessageQueue;
@@ -31,6 +32,7 @@ internal class LoginTests
 		var fakeJwtTokenHandler = Substitute.For<IJwtTokenHandler>();
 		var fakePlayerLoginRecordRepository = Substitute.For<IPlayerLoginRecordRepository>();
 		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
+		var fakePlayerOperations = Substitute.For<IPlayerOperations>();
 		var fakePasswordValidateCommandService = Substitute
 			.For<IGetService<PlayerPasswordValidateCommand, bool>>();
 
@@ -106,6 +108,7 @@ internal class LoginTests
 			fakePlayerLoginRecordRepository,
 			fakePlayerServiceClient,
 			fakeBrandServiceClient,
+			fakePlayerOperations,
 			fakePasswordValidateCommandService);
 
 		var actual = await sut.GetAsync(command);
@@ -128,6 +131,7 @@ internal class LoginTests
 		var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
 		var fakePlayerLoginRecordRepository = Substitute.For<IPlayerLoginRecordRepository>();
 		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
+		var fakePlayerOperations = Substitute.For<IPlayerOperations>();
 		var fakePasswordValidateCommandService = Substitute
 			.For<IGetService<PlayerPasswordValidateCommand, bool>>();
 
@@ -196,6 +200,7 @@ internal class LoginTests
 			fakePlayerLoginRecordRepository,
 			fakePlayerServiceClient,
 			fakeBrandServiceClient,
+			fakePlayerOperations,
 			fakePasswordValidateCommandService);
 
 		var loginInfo = await sut.GetAsync(command);
@@ -216,6 +221,7 @@ internal class LoginTests
 		var fakeJwtTokenHandler = Substitute.For<IJwtTokenHandler>();
 		var fakePlayerLoginRecordRepository = Substitute.For<IPlayerLoginRecordRepository>();
 		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
+		var fakePlayerOperations = Substitute.For<IPlayerOperations>();
 		var fakePasswordValidateCommandService = Substitute
 			.For<IGetService<PlayerPasswordValidateCommand, bool>>();
 
@@ -239,6 +245,7 @@ internal class LoginTests
 			fakePlayerLoginRecordRepository,
 			fakePlayerServiceClient,
 			fakeBrandServiceClient,
+			fakePlayerOperations,
 			fakePasswordValidateCommandService);
 
 		_ = Assert.ThrowsAsync<InvalidStatusException>(async () => await sut.GetAsync(command));
@@ -260,6 +267,7 @@ internal class LoginTests
 		var fakeJwtTokenHandler = Substitute.For<IJwtTokenHandler>();
 		var fakePlayerLoginRecordRepository = Substitute.For<IPlayerLoginRecordRepository>();
 		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
+		var fakePlayerOperations = Substitute.For<IPlayerOperations>();
 		var fakePasswordValidateCommandService = Substitute
 			.For<IGetService<PlayerPasswordValidateCommand, bool>>();
 
@@ -306,6 +314,7 @@ internal class LoginTests
 			fakePlayerLoginRecordRepository,
 			fakePlayerServiceClient,
 			fakeBrandServiceClient,
+			fakePlayerOperations,
 			fakePasswordValidateCommandService);
 
 		_ = Assert.ThrowsAsync<InvalidCredentialsException>(async () => await sut.GetAsync(command));
@@ -327,6 +336,7 @@ internal class LoginTests
 		var fakeJwtTokenHandler = Substitute.For<IJwtTokenHandler>();
 		var fakePlayerLoginRecordRepository = Substitute.For<IPlayerLoginRecordRepository>();
 		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
+		var fakePlayerOperations = Substitute.For<IPlayerOperations>();
 		var fakePasswordValidateCommandService = Substitute
 			.For<IGetService<PlayerPasswordValidateCommand, bool>>();
 
@@ -356,6 +366,7 @@ internal class LoginTests
 			fakePlayerLoginRecordRepository,
 			fakePlayerServiceClient,
 			fakeBrandServiceClient,
+			fakePlayerOperations,
 			fakePasswordValidateCommandService);
 
 		_ = Assert.ThrowsAsync<Services.Operator.PlayerNotFoundException>(async () => await sut.GetAsync(command));

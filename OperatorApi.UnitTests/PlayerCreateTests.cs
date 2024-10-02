@@ -11,6 +11,7 @@ using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Apis.OperatorApi.Validators;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
+using TGS.Services.Operations;
 using TGS.Services.Operator;
 using TGS.Services.Operator.ApplicationServices.Player;
 using TGS.Services.Operator.PlayerRegisterFlow;
@@ -313,11 +314,13 @@ public class PlayerCreateTests
 		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
 		var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
 		var fakeVipLevelServiceClient = Substitute.For<IVipLevelServiceClient>();
+		var fakePlayerOperations = Substitute.For<IPlayerOperations>();
 
 		var sut = new CreatePlayerCommandService(
 			fakePlayerServiceClient,
 			fakeBrandServiceClient,
-			fakeVipLevelServiceClient);
+			fakeVipLevelServiceClient,
+			fakePlayerOperations);
 
 		var brandId = Guid.NewGuid();
 		var password = "password";

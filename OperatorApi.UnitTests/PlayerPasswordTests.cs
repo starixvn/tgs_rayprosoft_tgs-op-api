@@ -10,6 +10,7 @@ using Tgs.PlayerService.Client;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Models.Tokens;
+using TGS.Services.Operations;
 using TGS.Services.Operator;
 using TGS.Services.Operator.ApplicationServices.Player;
 using TGS.Services.Operator.ValidateCode;
@@ -46,11 +47,13 @@ public class PlayerPasswordTests
 					  5,
 					  6
 				  ]));
+		var fakePlayerOperations = Substitute.For<IPlayerOperations>();
 
 		var fakePasswordHandler = Substitute.For<IPasswordHandler>();
 
 		var sut = new ChangePasswordQueryService(
 			fakePlayerRepository,
+			fakePlayerOperations,
 			fakePasswordHandler);
 
 		var brandId = Guid.NewGuid();
@@ -256,11 +259,13 @@ public class PlayerPasswordTests
 	{
 		var fakePlayerRepository = Substitute.For<IPlayerRepository>();
 		var fakeValidateCodeOperator = Substitute.For<IValidateCodeOperator>();
+		var fakePlayerOperations = Substitute.For<IPlayerOperations>();
 
 		var sut = new ResetPasswordCommandService(
 			fakePlayerRepository,
 			Substitute.For<IPasswordHandler>(),
-			fakeValidateCodeOperator);
+			fakeValidateCodeOperator,
+			fakePlayerOperations);
 
 		var command = new ResetPasswordCommand("31B51623-2D9D-4A5B-B6F4-32924C5A91EB", "654321", "newPassword");
 
@@ -275,11 +280,13 @@ public class PlayerPasswordTests
 	{
 		var fakePlayerRepository = Substitute.For<IPlayerRepository>();
 		var fakeValidateCodeOperator = Substitute.For<IValidateCodeOperator>();
+		var fakePlayerOperations = Substitute.For<IPlayerOperations>();
 
 		var sut = new ResetPasswordCommandService(
 			fakePlayerRepository,
 			Substitute.For<IPasswordHandler>(),
-			fakeValidateCodeOperator);
+			fakeValidateCodeOperator,
+			fakePlayerOperations);
 
 		var command = new ResetPasswordCommand("31B51623-2D9D-4A5B-B6F4-32924C5A91EB", "123456", "newPassword");
 
