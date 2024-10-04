@@ -137,7 +137,8 @@ public class ApolloPayDepositTests(ITestOutputHelper testOutputHelper)
 				    "merchantNo": "merchantNo",
 				    "apiKey": "apiKey",
 				    "channelType": "QRIS",
-				    "bankCode": null
+				    "bankCode": null,
+					"exchangeRate": 1
 				}
 				""",
 			PaymentId = Guid.NewGuid(),
@@ -171,7 +172,8 @@ public class ApolloPayDepositTests(ITestOutputHelper testOutputHelper)
 				"apiKey",
 				Guid.NewGuid(),
 				"QRIS",
-				null),
+				null,
+				1m),
 			new ApolloPayDepositResponse(
 				100M,
 				Guid.NewGuid(),
