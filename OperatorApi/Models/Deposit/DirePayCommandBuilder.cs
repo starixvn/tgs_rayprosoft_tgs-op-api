@@ -33,7 +33,7 @@ public class DirePayCommandBuilder(IPlayerServiceClient playerServiceClient)
 					brandPaymentInfo.GetValueOrThrow<string>("password"),
 					brandPaymentInfo.GetValueOrThrow<string>("secret"),
 					formId,
-					brandPaymentInfo.GetValueOrDefault("redirectUrl", new Uri("https://www.google.com/search?q=success")),
+					new Uri(brandPaymentInfo.GetValueOrDefault("redirectUrl", "https://www.google.com/search?q=success")),
 					brandPaymentInfo.GetValueOrThrow<string>("currencyCode"),
 					brandPaymentInfo.GetValueOrThrow<string>("method"),
 					requestInfo.PlayerCode,
