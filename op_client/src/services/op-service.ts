@@ -10,7 +10,7 @@ export default class OperatorService {
 
     // #endregion Constructors (1)
 
-    // #region Public Methods (72)
+    // #region Public Methods (74)
 
     public checkPhoneCanUse(request: StartSetPhoneRequest): Promise<SuccessResponse<boolean>> {
         return this.http
@@ -253,6 +253,18 @@ export default class OperatorService {
         return this.http
             .post("/api/deposit/bank/antpay", request)
             .then<SuccessResponse<DepositFormCreatedResponse>>(res => res.data);
+    }
+
+    public submitApolloBankDepositRequest(request: DepositRequest): Promise<SuccessResponse<DepositFormCreatedResponse>> {
+        return this.http
+            .post("/api/deposit/bank/apollopay", request)
+            .then<SuccessResponse<DepositFormCreatedResponse>>(res => res.data);
+    }
+
+    public submitApolloThirdPartyDepositRequest(request: DepositRequest): Promise<SuccessResponse<DepositFormCreatedResponse>> {
+        return this.http
+            .post("/api/deposit/thirdparty/apollopay", request)
+            .then(res => res.data);
     }
 
     public submitDepositRequest(
@@ -590,5 +602,5 @@ export default class OperatorService {
             .then(res => res.data);
     }
 
-    // #endregion Public Methods (72)
+    // #endregion Public Methods (74)
 }
