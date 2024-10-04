@@ -335,7 +335,8 @@ public class ApolloPayDepositTests(ITestOutputHelper testOutputHelper)
 				    "merchantNo": "merchantNo",
 				    "apiKey": "apiKey",
 				    "channelType": "BankToBank",
-				    "bankCode": "BCA_ID"
+				    "bankCode": "BCA_ID",
+					"exchangeRate": 1
 				}
 				""",
 			PaymentId = Guid.NewGuid(),
@@ -369,7 +370,8 @@ public class ApolloPayDepositTests(ITestOutputHelper testOutputHelper)
 				"apiKey",
 				Guid.NewGuid(),
 				"BankToBank",
-				"BCA_ID"),
+				"BCA_ID",
+				1m),
 			new ApolloPayDepositResponse(
 				100M,
 				Guid.NewGuid(),
