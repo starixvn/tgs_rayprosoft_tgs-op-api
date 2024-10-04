@@ -29,7 +29,8 @@ public class ApolloPayCommandBuilder() : IDepositFormCommandBuilder
 					brandPaymentInfo.RootElement.GetProperty("apiKey").GetString(),
 					formId,
 					brandPaymentInfo.RootElement.GetProperty("channelType").GetString(),
-					hasBankCode ? jsonBankCode.GetString() : null),
+					hasBankCode ? jsonBankCode.GetString() : null,
+					brandPaymentInfo.RootElement.GetProperty("exchangeRate").GetDecimal()),
 				ApolloPayUtility.SerializerOptions));
 
 		return ValueTask.FromResult(command);
