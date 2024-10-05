@@ -480,6 +480,7 @@ public class PlayerController(ILogger<PlayerController> logger) : ControllerBase
 	public async Task<LoginResponse> LoginAsync(
 		[FromServices] IGetService<LoginCommand, LoginInfo> loginService,
 		[FromServices] IGetService<PlayerTokenParserCommand, PlayerTokenData> playerTokenParserCommandService,
+		[FromServices] IGetService<CreateDeletePlayerSessionCommand, Guid> createPlayerSessionService,
 		[FromBody] LoginRequest request)
 	{
 		var brandId = HttpContext.GetBrandId()!.Value;
@@ -488,6 +489,7 @@ public class PlayerController(ILogger<PlayerController> logger) : ControllerBase
 		{
 			var ipAddress = IPUtils.GetRequestIP(HttpContext);
 			var hostName = Request.Host.Host;
+			var playerSession = Guid.Empty;
 
 			var command = new LoginCommand(
 				brandId,
@@ -509,10 +511,14 @@ public class PlayerController(ILogger<PlayerController> logger) : ControllerBase
 			if (playerTokenData is not null)
 				HttpContext.Items[ContextItems.PlayerToken] = playerTokenData;
 
+			if (playerTokenData is not null)
+				playerSession = await createPlayerSessionService.GetAsync(new CreateDeletePlayerSessionCommand(playerTokenData.PlayerCode, true), HttpContext.RequestAborted).ConfigureAwait(false);
+
 			return new LoginResponse
 			{
 				LoginTime = info.LoginTime.ToUnixTimeMilliseconds(),
-				PlayerToken = info.PlayerToken
+				PlayerToken = info.PlayerToken,
+				PlayerSession = playerSession
 			};
 		}
 		catch (Exception ex)
@@ -544,7 +550,8 @@ public class PlayerController(ILogger<PlayerController> logger) : ControllerBase
 	[AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
 	[IgnoreUserBlacklistCheck]
 	public async Task<LogoutResponse> LogoutAsync(
-		[FromServices] IGetService<GetLogoutQuery, LogoutInfo> getLogoutQueryService)
+		[FromServices] IGetService<GetLogoutQuery, LogoutInfo> getLogoutQueryService,
+		[FromServices] IGetService<CreateDeletePlayerSessionCommand, Guid> sessionService)
 	{
 		var brandId = HttpContext.GetBrandId()!.Value;
 		var playerTokenData = HttpContext.Items.GetPlayerTokenData();
@@ -561,6 +568,10 @@ public class PlayerController(ILogger<PlayerController> logger) : ControllerBase
 		{
 			throw new CoreExceptions.PlayerNotFoundException(playerTokenData.PlayerCode, "Player not found.");
 		}
+
+		await sessionService
+			.GetAsync(new CreateDeletePlayerSessionCommand(playerTokenData.PlayerCode, false), HttpContext.RequestAborted)
+			.ConfigureAwait(false);
 
 		return new LogoutResponse { UpdateTime = info.UpdateTime };
 	}

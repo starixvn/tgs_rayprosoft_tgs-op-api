@@ -13,4 +13,7 @@ public record LoginResponse : TgsResponse
 	/// </summary>
 	[JsonPropertyName("logintime")]
 	public long LoginTime { get; init; }
+
+	[JsonPropertyName("session")]
+	public Guid PlayerSession { get; set; }
 }

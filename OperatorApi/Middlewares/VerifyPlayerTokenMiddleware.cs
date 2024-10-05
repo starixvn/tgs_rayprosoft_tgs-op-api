@@ -25,6 +25,7 @@ public sealed class VerifyPlayerTokenMiddleware(
 	public async Task InvokeAsync(
 		HttpContext context,
 		IGetService<PlayerTokenParserCommand, PlayerTokenData?> playerTokenParserCommandService,
+		IGetService<VerifyPlayerSessionCommand, bool> verifyPlayerSessionCommandService,
 		ICommandService<ValidatePlayerLoginRecordCommand> loginRecordValidateService)
 	{
 		using var activity = _VerifyPlayerTokenMiddlewareSource.StartActivity(nameof(VerifyPlayerTokenMiddleware));
@@ -33,6 +34,7 @@ public sealed class VerifyPlayerTokenMiddleware(
 		var token = context.Request.Path == "/api/notify"
 			? context.Request.Query.TryGetValue("access_token", out var queryValue) ? queryValue.FirstOrDefault() : null
 			: context.Request.Headers.TryGetValue("Token", out var value) ? value.FirstOrDefault() : null;
+		var session = context.Request.Headers.TryGetValue("Session", out var sessionValue) ? sessionValue.FirstOrDefault() : null;
 
 		_logger.LogDebug("Token is {token}", token);
 
@@ -91,6 +93,26 @@ public sealed class VerifyPlayerTokenMiddleware(
 				Error = 102,
 				ErrorMessage = "InvalidOrExpiredPlayerToken",
 				ErrorMessageKey = "InvalidOrExpiredPlayerToken"
+			}).ConfigureAwait(false);
+
+			return;
+		}
+
+		var sessionIsValid = attribute is { AllowNullOrEmpty: true, NeedAuthorize: false }
+									|| playerTokenData is null
+									|| await verifyPlayerSessionCommandService.GetAsync(new VerifyPlayerSessionCommand(playerTokenData.PlayerCode, session));
+
+		if (!sessionIsValid)
+		{
+			_logger.LogDebug("Session is Missing or Invalid");
+
+			context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+
+			await context.Response.WriteAsJsonAsync(new TgsResponse
+			{
+				Error = 102,
+				ErrorMessage = "InvalidOrExpiredPlayerSession",
+				ErrorMessageKey = "InvalidOrExpiredPlayerSession"
 			}).ConfigureAwait(false);
 
 			return;

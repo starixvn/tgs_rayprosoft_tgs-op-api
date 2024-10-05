@@ -9,6 +9,7 @@ public enum OpApiError
 	ClientIdNotFound = 104,
 	InvalidOrExpiredAgentToken = 105,
 	InvalidPassword = 106,
+	InvalidSession = 107,
 	PlayerNotFound = 201,
 	UserBlocked = 202,
 	CountryRestricted = 203,
