@@ -358,13 +358,9 @@ public class PlayerEmailTests
 
 		var playerCode = "testPlayerCode";
 		var email = "test@raypro.com";
-		var brand = "GPI";
-		var username = "test123";
 		var command = new StartSetPlayerEmailCommand(
 			playerCode,
 			email,
-			brand,
-			username,
 			CultureInfo.GetCultureInfo("en-US"),
 			true);
 
@@ -403,9 +399,7 @@ public class PlayerEmailTests
 
 		var playerCode = "testPlayerCode";
 		var email = "test@raypro.com";
-		var brand = "GPI";
-		var username = "test123";
-		var command = new StartSetPlayerEmailCommand(playerCode, email, brand, username,CultureInfo.GetCultureInfo("en-US"), false);
+		var command = new StartSetPlayerEmailCommand(playerCode, email, CultureInfo.GetCultureInfo("en-US"), false);
 
 		var validateCode = "123456";
 		var expectedSecurityKey = "3F8E5681-50C8-4F2F-8379-3AA6EF2C6064";

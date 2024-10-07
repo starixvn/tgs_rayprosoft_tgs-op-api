@@ -783,8 +783,6 @@ public class PlayerController(ILogger<PlayerController> logger) : ControllerBase
 		var command = new StartSetPlayerEmailCommand(
 			playerTokenData.PlayerCode,
 			request.Email,
-			request.Brand,
-			request.Username,
 			CultureInfo.CurrentUICulture,
 			false);
 
