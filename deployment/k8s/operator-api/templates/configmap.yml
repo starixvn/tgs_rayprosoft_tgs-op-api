@@ -28,9 +28,7 @@ data:
         "AgentBaseUrl": "http://agent-service",
         "PlayerAllAgentBaseUrl": "http://player-all-agent-service",
         "AgentDividendBaseUrl": "http://agent-dividend-service",
-        "PromotionMilestoneBaseUrl": "http://promotion-milestone-service",
-        "TelegramBotToken": "6137223098:AAEeQiBaQ1G1Gj5pO7p9q_FVwvXViM1BMcg",
-        "TelegramChatId": "-4040476762"
+        "PromotionMilestoneBaseUrl": "http://promotion-milestone-service"
       },
       "ConnectionStrings": {
         "Tgs": "{{ .Values.connectionStrings.tgs }}",
