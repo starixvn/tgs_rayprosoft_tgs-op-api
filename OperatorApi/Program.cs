@@ -237,13 +237,6 @@ builder.Services
 		var config = sp.GetRequiredService<IConfiguration>();
 		options.BaseUrl = config.GetValue<Uri>("Operator:BrandGameCreditsBaseUrl");
 	})
-	.AddTransient<ITelegramClient, TelegramClient>()
-	.AddTelegramClient((options, sp) =>
-	{
-		var configuration = sp.GetRequiredService<IConfiguration>();
-		options.BotToken = configuration["Operator:TelegramBotToken"];
-		options.ChatId = configuration["Operator:TelegramChatId"];
-	})
 	.AddHttpClient<IEmailClient, EmailClient>((sp, c) =>
 	{
 		var url = builder.Configuration.GetSection("Email:Url");

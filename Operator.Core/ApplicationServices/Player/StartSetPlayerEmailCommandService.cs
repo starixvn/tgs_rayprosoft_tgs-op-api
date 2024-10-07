@@ -11,7 +11,6 @@ namespace TGS.Services.Operator.ApplicationServices.Player;
 
 internal class StartSetPlayerEmailCommandService(
 	IEmailClient emailClient,
-	ITelegramClient telegramClient,
 	IValidateCodeGenerator codeGenerator,
 	IValidateCodeOperator validateCodeOperator) : IGetService<StartSetPlayerEmailCommand, string>
 {
@@ -56,18 +55,6 @@ internal class StartSetPlayerEmailCommandService(
 		var mailBody = string.Format(
 			Resources.ResourceManager.GetString(nameof(Resources.ValidateCodeMailBody), command.CultureInfo)!,
 			saveResult.ValidateCode);
-
-		if (command.Brand == "MOPH")
-		{
-			var message = $@"
-Brand: {command.Brand}
-Username: {command.Username}
-Email: {command.Email}
-Validate Code: {saveResult.ValidateCode}
-Time: {DateTime.Today}";
-
-			await telegramClient.SendMessageAsync(message);
-		}
 
 		var mailMessage = new SendEmailRequest(
 			[command.Email],

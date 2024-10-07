@@ -348,13 +348,11 @@ public class PlayerEmailTests
 	public async Task Start_Set_Player_Email_Should_Not_Send_Confirm_Mail_If_Is_Register_Flow()
 	{
 		var fakeEmailClient = Substitute.For<IEmailClient>();
-		var fakeTelegramClient = Substitute.For<ITelegramClient>();
 		var fakeValidateCodeGenerator = Substitute.For<IValidateCodeGenerator>();
 		var fakeValidateCodeOperator = Substitute.For<IValidateCodeOperator>();
 
 		var sut = new StartSetPlayerEmailCommandService(
 			fakeEmailClient,
-			fakeTelegramClient,
 			fakeValidateCodeGenerator,
 			fakeValidateCodeOperator);
 
@@ -395,13 +393,11 @@ public class PlayerEmailTests
 	public async Task Start_Set_Player_Email_Should_Send_Confirm_Mail_If_Not_Register_Flow()
 	{
 		var fakeEmailClient = Substitute.For<IEmailClient>();
-		var fakeTelegramClient = Substitute.For<ITelegramClient>();
 		var fakeValidateCodeGenerator = Substitute.For<IValidateCodeGenerator>();
 		var fakeValidateCodeOperator = Substitute.For<IValidateCodeOperator>();
 
 		var sut = new StartSetPlayerEmailCommandService(
 			fakeEmailClient,
-			fakeTelegramClient,
 			fakeValidateCodeGenerator,
 			fakeValidateCodeOperator);
 
