@@ -10,7 +10,7 @@ export default class OperatorService {
 
     // #endregion Constructors (1)
 
-    // #region Public Methods (74)
+    // #region Public Methods (75)
 
     public checkPhoneCanUse(request: StartSetPhoneRequest): Promise<SuccessResponse<boolean>> {
         return this.http
@@ -512,6 +512,12 @@ export default class OperatorService {
             .then<SuccessResponse<DepositFormCreatedResponse>>(res => res.data);
     }
 
+    public submitNinghongThirdPartyDepositRequest(request: DepositRequest): Promise<SuccessResponse<DepositFormCreatedResponse>> {
+        return this.http
+            .post("/api/deposit/thirdparty/ninghongpay", request)
+            .then<SuccessResponse<DepositFormCreatedResponse>>(res => res.data);
+    }
+
     public submitPhpGoThirdPartyDepositRequest(request: DepositRequest): Promise<SuccessResponse<DepositFormCreatedResponse>> {
         return this.http
             .post("/api/deposit/thirdparty/phpgopay", request)
@@ -602,5 +608,5 @@ export default class OperatorService {
             .then(res => res.data);
     }
 
-    // #endregion Public Methods (74)
+    // #endregion Public Methods (75)
 }

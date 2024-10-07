@@ -82,6 +82,8 @@ public class DepositFormCommandBuilderFactory(IServiceProvider serviceProvider)
 			=> ActivatorUtilities.GetServiceOrCreateInstance<WFPayCommandBuilder>(serviceProvider),
 			_ when string.Equals("ApolloPay", paymentCode, StringComparison.InvariantCultureIgnoreCase)
 			=> ActivatorUtilities.GetServiceOrCreateInstance<ApolloPayCommandBuilder>(serviceProvider),
+			_ when string.Equals("NinghongPay", paymentCode, StringComparison.InvariantCultureIgnoreCase)
+			=> ActivatorUtilities.GetServiceOrCreateInstance<NinghongPayCommandBuilder>(serviceProvider),			
 			_ => throw new NotImplementedException()
 		};
 	}
