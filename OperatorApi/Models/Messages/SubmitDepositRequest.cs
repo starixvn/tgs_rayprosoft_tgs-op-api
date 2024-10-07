@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.Text.Json.Nodes;
+using System.Text.Json.Serialization;
 
 namespace TGS.Apis.OperatorApi.Models.Messages;
 
@@ -12,4 +13,7 @@ public record SubmitDepositRequest
 
 	[JsonPropertyName("promotionid")]
 	public Guid? PromotionId { get; init; }
+
+	[JsonPropertyName("customData")]
+	public JsonNode? CustomData { get; init; }
 }

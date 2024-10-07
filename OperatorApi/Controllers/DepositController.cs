@@ -218,7 +218,8 @@ public class DepositController : ControllerBase
 			brandPayment,
 			request.Amount,
 			request.PromotionId,
-			IPUtils.GetRequestIP(HttpContext));
+			IPUtils.GetRequestIP(HttpContext),
+			request.CustomData);
 
 		var command = await builder.BuildDepositCommandAsync(
 			paymentCode,

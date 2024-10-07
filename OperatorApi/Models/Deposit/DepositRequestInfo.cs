@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using System.Text.Json.Nodes;
 using Tgs.Payment.Clients;
 
 namespace TGS.Apis.OperatorApi.Models.Deposit;
@@ -10,4 +11,5 @@ public record DepositRequestInfo(
 	decimal Amount,
 	Guid? PromotionId,
 	#nullable enable
-	string? PlayerIp);
+	string? PlayerIp,
+	JsonNode? CustomData);
