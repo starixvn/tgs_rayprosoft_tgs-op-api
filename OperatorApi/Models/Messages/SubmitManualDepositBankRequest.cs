@@ -23,8 +23,9 @@ public record SubmitManualDepositBankRequest
 
 	[JsonPropertyName("banktype")]
 	public string BankType { get; init; } = default!;
+
 	[JsonPropertyName("note")]
-	public string? Note { get; init; }
+	public string Note { get; init; } = string.Empty;
 
 	[JsonPropertyName("realname")]
 	public string? RealName { get; init; }
