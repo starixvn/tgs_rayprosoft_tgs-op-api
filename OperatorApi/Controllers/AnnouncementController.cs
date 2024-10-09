@@ -46,7 +46,7 @@ public class AnnouncementController : ControllerBase
 		var main = result
 			.Where(a => a.Type == "Main")
 			.OrderBy(a => a.CreatedOn)
-			.Take(1)
+			//.Take(1)
 			.Select(item => new Announcement
 			{
 				Content = item.Content,
