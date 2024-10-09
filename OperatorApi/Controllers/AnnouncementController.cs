@@ -63,7 +63,7 @@ public class AnnouncementController : ControllerBase
 		var deposit = result
 			.Where(a => a.Type == "Deposit")
 			.OrderBy(a => a.CreatedOn)
-			.Take(1)
+			//.Take(1)
 			.Select(item => new Announcement
 			{
 				Content = item.Content,
