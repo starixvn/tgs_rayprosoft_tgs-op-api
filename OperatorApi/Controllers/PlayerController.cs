@@ -20,6 +20,7 @@ using TGS.Services.Operations;
 using TGS.Services.Operator;
 using TGS.Services.Operator.ApplicationServices.Brand;
 using TGS.Services.Operator.ApplicationServices.Player;
+using TGS.Services.Operator.ApplicationServices.Sms;
 using TGS.Services.Operator.ApplicationServices.Withdraw;
 using TGS.Services.Operator.PlayerRegisterFlow;
 using ContextItems = TGS.Core.Models.Consts.ContextItems;
@@ -1063,4 +1064,36 @@ public class PlayerController(ILogger<PlayerController> logger) : ControllerBase
 
 		return toggleService.ExecuteAsync(command);
 	}
+
+	[HttpPost("phone/send-otp")]
+	public async ValueTask<bool> CheckPhoneSendOtpAsync(
+		[FromServices] IGetService<CheckBrandPhoneExistsQuery, bool> checkService,
+		[FromServices] ICommandService<SendOtpCommand> sendOtpService,
+		[FromBody] StartSetPhoneRequest viewModel)
+	{
+		var brandId = HttpContext.Items.GetBrandId();
+
+		var query = new CheckBrandPhoneExistsQuery(
+			brandId,
+			viewModel.AreaCode,
+			viewModel.Phone);
+
+		var phoneCanUse = await checkService.GetAsync(query, HttpContext.RequestAborted);
+
+		if (!phoneCanUse)
+		{
+			throw new BrandPhoneDuplicateException();
+		}
+
+		var command = new SendOtpCommand(
+			brandId,
+			CultureInfo.CurrentUICulture,
+			viewModel.AreaCode,
+			viewModel.Phone);
+
+		await sendOtpService.ExecuteAsync(command, HttpContext.RequestAborted);
+
+		return true;
+	}
+
 }

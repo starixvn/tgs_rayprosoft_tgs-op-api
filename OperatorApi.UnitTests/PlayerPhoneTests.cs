@@ -1,5 +1,6 @@
 ﻿using System.Collections.Immutable;
 using System.Globalization;
+using Irony.Parsing;
 using Moq;
 using NSubstitute;
 using NUnit.Framework.Legacy;
@@ -10,6 +11,7 @@ using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Models.Enums;
 using TGS.Services.Operator;
 using TGS.Services.Operator.ApplicationServices.Player;
+using TGS.Services.Operator.ApplicationServices.Sms;
 using TGS.Services.Operator.ValidateCode;
 using TGS.SmsService.Client;
 
@@ -388,5 +390,79 @@ public class PlayerPhoneTests
 			Times.Exactly(0));
 
 		ClassicAssert.AreEqual(expectedSecurityKey, actualSecurityKey);
+	}
+
+	[Test]
+	public async Task Send_Otp_With_Phone_Should_Get_True()
+	{
+		var brandId = Guid.Parse("1D46DDD7-EB42-43A0-CB2F-724E59622CA5");
+		var areaCode = "+852";
+		var phone = "66666666";
+
+		var fakeSmsServiceClient = Substitute.For<ISmsServiceClient>();
+		var fakeValidateCodeGenerator = Substitute.For<IValidateCodeGenerator>();
+		var fakeValidateCodeOperator = Substitute.For<IValidateCodeOperator>();
+
+		var sut = new SendOtpCommandService(fakeSmsServiceClient, fakeValidateCodeGenerator, fakeValidateCodeOperator);
+
+		var command = new SendOtpCommand(brandId, CultureInfo.CurrentCulture, areaCode, phone);
+
+		var code = "code";
+
+		var securityKey = "securityKey";
+
+		_ = fakeValidateCodeGenerator.GenerateCode()
+			.Returns("code");
+
+		_ = fakeValidateCodeGenerator.GenerateSecurityKey()
+			.Returns("securityKey");
+
+		var data = new ValidateCodeData($"{command.BrandId}-{command.AreaCode}-{command.Phone}", securityKey);
+
+		_ = fakeValidateCodeOperator.SaveValidateDataAsync(
+				Arg.Is(code),Arg.Is(securityKey), Arg.Is(data))
+			.Returns(true);
+
+		await sut.ExecuteAsync(command);
+
+		_ = fakeSmsServiceClient.ReceivedWithAnyArgs(1)
+			.SendShortMessageAsync(default, default, default, null, null, default);
+	}
+
+	[Test]
+	public void Send_Otp_With_Duplicated_Phone_Should_Get_False()
+	{
+		var brandId = Guid.Parse("1D46DDD7-EB42-43A0-CB2F-724E59622CA5");
+		var areaCode = "+852";
+		var phone = "66666666";
+
+		var fakeSmsServiceClient = Substitute.For<ISmsServiceClient>();
+		var fakeValidateCodeGenerator = Substitute.For<IValidateCodeGenerator>();
+		var fakeValidateCodeOperator = Substitute.For<IValidateCodeOperator>();
+
+		var sut = new SendOtpCommandService(fakeSmsServiceClient, fakeValidateCodeGenerator, fakeValidateCodeOperator);
+
+		var command = new SendOtpCommand(brandId, CultureInfo.CurrentCulture, areaCode, phone);
+
+		var code = "code";
+
+		var securityKey = "securityKey";
+
+		_ = fakeValidateCodeGenerator.GenerateCode()
+			.Returns("code");
+
+		_ = fakeValidateCodeGenerator.GenerateSecurityKey()
+			.Returns("securityKey");
+
+		var data = new ValidateCodeData($"{command.BrandId}-{command.AreaCode}-{command.Phone}", securityKey);
+
+		_ = fakeValidateCodeOperator.SaveValidateDataAsync(
+				Arg.Is(code), Arg.Is(securityKey), Arg.Is(data))
+			.Returns(false);
+
+		Assert.ThrowsAsync<GenerateValidateCodeFailException>(async () => await sut.ExecuteAsync(command));
+
+		_ = fakeSmsServiceClient.ReceivedWithAnyArgs(0)
+			.SendShortMessageAsync(default, default, default, null, null, default);
 	}
 }
