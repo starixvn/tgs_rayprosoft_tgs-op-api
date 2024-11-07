@@ -24,7 +24,6 @@ using TGS.Services.Operator.ApplicationServices.Sms;
 using TGS.Services.Operator.ApplicationServices.Withdraw;
 using TGS.Services.Operator.PlayerRegisterFlow;
 using ContextItems = TGS.Core.Models.Consts.ContextItems;
-
 using CoreExceptions = TGS.Core.Models.Exceptions;
 
 namespace TGS.Apis.OperatorApi.Controllers;
@@ -58,7 +57,8 @@ public class PlayerController(ILogger<PlayerController> logger) : ControllerBase
 			request.NewPassword);
 
 		var playerAgentId =
-			await playerServiceClient.GetAgentIdForPlayerUpgradedAsync(playerTokenData.PlayerCode,
+			await playerServiceClient.GetAgentIdForPlayerUpgradedAsync(
+				playerTokenData.PlayerCode,
 				HttpContext.RequestAborted);
 
 		ChangePasswordInfo info;
@@ -73,7 +73,10 @@ public class PlayerController(ILogger<PlayerController> logger) : ControllerBase
 			{
 				await agentClient
 					.SetAgentPasswordAsync(
-						new SetAgentPasswordRequest(playerAgentId!.Value, request.NewPassword, playerTokenData.PlayerCode),
+						new SetAgentPasswordRequest(
+							playerAgentId!.Value,
+							request.NewPassword,
+							playerTokenData.PlayerCode),
 						HttpContext.RequestAborted)
 					.ConfigureAwait(false);
 			}
@@ -146,7 +149,10 @@ public class PlayerController(ILogger<PlayerController> logger) : ControllerBase
 		var query = new GetUserNameQuery(brandId, request.Username);
 		var isExist = await getUserNameQueryService.GetAsync(query).ConfigureAwait(false);
 
-		return new CheckUsernameResponse { Exists = isExist };
+		return new CheckUsernameResponse
+		{
+			Exists = isExist
+		};
 	}
 
 	/// <summary>
@@ -245,21 +251,22 @@ public class PlayerController(ILogger<PlayerController> logger) : ControllerBase
 		var brandId = HttpContext.Items.GetBrandId();
 
 		return !string.IsNullOrWhiteSpace(request.Phone)
-			? forgotPasswordBySmsService.GetAsync(new ForgotPasswordBySmsCommand(
-				brandId,
-				CultureInfo.CurrentUICulture,
-				request.AreaCode,
-				request.Phone))
-			: forgotPasswordService.GetAsync(new ForgotPasswordByMailCommand(
-			brandId,
-			CultureInfo.CurrentUICulture,
-			request.Email));
+			? forgotPasswordBySmsService.GetAsync(
+				new ForgotPasswordBySmsCommand(
+					brandId,
+					CultureInfo.CurrentUICulture,
+					request.AreaCode,
+					request.Phone))
+			: forgotPasswordService.GetAsync(
+				new ForgotPasswordByMailCommand(
+					brandId,
+					CultureInfo.CurrentUICulture,
+					request.Email));
 	}
 
 	[HttpGet("game/auto-transfer", Name = "GetAutoTransferToGameFlag")]
 	[AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-	public ValueTask<bool> GetAutoTransferToGameFlagAsync(
-		[FromServices] IGetService<GetPlayerIsAutoTransferToGameQuery, bool> getService)
+	public ValueTask<bool> GetAutoTransferToGameFlagAsync([FromServices] IGetService<GetPlayerIsAutoTransferToGameQuery, bool> getService)
 	{
 		var playerTokenData = HttpContext.Items.GetPlayerTokenData();
 
@@ -271,8 +278,7 @@ public class PlayerController(ILogger<PlayerController> logger) : ControllerBase
 	[HttpGet("register", Name = "GetCurrentRegisterStep")]
 	[AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
 	[IgnoreUserBlacklistCheck]
-	public ValueTask<string> GetCurrentRegisterStepAsync(
-			[FromServices] IGetService<GetCurrentPlayerRegisterFlowStepQuery, string> getService)
+	public ValueTask<string> GetCurrentRegisterStepAsync([FromServices] IGetService<GetCurrentPlayerRegisterFlowStepQuery, string> getService)
 	{
 		var brandId = HttpContext.GetBrandId() ?? throw new BrandNotFoundException();
 		var playerTokenData = HttpContext.Items.GetPlayerTokenData();
@@ -302,8 +308,8 @@ public class PlayerController(ILogger<PlayerController> logger) : ControllerBase
 		var playerCode = playerTokenData.PlayerCode;
 
 		var player = await getPlayerMainDataQueryService
-			.GetAsync(new GetPlayerMainDataQuery(playerCode))
-			.ConfigureAwait(false)
+				.GetAsync(new GetPlayerMainDataQuery(playerCode))
+				.ConfigureAwait(false)
 			?? throw new CoreExceptions.PlayerNotFoundException(playerCode, "Player not found.");
 
 		var playerVipLevelInfo = await getPlayerVipLevelQueryService
@@ -329,9 +335,9 @@ public class PlayerController(ILogger<PlayerController> logger) : ControllerBase
 			.ConfigureAwait(false);
 
 		var bankInfoAuthentication = playerStatus == Tgs.PlayerService.Client.PlayerStatus.Enabled
-			  || await getBankInfoQueryService
-				  .QueryAsync(new GetPlayerBankInfosQuery(playerCode))
-				  .AnyAsync(info => info.IsDefault).ConfigureAwait(false);
+			|| await getBankInfoQueryService
+				.QueryAsync(new GetPlayerBankInfosQuery(playerCode))
+				.AnyAsync(info => info.IsDefault).ConfigureAwait(false);
 
 		var agentId =
 			await playerAgentService.GetAsync(new GetPlayerAgentQuery(playerCode), HttpContext.RequestAborted);
@@ -424,15 +430,21 @@ public class PlayerController(ILogger<PlayerController> logger) : ControllerBase
 			switch (ex)
 			{
 				case CoreExceptions.PlayerNotFoundException playerNotFoundException:
-					_logger.LogWarning(playerNotFoundException, "{request.Username} not found.", request.Username);
+					_logger.LogWarning(
+						playerNotFoundException,
+						"{request.Username} not found.",
+						request.Username);
+
 					break;
 
 				case InvalidCredentialsException invalidCredException:
 					_logger.LogWarning(invalidCredException, "Password is mismatched.");
+
 					break;
 
 				default:
 					_logger.LogWarning(ex, "Login fail!");
+
 					break;
 			}
 
@@ -446,14 +458,17 @@ public class PlayerController(ILogger<PlayerController> logger) : ControllerBase
 	[HttpDelete("logout", Name = "Logout")]
 	[AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
 	[IgnoreUserBlacklistCheck]
-	public async Task<LogoutResponse> LogoutAsync(
-		[FromServices] IGetService<GetLogoutQuery, LogoutInfo> getLogoutQueryService)
+	public async Task<LogoutResponse> LogoutAsync([FromServices] IGetService<GetLogoutQuery, LogoutInfo> getLogoutQueryService)
 	{
 		var brandId = HttpContext.GetBrandId()!.Value;
 		var playerTokenData = HttpContext.Items.GetPlayerTokenData();
 
-		var query = new GetLogoutQuery(brandId, playerTokenData.PlayerCode, playerTokenData.LoginRecordId);
+		var query = new GetLogoutQuery(
+			brandId,
+			playerTokenData.PlayerCode,
+			playerTokenData.LoginRecordId);
 		LogoutInfo info;
+
 		try
 		{
 			info = await getLogoutQueryService
@@ -465,7 +480,10 @@ public class PlayerController(ILogger<PlayerController> logger) : ControllerBase
 			throw new CoreExceptions.PlayerNotFoundException(playerTokenData.PlayerCode, "Player not found.");
 		}
 
-		return new LogoutResponse { UpdateTime = info.UpdateTime };
+		return new LogoutResponse
+		{
+			UpdateTime = info.UpdateTime
+		};
 	}
 
 	/// <summary>
@@ -477,14 +495,15 @@ public class PlayerController(ILogger<PlayerController> logger) : ControllerBase
 	public async Task<CreatePlayerResponse> RegisterPlayerAsync(
 		[FromServices] IGetService<BrandQuery, BrandInfo> getBrandService,
 		[FromServices] IGetService<ExecutePlayerRegisterFlowCommand, RegisterFlowProcessResult> executeFlowService,
-		[FromHeader(Name = "Agent-Invitation-Code")] string invitationCode,
+		[FromHeader(Name = "Agent-Invitation-Code")]
+		string invitationCode,
 		[FromBody] CreatePlayerRequest request)
 	{
 		var brandId = HttpContext.GetBrandId() ?? throw new BrandNotFoundException();
 
 		var brand = await getBrandService
-			.GetAsync(new BrandQuery(brandId), HttpContext.RequestAborted)
-			.ConfigureAwait(false)
+				.GetAsync(new BrandQuery(brandId), HttpContext.RequestAborted)
+				.ConfigureAwait(false)
 			?? throw new InvalidStatusException("Brand doesn't exist");
 
 		if (brand.Status == BrandStatus.Maintenance)
@@ -523,14 +542,15 @@ public class PlayerController(ILogger<PlayerController> logger) : ControllerBase
 	public async Task<PlayerRegisterFlowResponseViewModel> RegisterPlayerAsync(
 		[FromServices] IGetService<BrandQuery, BrandInfo> getBrandService,
 		[FromServices] IGetService<ExecutePlayerRegisterFlowCommand, RegisterFlowProcessResult> executeFlowService,
-		[FromHeader(Name = "Agent-Invitation-Code")] string invitationCode,
+		[FromHeader(Name = "Agent-Invitation-Code")]
+		string invitationCode,
 		[FromBody] PlayerRegisterFlowViewModel model)
 	{
 		var brandId = HttpContext.GetBrandId() ?? throw new BrandNotFoundException();
 
 		var brand = await getBrandService
-			.GetAsync(new BrandQuery(brandId), HttpContext.RequestAborted)
-			.ConfigureAwait(false)
+				.GetAsync(new BrandQuery(brandId), HttpContext.RequestAborted)
+				.ConfigureAwait(false)
 			?? throw new InvalidStatusException("Brand doesn't exist");
 
 		if (brand.Status == BrandStatus.Maintenance)
@@ -580,9 +600,13 @@ public class PlayerController(ILogger<PlayerController> logger) : ControllerBase
 	[ProducesResponseType(StatusCodes.Status406NotAcceptable)]
 	public async ValueTask ResetPasswordAsync(
 		[FromServices] ICommandService<ResetPasswordCommand> resetService,
-		[FromBody] ResetPasswordRequest request)
-		=> await resetService
-			.ExecuteAsync(new ResetPasswordCommand(request.SecurityKey, request.ValidateCode, request.NewPassword))
+		[FromBody] ResetPasswordRequest request) =>
+		await resetService
+			.ExecuteAsync(
+				new ResetPasswordCommand(
+					request.SecurityKey,
+					request.ValidateCode,
+					request.NewPassword))
 			.ConfigureAwait(false);
 
 	/// <summary>
@@ -868,11 +892,12 @@ public class PlayerController(ILogger<PlayerController> logger) : ControllerBase
 		var command = new ExecutePlayerRegisterFlowCommand(
 			brandId,
 			"InitMail",
-			JsonSerializer.SerializeToDocument(new
-			{
-				input = "Init",
-				data = request
-			}),
+			JsonSerializer.SerializeToDocument(
+				new
+				{
+					input = "Init",
+					data = request
+				}),
 			locationInfo);
 
 		var result = await executeFlowService
@@ -913,11 +938,12 @@ public class PlayerController(ILogger<PlayerController> logger) : ControllerBase
 		var command = new ExecutePlayerRegisterFlowCommand(
 			brandId,
 			"InitPhone",
-			JsonSerializer.SerializeToDocument(new
-			{
-				input = "Init",
-				data = request
-			}),
+			JsonSerializer.SerializeToDocument(
+				new
+				{
+					input = "Init",
+					data = request
+				}),
 			locationInfo);
 
 		var result = await executeFlowService
@@ -950,11 +976,12 @@ public class PlayerController(ILogger<PlayerController> logger) : ControllerBase
 		var command = new ExecutePlayerRegisterFlowCommand(
 			brandId,
 			"InitMail",
-			JsonSerializer.SerializeToDocument(new
-			{
-				input = "Valid",
-				data = request
-			}),
+			JsonSerializer.SerializeToDocument(
+				new
+				{
+					input = "Valid",
+					data = request
+				}),
 			locationInfo);
 
 		_ = await executeFlowService
@@ -1041,11 +1068,12 @@ public class PlayerController(ILogger<PlayerController> logger) : ControllerBase
 		var command = new ExecutePlayerRegisterFlowCommand(
 			brandId,
 			"Init-Phone",
-			JsonSerializer.SerializeToDocument(new
-			{
-				input = "Valid",
-				data = request
-			}),
+			JsonSerializer.SerializeToDocument(
+				new
+				{
+					input = "Valid",
+					data = request
+				}),
 			locationInfo);
 
 		_ = await executeFlowService
@@ -1055,8 +1083,7 @@ public class PlayerController(ILogger<PlayerController> logger) : ControllerBase
 
 	[HttpPost("game/auto-transfer", Name = "ToggleAutoTransferToGameFlag")]
 	[AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-	public ValueTask ToggleAutoTransferToGameFlagAsync(
-		[FromServices] ICommandService<TogglePlayerIsAutoTransferToGameCommand> toggleService)
+	public ValueTask ToggleAutoTransferToGameFlagAsync([FromServices] ICommandService<TogglePlayerIsAutoTransferToGameCommand> toggleService)
 	{
 		var playerTokenData = HttpContext.Items.GetPlayerTokenData();
 
@@ -1096,4 +1123,32 @@ public class PlayerController(ILogger<PlayerController> logger) : ControllerBase
 		return true;
 	}
 
+	[HttpPost("v2/register", Name = "RegisterByPhoneFlow")]
+	[IgnoreUserBlacklistCheck]
+	[AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = false)]
+	public async ValueTask RegisterPlayerAsync(
+		[FromServices] IGetService<RegisterByPhoneCommand, NewPlayerInfo> newRegisterService,
+		[FromServices] ICommandService<ValidateOtpCommand> validateCodeService,
+		[FromBody] RegisterByPhoneRequest byPhoneRequest)
+	{
+		var brandId = HttpContext.Items.GetBrandId();
+
+		var ipAddress = HttpContext.Connection.RemoteIpAddress;
+		var hostName = Request.Host.Host;
+
+		await validateCodeService.ExecuteAsync(new ValidateOtpCommand(byPhoneRequest.ValidateCode, byPhoneRequest.SecurityKey));
+
+		var command = new RegisterByPhoneCommand(
+			UserName: byPhoneRequest.UserName,
+			Password: byPhoneRequest.Password,
+			Phone: byPhoneRequest.Phone,
+			AreaCode: byPhoneRequest.AreaCode,
+			AgentInvitationCode: byPhoneRequest.AgentInvitationCode,
+			UpperPlayerCode: byPhoneRequest.UpperPlayerCode,
+			BrandId: brandId,
+			IpAddress: ipAddress.ToString(),
+			HostName: hostName);
+
+		await newRegisterService.GetAsync(command);
+	}
 }
